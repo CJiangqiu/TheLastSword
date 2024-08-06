@@ -1,0 +1,28 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="Academic Free License v3.0"
+
+[[mods]]
+modId="the_last_sword"
+version="1.0.0"
+displayName="The Last Sword You Never Forgot"
+displayURL="none"
+credits="Texture resource owner&Original author: queenofsquiggles,"
+authors="CJiangqiu"
+description="An unofficial version of The Last Sword Mod,bringing this classic weapon to 1.20.1."
+
+[[dependencies.the_last_sword]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.20.1]"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.the_last_sword]]
+    modId="jei"
+    mandatory=false
+    versionRange="[1,)"
+    ordering="NONE"
+    side="BOTH"
+
+
+

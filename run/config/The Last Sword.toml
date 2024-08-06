@@ -1,0 +1,7 @@
+
+["Increase Value"]
+	#Damage increased per level of upgrade when level<6.
+	"Increase Value" = 200.0
+	#Damage increased per level of upgrade when level>=6.
+	"Increase Value High Level" = 1024.0
+

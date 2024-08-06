@@ -1,0 +1,16 @@
+{
+  "item_group.the_last_sword.the_last_sword_tab": "§5The Last Sword You Never Forgot",
+  "item.the_last_sword.dragon_sword": "Dragon Sword",
+  "item.the_last_sword.dragon_crystal_upgrade_template": "Dragon Crystal Upgrade Template",
+  "item.the_last_sword.the_last_sword": "The Last Sword",
+  "item_tooltip.the_last_sword.dragon_sword": "Sword Level:",
+
+  "item.the_last_sword.dragon_crystal_armor_helmet": "Dragon Crystal Helmet",
+  "item.the_last_sword.dragon_crystal_armor_leggings": "Dragon Crystal Leggings",
+  "item.the_last_sword.dragon_crystal_armor_boots": "Dragon Crystal Boots",
+  "item.the_last_sword.dragon_crystal": "Dragon Crystal",
+  "item.the_last_sword.dragon_crystal_armor_chestplate": "Dragon Crystal Chestplate",
+  "item.the_last_sword.dragon_crystal_sword":"Dragon Crystal Sword",
+  "block.the_last_sword.dragon_crystal_smithing_table":"Dragon Crystal Smithing Table",
+  "item_tooltip.the_last_sword.extra_attack_damage": "Extra Damage:"
+}
