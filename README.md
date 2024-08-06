@@ -1,1 +1,1 @@
-The code for this mod was completed by me (CJiangqiu), and the texture resource owner & original author is queenofsquiggles.
+The base code for most of the classes in this mod was generated using MCreator, while the more complex code was completed by me. Additionally,the texture resource owner & original author is queenofsquiggles.
