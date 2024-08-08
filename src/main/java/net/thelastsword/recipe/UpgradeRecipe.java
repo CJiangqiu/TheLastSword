@@ -1,6 +1,7 @@
 package net.thelastsword.recipe;
 
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraftforge.eventbus.api.Event;
 import net.thelastsword.capability.SwordCapability;
 import net.thelastsword.configuration.TheLastSwordConfiguration;
 import net.thelastsword.world.inventory.DragonCrystalSmithingTableGuiMenu;
@@ -8,7 +9,6 @@ import net.thelastsword.init.TheLastSwordModItems;
 
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.event.TickEvent;
 
 import net.minecraft.world.level.block.Blocks;
@@ -24,6 +24,8 @@ import java.util.Map;
 
 @Mod.EventBusSubscriber
 public class UpgradeRecipe {
+    private static ItemStack previousOutputItem = ItemStack.EMPTY;
+
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
         if (event.phase == TickEvent.Phase.END) {
@@ -40,9 +42,12 @@ public class UpgradeRecipe {
             return;
         if (entity instanceof Player _plr0 && _plr0.containerMenu instanceof DragonCrystalSmithingTableGuiMenu) {
             ItemStack inputItem = (entity instanceof Player _plrSlotItem && _plrSlotItem.containerMenu instanceof Supplier _splr && _splr.get() instanceof Map _slt ? ((Slot) _slt.get(1)).getItem() : ItemStack.EMPTY);
-            if ((entity instanceof Player _plrSlotItem && _plrSlotItem.containerMenu instanceof Supplier _splr && _splr.get() instanceof Map _slt ? ((Slot) _slt.get(0)).getItem() : ItemStack.EMPTY)
-                    .getItem() == TheLastSwordModItems.DRAGON_CRYSTAL_UPGRADE_TEMPLATE.get()
-                    && (entity instanceof Player _plrSlotItem && _plrSlotItem.containerMenu instanceof Supplier _splr && _splr.get() instanceof Map _slt ? ((Slot) _slt.get(2)).getItem() : ItemStack.EMPTY).getItem() == Blocks.DRAGON_EGG.asItem()) {
+            ItemStack templateItem = (entity instanceof Player _plrSlotItem && _plrSlotItem.containerMenu instanceof Supplier _splr && _splr.get() instanceof Map _slt ? ((Slot) _slt.get(0)).getItem() : ItemStack.EMPTY);
+            ItemStack eggItem = (entity instanceof Player _plrSlotItem && _plrSlotItem.containerMenu instanceof Supplier _splr && _splr.get() instanceof Map _slt ? ((Slot) _slt.get(2)).getItem() : ItemStack.EMPTY);
+
+            if (!inputItem.isEmpty() && !templateItem.isEmpty() && !eggItem.isEmpty()
+                    && templateItem.getItem() == TheLastSwordModItems.DRAGON_CRYSTAL_UPGRADE_TEMPLATE.get()
+                    && eggItem.getItem() == Blocks.DRAGON_EGG.asItem()) {
 
                 inputItem.getCapability(SwordCapability.SWORD_LEVEL_CAPABILITY).ifPresent(swordLevel -> {
                     ItemStack _setstack;
@@ -88,7 +93,14 @@ public class UpgradeRecipe {
                         _player.containerMenu.broadcastChanges();
                     }
                 });
+            } else {
+                if (entity instanceof Player _player && _player.containerMenu instanceof Supplier _current && _current.get() instanceof Map _slots) {
+                    ((Slot) _slots.get(3)).set(ItemStack.EMPTY);
+                    _player.containerMenu.broadcastChanges();
+                }
             }
+
+
         }
     }
 }

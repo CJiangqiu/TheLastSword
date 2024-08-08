@@ -5,7 +5,7 @@ plugins {
 
 }
 
-version = '1.20.1-forge-1.0.0'
+version = '1.20.1-forge-1.0.3'
 group = 'net.thelastsword'
 archivesBaseName = 'The Last Sword'
 

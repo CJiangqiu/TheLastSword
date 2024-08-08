@@ -33,6 +33,8 @@ import net.thelastsword.init.TheLastSwordModItems;
 import java.util.List;
 
 public class TheLastSword extends SwordItem implements ICapabilityProvider {
+    private final float baseAttackDamage;
+
     public TheLastSword() {
         super(new Tier() {
             public int getUses() {
@@ -59,6 +61,11 @@ public class TheLastSword extends SwordItem implements ICapabilityProvider {
                 return Ingredient.of(new ItemStack(TheLastSwordModItems.DRAGON_CRYSTAL.get()));
             }
         }, 3, -2.4f, new Item.Properties().fireResistant().rarity(Rarity.EPIC));
+        this.baseAttackDamage = 1022f; // 设置基础攻击伤害
+    }
+
+    public float getBaseAttackDamage() {
+        return baseAttackDamage;
     }
 
     @Override
@@ -86,13 +93,11 @@ public class TheLastSword extends SwordItem implements ICapabilityProvider {
         return 1024f;
     }
 
-
     @Override
     public boolean mineBlock(ItemStack itemstack, Level world, BlockState blockstate, BlockPos pos, LivingEntity entity) {
         itemstack.hurtAndBreak(1, entity, i -> i.broadcastBreakEvent(EquipmentSlot.MAINHAND));
         return true;
     }
-
 
     @Override
     @OnlyIn(Dist.CLIENT)
@@ -117,12 +122,13 @@ public class TheLastSword extends SwordItem implements ICapabilityProvider {
             double increaseValue = TheLastSwordConfiguration.INCREASE_VALUE.get();
             double increaseValueHighLevel = TheLastSwordConfiguration.INCREASE_VALUE_HIGH_LEVEL.get();
             double extraDamage = (level < 6 ? increaseValue : increaseValueHighLevel) * level;
-            target.hurt(new DamageSource(attacker.getCommandSenderWorld().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.GENERIC)), (float) extraDamage);
 
             stack.getCapability(SwordCapability.EXTRA_ATTACK_DAMAGE_CAPABILITY).ifPresent(extraAttackDamage -> {
-                extraAttackDamage.setExtraAttackDamage((float) (level * (level < 6 ? increaseValue : increaseValueHighLevel))); // 设置额外攻击力为剑等级乘以配置文件相关值
-                target.hurt(new DamageSource(attacker.getCommandSenderWorld().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.GENERIC)), extraAttackDamage.getExtraAttackDamage());
+                extraAttackDamage.setExtraAttackDamage((float) extraDamage); // 设置额外攻击力为计算的额外伤害
             });
+
+            float totalDamage = (float) (extraDamage + this.getBaseAttackDamage()); // 获取基础攻击伤害并计算总伤害
+            target.hurt(new DamageSource(attacker.getCommandSenderWorld().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.GENERIC)), totalDamage);
         });
         return super.hurtEnemy(stack, target, attacker);
     }
@@ -131,11 +137,9 @@ public class TheLastSword extends SwordItem implements ICapabilityProvider {
     public void appendHoverText(ItemStack itemstack, Level level, List<Component> list, TooltipFlag flag) {
         super.appendHoverText(itemstack, level, list, flag);
 
-
         itemstack.getCapability(SwordCapability.SWORD_LEVEL_CAPABILITY).ifPresent(swordLevel -> {
             list.add(Component.translatable("item_tooltip.the_last_sword.dragon_sword").append(" " + swordLevel.getLevel()));
         });
-
 
         itemstack.getCapability(SwordCapability.EXTRA_ATTACK_DAMAGE_CAPABILITY).ifPresent(extraAttackDamage -> {
             list.add(Component.translatable("item_tooltip.the_last_sword.extra_attack_damage")

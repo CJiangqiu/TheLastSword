@@ -1,16 +1,16 @@
 modLoader="javafml"
 loaderVersion="[47,)"
-license="Academic Free License v3.0"
+license="'Anything Goes As Long As It’s Free' License"
 
 [[mods]]
 modId="the_last_sword"
 version="1.0.0"
 displayName="The Last Sword You Never Forgot"
-displayURL="none"
+displayURL="https://github.com/CJiangqiu/TheLastSword"
 credits="Texture resource owner&Original author: queenofsquiggles,"
 authors="CJiangqiu"
-description="An unofficial version of The Last Sword Mod,bringing this classic weapon to 1.20.1."
-
+description="An unofficial version of The Last Sword Mod,bringing this classic weapon to Forge 1.20.1."
+logoFile="assets/the_last_sword/textures/logo.png"
 [[dependencies.the_last_sword]]
     modId="minecraft"
     mandatory=true

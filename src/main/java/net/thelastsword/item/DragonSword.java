@@ -1,11 +1,10 @@
 package net.thelastsword.item;
 
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.damagesource.DamageSource;
@@ -20,8 +19,8 @@ import net.minecraftforge.common.ToolAction;
 import net.minecraftforge.common.ToolActions;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
-import net.thelastsword.capability.DefaultSwordLevel;
 import net.thelastsword.capability.DefaultExtraAttackDamage;
+import net.thelastsword.capability.DefaultSwordLevel;
 import net.thelastsword.capability.SwordCapability;
 import net.thelastsword.configuration.TheLastSwordConfiguration;
 import net.thelastsword.entity.DragonSwordProjectile;
@@ -30,6 +29,8 @@ import net.thelastsword.init.TheLastSwordModItems;
 import java.util.List;
 
 public class DragonSword extends SwordItem implements ICapabilityProvider {
+    private final float baseAttackDamage;
+
     public DragonSword() {
         super(new Tier() {
             public int getUses() {
@@ -56,6 +57,11 @@ public class DragonSword extends SwordItem implements ICapabilityProvider {
                 return Ingredient.of(new ItemStack(TheLastSwordModItems.DRAGON_CRYSTAL.get()));
             }
         }, 3, -2.4f, new Item.Properties().fireResistant().rarity(Rarity.RARE));
+        this.baseAttackDamage = 196f; // 设置基础攻击伤害
+    }
+
+    public float getBaseAttackDamage() {
+        return baseAttackDamage;
     }
 
     @Override
@@ -108,12 +114,13 @@ public class DragonSword extends SwordItem implements ICapabilityProvider {
             double increaseValue = TheLastSwordConfiguration.INCREASE_VALUE.get();
             double increaseValueHighLevel = TheLastSwordConfiguration.INCREASE_VALUE_HIGH_LEVEL.get();
             double extraDamage = (level < 6 ? increaseValue : increaseValueHighLevel) * level;
-            target.hurt(new DamageSource(attacker.getCommandSenderWorld().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.GENERIC)), (float) extraDamage);
 
             stack.getCapability(SwordCapability.EXTRA_ATTACK_DAMAGE_CAPABILITY).ifPresent(extraAttackDamage -> {
-                extraAttackDamage.setExtraAttackDamage((float) (level * (level < 6 ? increaseValue : increaseValueHighLevel))); // 设置额外攻击力为剑等级乘以配置文件相关值
-                target.hurt(new DamageSource(attacker.getCommandSenderWorld().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.GENERIC)), extraAttackDamage.getExtraAttackDamage());
+                extraAttackDamage.setExtraAttackDamage((float) extraDamage); // 设置额外攻击力为计算的额外伤害
             });
+
+            float totalDamage = (float) (extraDamage + this.getBaseAttackDamage()); // 获取基础攻击伤害并计算总伤害
+            target.hurt(new DamageSource(attacker.getCommandSenderWorld().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.GENERIC)), totalDamage);
         });
         return super.hurtEnemy(stack, target, attacker);
     }
@@ -122,11 +129,9 @@ public class DragonSword extends SwordItem implements ICapabilityProvider {
     public void appendHoverText(ItemStack itemstack, Level level, List<Component> list, TooltipFlag flag) {
         super.appendHoverText(itemstack, level, list, flag);
 
-
         itemstack.getCapability(SwordCapability.SWORD_LEVEL_CAPABILITY).ifPresent(swordLevel -> {
             list.add(Component.translatable("item_tooltip.the_last_sword.dragon_sword").append(" " + swordLevel.getLevel()));
         });
-
 
         itemstack.getCapability(SwordCapability.EXTRA_ATTACK_DAMAGE_CAPABILITY).ifPresent(extraAttackDamage -> {
             list.add(Component.translatable("item_tooltip.the_last_sword.extra_attack_damage")
