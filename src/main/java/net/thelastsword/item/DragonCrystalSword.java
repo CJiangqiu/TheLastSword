@@ -86,10 +86,10 @@ public class DragonCrystalSword extends SwordItem implements ICapabilityProvider
             double extraDamage = (level < 6 ? increaseValue : increaseValueHighLevel) * level;
 
             stack.getCapability(SwordCapability.EXTRA_ATTACK_DAMAGE_CAPABILITY).ifPresent(extraAttackDamage -> {
-                extraAttackDamage.setExtraAttackDamage((float) extraDamage); // 设置额外攻击力为计算的额外伤害
+                extraAttackDamage.setExtraAttackDamage((float) extraDamage);
             });
 
-            float totalDamage = (float) (extraDamage + this.getBaseAttackDamage()); // 获取基础攻击伤害并计算总伤害
+            float totalDamage = (float) (extraDamage + this.getBaseAttackDamage());
             target.hurt(new DamageSource(attacker.getCommandSenderWorld().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.GENERIC)), totalDamage);
         });
         return super.hurtEnemy(stack, target, attacker);

@@ -25,5 +25,13 @@
   "item.the_last_sword.the_last_sword": "The Last Sword",
   "item_group.the_last_sword.the_last_sword_tab": "§5The Last Sword You Never Forgot",
   "item_tooltip.the_last_sword.dragon_sword": "Sword Level:",
-  "item_tooltip.the_last_sword.extra_attack_damage": "Extra Damage:"
+  "item_tooltip.the_last_sword.extra_attack_damage": "Extra Damage:",
+  "item_tooltip.the_last_sword.mode": "Mode:",
+  "item_tooltip.the_last_sword.mode_descr": "Hold Shift",
+  "item_tooltip.the_last_sword.normal_mode": "Normal Mode",
+  "item_tooltip.the_last_sword.normal_mode_descr": "In this mode, left-click can mine most mineable blocks, and right-click can shoot projectiles, dealing out_of_world damage based on extra attack damage.",
+  "item_tooltip.the_last_sword.powerful_mining_mode": "Powerful Mining Mode",
+  "item_tooltip.the_last_sword.powerful_mining_mode_descr": "In this mode, right-click can mine almost all blocks. Use with caution!",
+  "item_tooltip.the_last_sword.powerful_range_attack_mode": "Powerful Range Attack Mode",
+"item_tooltip.the_last_sword.powerful_range_attack_mode_descr": "In this mode, right-clicking will deal massive damage to specified entities within the range defined in the configuration file. The damage value is based on the extra attack damage value and reduces the same amount of maximum health, attack power, and armor value. If the entity survives but its maximum health is lower than the extra attack damage value, the entity will be removed. Please use with caution!",  "key.the_last_sword.change_the_last_sword_mode": "Change The Last Sword Mode"
 }

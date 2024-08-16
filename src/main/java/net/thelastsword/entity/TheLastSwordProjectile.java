@@ -86,7 +86,7 @@ public class TheLastSwordProjectile extends AbstractArrow implements ItemSupplie
                 _level.addFreshEntity(entityToSpawn);
             }
 
-            entity.hurt(new DamageSource(this.level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.LIGHTNING_BOLT), this, this.getOwner()), 12);
+            entity.hurt(new DamageSource(this.level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.FELL_OUT_OF_WORLD), this, this.getOwner()), 12);
         }
     }
 

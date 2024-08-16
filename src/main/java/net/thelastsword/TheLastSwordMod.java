@@ -3,6 +3,7 @@ package net.thelastsword;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.thelastsword.network.ChangeTheLastSwordModeMessage;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -38,52 +39,62 @@ import java.util.AbstractMap;
 
 @Mod("the_last_sword")
 public class TheLastSwordMod {
-	public static final Logger LOGGER = LogManager.getLogger(TheLastSwordMod.class);
-	public static final String MODID = "the_last_sword";
-	private static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, MODID);
-	public TheLastSwordMod() {
-		MinecraftForge.EVENT_BUS.register(this);
-		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+    public static final Logger LOGGER = LogManager.getLogger(TheLastSwordMod.class);
+    public static final String MODID = "the_last_sword";
+    private static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, MODID);
 
-		TheLastSwordModBlocks.REGISTRY.register(bus);
-		TheLastSwordModBlockEntities.REGISTRY.register(bus);
-		TheLastSwordModItems.REGISTRY.register(bus);
-		TheLastSwordModEntities.REGISTRY.register(bus);
+    public TheLastSwordMod() {
+        MinecraftForge.EVENT_BUS.register(this);
+        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
 
-		TheLastSwordModTabs.REGISTRY.register(bus);
+        TheLastSwordModBlocks.REGISTRY.register(bus);
+        TheLastSwordModBlockEntities.REGISTRY.register(bus);
+        TheLastSwordModItems.REGISTRY.register(bus);
+        TheLastSwordModEntities.REGISTRY.register(bus);
 
-		TheLastSwordModMenus.REGISTRY.register(bus);
+        TheLastSwordModTabs.REGISTRY.register(bus);
 
+        TheLastSwordModMenus.REGISTRY.register(bus);
 
-	}
+        init();
+    }
 
-	private static final String PROTOCOL_VERSION = "1";
-	public static final SimpleChannel PACKET_HANDLER = NetworkRegistry.newSimpleChannel(new ResourceLocation(MODID, MODID), () -> PROTOCOL_VERSION, PROTOCOL_VERSION::equals, PROTOCOL_VERSION::equals);
-	private static int messageID = 0;
+    private static final String PROTOCOL_VERSION = "1";
+    public static final SimpleChannel PACKET_HANDLER = NetworkRegistry.newSimpleChannel(
+        new ResourceLocation(MODID, MODID),
+        () -> PROTOCOL_VERSION,
+        PROTOCOL_VERSION::equals,
+        PROTOCOL_VERSION::equals
+    );
+    private static int messageID = 0;
 
-	public static <T> void addNetworkMessage(Class<T> messageType, BiConsumer<T, FriendlyByteBuf> encoder, Function<FriendlyByteBuf, T> decoder, BiConsumer<T, Supplier<NetworkEvent.Context>> messageConsumer) {
-		PACKET_HANDLER.registerMessage(messageID, messageType, encoder, decoder, messageConsumer);
-		messageID++;
-	}
+    public static <T> void addNetworkMessage(Class<T> messageType, BiConsumer<T, FriendlyByteBuf> encoder, Function<FriendlyByteBuf, T> decoder, BiConsumer<T, Supplier<NetworkEvent.Context>> messageConsumer) {
+        PACKET_HANDLER.registerMessage(messageID, messageType, encoder, decoder, messageConsumer);
+        messageID++;
+    }
 
-	private static final Collection<AbstractMap.SimpleEntry<Runnable, Integer>> workQueue = new ConcurrentLinkedQueue<>();
+    private static final Collection<AbstractMap.SimpleEntry<Runnable, Integer>> workQueue = new ConcurrentLinkedQueue<>();
 
-	public static void queueServerWork(int tick, Runnable action) {
-		if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER)
-			workQueue.add(new AbstractMap.SimpleEntry<>(action, tick));
-	}
+    public static void queueServerWork(int tick, Runnable action) {
+        if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER)
+            workQueue.add(new AbstractMap.SimpleEntry<>(action, tick));
+    }
 
-	@SubscribeEvent
-	public void tick(TickEvent.ServerTickEvent event) {
-		if (event.phase == TickEvent.Phase.END) {
-			List<AbstractMap.SimpleEntry<Runnable, Integer>> actions = new ArrayList<>();
-			workQueue.forEach(work -> {
-				work.setValue(work.getValue() - 1);
-				if (work.getValue() == 0)
-					actions.add(work);
-			});
-			actions.forEach(e -> e.getKey().run());
-			workQueue.removeAll(actions);
-		}
-	}
+    @SubscribeEvent
+    public void tick(TickEvent.ServerTickEvent event) {
+        if (event.phase == TickEvent.Phase.END) {
+            List<AbstractMap.SimpleEntry<Runnable, Integer>> actions = new ArrayList<>();
+            workQueue.forEach(work -> {
+                work.setValue(work.getValue() - 1);
+                if (work.getValue() == 0)
+                    actions.add(work);
+            });
+            actions.forEach(e -> e.getKey().run());
+            workQueue.removeAll(actions);
+        }
+    }
+
+    private void init() {
+        addNetworkMessage(ChangeTheLastSwordModeMessage.class, ChangeTheLastSwordModeMessage::buffer, ChangeTheLastSwordModeMessage::new, ChangeTheLastSwordModeMessage::handler);
+    }
 }

@@ -25,5 +25,14 @@
   "item.the_last_sword.the_last_sword": "最终之剑",
   "item_group.the_last_sword.the_last_sword_tab": "§5最终之剑",
   "item_tooltip.the_last_sword.dragon_sword": "剑等级:",
-  "item_tooltip.the_last_sword.extra_attack_damage": "额外伤害："
+  "item_tooltip.the_last_sword.extra_attack_damage": "额外伤害：",
+  "item_tooltip.the_last_sword.mode": "模式：",
+  "item_tooltip.the_last_sword.normal_mode": "普通模式",
+  "item_tooltip.the_last_sword.normal_mode_descr": "当前模式下，左键可挖掘大部分可挖掘的方块，右键可发射弹射物，造成额外伤害数值的out_of_world伤害",
+  "item_tooltip.the_last_sword.powerful_mining_mode": "强力挖掘模式",
+  "item_tooltip.the_last_sword.powerful_mining_mode_descr": "当前模式下，右键可以挖掘几乎所有方块，请谨慎使用！",
+  "item_tooltip.the_last_sword.powerful_range_attack_mode": "强力范围攻击模式",
+  "item_tooltip.the_last_sword.powerful_range_attack_mode_descr": "当前模式下，右键会对配置文件相关数值的范围内的指定实体造成大量伤害，伤害数值基于额外伤害数值，并减少相同数值的最大生命值、攻击力、护甲值；若实体存活且最大生命值低于额外伤害数值，则清除实体，请谨慎使用！",
+  "key.the_last_sword.change_the_last_sword_mode": "更改最终之剑模式",
+  "item_tooltip.the_last_sword.mode_descr": "按下 Shift"
 }

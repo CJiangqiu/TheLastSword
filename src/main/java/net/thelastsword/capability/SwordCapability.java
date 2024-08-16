@@ -18,11 +18,13 @@ import net.thelastsword.item.TheLastSword;
 public class SwordCapability {
     public static Capability<ISwordLevel> SWORD_LEVEL_CAPABILITY = CapabilityManager.get(new CapabilityToken<>() {});
     public static Capability<IExtraAttackDamage> EXTRA_ATTACK_DAMAGE_CAPABILITY = CapabilityManager.get(new CapabilityToken<>() {});
+      public static Capability<IMode> MODE_CAPABILITY = CapabilityManager.get(new CapabilityToken<>() {});
 
     @SubscribeEvent
     public static void onRegisterCapabilitiesEvent(RegisterCapabilitiesEvent event) {
         event.register(ISwordLevel.class);
         event.register(IExtraAttackDamage.class);
+        event.register(IMode.class);
     }
 
     @SubscribeEvent
@@ -42,7 +44,8 @@ public class SwordCapability {
         }
         if (event.getObject().getItem() instanceof TheLastSword) {
             event.addCapability(new ResourceLocation("the_last_sword","sword_level"), new SwordLevelProvider(13)); // 设置默认剑等级为6
-            event.addCapability(new ResourceLocation("the_last_sword", "extra_attack_damage"), new ExtraAttackDamageProvider(13)); // 设置默认额外攻击力
+            event.addCapability(new ResourceLocation("the_last_sword", "extra_attack_damage"), new ExtraAttackDamageProvider(13));// 设置默认额外攻击力
+            event.addCapability(new ResourceLocation("the_last_sword", "mode"), new ModeProvider(0));
         }
     }
 }

@@ -5,3 +5,25 @@
 	#Damage increased per level of upgrade when level>=6.
 	"Increase Value High Level" = 1024.0
 
+[Modes]
+	#Controls the inventory protection feature of The Last Sword, which prevents death drops.
+	"Inventory Protection" = true
+	#Allows players to fly when holding The Last Sword.
+	"Allow Flying" = true
+	#Allows attacking villagers.
+	"Attack Villagers" = false
+	#Allows attacking animals.
+	"Attack Animals" = true
+	#Allows attacking tamed entities.
+	"Attack Tamed" = false
+	#Allows attacking players.
+	"Attack Players" = false
+	#Allows attacking golems.
+	"Attack Golems" = false
+	#Allows attacking neutral mobs.
+	"Attack Neutral" = true
+	#Cooldown time for range attack.
+	"Range Attack Cooldown" = 100
+	#Range for powerful range attack.
+	"Range Attack Range" = 64.0
+
