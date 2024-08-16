@@ -65,43 +65,7 @@ public abstract class DragonCrystalArmor extends ArmorItem {
         }, type, properties.fireResistant().rarity(Rarity.RARE));
     }
 
-    @Override
-    public void inventoryTick(ItemStack itemstack, Level world, Entity entity, int slot, boolean selected) {
-        super.inventoryTick(itemstack, world, entity, slot, selected);
-        if (entity instanceof Player player) {
-            boolean hasFullSet = true;
-            for (ItemStack armorItem : player.getArmorSlots()) {
-                if (armorItem.isEmpty() || !(armorItem.getItem() instanceof DragonCrystalArmor)) {
-                    hasFullSet = false;
-                    break;
-                }
-            }
 
-            if (checkGamemode(player, GameType.SURVIVAL) || checkGamemode(player, GameType.ADVENTURE)) {
-                if (hasFullSet) {
-                    if (!player.getAbilities().mayfly) {
-                        player.getAbilities().mayfly = true;
-                        player.onUpdateAbilities();
-                    }
-                } else {
-                    if (player.getAbilities().mayfly) {
-                        player.getAbilities().mayfly = false;
-                        player.onUpdateAbilities();
-                    }
-                }
-            }
-        }
-    }
-
-    private boolean checkGamemode(Entity entity, GameType gameType) {
-        if (entity instanceof ServerPlayer serverPlayer) {
-            return serverPlayer.gameMode.getGameModeForPlayer() == gameType;
-        } else if (entity.level().isClientSide() && entity instanceof Player player) {
-            return Minecraft.getInstance().getConnection().getPlayerInfo(player.getGameProfile().getId()) != null &&
-                   Minecraft.getInstance().getConnection().getPlayerInfo(player.getGameProfile().getId()).getGameMode() == gameType;
-        }
-        return false;
-    }
 
     public static class Helmet extends DragonCrystalArmor {
         public Helmet() {

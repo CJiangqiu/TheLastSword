@@ -4,6 +4,8 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/TheLastSword.main.iml" filepath="$PROJECT_DIR$/.idea/modules/TheLastSword.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/TheLastSword.test.iml" filepath="$PROJECT_DIR$/.idea/modules/TheLastSword.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/net.thelastsword.TheLastSword.main.iml" filepath="$PROJECT_DIR$/.idea/modules/net.thelastsword.TheLastSword.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/net.thelastsword.TheLastSword.test.iml" filepath="$PROJECT_DIR$/.idea/modules/net.thelastsword.TheLastSword.test.iml" />
     </modules>
   </component>
 </project>

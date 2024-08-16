@@ -10,6 +10,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -23,6 +24,8 @@ import net.minecraftforge.common.ToolAction;
 import net.minecraftforge.common.ToolActions;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.thelastsword.capability.SwordCapability;
 import net.thelastsword.capability.SwordLevelProvider;
 import net.thelastsword.capability.ExtraAttackDamageProvider;
@@ -61,13 +64,44 @@ public class TheLastSword extends SwordItem implements ICapabilityProvider {
                 return Ingredient.of(new ItemStack(TheLastSwordModItems.DRAGON_CRYSTAL.get()));
             }
         }, 3, -2.4f, new Item.Properties().fireResistant().rarity(Rarity.EPIC));
-        this.baseAttackDamage = 1022f; // 设置基础攻击伤害
+        this.baseAttackDamage = 1022f;
     }
 
     public float getBaseAttackDamage() {
         return baseAttackDamage;
     }
+    @Override
+    public void inventoryTick(ItemStack itemstack, Level world, Entity entity, int slot, boolean selected) {
+        super.inventoryTick(itemstack, world, entity, slot, selected);
+        if (entity instanceof Player player) {
+            boolean hasSword = false;
+            for (ItemStack stack : player.getInventory().items) {
+                if (stack.getItem() instanceof TheLastSword) {
+                    hasSword = true;
+                    break;
+                }
+            }
 
+            if (hasSword && !player.isCreative() && !player.isSpectator()) {
+                if (!player.getAbilities().mayfly) {
+                    player.getAbilities().mayfly = true;
+                    player.onUpdateAbilities();
+                }
+                if (!player.getAbilities().invulnerable) {
+                    player.getAbilities().invulnerable = true;
+                }
+            } else {
+                if (player.getAbilities().mayfly) {
+                    player.getAbilities().mayfly = false;
+                    player.getAbilities().flying = false;
+                    player.onUpdateAbilities();
+                }
+                if (player.getAbilities().invulnerable) {
+                    player.getAbilities().invulnerable = false;
+                }
+            }
+        }
+    }
     @Override
     public boolean isCorrectToolForDrops(BlockState blockstate) {
         int tier = 1024;
@@ -124,10 +158,10 @@ public class TheLastSword extends SwordItem implements ICapabilityProvider {
             double extraDamage = (level < 6 ? increaseValue : increaseValueHighLevel) * level;
 
             stack.getCapability(SwordCapability.EXTRA_ATTACK_DAMAGE_CAPABILITY).ifPresent(extraAttackDamage -> {
-                extraAttackDamage.setExtraAttackDamage((float) extraDamage); // 设置额外攻击力为计算的额外伤害
+                extraAttackDamage.setExtraAttackDamage((float) extraDamage);
             });
 
-            float totalDamage = (float) (extraDamage + this.getBaseAttackDamage()); // 获取基础攻击伤害并计算总伤害
+            float totalDamage = (float) (extraDamage + this.getBaseAttackDamage());
             target.hurt(new DamageSource(attacker.getCommandSenderWorld().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.GENERIC)), totalDamage);
         });
         return super.hurtEnemy(stack, target, attacker);
