@@ -3,6 +3,7 @@ package net.thelastsword;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.thelastsword.client.render.TheLastSwordRender;
 import net.thelastsword.network.ChangeTheLastSwordModeMessage;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -13,7 +14,6 @@ import net.thelastsword.init.TheLastSwordModItems;
 import net.thelastsword.init.TheLastSwordModEntities;
 import net.thelastsword.init.TheLastSwordModBlocks;
 import net.thelastsword.init.TheLastSwordModBlockEntities;
-
 import net.minecraftforge.network.simple.SimpleChannel;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.NetworkEvent;
@@ -24,18 +24,17 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.common.MinecraftForge;
-
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.FriendlyByteBuf;
 
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.function.Function;
 import java.util.function.BiConsumer;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.List;
-import java.util.Collection;
-import java.util.ArrayList;
-import java.util.AbstractMap;
+
+import net.thelastsword.client.model.CosmicModelLoader; // 导入自定义模型加载器
+import net.minecraftforge.client.event.ModelEvent; // 导入ModelEvent
 
 @Mod("the_last_sword")
 public class TheLastSwordMod {
@@ -96,5 +95,16 @@ public class TheLastSwordMod {
 
     private void init() {
         addNetworkMessage(ChangeTheLastSwordModeMessage.class, ChangeTheLastSwordModeMessage::buffer, ChangeTheLastSwordModeMessage::new, ChangeTheLastSwordModeMessage::handler);
+        registerModelLoaders(); // 注册模型加载器
+    }
+
+    private void registerModelLoaders() {
+        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+        bus.addListener(this::onRegisterGeometryLoaders);
+    }
+
+    @SubscribeEvent
+    public void onRegisterGeometryLoaders(ModelEvent.RegisterGeometryLoaders event) {
+        event.register("cosmic", new CosmicModelLoader());
     }
 }

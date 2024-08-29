@@ -27,3 +27,9 @@
 	#Range for powerful range attack.
 	"Range Attack Range" = 64.0
 
+["Dragon Egg Options"]
+	#Controls whether the Ender Dragon drops a dragon egg upon death.
+	"Drop Dragon Egg" = true
+	#Controls whether multiple dragon eggs are given to players who dealt significant damage.
+	"Multiple Dragon Eggs" = true
+

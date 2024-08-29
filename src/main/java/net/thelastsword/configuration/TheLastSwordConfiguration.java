@@ -16,7 +16,9 @@ public class TheLastSwordConfiguration {
     public static final ForgeConfigSpec.ConfigValue<Boolean> ATTACK_GOLEMS;
     public static final ForgeConfigSpec.ConfigValue<Boolean> ATTACK_NEUTRAL;
     public static final ForgeConfigSpec.ConfigValue<Integer> RANGE_ATTACK_COOLDOWN;
-    public static final ForgeConfigSpec.ConfigValue<Double> RANGE_ATTACK_RANGE; // 新增的配置项
+    public static final ForgeConfigSpec.ConfigValue<Double> RANGE_ATTACK_RANGE;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> DROP_DRAGON_EGG;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> MULTIPLE_DRAGON_EGGS;
 
     static {
         BUILDER.push("Increase Value");
@@ -49,7 +51,13 @@ public class TheLastSwordConfiguration {
                                     .define("Range Attack Range", 64.0);
         BUILDER.pop();
 
+        BUILDER.push("Dragon Egg Options");
+        DROP_DRAGON_EGG = BUILDER.comment("Controls whether the Ender Dragon drops a dragon egg upon death.")
+                                 .define("Drop Dragon Egg", true);
+        MULTIPLE_DRAGON_EGGS = BUILDER.comment("Controls whether multiple dragon eggs are given to players who dealt significant damage.")
+                                      .define("Multiple Dragon Eggs", true);
+        BUILDER.pop();
+
         SPEC = BUILDER.build();
     }
 }
-

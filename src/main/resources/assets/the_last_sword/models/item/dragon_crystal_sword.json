@@ -2,5 +2,17 @@
   "parent": "item/handheld",
   "textures": {
     "layer0": "the_last_sword:item/dragon_crystal_sword"
+  },
+  "display": {
+    "thirdperson_righthand": {
+      "rotation": [0, -90, 55],
+      "translation": [0, 7, 0],
+      "scale": [1.2, 1.2, 1.2]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [0, 90, -55],
+      "translation": [0, 7, 0],
+      "scale": [1.2, 1.2, 1.2]
+    }
   }
 }

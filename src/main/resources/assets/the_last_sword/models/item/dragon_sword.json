@@ -1,6 +1,6 @@
 {
   "parent": "item/handheld",
   "textures": {
-    "layer0": "the_last_sword:item/sword"
+    "layer0": "the_last_sword:item/dragon_sword"
   }
 }

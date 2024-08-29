@@ -74,7 +74,7 @@ public abstract class DragonCrystalArmor extends ArmorItem {
 
         @Override
         public String getArmorTexture(ItemStack stack, Entity entity, EquipmentSlot slot, String type) {
-            return "the_last_sword:textures/models/armor/dragonarmor__layer_1.png";
+            return "the_last_sword:textures/models/armor/dragon_crystal_armor_layer_1.png";
         }
 
         @Override
@@ -94,7 +94,7 @@ public abstract class DragonCrystalArmor extends ArmorItem {
 
         @Override
         public String getArmorTexture(ItemStack stack, Entity entity, EquipmentSlot slot, String type) {
-            return "the_last_sword:textures/models/armor/dragonarmor__layer_1.png";
+            return "the_last_sword:textures/models/armor/dragon_crystal_armor_layer_1.png";
         }
 
         @Override
@@ -115,7 +115,7 @@ public abstract class DragonCrystalArmor extends ArmorItem {
 
         @Override
         public String getArmorTexture(ItemStack stack, Entity entity, EquipmentSlot slot, String type) {
-            return "the_last_sword:textures/models/armor/dragonarmor__layer_2.png";
+            return "the_last_sword:textures/models/armor/dragon_crystal_armor_layer_2.png";
         }
 
         @Override
@@ -135,7 +135,7 @@ public abstract class DragonCrystalArmor extends ArmorItem {
 
         @Override
         public String getArmorTexture(ItemStack stack, Entity entity, EquipmentSlot slot, String type) {
-            return "the_last_sword:textures/models/armor/dragonarmor__layer_1.png";
+            return "the_last_sword:textures/models/armor/dragon_crystal_armor_layer_1.png";
         }
 
         @Override

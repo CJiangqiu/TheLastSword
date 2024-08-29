@@ -1,0 +1,68 @@
+{
+  "vertex": "the_last_sword:the_last_sword",
+  "fragment": "the_last_sword:the_last_sword",
+  "samplers": [
+    {
+      "name": "hiltTexture",
+      "file": "textures/item/the_last_sword_hilt.png"
+    },
+    {
+      "name": "bodyTexture",
+      "file": "textures/item/the_last_sword_body.png"
+    }
+  ],
+  "attributes": [
+    "Position",
+    "UV0"
+  ],
+  "uniforms": [
+    {
+      "name": "time",
+      "type": "float",
+      "count": 1,
+      "values": [0.0]
+    },
+    {
+      "name": "yaw",
+      "type": "float",
+      "count": 1,
+      "values": [0.0]
+    },
+    {
+      "name": "pitch",
+      "type": "float",
+      "count": 1,
+      "values": [0.0]
+    },
+    {
+      "name": "externalScale",
+      "type": "float",
+      "count": 1,
+      "values": [1.0]
+    },
+    {
+      "name": "opacity",
+      "type": "float",
+      "count": 1,
+      "values": [1.0]
+    },
+    {
+      "name": "scale",
+      "type": "float",
+      "count": 1,
+      "values": [1.0]
+    },
+    {
+      "name": "offsetX",
+      "type": "float",
+      "count": 1,
+      "values": [0.0]
+    },
+    {
+      "name": "offsetY",
+      "type": "float",
+      "count": 1,
+      "values": [0.0]
+    }
+  ]
+}
