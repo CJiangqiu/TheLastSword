@@ -2,5 +2,12 @@
   "parent": "item/handheld",
   "textures": {
     "layer0": "the_last_sword:item/dragon_crystal_sword"
-  }
+  },
+  "overrides": [
+    { "predicate": { "level": 1 }, "model": "the_last_sword:item/dragon_crystal_sword_1" },
+    { "predicate": { "level": 2 }, "model": "the_last_sword:item/dragon_crystal_sword_2" },
+    { "predicate": { "level": 3 }, "model": "the_last_sword:item/dragon_crystal_sword_3" },
+    { "predicate": { "level": 4 }, "model": "the_last_sword:item/dragon_crystal_sword_4" },
+    { "predicate": { "level": 5 }, "model": "the_last_sword:item/dragon_crystal_sword_5" }
+  ]
 }

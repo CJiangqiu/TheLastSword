@@ -19,6 +19,7 @@ public class TheLastSwordConfiguration {
     public static final ForgeConfigSpec.ConfigValue<Double> RANGE_ATTACK_RANGE;
     public static final ForgeConfigSpec.ConfigValue<Boolean> DROP_DRAGON_EGG;
     public static final ForgeConfigSpec.ConfigValue<Boolean> MULTIPLE_DRAGON_EGGS;
+    public static final ForgeConfigSpec.ConfigValue<Double> ABSOLUTE_DESTRUCTION_MULTIPLIER; // 新增配置项
 
     static {
         BUILDER.push("Increase Value");
@@ -56,6 +57,11 @@ public class TheLastSwordConfiguration {
                                  .define("Drop Dragon Egg", true);
         MULTIPLE_DRAGON_EGGS = BUILDER.comment("Controls whether multiple dragon eggs are given to players who dealt significant damage.")
                                       .define("Multiple Dragon Eggs", true);
+        BUILDER.pop();
+
+        BUILDER.push("Absolute Destruction");
+        ABSOLUTE_DESTRUCTION_MULTIPLIER = BUILDER.comment("Multiplier for absolute destruction damage.")
+                                                 .define("Absolute Destruction Multiplier", 0.1);
         BUILDER.pop();
 
         SPEC = BUILDER.build();

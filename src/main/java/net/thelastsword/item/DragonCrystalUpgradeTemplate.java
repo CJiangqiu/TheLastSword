@@ -1,8 +1,8 @@
 
 package net.thelastsword.item;
 
-import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Rarity;
 
 public class DragonCrystalUpgradeTemplate extends Item {
 	public DragonCrystalUpgradeTemplate() {

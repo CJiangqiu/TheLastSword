@@ -3,6 +3,7 @@ package net.thelastsword.item;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.damagesource.DamageSource;
@@ -12,6 +13,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.common.ToolAction;
+import net.minecraftforge.common.ToolActions;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
 import net.thelastsword.capability.DefaultExtraAttackDamage;
@@ -24,7 +28,6 @@ import net.thelastsword.init.TheLastSwordModItems;
 import java.util.List;
 
 public class DragonCrystalSword extends SwordItem implements ICapabilityProvider {
-    private final float baseAttackDamage;
 
     public DragonCrystalSword() {
         super(new Tier() {
@@ -41,7 +44,7 @@ public class DragonCrystalSword extends SwordItem implements ICapabilityProvider
             }
 
             public int getLevel() {
-                return 1;
+                return 4;
             }
 
             public int getEnchantmentValue() {
@@ -51,12 +54,33 @@ public class DragonCrystalSword extends SwordItem implements ICapabilityProvider
             public Ingredient getRepairIngredient() {
                 return Ingredient.of(new ItemStack(TheLastSwordModItems.DRAGON_CRYSTAL.get()));
             }
-        }, 3, -2.4f, new Item.Properties().rarity(Rarity.UNCOMMON).fireResistant());
-        this.baseAttackDamage = 8f; // 设置基础攻击伤害
+        }, 3, -2.4f, new Item.Properties().fireResistant().rarity(Rarity.UNCOMMON));
+
     }
 
-    public float getBaseAttackDamage() {
-        return baseAttackDamage;
+    @Override
+    public boolean isCorrectToolForDrops(BlockState blockstate) {
+        int level = 4;
+        if (level < 3 && blockstate.is(BlockTags.NEEDS_DIAMOND_TOOL)) {
+            return false;
+        } else if (level < 2 && blockstate.is(BlockTags.NEEDS_IRON_TOOL)) {
+            return false;
+        } else {
+            return level < 1 && blockstate.is(BlockTags.NEEDS_STONE_TOOL)
+                    ? false
+                    : (blockstate.is(BlockTags.MINEABLE_WITH_AXE) || blockstate.is(BlockTags.MINEABLE_WITH_HOE) || blockstate.is(BlockTags.MINEABLE_WITH_PICKAXE) || blockstate.is(BlockTags.MINEABLE_WITH_SHOVEL));
+        }
+    }
+
+    @Override
+    public float getDestroySpeed(ItemStack itemstack, BlockState blockstate) {
+        return 64f;
+    }
+
+    @Override
+    public boolean canPerformAction(ItemStack stack, ToolAction toolAction) {
+        return ToolActions.DEFAULT_AXE_ACTIONS.contains(toolAction) || ToolActions.DEFAULT_HOE_ACTIONS.contains(toolAction) || ToolActions.DEFAULT_SHOVEL_ACTIONS.contains(toolAction) || ToolActions.DEFAULT_PICKAXE_ACTIONS.contains(toolAction)
+                || ToolActions.DEFAULT_SWORD_ACTIONS.contains(toolAction);
     }
 
     @Override
@@ -89,7 +113,7 @@ public class DragonCrystalSword extends SwordItem implements ICapabilityProvider
                 extraAttackDamage.setExtraAttackDamage((float) extraDamage);
             });
 
-            float totalDamage = (float) (extraDamage + this.getBaseAttackDamage());
+            float totalDamage = (float) (extraDamage + getTier().getAttackDamageBonus());
             target.hurt(new DamageSource(attacker.getCommandSenderWorld().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.GENERIC)), totalDamage);
         });
         return super.hurtEnemy(stack, target, attacker);
@@ -100,7 +124,7 @@ public class DragonCrystalSword extends SwordItem implements ICapabilityProvider
         super.appendHoverText(itemstack, level, list, flag);
 
         itemstack.getCapability(SwordCapability.SWORD_LEVEL_CAPABILITY).ifPresent(swordLevel -> {
-            list.add(Component.translatable("item_tooltip.the_last_sword.dragon_sword").append(" " + swordLevel.getLevel()));
+            list.add(Component.translatable("item_tooltip.the_last_sword.sword_level").append(" " + swordLevel.getLevel()));
         });
 
         itemstack.getCapability(SwordCapability.EXTRA_ATTACK_DAMAGE_CAPABILITY).ifPresent(extraAttackDamage -> {

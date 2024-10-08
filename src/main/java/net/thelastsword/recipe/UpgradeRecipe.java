@@ -1,26 +1,23 @@
 package net.thelastsword.recipe;
 
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import net.thelastsword.capability.SwordCapability;
 import net.thelastsword.configuration.TheLastSwordConfiguration;
-import net.thelastsword.world.inventory.DragonCrystalSmithingTableGuiMenu;
 import net.thelastsword.init.TheLastSwordModItems;
-
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.event.TickEvent;
-
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.Entity;
+import net.thelastsword.world.inventory.DragonCrystalSmithingTableGuiMenu;
 
 import javax.annotation.Nullable;
-
-import java.util.function.Supplier;
 import java.util.Map;
+import java.util.function.Supplier;
 
 @Mod.EventBusSubscriber
 public class UpgradeRecipe {

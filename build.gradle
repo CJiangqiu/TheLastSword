@@ -1,11 +1,10 @@
 plugins {
     id 'eclipse'
     id 'net.minecraftforge.gradle' version '[6.0.16,6.2)'
-
-
+    id 'org.spongepowered.mixin' version '0.7.+'
 }
 
-version = '1.20.1-forge-1.0.6'
+version = '1.20.1-forge-1.0.7-alpha'
 group = 'net.thelastsword'
 archivesBaseName = 'The Last Sword'
 
@@ -53,34 +52,45 @@ minecraft {
                 includeGroup "curse.maven"
             }
         }
-          maven {
-    name = "Progwml6's maven"
-    url = "https://dvs1.progwml6.com/files/maven/"
-  }
-  maven {
-    name = "Jared's maven"
-    url = "https://maven.blamejared.com/"
-  }
-  maven {
-    name = "ModMaven"
-    url = "https://modmaven.dev"
-  }
+        maven {
+            name = "Progwml6's maven"
+            url = "https://dvs1.progwml6.com/files/maven/"
+        }
+        maven {
+            name = "Jared's maven"
+            url = "https://maven.blamejared.com/"
+        }
+        maven {
+            name = "ModMaven"
+            url = "https://modmaven.dev"
+        }
+        maven {
+            name = "SpongePowered"
+            url = "https://repo.spongepowered.org/repository/maven-public/"
+        }
+    }
 }
-    }
-    dependencies {
-        minecraft 'net.minecraftforge:forge:1.20.1-47.2.0'
 
-        compileOnly(fg.deobf("mezz.jei:jei-1.20.1-common-api:15.3.0.8"))
-        compileOnly(fg.deobf("mezz.jei:jei-1.20.1-forge-api:15.3.0.8"))
-        runtimeOnly(fg.deobf("mezz.jei:jei-1.20.1-forge:15.3.0.8"))
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.20.1-47.2.0'
 
-    }
+    compileOnly(fg.deobf("mezz.jei:jei-1.20.1-common-api:15.3.0.8"))
+    compileOnly(fg.deobf("mezz.jei:jei-1.20.1-forge-api:15.3.0.8"))
+    runtimeOnly(fg.deobf("mezz.jei:jei-1.20.1-forge:15.3.0.8"))
 
+    implementation 'org.ow2.asm:asm:9.2'
+    implementation 'org.ow2.asm:asm-commons:9.2'
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+}
 
+mixin {
+    add sourceSets.main, "mixins.thelastsword.refmap.json"
+}
 
-    tasks.withType(JavaCompile).configureEach {
-        options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
-    }
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}
 
-
-
+tasks.jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}

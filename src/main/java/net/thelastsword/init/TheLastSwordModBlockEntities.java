@@ -1,12 +1,12 @@
 package net.thelastsword.init;
 
-import net.thelastsword.block.entity.DragonCrystalSmithingTableBlockEntity;
-import net.thelastsword.TheLastSwordMod;
-import net.minecraftforge.registries.RegistryObject;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
+import net.thelastsword.TheLastSwordMod;
+import net.thelastsword.block.entity.DragonCrystalSmithingTableBlockEntity;
 
 public class TheLastSwordModBlockEntities {
 	public static final DeferredRegister<BlockEntityType<?>> REGISTRY = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, TheLastSwordMod.MODID);

@@ -1,16 +1,16 @@
 package net.thelastsword.recipe;
 
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.thelastsword.capability.SwordCapability;
 
-import java.util.function.Supplier;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class CleanSlot {
     public static void execute(Entity entity) {

@@ -1,31 +1,25 @@
 package net.thelastsword.item;
 
 import com.google.common.collect.Iterables;
-import net.minecraft.client.Minecraft;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.*;
-import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.Level;
-import net.thelastsword.init.TheLastSwordModItems;
-
-import net.minecraftforge.registries.ForgeRegistries;
-
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.*;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.Level;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.thelastsword.init.TheLastSwordModItems;
 
 public abstract class DragonCrystalArmor extends ArmorItem {
     public DragonCrystalArmor(ArmorItem.Type type, Item.Properties properties) {
         super(new ArmorMaterial() {
             @Override
             public int getDurabilityForType(ArmorItem.Type type) {
-                return new int[]{13, 15, 16, 11}[type.getSlot().getIndex()] * 74;
+                return new int[]{26, 30, 32, 22}[type.getSlot().getIndex()] * 74;
             }
 
             @Override

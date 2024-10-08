@@ -46,5 +46,10 @@
       <option name="name" value="Jared's maven" />
       <option name="url" value="https://maven.blamejared.com/" />
     </remote-repository>
+    <remote-repository>
+      <option name="id" value="SpongePowered" />
+      <option name="name" value="SpongePowered" />
+      <option name="url" value="https://repo.spongepowered.org/repository/maven-public/" />
+    </remote-repository>
   </component>
 </project>

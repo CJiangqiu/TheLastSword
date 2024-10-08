@@ -1,16 +1,15 @@
 package net.thelastsword.init;
 
-import net.minecraft.world.item.Rarity;
-import net.thelastsword.item.*;
-import net.thelastsword.TheLastSwordMod;
-
-import net.minecraftforge.registries.RegistryObject;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.DeferredRegister;
-
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Rarity;
+import net.minecraft.world.level.block.Block;
+import net.minecraftforge.common.ForgeSpawnEggItem;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
+import net.thelastsword.TheLastSwordMod;
+import net.thelastsword.item.*;
 
 public class TheLastSwordModItems {
 	public static final DeferredRegister<Item> REGISTRY = DeferredRegister.create(ForgeRegistries.ITEMS, TheLastSwordMod.MODID);
@@ -25,6 +24,7 @@ public class TheLastSwordModItems {
 	public static final RegistryObject<Item> DRAGON_CRYSTAL_ARMOR_LEGGINGS = REGISTRY.register("dragon_crystal_armor_leggings", () -> new DragonCrystalArmor.Leggings());
 	public static final RegistryObject<Item> DRAGON_CRYSTAL_ARMOR_BOOTS = REGISTRY.register("dragon_crystal_armor_boots", () -> new DragonCrystalArmor.Boots());
 	public static final RegistryObject<Item> DRAGON_CRYSTAL_SMITHING_TABLE = REGISTRY.register("dragon_crystal_smithing_table", () -> new BlockItem(TheLastSwordModBlocks.DRAGON_CRYSTAL_SMITHING_TABLE.get(), new Item.Properties().rarity(Rarity.RARE)));
+	public static final RegistryObject<Item> TEST_ENTITY_SPAWN_EGG = REGISTRY.register("test_entity_spawn_egg", () -> new ForgeSpawnEggItem(TheLastSwordModEntities.TEST_ENTITY, -1, -1, new Item.Properties()));
 
 
 	private static RegistryObject<Item> block(RegistryObject<Block> block) {

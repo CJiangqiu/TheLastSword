@@ -2,14 +2,16 @@ package net.thelastsword.client.model;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
-import com.ibm.icu.impl.Pair;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.*;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.Material;
+import net.minecraft.client.resources.model.ModelBaker;
+import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
@@ -20,7 +22,6 @@ import net.minecraftforge.client.model.geometry.IUnbakedGeometry;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Function;
 
 public class CosmicModelLoader implements IGeometryLoader<CosmicModelLoader.CosmicModelGeometry> {

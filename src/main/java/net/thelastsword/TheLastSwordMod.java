@@ -1,40 +1,39 @@
 package net.thelastsword;
 
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraftforge.client.event.ModelEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.util.thread.SidedThreadGroups;
+import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.simple.SimpleChannel;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.thelastsword.client.render.TheLastSwordRender;
+import net.thelastsword.client.model.CosmicModelLoader;
+
+import net.thelastsword.configuration.TheLastSwordConfiguration;
+import net.thelastsword.init.*;
 import net.thelastsword.network.ChangeTheLastSwordModeMessage;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import net.thelastsword.init.TheLastSwordModTabs;
-import net.thelastsword.init.TheLastSwordModMenus;
-import net.thelastsword.init.TheLastSwordModItems;
-import net.thelastsword.init.TheLastSwordModEntities;
-import net.thelastsword.init.TheLastSwordModBlocks;
-import net.thelastsword.init.TheLastSwordModBlockEntities;
-import net.minecraftforge.network.simple.SimpleChannel;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.fml.util.thread.SidedThreadGroups;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.network.FriendlyByteBuf;
-
-import java.util.*;
-import java.util.function.Supplier;
-import java.util.function.Function;
-import java.util.function.BiConsumer;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
-
-import net.thelastsword.client.model.CosmicModelLoader; // 导入自定义模型加载器
-import net.minecraftforge.client.event.ModelEvent; // 导入ModelEvent
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 @Mod("the_last_sword")
 public class TheLastSwordMod {
@@ -54,6 +53,9 @@ public class TheLastSwordMod {
         TheLastSwordModTabs.REGISTRY.register(bus);
 
         TheLastSwordModMenus.REGISTRY.register(bus);
+
+
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, TheLastSwordConfiguration.SPEC);
 
         init();
     }
@@ -107,4 +109,6 @@ public class TheLastSwordMod {
     public void onRegisterGeometryLoaders(ModelEvent.RegisterGeometryLoaders event) {
         event.register("cosmic", new CosmicModelLoader());
     }
+
+
 }

@@ -1,0 +1,26 @@
+{
+  "mappings": {
+    "net/thelastsword/mixin/AbsoluteDestructionEntityMixin": {
+      "tick": "Lnet/minecraft/world/entity/LivingEntity;m_8119_()V"
+    },
+    "net/thelastsword/mixin/AbsoluteDestructionLivingEntityMixin": {
+      "getMaxHealth": "Lnet/minecraft/world/entity/LivingEntity;m_21233_()F",
+      "tick": "Lnet/minecraft/world/entity/LivingEntity;m_8119_()V",
+      "remove": "Lnet/minecraft/world/entity/LivingEntity;m_142687_(Lnet/minecraft/world/entity/Entity$RemovalReason;)V",
+      "setHealth": "Lnet/minecraft/world/entity/LivingEntity;m_21153_(F)V"
+    }
+  },
+  "data": {
+    "searge": {
+      "net/thelastsword/mixin/AbsoluteDestructionEntityMixin": {
+        "tick": "Lnet/minecraft/world/entity/LivingEntity;m_8119_()V"
+      },
+      "net/thelastsword/mixin/AbsoluteDestructionLivingEntityMixin": {
+        "getMaxHealth": "Lnet/minecraft/world/entity/LivingEntity;m_21233_()F",
+        "tick": "Lnet/minecraft/world/entity/LivingEntity;m_8119_()V",
+        "remove": "Lnet/minecraft/world/entity/LivingEntity;m_142687_(Lnet/minecraft/world/entity/Entity$RemovalReason;)V",
+        "setHealth": "Lnet/minecraft/world/entity/LivingEntity;m_21153_(F)V"
+      }
+    }
+  }
+}

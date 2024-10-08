@@ -1,57 +1,52 @@
 package net.thelastsword.item;
 
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
-import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.IronGolem;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.phys.AABB;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ToolAction;
 import net.minecraftforge.common.ToolActions;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.thelastsword.capability.*;
+import net.thelastsword.capability.ExtraAttackDamageProvider;
+import net.thelastsword.capability.ModeProvider;
+import net.thelastsword.capability.SwordCapability;
+import net.thelastsword.capability.SwordLevelProvider;
 import net.thelastsword.configuration.TheLastSwordConfiguration;
+import net.thelastsword.event.JustifiedDefense;
 import net.thelastsword.entity.TheLastSwordProjectile;
+import net.thelastsword.event.PowerfulRangeAttack;
 import net.thelastsword.init.TheLastSwordModItems;
 
-import java.lang.reflect.Method;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-@Mod.EventBusSubscriber
 public class TheLastSword extends SwordItem implements ICapabilityProvider {
     private final float baseAttackDamage;
     private long lastRangeAttackTime = 0;
@@ -68,7 +63,7 @@ public class TheLastSword extends SwordItem implements ICapabilityProvider {
             }
 
             public float getAttackDamageBonus() {
-                return 1022f;
+                return 196f;
             }
 
             public int getLevel() {
@@ -90,6 +85,7 @@ public class TheLastSword extends SwordItem implements ICapabilityProvider {
     public float getBaseAttackDamage() {
         return baseAttackDamage;
     }
+
     // Mining functionality/挖掘功能
     // Check if the tool is correct for drops/检查工具是否适合掉落物
     @Override
@@ -105,30 +101,32 @@ public class TheLastSword extends SwordItem implements ICapabilityProvider {
                     : (blockstate.is(BlockTags.MINEABLE_WITH_AXE) || blockstate.is(BlockTags.MINEABLE_WITH_HOE) || blockstate.is(BlockTags.MINEABLE_WITH_PICKAXE) || blockstate.is(BlockTags.MINEABLE_WITH_SHOVEL));
         }
     }
+
     // Check if the tool can perform action/检查工具是否可以执行动作
     @Override
     public boolean canPerformAction(ItemStack stack, ToolAction toolAction) {
         return ToolActions.DEFAULT_AXE_ACTIONS.contains(toolAction) || ToolActions.DEFAULT_HOE_ACTIONS.contains(toolAction) || ToolActions.DEFAULT_SHOVEL_ACTIONS.contains(toolAction) || ToolActions.DEFAULT_PICKAXE_ACTIONS.contains(toolAction)
                 || ToolActions.DEFAULT_SWORD_ACTIONS.contains(toolAction);
     }
+
     // Get destroy speed/获取破坏速度
     @Override
     public float getDestroySpeed(ItemStack itemstack, BlockState blockstate) {
         return 1024f;
     }
+
     // Handle block mining/处理方块挖掘
     @Override
     public boolean mineBlock(ItemStack itemstack, Level world, BlockState blockstate, BlockPos pos, LivingEntity entity) {
         itemstack.hurtAndBreak(1, entity, i -> i.broadcastBreakEvent(EquipmentSlot.MAINHAND));
         return true;
     }
-    // Mining functionality/挖掘功能
 
     // Check if the item has an enchanted or special foil effect/检查物品是否具有附魔或特殊的闪光效果
     @Override
     @OnlyIn(Dist.CLIENT)
     public boolean isFoil(ItemStack itemstack) {
-        return true;
+        return itemstack.getCapability(SwordCapability.MODE_CAPABILITY).map(modeCapability -> modeCapability.getMode() == 2).orElse(false);
     }
 
     // Get capability/获取能力
@@ -143,6 +141,7 @@ public class TheLastSword extends SwordItem implements ICapabilityProvider {
         }
         return LazyOptional.empty();
     }
+
     // Handle enemy hit/处理敌人击中
     @Override
     public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
@@ -161,81 +160,89 @@ public class TheLastSword extends SwordItem implements ICapabilityProvider {
         });
         return super.hurtEnemy(stack, target, attacker);
     }
-    // Handle inventory tick/处理在背包中时
-    @Override
-    public void inventoryTick(ItemStack itemstack, Level world, Entity entity, int slot, boolean selected) {
-        super.inventoryTick(itemstack, world, entity, slot, selected);
-        if (entity instanceof Player player) {
-            boolean hasSword = false;
-            for (ItemStack stack : player.getInventory().items) {
-                if (stack.getItem() instanceof TheLastSword) {
-                    hasSword = true;
-                    break;
-                }
+
+// Handle inventory tick/处理在背包中时
+@Override
+public void inventoryTick(ItemStack itemstack, Level world, Entity entity, int slot, boolean selected) {
+    super.inventoryTick(itemstack, world, entity, slot, selected);
+    if (entity instanceof Player player) {
+        boolean hasSword = false;
+        for (ItemStack stack : player.getInventory().items) {
+            if (stack.getItem() instanceof TheLastSword) {
+                hasSword = true;
+                break;
             }
-            if (!player.isCreative() && !player.isSpectator()) {
-                boolean allowFlying = TheLastSwordConfiguration.ALLOW_FLYING.get();
-                if (hasSword) {
-                    if (allowFlying && !player.getAbilities().mayfly) {
-                        player.getAbilities().mayfly = true;
-                        player.onUpdateAbilities();
-                    }
-                    if (!player.getAbilities().invulnerable) {
-                        player.getAbilities().invulnerable = true;
-                    }
-                } else {
-                    if (player.getAbilities().mayfly) {
-                        player.getAbilities().mayfly = false;
-                        player.getAbilities().flying = false;
-                        player.onUpdateAbilities();
-                    }
-                    if (player.getAbilities().invulnerable) {
-                        player.getAbilities().invulnerable = false;
-                    }
+        }
+        if (!player.isCreative() && !player.isSpectator()) {
+            boolean allowFlying = TheLastSwordConfiguration.ALLOW_FLYING.get();
+            if (hasSword) {
+                if (allowFlying && !player.getAbilities().mayfly) {
+                    player.getAbilities().mayfly = true;
+                    player.getPersistentData().putBoolean("TheLastSwordFly", true);
+                    player.onUpdateAbilities();
+                }
+                if (!JustifiedDefense.hasJustifiedDefense(player)) {
+                    JustifiedDefense.applyJustifiedDefense(player);
+                }
+
+            } else {
+                if (player.getPersistentData().getBoolean("TheLastSwordFly")) {
+                    player.getAbilities().mayfly = false;
+                    player.getAbilities().flying = false;
+                    player.getPersistentData().remove("TheLastSwordFly");
+                    player.onUpdateAbilities();
+                }
+                if (JustifiedDefense.hasJustifiedDefense(player)) {
+                    JustifiedDefense.removeJustifiedDefense(player);
                 }
             }
         }
     }
+}
 
-    // Event handler for player tick/玩家tick事件处理
-    @Mod.EventBusSubscriber
-    public static class TheLastSwordEventHandler {
+// Event handler for player tick/玩家tick事件处理
+@Mod.EventBusSubscriber
+public static class TheLastSwordEventHandler {
 
-        @SubscribeEvent
-        public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-            Player player = event.player;
-            boolean hasSword = false;
+    @SubscribeEvent
+    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
+        Player player = event.player;
+        boolean hasSword = false;
 
-            for (ItemStack stack : player.getInventory().items) {
-                if (stack.getItem() instanceof TheLastSword) {
-                    hasSword = true;
-                    break;
-                }
+        for (ItemStack stack : player.getInventory().items) {
+            if (stack.getItem() instanceof TheLastSword) {
+                hasSword = true;
+                break;
             }
+        }
 
-            if (!player.isCreative() && !player.isSpectator()) {
-                boolean allowFlying = TheLastSwordConfiguration.ALLOW_FLYING.get();
-                if (hasSword) {
-                    if (allowFlying && !player.getAbilities().mayfly) {
-                        player.getAbilities().mayfly = true;
-                        player.onUpdateAbilities();
-                    }
-                    if (!player.getAbilities().invulnerable) {
-                        player.getAbilities().invulnerable = true;
-                    }
-                } else {
-                    if (player.getAbilities().mayfly) {
-                        player.getAbilities().mayfly = false;
-                        player.getAbilities().flying = false;
-                        player.onUpdateAbilities();
-                    }
-                    if (player.getAbilities().invulnerable) {
-                        player.getAbilities().invulnerable = false;
-                    }
+        if (!player.isCreative() && !player.isSpectator()) {
+            boolean allowFlying = TheLastSwordConfiguration.ALLOW_FLYING.get();
+            if (hasSword) {
+                if (allowFlying && !player.getAbilities().mayfly) {
+                    player.getAbilities().mayfly = true;
+                    player.getPersistentData().putBoolean("TheLastSwordFly", true);
+                    player.onUpdateAbilities();
+                }
+                if (!JustifiedDefense.hasJustifiedDefense(player)) {
+                    JustifiedDefense.applyJustifiedDefense(player);
+                }
+
+            } else {
+                if (player.getPersistentData().getBoolean("TheLastSwordFly")) {
+                    player.getAbilities().mayfly = false;
+                    player.getAbilities().flying = false;
+                    player.getPersistentData().remove("TheLastSwordFly");
+                    player.onUpdateAbilities();
+                }
+                if (JustifiedDefense.hasJustifiedDefense(player)) {
+                    JustifiedDefense.removeJustifiedDefense(player);
                 }
             }
         }
     }
+}
+
 
 
     // Handle item use/处理物品使用
@@ -266,19 +273,30 @@ public class TheLastSword extends SwordItem implements ICapabilityProvider {
                         Block.popResource(world, pos, drop);
                     }
 
+                    // Drop experience if the block has experience drops/如果方块有经验掉落，则掉落经验
+                    int exp = blockState.getBlock().getExpDrop(blockState, (ServerLevel) world, RandomSource.create(), pos, fortuneLevel, 0);
+                    if (exp > 0) {
+                        blockState.getBlock().popExperience((ServerLevel) world, pos, exp);
+                    }
+
                     // Ensure original block is removed/确保移除原有方块
-                    world.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+                    if (blockState.getDestroySpeed(world, pos) < 0 || blockState.getBlock() == Blocks.BEDROCK || blockState.getBlock() == Blocks.BARRIER) {
+                        // If block is unbreakable, drop its item form/如果方块不可破坏，则掉落其物品形式
+                        Block.popResource(world, pos, new ItemStack(blockState.getBlock().asItem()));
+                        world.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+                    } else {
+                        world.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+                    }
                     itemstack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(hand));
                 }
             } else if (mode == 2) {
-                // Powerful range attack mode: Right-click for 64*64 range attack/强力范围攻击模式：右键进行64*64范围攻击
+                // Powerful range attack mode: Right-click for range attack/强力范围攻击模式：右键进行范围攻击
                 long currentTime = System.currentTimeMillis();
                 int cooldown = TheLastSwordConfiguration.RANGE_ATTACK_COOLDOWN.get();
                 if (currentTime - lastRangeAttackTime >= cooldown) {
                     if (!world.isClientSide) {
-                        performPowerfulRangeAttack(world, player, itemstack);
+                        PowerfulRangeAttack.performPowerfulRangeAttack(world, player, itemstack);
                         itemstack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(hand));
-                        world.playSound(null, player.blockPosition(), SoundEvents.ENDER_DRAGON_GROWL, SoundSource.PLAYERS, 1.0F, 1.0F);
                         lastRangeAttackTime = currentTime;
                     }
                 }
@@ -286,76 +304,6 @@ public class TheLastSword extends SwordItem implements ICapabilityProvider {
         });
         return InteractionResultHolder.success(itemstack);
     }
-// Perform powerful range attack/执行强力范围攻击
-private void performPowerfulRangeAttack(Level world, Player player, ItemStack itemstack) {
-    double range = TheLastSwordConfiguration.RANGE_ATTACK_RANGE.get(); // 使用配置文件中的范围值
-    AABB attackRange = new AABB(player.getX() - range / 2, player.getY() - range / 2, player.getZ() - range / 2,
-                                player.getX() + range / 2, player.getY() + range / 2, player.getZ() + range / 2);
-    List<Entity> entities = world.getEntities(player, attackRange, e ->
-            !(e instanceof Player && !TheLastSwordConfiguration.ATTACK_PLAYERS.get()) &&
-            !(e instanceof ItemEntity) &&
-            !(e instanceof Villager && !TheLastSwordConfiguration.ATTACK_VILLAGERS.get()) &&
-            !(e instanceof TamableAnimal && ((TamableAnimal) e).isTame() && !TheLastSwordConfiguration.ATTACK_TAMED.get()) &&
-            !(e instanceof IronGolem && !TheLastSwordConfiguration.ATTACK_GOLEMS.get()) &&
-            !(e instanceof NeutralMob && !TheLastSwordConfiguration.ATTACK_NEUTRAL.get()) &&
-            !(e instanceof Animal && !TheLastSwordConfiguration.ATTACK_ANIMALS.get())
-    );
-
-    for (Entity entity : entities) {
-        // Get extra damage/获取额外伤害
-        itemstack.getCapability(SwordCapability.EXTRA_ATTACK_DAMAGE_CAPABILITY).ifPresent(extraAttackDamage -> {
-            float extraDamage = extraAttackDamage.getExtraAttackDamage();
-            // Deal extra damage to target/对目标造成额外伤害
-            entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.PLAYER_ATTACK)), extraDamage);
-            entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.EXPLOSION)), extraDamage);
-            entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.MAGIC)), extraDamage);
-            entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.DRAGON_BREATH)), extraDamage);
-            entity.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.FELL_OUT_OF_WORLD)), extraDamage);
-
-            // Schedule task to run after 1 second/调度任务在1秒后运行
-            if (world instanceof ServerLevel serverLevel) {
-                serverLevel.getServer().execute(() -> {
-                    if (entity instanceof LivingEntity livingEntity && livingEntity.getAttribute(Attributes.MAX_HEALTH).getBaseValue() < extraDamage) {
-                        // Drop entity's loot/掉落实体的掉落物
-                        try {
-                            Method dropLoot = LivingEntity.class.getDeclaredMethod("dropFromLootTable", DamageSource.class, boolean.class);
-                            dropLoot.setAccessible(true);
-                            dropLoot.invoke(livingEntity, DamageTypes.GENERIC, true);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        // Disable entity's AI/设置关闭实体的AI
-                        CompoundTag nbtData = new CompoundTag();
-                        nbtData.putBoolean("NoAI", true);
-                        livingEntity.load(nbtData);
-                        // Remove entity/清除实体
-                        livingEntity.setHealth(0);
-                        livingEntity.remove(Entity.RemovalReason.KILLED);
-                        livingEntity.remove(Entity.RemovalReason.CHANGED_DIMENSION);
-                        livingEntity.remove(Entity.RemovalReason.DISCARDED);
-                        livingEntity.remove(Entity.RemovalReason.UNLOADED_TO_CHUNK);
-                        livingEntity.remove(Entity.RemovalReason.UNLOADED_WITH_PLAYER);
-                        // Set entity invisible/设置实体不可见
-                        livingEntity.setInvisible(true);
-                        // Teleport entity to x, -1024, z/将实体位置设于 x, -1024, z 的位置
-                        livingEntity.teleportTo(player.getX(), -1024, player.getZ());
-                        // Summon visual lightning bolt at entity's location/在实体位置降下一道仅视觉效果的雷电
-                        if (world instanceof ServerLevel _level) {
-                            LightningBolt lightningBolt = EntityType.LIGHTNING_BOLT.create(_level);
-                            lightningBolt.moveTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
-                            lightningBolt.setVisualOnly(true);
-                            _level.addFreshEntity(lightningBolt);
-                        }
-                    }
-                });
-            }
-        });
-
-        // Add cooldown/添加冷却时间
-        int cooldown = TheLastSwordConfiguration.RANGE_ATTACK_COOLDOWN.get() * 2;
-        player.getCooldowns().addCooldown(itemstack.getItem(), cooldown);
-    }
-}
 
 
 
@@ -364,7 +312,7 @@ private void performPowerfulRangeAttack(Level world, Player player, ItemStack it
         super.appendHoverText(itemstack, level, list, flag);
 
         itemstack.getCapability(SwordCapability.SWORD_LEVEL_CAPABILITY).ifPresent(swordLevel -> {
-            list.add(Component.translatable("item_tooltip.the_last_sword.dragon_sword").append(" " + swordLevel.getLevel()));
+            list.add(Component.translatable("item_tooltip.the_last_sword.sword_level").append(" " + swordLevel.getLevel()));
         });
 
         itemstack.getCapability(SwordCapability.MODE_CAPABILITY).ifPresent(modeCapability -> {
@@ -398,6 +346,4 @@ private void performPowerfulRangeAttack(Level world, Player player, ItemStack it
                     .append(" " + extraAttackDamage.getExtraAttackDamage()));
         });
     }
-
-
 }
