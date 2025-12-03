@@ -218,10 +218,7 @@ public final class TheLastEndSwordWraithAI {
         }
     }
 
-    /**
-     * 检查战斗传送距离（战斗 AI 子系统）
-     * @return true 如果进行了传送，false 否则
-     */
+    //检查战斗传送距离并执行传送
     private static boolean checkCombatTeleportDistance(TheLastEndSwordWraithEntity wraith) {
         int configDistance = TheLastSwordConfiguration.getWraithCombatTeleportDistanceSafely();
 

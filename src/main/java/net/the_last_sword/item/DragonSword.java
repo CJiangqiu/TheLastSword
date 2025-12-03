@@ -17,6 +17,7 @@ import net.the_last_sword.entity.DragonSwordProjectile;
 import net.the_last_sword.summon.WraithSummonManager;
 import net.the_last_sword.util.nbt.ItemLevelHelper;
 import net.the_last_sword.util.nbt.ItemModeHelper;
+import net.minecraft.world.entity.Entity;
 
 import java.util.List;
 
@@ -76,7 +77,7 @@ public class DragonSword extends TheLastEndSwordItems {
 
     //背包刻更新：初始化模式NBT
     @Override
-    public void inventoryTick(ItemStack stack, Level level, net.minecraft.world.entity.Entity entity, int slotId, boolean isSelected) {
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
         super.inventoryTick(stack, level, entity, slotId, isSelected);
         ItemModeHelper.initializeMode(stack, 0, MAX_MODES);
     }

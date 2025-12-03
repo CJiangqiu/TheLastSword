@@ -11,6 +11,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.fml.common.Mod;
 import net.the_last_sword.init.ModBlocks;
 import net.the_last_sword.item.DragonCrystalSoulStone;
@@ -44,7 +45,7 @@ public class DragonSoulLanternEventHandler {
             return;
         }
 
-        ResourceLocation entityId = net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getKey(event.getEntity().getType());
+        ResourceLocation entityId = ForgeRegistries.ENTITY_TYPES.getKey(event.getEntity().getType());
         if (entityId != null) {
             CompoundTag nbt = emptySoulStone.getOrCreateTag();
             nbt.putString("wraith_entity_id", entityId.toString());

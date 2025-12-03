@@ -9,6 +9,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -81,7 +82,7 @@ public class DragonCrystalSoulStone extends Item {
             if (!entityId.isEmpty()) {
                 try {
                     ResourceLocation rl = new ResourceLocation(entityId);
-                    EntityType<?> entityType = net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getValue(rl);
+                    EntityType<?> entityType = ForgeRegistries.ENTITY_TYPES.getValue(rl);
                     if (entityType != null) {
                         return entityType.getDescriptionId();
                     }

@@ -33,6 +33,8 @@ import net.the_last_sword.summon.WraithSummonManager;
 import net.the_last_sword.util.EntityUtil;
 import net.the_last_sword.util.nbt.ItemLevelHelper;
 import net.the_last_sword.util.nbt.ItemModeHelper;
+import net.the_last_sword.event.ServerEventHandler;
+import net.minecraftforge.common.ForgeMod;
 
 import java.util.List;
 
@@ -142,7 +144,7 @@ public class TheLastSword extends TheLastEndSwordItems {
         } else if (mode == 1) {
             //模式1：右键进行强力范围挖掘（带预览系统）
             if (!world.isClientSide) {
-                net.the_last_sword.event.ServerEventHandler.performMining(player, world);
+                ServerEventHandler.performMining(player, world);
             }
         } else if (mode == 2) {
             //模式2：右键唤灵（召唤或唤回剑灵）
@@ -178,7 +180,7 @@ public class TheLastSword extends TheLastEndSwordItems {
         Vec3 lookVec = player.getViewVector(1.0F);
         Vec3 playerPos = player.position();
 
-        double attackRange = player.getAttributeValue(net.minecraftforge.common.ForgeMod.ENTITY_REACH.get());
+        double attackRange = player.getAttributeValue(ForgeMod.ENTITY_REACH.get());
 
         Vec3 endPos = playerPos.add(lookVec.scale(attackRange));
         AABB attackBox = new AABB(

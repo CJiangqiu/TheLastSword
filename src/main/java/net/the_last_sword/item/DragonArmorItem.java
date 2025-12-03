@@ -24,6 +24,7 @@ import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.init.ModItems;
 import net.the_last_sword.util.nbt.ItemEnergyStorage;
 import net.the_last_sword.util.nbt.ItemLevelHelper;
+import net.minecraft.nbt.CompoundTag;
 import software.bernie.geckolib.animatable.GeoItem;
 import software.bernie.geckolib.constant.DataTickets;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
@@ -142,7 +143,7 @@ public abstract class DragonArmorItem extends TheLastEndArmorItem implements Geo
     // ==================== Forge Energy系统 ====================
 
     @Override
-    public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable net.minecraft.nbt.CompoundTag nbt) {
+    public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundTag nbt) {
         return new ICapabilityProvider() {
             private final ItemEnergyStorage energyStorage = new ItemEnergyStorage(stack,
                 () -> DragonArmorItem.getMaxEnergy(stack));

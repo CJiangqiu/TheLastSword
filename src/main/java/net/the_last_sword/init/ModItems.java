@@ -9,6 +9,7 @@ import net.minecraftforge.registries.RegistryObject;
 import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.item.*;
 import net.the_last_sword.test.UltraTestSwordItem;
+import net.minecraft.world.item.Rarity;
 
 public class ModItems {
 
@@ -54,7 +55,7 @@ public class ModItems {
 
     //龙魂灯笼
     public static final RegistryObject<Item> DRAGON_SOUL_LANTERN = ITEMS.register("dragon_soul_lantern",
-        () -> new DragonSoulLanternItem(ModBlocks.DRAGON_SOUL_LANTERN.get(), new Item.Properties().stacksTo(64).rarity(net.minecraft.world.item.Rarity.RARE).fireResistant())
+        () -> new DragonSoulLanternItem(ModBlocks.DRAGON_SOUL_LANTERN.get(), new Item.Properties().stacksTo(64).rarity(Rarity.RARE).fireResistant())
     );
 
     //龙水晶盔甲

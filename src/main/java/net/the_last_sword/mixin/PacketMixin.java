@@ -27,6 +27,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import net.minecraft.network.PacketListener;
 
 import java.util.function.Predicate;
 
@@ -173,7 +174,7 @@ public final class PacketMixin {
     @Mixin(Connection.class)
     public static abstract class ConnPrevent {
 
-        @Shadow private net.minecraft.network.PacketListener packetListener;
+        @Shadow private PacketListener packetListener;
 
         @Inject(method = "disconnect",
                 at = @At("HEAD"), cancellable = true)

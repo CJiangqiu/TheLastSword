@@ -4,6 +4,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -337,7 +338,7 @@ public final class DefenceManager {
     }
 
     //定期清理无效的防御记录
-    public static void tick(net.minecraft.server.MinecraftServer server, long currentTime) {
+    public static void tick(MinecraftServer server, long currentTime) {
         //定期清理无效记录
         if (currentTime - lastCleanupTime >= CLEANUP_INTERVAL) {
             cleanupInvalidRecords(server);
@@ -357,7 +358,7 @@ public final class DefenceManager {
     }
 
     //定期更新3级实体NBT
-    private static void updateLevel3EntityNBT(net.minecraft.server.MinecraftServer server) {
+    private static void updateLevel3EntityNBT(MinecraftServer server) {
         int updatedCount = 0;
 
         for (Map.Entry<UUID, DefenceRecord> entry : records.entrySet()) {
@@ -386,7 +387,7 @@ public final class DefenceManager {
     }
 
     //检查并复活3级实体
-    private static void checkAndReviveLevel3Entities(net.minecraft.server.MinecraftServer server) {
+    private static void checkAndReviveLevel3Entities(MinecraftServer server) {
         for (Map.Entry<UUID, DefenceRecord> entry : records.entrySet()) {
             UUID uuid = entry.getKey();
             DefenceRecord record = entry.getValue();
@@ -411,7 +412,7 @@ public final class DefenceManager {
     }
 
     //通过UUID查找实体
-    private static LivingEntity findEntityByUUID(net.minecraft.server.MinecraftServer server, UUID uuid) {
+    private static LivingEntity findEntityByUUID(MinecraftServer server, UUID uuid) {
         for (ServerLevel level : server.getAllLevels()) {
             Entity entity = level.getEntity(uuid);
             if (entity instanceof LivingEntity livingEntity) {
@@ -428,7 +429,7 @@ public final class DefenceManager {
     }
 
     //复活3级实体
-    private static void reviveLevel3Entity(UUID uuid, net.minecraft.server.MinecraftServer server) {
+    private static void reviveLevel3Entity(UUID uuid, MinecraftServer server) {
         CompoundTag nbt = level3EntityNBT.get(uuid);
         if (nbt == null) {
             TheLastSwordLogger.warn("Cannot revive level 3 entity {}: NBT not found", uuid);
@@ -479,7 +480,7 @@ public final class DefenceManager {
     }
 
     //清理无效的防御记录
-    private static void cleanupInvalidRecords(net.minecraft.server.MinecraftServer server) {
+    private static void cleanupInvalidRecords(MinecraftServer server) {
         if (records.isEmpty()) {
             return;
         }

@@ -13,7 +13,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
+import net.the_last_sword.init.ModBlocks;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
@@ -39,6 +42,7 @@ import net.the_last_sword.util.nbt.ItemModeHelper;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -52,9 +56,13 @@ public class ClientEventHandler {
     private static final double EFFECT_RADIUS = 32.0;
     private static float rotation = 0.0f;
 
+    //龙魂灯笼渲染相关
+    private static final double LANTERN_RANGE = 8.0;
+    private static final double LANTERN_SEARCH_RANGE = 16.0;
+
     //球体渲染缓冲区（静态重用，避免内存泄漏）
     private static BufferBuilder sphereBufferBuilder = null;
-    private static net.minecraft.client.renderer.MultiBufferSource.BufferSource sphereBufferSource = null;
+    private static MultiBufferSource.BufferSource sphereBufferSource = null;
 
     //球体渲染类型（使用终焉着色器）
     private static final RenderType SPHERE_RENDER_TYPE = RenderType.create(
@@ -231,6 +239,9 @@ public class ClientEventHandler {
                 renderMiningPreview(event.getPoseStack(), event.getCamera());
             }
         }
+
+        //渲染龙魂灯笼范围
+        renderDragonSoulLanternRanges(event.getPoseStack(), event.getCamera(), mc.level);
     }
 
     //查找所有激活万物终焉的剑灵
@@ -276,7 +287,7 @@ public class ClientEventHandler {
         //初始化缓冲区（仅首次）
         if (sphereBufferBuilder == null) {
             sphereBufferBuilder = new BufferBuilder(2097152); // 2MB预分配，避免扩容
-            sphereBufferSource = net.minecraft.client.renderer.MultiBufferSource.immediate(sphereBufferBuilder);
+            sphereBufferSource = MultiBufferSource.immediate(sphereBufferBuilder);
         }
 
         VertexConsumer buffer = sphereBufferSource.getBuffer(SPHERE_RENDER_TYPE);
@@ -394,5 +405,102 @@ public class ClientEventHandler {
                                 float red, float green, float blue, float alpha) {
         buffer.vertex(matrix, x1, y1, z1).color(red, green, blue, alpha).normal(1, 0, 0).endVertex();
         buffer.vertex(matrix, x2, y2, z2).color(red, green, blue, alpha).normal(1, 0, 0).endVertex();
+    }
+
+    //========== 龙魂灯笼范围渲染方法 ==========
+
+    //渲染所有激活的龙魂灯笼范围
+    private static void renderDragonSoulLanternRanges(PoseStack poseStack, Camera camera, Level level) {
+        List<BlockPos> activeLanterns = findNearbyActiveLanterns(level, Minecraft.getInstance().player.blockPosition());
+        if (activeLanterns.isEmpty()) {
+            return;
+        }
+
+        Vec3 cameraPos = camera.getPosition();
+        poseStack.pushPose();
+        poseStack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
+
+        BufferBuilder bufferBuilder = new BufferBuilder(256);
+        MultiBufferSource.BufferSource immediateBufferSource = MultiBufferSource.immediate(bufferBuilder);
+        VertexConsumer buffer = immediateBufferSource.getBuffer(RenderType.lines());
+
+        //紫色呼吸效果
+        float time = (System.currentTimeMillis() % 2000) / 2000.0f;
+        float alpha = 0.4f + 0.3f * (float) Math.sin(time * Math.PI * 2);
+        float red = 0.5f;
+        float green = 0.0f;
+        float blue = 1.0f;
+        Matrix4f matrix = poseStack.last().pose();
+
+        for (BlockPos lanternPos : activeLanterns) {
+            renderLanternRangeBox(buffer, matrix, lanternPos, red, green, blue, alpha);
+        }
+
+        immediateBufferSource.endBatch();
+        poseStack.popPose();
+    }
+
+    //查找附近激活的龙魂灯笼
+    private static List<BlockPos> findNearbyActiveLanterns(Level level, BlockPos playerPos) {
+        List<BlockPos> lanterns = new ArrayList<>();
+        int range = (int) Math.ceil(LANTERN_SEARCH_RANGE);
+
+        for (int x = -range; x <= range; x++) {
+            for (int y = -range; y <= range; y++) {
+                for (int z = -range; z <= range; z++) {
+                    BlockPos checkPos = playerPos.offset(x, y, z);
+
+                    if (playerPos.distSqr(checkPos) <= LANTERN_SEARCH_RANGE * LANTERN_SEARCH_RANGE) {
+                        BlockState state = level.getBlockState(checkPos);
+                        if (state.getBlock() == ModBlocks.DRAGON_SOUL_LANTERN.get()) {
+                            if (isLanternActivated(level, checkPos)) {
+                                lanterns.add(checkPos);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return lanterns;
+    }
+
+    //检查龙魂灯笼是否激活（底部有黑曜石或哭泣的黑曜石）
+    private static boolean isLanternActivated(Level level, BlockPos lanternPos) {
+        BlockPos belowPos = lanternPos.below();
+        BlockState belowState = level.getBlockState(belowPos);
+        return belowState.is(Blocks.OBSIDIAN) ||
+               belowState.is(Blocks.CRYING_OBSIDIAN);
+    }
+
+    //渲染龙魂灯笼范围方框
+    private static void renderLanternRangeBox(VertexConsumer buffer, Matrix4f matrix, BlockPos center,
+                                              float red, float green, float blue, float alpha) {
+        int range = (int) LANTERN_RANGE;
+
+        float x1 = center.getX() - range;
+        float y1 = center.getY() - range;
+        float z1 = center.getZ() - range;
+        float x2 = center.getX() + range + 1;
+        float y2 = center.getY() + range + 1;
+        float z2 = center.getZ() + range + 1;
+
+        //底面的4条边
+        addLine(buffer, matrix, x1, y1, z1, x2, y1, z1, red, green, blue, alpha);
+        addLine(buffer, matrix, x2, y1, z1, x2, y1, z2, red, green, blue, alpha);
+        addLine(buffer, matrix, x2, y1, z2, x1, y1, z2, red, green, blue, alpha);
+        addLine(buffer, matrix, x1, y1, z2, x1, y1, z1, red, green, blue, alpha);
+
+        //顶面的4条边
+        addLine(buffer, matrix, x1, y2, z1, x2, y2, z1, red, green, blue, alpha);
+        addLine(buffer, matrix, x2, y2, z1, x2, y2, z2, red, green, blue, alpha);
+        addLine(buffer, matrix, x2, y2, z2, x1, y2, z2, red, green, blue, alpha);
+        addLine(buffer, matrix, x1, y2, z2, x1, y2, z1, red, green, blue, alpha);
+
+        //4条竖直边
+        addLine(buffer, matrix, x1, y1, z1, x1, y2, z1, red, green, blue, alpha);
+        addLine(buffer, matrix, x2, y1, z1, x2, y2, z1, red, green, blue, alpha);
+        addLine(buffer, matrix, x2, y1, z2, x2, y2, z2, red, green, blue, alpha);
+        addLine(buffer, matrix, x1, y1, z2, x1, y2, z2, red, green, blue, alpha);
     }
 }

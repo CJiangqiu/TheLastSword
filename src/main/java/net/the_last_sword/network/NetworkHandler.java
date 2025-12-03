@@ -7,6 +7,7 @@ import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 import net.the_last_sword.TheLastSwordMod;
+import net.minecraft.server.level.ServerPlayer;
 
 //网络包管理器
 public class NetworkHandler {
@@ -79,7 +80,7 @@ public class NetworkHandler {
     }
 
     //发送到特定玩家
-    public static <MSG> void sendToPlayer(MSG message, net.minecraft.server.level.ServerPlayer player) {
+    public static <MSG> void sendToPlayer(MSG message, ServerPlayer player) {
         CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), message);
     }
 

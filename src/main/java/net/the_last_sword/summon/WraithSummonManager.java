@@ -13,6 +13,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.core.BlockPos;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
@@ -512,7 +514,7 @@ public class WraithSummonManager {
     private static EntityType<?> getEntityTypeFromString(String entityTypeStr) {
         try {
             ResourceLocation rl = new ResourceLocation(entityTypeStr);
-            return net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getValue(rl);
+            return ForgeRegistries.ENTITY_TYPES.getValue(rl);
         } catch (Exception e) {
             return null;
         }
@@ -692,7 +694,7 @@ public class WraithSummonManager {
 
     //获取冷却时间
     private static int getCooldownTicks(ItemStack weaponStack) {
-        String itemId = net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(weaponStack.getItem()).toString();
+        String itemId = ForgeRegistries.ITEMS.getKey(weaponStack.getItem()).toString();
         if (itemId.contains("the_last_end_sword")) {
             return TheLastSwordConfiguration.getTheLastSwordSummonCooldownSafely();
         } else if (itemId.contains("dragon_sword") || itemId.contains("dragon_crystal_sword")) {
@@ -1004,8 +1006,8 @@ public class WraithSummonManager {
             double z = centerPos.z + Math.sin(angle) * 2;
             double y = centerPos.y;
 
-            if (level.getBlockState(new net.minecraft.core.BlockPos((int)x, (int)y, (int)z)).isAir() &&
-                level.getBlockState(new net.minecraft.core.BlockPos((int)x, (int)y+1, (int)z)).isAir()) {
+            if (level.getBlockState(new BlockPos((int)x, (int)y, (int)z)).isAir() &&
+                level.getBlockState(new BlockPos((int)x, (int)y+1, (int)z)).isAir()) {
                 return new Vec3(x, y, z);
             }
         }

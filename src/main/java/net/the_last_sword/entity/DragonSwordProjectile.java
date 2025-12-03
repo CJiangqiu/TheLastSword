@@ -23,6 +23,7 @@ import net.the_last_sword.init.ModEntities;
 import net.the_last_sword.init.ModItems;
 import net.the_last_sword.item.DragonSword;
 import net.the_last_sword.util.nbt.ItemLevelHelper;
+import net.minecraftforge.network.PlayMessages;
 
 import java.util.UUID;
 
@@ -34,7 +35,7 @@ public class DragonSwordProjectile extends TheLastEndSwordItemsProjectile {
     public static final ItemStack PROJECTILE_ITEM = new ItemStack(ModItems.DRAGON_CRYSTAL.get());
 
     //用于网络生成实体的构造器
-    public DragonSwordProjectile(net.minecraftforge.network.PlayMessages.SpawnEntity packet, Level world) {
+    public DragonSwordProjectile(PlayMessages.SpawnEntity packet, Level world) {
         super(ModEntities.DRAGON_SWORD_PROJECTILE.get(), world);
     }
 

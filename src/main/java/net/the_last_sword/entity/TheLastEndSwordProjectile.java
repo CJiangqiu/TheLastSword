@@ -1,7 +1,9 @@
 package net.the_last_sword.entity;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.resources.ResourceLocation;
@@ -202,8 +204,8 @@ public class TheLastEndSwordProjectile extends AbstractArrow implements ItemSupp
                 float basePhysicalDamage = theLastSword.getBasePhysicalDamage();
                 if (basePhysicalDamage > 0) {
                     DamageSource physicalDamageSource = new DamageSource(
-                        owner.getCommandSenderWorld().registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.DAMAGE_TYPE)
-                            .getHolderOrThrow(net.minecraft.world.damagesource.DamageTypes.GENERIC),
+                        owner.getCommandSenderWorld().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE)
+                            .getHolderOrThrow(DamageTypes.GENERIC),
                         this,
                         owner
                     );
@@ -221,8 +223,8 @@ public class TheLastEndSwordProjectile extends AbstractArrow implements ItemSupp
 
                 //弹射物造成虚空伤害
                 target.hurt(new DamageSource(
-                        owner.getCommandSenderWorld().registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.DAMAGE_TYPE)
-                                .getHolderOrThrow(net.minecraft.world.damagesource.DamageTypes.FELL_OUT_OF_WORLD), owner, owner),
+                        owner.getCommandSenderWorld().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE)
+                                .getHolderOrThrow(DamageTypes.FELL_OUT_OF_WORLD), owner, owner),
                         (float) extraDamage);
             } else {
                 //如果没有TheLastEndSword，则使用默认伤害逻辑

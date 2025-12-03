@@ -2,18 +2,13 @@ package net.the_last_sword.mixin;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 import net.the_last_sword.attack.AttackManager;
 import net.the_last_sword.defence.DefenceManager;
-import net.the_last_sword.util.EntityQueryContext;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Mixin(ServerLevel.class)
 public class ServerLevelMixin {
