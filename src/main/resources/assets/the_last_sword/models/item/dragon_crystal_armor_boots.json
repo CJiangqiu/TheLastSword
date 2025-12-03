@@ -1,0 +1,74 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "the_last_sword:item/dragon_crystal_boots"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "trim_type": 0.1
+      },
+      "model": "the_last_sword:item/dragon_crystal_armor_boots_quartz_trim"
+    },
+    {
+      "predicate": {
+        "trim_type": 0.2
+      },
+      "model": "the_last_sword:item/dragon_crystal_armor_boots_iron_trim"
+    },
+    {
+      "predicate": {
+        "trim_type": 0.3
+      },
+      "model": "the_last_sword:item/dragon_crystal_armor_boots_netherite_trim"
+    },
+    {
+      "predicate": {
+        "trim_type": 0.4
+      },
+      "model": "the_last_sword:item/dragon_crystal_armor_boots_redstone_trim"
+    },
+    {
+      "predicate": {
+        "trim_type": 0.5
+      },
+      "model": "the_last_sword:item/dragon_crystal_armor_boots_copper_trim"
+    },
+    {
+      "predicate": {
+        "trim_type": 0.6
+      },
+      "model": "the_last_sword:item/dragon_crystal_armor_boots_gold_trim"
+    },
+    {
+      "predicate": {
+        "trim_type": 0.7
+      },
+      "model": "the_last_sword:item/dragon_crystal_armor_boots_emerald_trim"
+    },
+    {
+      "predicate": {
+        "trim_type": 0.8
+      },
+      "model": "the_last_sword:item/dragon_crystal_armor_boots_diamond_trim"
+    },
+    {
+      "predicate": {
+        "trim_type": 0.9
+      },
+      "model": "the_last_sword:item/dragon_crystal_armor_boots_lapis_trim"
+    },
+    {
+      "predicate": {
+        "trim_type": 1.0
+      },
+      "model": "the_last_sword:item/dragon_crystal_armor_boots_amethyst_trim"
+    },
+    {
+      "predicate": {
+        "trim_type": 1.1
+      },
+      "model": "the_last_sword:item/dragon_crystal_armor_boots_dragon_crystal_trim"
+    }
+  ]
+}

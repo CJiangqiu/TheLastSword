@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "aba",
+    "aca",
+    "aaa"
+  ],
+  "key": {
+    "a": {
+      "item": "the_last_sword:dragon_crystal"
+    },
+    "b": {
+      "item": "minecraft:netherite_upgrade_smithing_template"
+    },
+    "c": {
+      "item": "minecraft:end_crystal"
+    }
+  },
+  "result": {
+    "item": "the_last_sword:dragon_crystal_upgrade_template",
+    "count": 1
+  }
+}

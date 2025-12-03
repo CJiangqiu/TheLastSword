@@ -1,0 +1,103 @@
+plugins {
+    id 'idea'
+    id 'net.minecraftforge.gradle' version '[6.0.16,6.2)'
+    id 'org.spongepowered.mixin'    version '0.7.+'
+}
+
+version = "${project.minecraft_version}-forge-${project.mod_version}"
+group   = project.maven_group
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+repositories {
+    maven { url = "https://maven.minecraftforge.net/" }
+    maven { url = "https://cursemaven.com"; content { includeGroup "curse.maven" } }
+    maven { name = "Progwml6"; url = "https://dvs1.progwml6.com/files/maven/" }
+    maven { name = "BlameJared"; url = "https://maven.blamejared.com/" }
+    maven { name = "ModMaven"; url = "https://modmaven.dev" }
+    maven { name = "SpongePowered"; url = "https://repo.spongepowered.org/repository/maven-public/" }
+}
+
+
+minecraft {
+    mappings channel: 'official', version: '1.20.1'
+    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+    copyIdeResources  = true
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            mods { the_last_sword { source sourceSets.main } }
+        }
+        server {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            mods { the_last_sword { source sourceSets.main } }
+        }
+    }
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${project.forge_version}"
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    implementation 'org.reflections:reflections:0.9.12'
+    implementation 'org.ow2.asm:asm:9.2'
+    implementation 'org.ow2.asm:asm-commons:9.2'
+
+    implementation fg.deobf("curse.maven:jei-238222:6600311")
+    implementation fg.deobf("curse.maven:jade-324717:5876199")
+    implementation fg.deobf("curse.maven:attributefix-280510:4911084")
+    implementation fg.deobf("curse.maven:geckolib-388172:5675221")
+    implementation fg.deobf("curse.maven:lendercataclysm-551586:6906993")
+    implementation fg.deobf("curse.maven:curios-309927:6418456")
+    implementation fg.deobf("curse.maven:lionfish-api-1001614:5922047")
+    implementation fg.deobf("curse.maven:touhou-little-maid-355044:6979039")
+}
+
+mixin {
+    add sourceSets.main, "mixins.the_last_sword.refmap.json"
+    config "the_last_sword.mixins.json"
+}
+
+processResources {
+    inputs.property 'mod_version', project.mod_version
+    filesMatching('META-INF/mods.toml') { expand 'mod_version': project.mod_version }
+}
+
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+tasks.jar { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
+
+tasks.register('agentJar', Jar) {
+    group = 'build'
+    description = 'Build inner agent.jar (package opening only)'
+    dependsOn tasks.named('classes')
+    archiveBaseName = 'agent'
+    destinationDirectory = layout.buildDirectory.dir('embedded-agent')
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    //只打包 agent 类和依赖
+    from(sourceSets.main.output) {
+        include 'net/the_last_sword/agent/**'
+        include 'net/the_last_sword/util/health/**'
+        include 'net/the_last_sword/util/TheLastSwordLogger.class'
+    }
+
+    manifest {
+        attributes(
+                'Agent-Class': 'net.the_last_sword.agent.TheLastSwordAgent',
+                'Can-Redefine-Classes': 'true',
+                'Can-Retransform-Classes': 'true'
+        )
+    }
+}
+
+
+tasks.named('jar') {
+    dependsOn tasks.named('agentJar')
+    from(tasks.named('agentJar').flatMap { it.archiveFile }) {
+        into 'net/the_last_sword/agent'
+        rename { 'agent.jar' }
+    }
+    //exclude 'net/the_last_sword/agent/**'
+}

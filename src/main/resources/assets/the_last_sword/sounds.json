@@ -1,0 +1,20 @@
+{
+  "the_last_end_sword_wraith": {
+    "subtitle": "subtitles.the_last_end_sword_wraith",
+    "sounds": [
+      {
+        "name": "the_last_sword:the_last_end_sword_wraith",
+        "stream": true
+      }
+    ]
+  },
+  "lost_wraith": {
+    "subtitle": "subtitles.lost_wraith",
+    "sounds": [
+      {
+        "name": "the_last_sword:lost_wraith",
+        "stream": true
+      }
+    ]
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "the_last_sword:end_lost_altar",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 32,
+    "separation": 16,
+    "salt": 750141643
+  }
+}

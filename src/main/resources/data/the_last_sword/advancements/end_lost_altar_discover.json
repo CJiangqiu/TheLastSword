@@ -1,0 +1,30 @@
+{
+  "display": {
+    "icon": {
+      "item": "minecraft:dragon_head"
+    },
+    "title": {
+      "translate": "advancements.end_lost_altar_discover.title"
+    },
+    "description": {
+      "translate": "advancements.end_lost_altar_discover.descr"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "end_lost_altar_discover_0": {
+      "trigger": "minecraft:tick",
+      "conditions": {
+        "player": {
+          "location": {
+            "structure": "the_last_sword:end_lost_altar"
+          }
+        }
+      }
+    }
+  },
+  "parent": "the_last_sword:end_reset_discover"
+}

@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "aba",
+    "bcb",
+    "aba"
+  ],
+  "key": {
+    "a": {
+      "item": "minecraft:crying_obsidian"
+    },
+    "b": {
+      "item": "the_last_sword:dragon_crystal"
+    },
+    "c": {
+      "item": "minecraft:lantern"
+    }
+  },
+  "result": {
+    "item": "the_last_sword:dragon_soul_lantern",
+    "count": 1
+  }
+}

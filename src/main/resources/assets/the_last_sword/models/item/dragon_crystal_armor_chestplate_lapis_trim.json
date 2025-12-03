@@ -1,0 +1,7 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "the_last_sword:item/dragon_crystal_chestplate",
+    "layer1": "trims/items/chestplate_trim_lapis"
+  }
+}

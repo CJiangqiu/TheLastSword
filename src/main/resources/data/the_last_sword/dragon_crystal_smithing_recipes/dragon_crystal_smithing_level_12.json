@@ -1,0 +1,17 @@
+{
+  "type": "the_last_sword:dragon_crystal_smithing",
+  "template": {
+    "item": "the_last_sword:dragon_crystal_upgrade_template"
+  },
+  "input": {
+    "item": "the_last_sword:dragon_sword",
+    "inputLevel": 12
+  },
+  "addition": {
+    "item": "minecraft:dragon_egg"
+  },
+  "output": {
+    "item": "the_last_sword:the_last_sword",
+    "outputLevel": 13
+  }
+}

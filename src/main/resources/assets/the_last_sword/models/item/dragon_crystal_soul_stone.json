@@ -1,0 +1,14 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "the_last_sword:item/dragon_crystal_soul_stone"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "the_last_sword:dragon_crystal_soul_stone_full": 1
+      },
+      "model": "the_last_sword:item/dragon_crystal_soul_stone_full"
+    }
+  ]
+}

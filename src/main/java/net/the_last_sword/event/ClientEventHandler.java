@@ -1,0 +1,398 @@
+package net.the_last_sword.event;
+
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.*;
+import com.mojang.math.Axis;
+import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderStateShard;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.the_last_sword.TheLastSwordMod;
+import net.the_last_sword.client.gui.DefenceConfigScreen;
+import net.the_last_sword.client.overlay.JustifiedDefenceOverlay;
+import net.the_last_sword.client.shader.TheLastEndEffect;
+import net.the_last_sword.configuration.DefenceConfig;
+import net.the_last_sword.entity.TheLastEndSwordWraithEntity;
+import net.the_last_sword.entity.ai.TheLastEndSwordWraithAI;
+import net.the_last_sword.init.ModKeyMappings;
+import net.the_last_sword.item.TheLastSword;
+import net.the_last_sword.network.CancelPreviewPacket;
+import net.the_last_sword.network.ChangeModePacket;
+import net.the_last_sword.network.NetworkHandler;
+import net.the_last_sword.network.OpenSummonGuiPacket;
+import net.the_last_sword.util.nbt.ItemModeHelper;
+import org.joml.Matrix4f;
+import org.lwjgl.glfw.GLFW;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+//客户端事件处理器
+@Mod.EventBusSubscriber(modid = TheLastSwordMod.MOD_ID, value = Dist.CLIENT)
+public class ClientEventHandler {
+
+    //万物终焉渲染相关
+    private static final ResourceLocation END_PORTAL_TEXTURE = new ResourceLocation("textures/entity/end_portal.png");
+    private static final double EFFECT_RADIUS = 32.0;
+    private static float rotation = 0.0f;
+
+    //球体渲染缓冲区（静态重用，避免内存泄漏）
+    private static BufferBuilder sphereBufferBuilder = null;
+    private static net.minecraft.client.renderer.MultiBufferSource.BufferSource sphereBufferSource = null;
+
+    //球体渲染类型（使用终焉着色器）
+    private static final RenderType SPHERE_RENDER_TYPE = RenderType.create(
+            "all_things_end_sphere",
+            DefaultVertexFormat.POSITION_TEX,
+            VertexFormat.Mode.QUADS,
+            2097152,
+            false,
+            true,
+            RenderType.CompositeState.builder()
+                    .setShaderState(new RenderStateShard.ShaderStateShard(TheLastEndEffect::getShader))
+                    .setTextureState(new RenderStateShard.TextureStateShard(END_PORTAL_TEXTURE, false, false))
+                    .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
+                    .setCullState(RenderStateShard.NO_CULL)
+                    .setWriteMaskState(RenderStateShard.COLOR_WRITE)
+                    .createCompositeState(false)
+    );
+
+    //========== 挖掘预览相关 ==========
+    private static final Set<BlockPos> miningPreviewBlocks = new HashSet<>();
+    private static long miningPreviewUpdateTime = 0;
+
+    //设置预览方块（由网络包调用）
+    public static void setMiningPreviewBlocks(Set<BlockPos> blocks) {
+        miningPreviewBlocks.clear();
+        miningPreviewBlocks.addAll(blocks);
+        miningPreviewUpdateTime = System.currentTimeMillis();
+    }
+
+    //清除预览（由网络包调用）
+    public static void clearMiningPreview() {
+        miningPreviewBlocks.clear();
+    }
+
+    //检查是否有活动的预览
+    public static boolean hasActiveMiningPreview() {
+        if (miningPreviewBlocks.isEmpty()) {
+            return false;
+        }
+        //检查预览是否过期（10秒）
+        if (System.currentTimeMillis() - miningPreviewUpdateTime > 10000) {
+            clearMiningPreview();
+            return false;
+        }
+        return true;
+    }
+
+    @Mod.EventBusSubscriber(modid = TheLastSwordMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    public static class ModBusEvents {
+        //客户端初始化
+        @SubscribeEvent
+        public static void onClientSetup(FMLClientSetupEvent event) {
+            event.enqueueWork(() -> {
+                //加载防御配置
+                DefenceConfig.load();
+            });
+        }
+    }
+
+    //按键输入事件
+    @SubscribeEvent
+    public static void onKeyInput(InputEvent.Key event) {
+        if (event.getAction() == GLFW.GLFW_RELEASE) {
+            if (event.getKey() == ModKeyMappings.CHANGE_SWORD_MODE.getKey().getValue()) {
+                Minecraft minecraft = Minecraft.getInstance();
+                if (minecraft.player != null && minecraft.getConnection() != null) {
+                    NetworkHandler.sendToServer(new ChangeModePacket());
+                }
+            }
+        }
+    }
+
+    //鼠标输入事件 - 左键取消挖掘预览
+    @SubscribeEvent
+    public static void onMouseInput(InputEvent.MouseButton.Pre event) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.player == null || minecraft.level == null || minecraft.screen != null) {
+            return; //有GUI界面打开时不处理
+        }
+
+        //检测左键按下
+        if (event.getButton() == GLFW.GLFW_MOUSE_BUTTON_LEFT && event.getAction() == GLFW.GLFW_PRESS) {
+            //检查玩家是否持有最终之剑且处于强力挖掘模式
+            ItemStack mainHand = minecraft.player.getMainHandItem();
+            if (!(mainHand.getItem() instanceof TheLastSword)) {
+                return;
+            }
+
+            //检查是否在强力挖掘模式
+            int mode = ItemModeHelper.getMode(mainHand);
+            if (mode != 1) {
+                return; //不是强力挖掘模式
+            }
+
+            //检查是否有活动的预览
+            if (hasActiveMiningPreview()) {
+                //发送取消预览包到服务端
+                NetworkHandler.sendToServer(new CancelPreviewPacket());
+
+                //阻止这次左键事件继续传播，避免触发攻击
+                event.setCanceled(true);
+            }
+        }
+    }
+
+    //HUD 渲染事件
+    @SubscribeEvent
+    public static void onRenderGuiOverlay(RenderGuiOverlayEvent.Pre event) {
+        JustifiedDefenceOverlay.onRenderGuiOverlay(event);
+    }
+
+    //客户端Tick事件 - 处理按键
+    @SubscribeEvent
+    public static void onClientTick(TickEvent.ClientTickEvent event) {
+        if (event.phase == TickEvent.Phase.END) {
+            Minecraft mc = Minecraft.getInstance();
+
+            //检查防御配置按键
+            while (ModKeyMappings.OPEN_DEFENCE_CONFIG.consumeClick()) {
+                if (mc.screen == null) {
+                    mc.setScreen(new DefenceConfigScreen());
+                }
+            }
+
+            //检查打开唤灵GUI按键
+            while (ModKeyMappings.OPEN_SUMMON_GUI.consumeClick()) {
+                if (mc.screen == null && mc.player != null) {
+                    NetworkHandler.sendToServer(new OpenSummonGuiPacket());
+                }
+            }
+        }
+    }
+
+    //万物终焉球体渲染
+    @SubscribeEvent
+    public static void onRenderLevelStage(RenderLevelStageEvent event) {
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
+            return;
+        }
+
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || mc.level == null) {
+            return;
+        }
+
+        //查找所有激活万物终焉的剑灵
+        List<TheLastEndSwordWraithEntity> activeWraiths = findActiveWraiths(mc.level);
+
+        if (!activeWraiths.isEmpty()) {
+            //检查着色器是否可用
+            if (!TheLastEndEffect.isAvailable()) {
+                return;
+            }
+
+            //更新着色器uniform
+            TheLastEndEffect.applyUniforms();
+
+            rotation += event.getPartialTick() * 1.0f;
+
+            //为每个剑灵渲染球体
+            for (TheLastEndSwordWraithEntity wraith : activeWraiths) {
+                renderSphere(event.getPoseStack(), wraith.position(), event.getPartialTick());
+            }
+        } else {
+            rotation = 0.0f;
+        }
+
+        //渲染挖掘预览
+        if (!miningPreviewBlocks.isEmpty()) {
+            //检查预览是否过期
+            if (System.currentTimeMillis() - miningPreviewUpdateTime > 10000) {
+                clearMiningPreview();
+            } else {
+                renderMiningPreview(event.getPoseStack(), event.getCamera());
+            }
+        }
+    }
+
+    //查找所有激活万物终焉的剑灵
+    private static List<TheLastEndSwordWraithEntity> findActiveWraiths(Level level) {
+        return level.getEntitiesOfClass(
+                TheLastEndSwordWraithEntity.class,
+                Minecraft.getInstance().player.getBoundingBox().inflate(128),
+                wraith -> TheLastEndSwordWraithAI.hasActiveAllThingsEndEffect(wraith)
+        );
+    }
+
+    //渲染球体
+    private static void renderSphere(PoseStack poseStack, Vec3 center, float partialTick) {
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.depthMask(false);
+
+        poseStack.pushPose();
+
+        //移动到球心位置
+        Vec3 cameraPos = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
+        poseStack.translate(
+                center.x - cameraPos.x,
+                center.y - cameraPos.y,
+                center.z - cameraPos.z
+        );
+
+        //旋转效果
+        poseStack.mulPose(Axis.YP.rotationDegrees(rotation * 0.5f));
+        poseStack.mulPose(Axis.XP.rotationDegrees(rotation * 0.3f));
+
+        //渲染球体网格
+        renderSphereMesh(poseStack, (float) EFFECT_RADIUS);
+
+        poseStack.popPose();
+
+        RenderSystem.depthMask(true);
+        RenderSystem.disableBlend();
+    }
+
+    //渲染球体网格
+    private static void renderSphereMesh(PoseStack poseStack, float radius) {
+        //初始化缓冲区（仅首次）
+        if (sphereBufferBuilder == null) {
+            sphereBufferBuilder = new BufferBuilder(2097152); // 2MB预分配，避免扩容
+            sphereBufferSource = net.minecraft.client.renderer.MultiBufferSource.immediate(sphereBufferBuilder);
+        }
+
+        VertexConsumer buffer = sphereBufferSource.getBuffer(SPHERE_RENDER_TYPE);
+        Matrix4f matrix = poseStack.last().pose();
+
+        int segments = 16;
+        float segmentAngle = 360.0f / segments;
+
+        //渲染球体（经纬度网格）
+        for (int lat = 0; lat < segments; lat++) {
+            float lat1 = lat * segmentAngle - 90;
+            float lat2 = (lat + 1) * segmentAngle - 90;
+
+            for (int lon = 0; lon < segments; lon++) {
+                float lon1 = lon * segmentAngle;
+                float lon2 = (lon + 1) * segmentAngle;
+
+                //计算四个顶点
+                Vec3 v1 = spherePoint(radius, lat1, lon1);
+                Vec3 v2 = spherePoint(radius, lat1, lon2);
+                Vec3 v3 = spherePoint(radius, lat2, lon2);
+                Vec3 v4 = spherePoint(radius, lat2, lon1);
+
+                //UV坐标
+                float u1 = lon / (float) segments;
+                float u2 = (lon + 1) / (float) segments;
+                float v1f = lat / (float) segments;
+                float v2f = (lat + 1) / (float) segments;
+
+                //添加四边形（顺时针顺序）
+                buffer.vertex(matrix, (float) v1.x, (float) v1.y, (float) v1.z).uv(u1, v1f).endVertex();
+                buffer.vertex(matrix, (float) v2.x, (float) v2.y, (float) v2.z).uv(u2, v1f).endVertex();
+                buffer.vertex(matrix, (float) v3.x, (float) v3.y, (float) v3.z).uv(u2, v2f).endVertex();
+                buffer.vertex(matrix, (float) v4.x, (float) v4.y, (float) v4.z).uv(u1, v2f).endVertex();
+            }
+        }
+
+        sphereBufferSource.endBatch();
+    }
+
+    //计算球面上的点
+    private static Vec3 spherePoint(float radius, float latitude, float longitude) {
+        float latRad = (float) Math.toRadians(latitude);
+        float lonRad = (float) Math.toRadians(longitude);
+
+        float x = radius * Mth.cos(latRad) * Mth.cos(lonRad);
+        float y = radius * Mth.sin(latRad);
+        float z = radius * Mth.cos(latRad) * Mth.sin(lonRad);
+
+        return new Vec3(x, y, z);
+    }
+
+    //========== 挖掘预览渲染方法 ==========
+
+    //渲染挖掘预览方块
+    private static void renderMiningPreview(PoseStack poseStack, Camera camera) {
+        Vec3 cameraPos = camera.getPosition();
+        poseStack.pushPose();
+        poseStack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
+
+        BufferBuilder bufferBuilder = new BufferBuilder(256);
+        MultiBufferSource.BufferSource immediateBufferSource = MultiBufferSource.immediate(bufferBuilder);
+        VertexConsumer buffer = immediateBufferSource.getBuffer(RenderType.lines());
+
+        //动态闪烁效果
+        float time = (System.currentTimeMillis() % 2000) / 2000.0f;
+        float alpha = 0.5f + 0.3f * (float) Math.sin(time * Math.PI * 2);
+        float red = 0.0f;
+        float green = 1.0f;
+        float blue = 0.0f;
+
+        Matrix4f matrix = poseStack.last().pose();
+
+        //渲染所有预览方块的轮廓
+        for (BlockPos pos : miningPreviewBlocks) {
+            renderBlockOutline(buffer, matrix, pos, red, green, blue, alpha);
+        }
+
+        immediateBufferSource.endBatch();
+        poseStack.popPose();
+    }
+
+    //渲染单个方块轮廓
+    private static void renderBlockOutline(VertexConsumer buffer, Matrix4f matrix, BlockPos pos,
+                                           float red, float green, float blue, float alpha) {
+        float x1 = pos.getX();
+        float y1 = pos.getY();
+        float z1 = pos.getZ();
+        float x2 = x1 + 1.0f;
+        float y2 = y1 + 1.0f;
+        float z2 = z1 + 1.0f;
+
+        //底面的4条边
+        addLine(buffer, matrix, x1, y1, z1, x2, y1, z1, red, green, blue, alpha);
+        addLine(buffer, matrix, x2, y1, z1, x2, y1, z2, red, green, blue, alpha);
+        addLine(buffer, matrix, x2, y1, z2, x1, y1, z2, red, green, blue, alpha);
+        addLine(buffer, matrix, x1, y1, z2, x1, y1, z1, red, green, blue, alpha);
+
+        //顶面的4条边
+        addLine(buffer, matrix, x1, y2, z1, x2, y2, z1, red, green, blue, alpha);
+        addLine(buffer, matrix, x2, y2, z1, x2, y2, z2, red, green, blue, alpha);
+        addLine(buffer, matrix, x2, y2, z2, x1, y2, z2, red, green, blue, alpha);
+        addLine(buffer, matrix, x1, y2, z2, x1, y2, z1, red, green, blue, alpha);
+
+        //4条竖直边
+        addLine(buffer, matrix, x1, y1, z1, x1, y2, z1, red, green, blue, alpha);
+        addLine(buffer, matrix, x2, y1, z1, x2, y2, z1, red, green, blue, alpha);
+        addLine(buffer, matrix, x2, y1, z2, x2, y2, z2, red, green, blue, alpha);
+        addLine(buffer, matrix, x1, y1, z2, x1, y2, z2, red, green, blue, alpha);
+    }
+
+    //添加一条线段
+    private static void addLine(VertexConsumer buffer, Matrix4f matrix,
+                                float x1, float y1, float z1, float x2, float y2, float z2,
+                                float red, float green, float blue, float alpha) {
+        buffer.vertex(matrix, x1, y1, z1).color(red, green, blue, alpha).normal(1, 0, 0).endVertex();
+        buffer.vertex(matrix, x2, y2, z2).color(red, green, blue, alpha).normal(1, 0, 0).endVertex();
+    }
+}

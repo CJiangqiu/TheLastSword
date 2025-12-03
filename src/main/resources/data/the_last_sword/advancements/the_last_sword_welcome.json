@@ -1,0 +1,23 @@
+{
+  "display": {
+    "background": "minecraft:textures/block/end_stone.png",
+    "icon": {
+      "item": "the_last_sword:the_last_sword"
+    },
+    "title": {
+      "translate": "advancements.the_last_sword_welcome.title"
+    },
+    "description": {
+      "translate": "advancements.the_last_sword_welcome.descr"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "criteria": {
+    "the_last_sword_welcome_0": {
+      "trigger": "minecraft:tick"
+    }
+  }
+}

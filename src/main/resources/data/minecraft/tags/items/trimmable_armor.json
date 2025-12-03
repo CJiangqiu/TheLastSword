@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "the_last_sword:dragon_crystal_armor_helmet",
+    "the_last_sword:dragon_crystal_armor_chestplate",
+    "the_last_sword:dragon_crystal_armor_leggings",
+    "the_last_sword:dragon_crystal_armor_boots"
+  ]
+}

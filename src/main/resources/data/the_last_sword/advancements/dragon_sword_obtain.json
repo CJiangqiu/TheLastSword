@@ -1,0 +1,39 @@
+{
+  "display": {
+    "icon": {
+      "item": "the_last_sword:dragon_sword"
+    },
+    "title": {
+      "translate": "advancements.dragon_sword_obtain.title"
+    },
+    "description": {
+      "translate": "advancements.dragon_sword_obtain.descr"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "dragon_sword_obtain_0": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "the_last_sword:dragon_sword"
+            ],
+            "count": {
+              "min": 1,
+              "max": 1
+            }
+          }
+        ]
+      }
+    }
+  },
+  "rewards": {
+    "experience": 50
+  },
+  "parent": "the_last_sword:dragon_crystal_sword_obtain"
+}

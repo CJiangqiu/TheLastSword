@@ -1,0 +1,9 @@
+{
+  "asset_name": "dragon_crystal",
+  "description": {
+    "color": "#4B0082",
+    "translate": "trim_material.the_last_sword.dragon_crystal"
+  },
+  "ingredient": "the_last_sword:dragon_crystal",
+  "item_model_index": 1.1
+}

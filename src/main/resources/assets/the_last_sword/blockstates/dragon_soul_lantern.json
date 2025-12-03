@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "hanging=false": {
+      "model": "the_last_sword:block/dragon_soul_lantern"
+    },
+    "hanging=true": {
+      "model": "the_last_sword:block/dragon_soul_lantern_hanging"
+    }
+  }
+}

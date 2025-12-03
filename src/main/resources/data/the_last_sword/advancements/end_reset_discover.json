@@ -1,0 +1,30 @@
+{
+  "display": {
+    "icon": {
+      "item": "minecraft:end_stone"
+    },
+    "title": {
+      "translate": "advancements.end_reset_discover.title"
+    },
+    "description": {
+      "translate": "advancements.end_reset_discover.descr"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "end_reset_discover_0": {
+      "trigger": "minecraft:tick",
+      "conditions": {
+        "player": {
+          "location": {
+            "structure": "the_last_sword:end_reset"
+          }
+        }
+      }
+    }
+  },
+  "parent": "the_last_sword:the_last_sword_welcome"
+}

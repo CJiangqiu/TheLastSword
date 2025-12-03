@@ -1,0 +1,42 @@
+{
+  "required": true,
+  "package": "net.the_last_sword.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "minVersion": "0.8",
+  "refmap": "mixins.the_last_sword.refmap.json",
+  "client": [
+    "ClientEntityCallbacksMixin",
+    "ClientLevelMixin",
+    "DeathScreenMixin",
+    "ItemRendererMixin",
+    "LevelRendererMixin",
+    "LivingEntityRendererMixin",
+    "PlayerRendererMixin",
+    "ScreenEffectRendererMixin"
+  ],
+  "mixins": [
+    "BlockBehaviourMixin",
+    "ChunkMapMixin",
+    "ClassInstanceMultiMapMixin",
+    "EndCrystalMixin",
+    "EntityLookupMixin",
+    "EntityMixin",
+    "EntitySectionMixin",
+    "EntityTickListMixin",
+    "ItemStackMixin",
+    "LivingEntityMixin",
+    "MobTargetingMixin",
+    "PacketMixin$ClearPrevent",
+    "PacketMixin$ConnPrevent",
+    "PacketMixin$KickPrevent",
+    "PersistentEntitySectionManagerMixin",
+    "PersistentEntitySectionManagerMixin$CallbackMixin",
+    "PlayerMixin",
+    "ServerLevelMixin",
+    "TransientEntitySectionManagerMixin",
+    "TransientEntitySectionManagerMixin$CallbackMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
