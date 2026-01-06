@@ -20,11 +20,13 @@ public class DefenceConfigScreen extends Screen {
         int centerX = this.width / 2;
         int startY = this.height / 2 - 30;
 
-        //按钮1：装备配置（暂未实现）
+        //按钮1：装备配置
         this.addRenderableWidget(Button.builder(
             Component.translatable("gui.the_last_sword.defence_config.equipment_settings"),
             button -> {
-                //TODO: 未来实现装备配置界面
+                if (this.minecraft != null) {
+                    this.minecraft.setScreen(new ArmorConfigScreen(this));
+                }
             }
         ).bounds(centerX - buttonWidth / 2, startY, buttonWidth, buttonHeight).build());
 

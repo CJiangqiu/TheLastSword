@@ -1,5 +1,6 @@
 package net.the_last_sword;
 
+import net.eca.api.EcaAPI;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -23,30 +24,11 @@ import net.the_last_sword.network.NetworkHandler;
 import net.the_last_sword.util.TheLastSwordLogger;
 import net.the_last_sword.event.ClientEventHandler;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.lang.invoke.MethodHandles;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.PriorityQueue;
-
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 @Mod(TheLastSwordMod.MOD_ID)
 public class TheLastSwordMod {
     public static final String MOD_ID = "the_last_sword";
-
-    //静态代码块：在类加载时立即设置 Agent 自附着权限（使用 Unsafe 底层方法）
-    static {
-        try {
-            allowAttachSelfViaUnsafe();
-            System.out.println("[TheLastSword] Agent self-attach enabled via Unsafe");
-        } catch (Throwable t) {
-            //降级到系统属性方法
-            System.setProperty("jdk.attach.allowAttachSelf", "true");
-            System.out.println("[TheLastSword] Unsafe method failed, fallback to system property: " + t.getMessage());
-        }
-    }
 
     //服务器任务调度系统
     private static final PriorityQueue<ScheduledTask> workQueue = new PriorityQueue<>();
@@ -86,79 +68,23 @@ public class TheLastSwordMod {
 
         TheLastSwordConfigManager.initializeConfig();
 
-        boolean agentOpened = ensureOpened();
-        TheLastSwordLogger.info("Agent opened: {}", agentOpened);
-        TheLastSwordLogger.info("Agent log file: logs/TheLastSwordAgent.log");
+        //初始化 ECA API 黑名单 - 保护最终之剑的实体数据字段
+        initializeEcaProtection();
     }
 
-    //使用 Unsafe 直接修改 HotSpotVirtualMachine.ALLOW_ATTACH_SELF 字段
-    private static void allowAttachSelfViaUnsafe() throws Exception {
-        Class<?> unsafeClass = Class.forName("sun.misc.Unsafe");
-        java.lang.reflect.Field unsafeField = unsafeClass.getDeclaredField("theUnsafe");
-        unsafeField.setAccessible(true);
-        Object unsafe = unsafeField.get(null);
-
-        Class<?> vmClass = Class.forName("sun.tools.attach.HotSpotVirtualMachine");
-        java.lang.reflect.Field allowAttachSelfField = vmClass.getDeclaredField("ALLOW_ATTACH_SELF");
-
-        //使用 Unsafe.putObject 直接修改字段值
-        java.lang.reflect.Method staticFieldBaseMethod = unsafeClass.getMethod("staticFieldBase", java.lang.reflect.Field.class);
-        java.lang.reflect.Method staticFieldOffsetMethod = unsafeClass.getMethod("staticFieldOffset", java.lang.reflect.Field.class);
-        java.lang.reflect.Method putObjectMethod = unsafeClass.getMethod("putObject", Object.class, long.class, Object.class);
-
-        Object fieldBase = staticFieldBaseMethod.invoke(unsafe, allowAttachSelfField);
-        long fieldOffset = (long) staticFieldOffsetMethod.invoke(unsafe, allowAttachSelfField);
-
-        putObjectMethod.invoke(unsafe, fieldBase, fieldOffset, Boolean.TRUE);
-    }
-
-    private static synchronized boolean ensureOpened() {
-        if (tryLookup()) {
-            return true;
-        }
-
+    //初始化 ECA API 保护机制
+    private void initializeEcaProtection() {
         try {
-            Path tmpDir = Files.createTempDirectory("tls-agent");
-            Path agent  = extract("/net/the_last_sword/agent/agent.jar", tmpDir.resolve("agent.jar"));
+            //添加黑名单关键词，防止 ECA 的阶段2扫描修改这些字段
+            EcaAPI.addHealthBlacklistKeyword("TRUE_HEALTH");
+            EcaAPI.addHealthBlacklistKeyword("TRUE_MAX_HEALTH");
+            EcaAPI.addHealthBlacklistKeyword("HEAL_BAN_TIME");
+            EcaAPI.addHealthBlacklistKeyword("IS_PROTECTED");
 
-            String pid = String.valueOf(ProcessHandle.current().pid());
-
-            Class<?> vmClass = Class.forName("com.sun.tools.attach.VirtualMachine");
-            Object vm = vmClass.getMethod("attach", String.class).invoke(null, pid);
-
-            try {
-                vmClass.getMethod("loadAgent", String.class, String.class)
-                    .invoke(vm, agent.toString(), TheLastSwordMod.class.getName());
-            } finally {
-                vmClass.getMethod("detach").invoke(vm);
-            }
-
-            return tryLookup();
-        } catch (Throwable t) {
-            TheLastSwordLogger.error("attach failed", t);
-            return false;
+            TheLastSwordLogger.info("ECA API protection initialized - TLS entity data fields are now protected");
+        } catch (Exception e) {
+            TheLastSwordLogger.error("Failed to initialize ECA API protection", e);
         }
-    }
-
-    private static boolean tryLookup() {
-        try {
-            Class<?> hashMapClass = Class.forName("java.util.HashMap");
-            Class<?> nodeArrayClass = Class.forName("[Ljava.util.HashMap$Node;");
-            MethodHandles.privateLookupIn(hashMapClass, MethodHandles.lookup())
-                    .findVarHandle(hashMapClass, "table", nodeArrayClass);
-            return true;
-        } catch (Throwable e) {
-            return false;
-        }
-    }
-
-    private static Path extract(String resource, Path target) throws Exception {
-        try (InputStream in = TheLastSwordMod.class.getResourceAsStream(resource)) {
-            if (in == null) throw new FileNotFoundException(resource);
-            Files.copy(in, target, REPLACE_EXISTING);
-        }
-        target.toFile().deleteOnExit();
-        return target.toAbsolutePath();
     }
 
     //添加服务器任务到队列

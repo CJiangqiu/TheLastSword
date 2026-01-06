@@ -1,7 +1,6 @@
 package net.the_last_sword.item;
 
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
@@ -16,17 +15,14 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
-import net.the_last_sword.attack.AbsoluteDestructionDamageSource;
-import net.the_last_sword.defence.DefenceManager;
+import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
 import net.the_last_sword.entity.TheLastEndSwordProjectile;
 import net.the_last_sword.init.ModKeyMappings;
 import net.the_last_sword.summon.WraithSummonManager;
@@ -54,7 +50,7 @@ public class TheLastSword extends TheLastEndSwordItems {
 
             @Override
             public float getSpeed() {
-                return 1024f; //极高的挖掘速度
+                return 13f;
             }
 
             @Override
@@ -84,7 +80,7 @@ public class TheLastSword extends TheLastEndSwordItems {
         return 13; //最终之剑默认13级
     }
 
-    //背包刻更新：初始化模式NBT（确保物品一进入背包就有正确的NBT数据）
+    //背包刻更新
     @Override
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
         super.inventoryTick(stack, level, entity, slotId, isSelected);
@@ -95,17 +91,21 @@ public class TheLastSword extends TheLastEndSwordItems {
     //近战单体攻击：模式0造成绝毁伤害，模式1和2造成虚空伤害
     @Override
     public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        int mode = ItemModeHelper.getMode(stack);
-
-        boolean attackedSuccessfully = super.hurtEnemy(stack, target, attacker);
+        //调用基类方法，检查友方误伤并造成物理伤害
+        if (!super.hurtEnemy(stack, target, attacker)) return false;
 
         if (!attacker.level().isClientSide) {
+            int mode = ItemModeHelper.getMode(stack);
             int level = ItemLevelHelper.getLevel(stack);
             double configValue = (level < 6)
                     ? TheLastSwordConfiguration.getIncreaseValueSafely()
                     : TheLastSwordConfiguration.getIncreaseValueHighLevelSafely();
-            float extraDamage = (float) (level * configValue);
+            //计算额外伤害：基础伤害 + 敌人13%最大生命值
+            float baseDamage = (float) (level * configValue);
+            float percentageDamage = target.getMaxHealth() * 0.13f;
+            float extraDamage = baseDamage + percentageDamage;
             if (extraDamage > 0) {
+                target.invulnerableTime = 0;
                 if (mode == 0) {
                     //模式0：物理伤害 + 绝毁伤害
                     AbsoluteDestructionDamageSource.applyAbsoluteDestructionIntelligently(target, attacker, stack, extraDamage);
@@ -118,7 +118,7 @@ public class TheLastSword extends TheLastEndSwordItems {
                 }
             }
         }
-        return attackedSuccessfully;
+        return true;
     }
 
     private boolean returnSwing;
@@ -156,9 +156,6 @@ public class TheLastSword extends TheLastEndSwordItems {
         return InteractionResultHolder.success(itemstack);
     }
 
-    //注意：原来的 performSimpleMining 方法已被移除
-    //现在使用 ServerEventHandler.performMining 实现带预览的挖掘系统
-
     //左键挥动触发范围攻击：仅模式0生效
     @Override
     public boolean onEntitySwing(ItemStack stack, LivingEntity entity) {
@@ -193,7 +190,7 @@ public class TheLastSword extends TheLastEndSwordItems {
         );
 
         List<LivingEntity> targets = player.level().getEntitiesOfClass(LivingEntity.class, attackBox,
-            e -> e != player && e.isAlive() && EntityUtil.shouldAttack(e) &&
+            e -> e != player && e.isAlive() &&
             EntityUtil.canAttack(player, e) &&
             !WraithSummonManager.isWraith(e.getUUID()));
 
@@ -205,7 +202,10 @@ public class TheLastSword extends TheLastEndSwordItems {
                 double configValue = (level < 6)
                         ? TheLastSwordConfiguration.getIncreaseValueSafely()
                         : TheLastSwordConfiguration.getIncreaseValueHighLevelSafely();
-                float extraDamage = (float) (level * configValue);
+                //计算额外伤害：基础伤害 + 敌人13%最大生命值
+                float baseDamage = (float) (level * configValue);
+                float percentageDamage = target.getMaxHealth() * 0.13f;
+                float extraDamage = baseDamage + percentageDamage;
 
                 //先造成物理伤害
                 float basePhysicalDamage = getBasePhysicalDamage();
@@ -244,14 +244,14 @@ public class TheLastSword extends TheLastEndSwordItems {
             float extraDamage = (float) (itemLevel * configValue);
             float basePhysicalDamage = getBasePhysicalDamage();
 
-            //根据模式添加操作描述
+            //根据模式添加操作描述（附加伤害包含13%敌人生命）
             switch (mode) {
                 case 0 -> {
                     //常规模式操作说明
                     tooltip.add(Component.translatable("item_tooltip.the_last_sword.the_last_sword.left_click_normal",
                         String.format("%.0f", basePhysicalDamage), String.format("%.0f", extraDamage)));
                     tooltip.add(Component.translatable("item_tooltip.the_last_sword.the_last_sword.right_click_normal",
-                        "2.5格", String.format("%.0f", basePhysicalDamage), String.format("%.0f", extraDamage)));
+                        String.format("%.0f", basePhysicalDamage), String.format("%.0f", extraDamage)));
                 }
                 case 1 -> {
                     //强力挖掘模式操作说明
@@ -265,7 +265,7 @@ public class TheLastSword extends TheLastEndSwordItems {
                 case 2 -> {
                     //唤灵模式操作说明
                     tooltip.add(Component.translatable("item_tooltip.the_last_sword.the_last_sword.left_click_summon",
-                        "5", String.format("%.0f", basePhysicalDamage), String.format("%.0f", extraDamage)));
+                        String.format("%.0f", basePhysicalDamage), String.format("%.0f", extraDamage)));
 
                     //根据等级选择对应的每级加成（6级为分界点）
                     float healthPerLevel, attackPerLevel;
@@ -311,7 +311,6 @@ public class TheLastSword extends TheLastEndSwordItems {
 
                     tooltip.add(
                             Component.translatable("item_tooltip.the_last_sword.summon_entity_mode_descr",
-                                    "6", //左键攻击范围
                                     String.format("%.0f", healthBonus),
                                     String.format("%.0f", attackBonus))
                                     .withStyle(style -> style.withColor(TextColor.fromRgb(0xAAAAAA))));
@@ -325,15 +324,20 @@ public class TheLastSword extends TheLastEndSwordItems {
             }
         }
 
-        //6. 当前模式切换绑定按键
+        //6. 被动技能：终焉之主
+        tooltip.add(Component.empty());
+        tooltip.add(Component.translatable("item_tooltip.the_last_sword.the_last_sword.passive"));
+
+        //7. 当前模式切换绑定按键
         tooltip.add(
                 Component.translatable("item_tooltip.the_last_sword.mode_key")
                         .append(" ")
                         .append(ModKeyMappings.CHANGE_SWORD_MODE.getKey().getDisplayName().getString())
         );
 
-        //7. Lore提示
-        tooltip.add(Component.translatable("item_tooltip.the_last_sword.the_last_sword"));
+        //8. Lore提示
+        tooltip.add(Component.translatable("item_tooltip_lore.the_last_sword.the_last_sword")
+            .withStyle(net.minecraft.ChatFormatting.GRAY));
     }
 
     //获取模式翻译键
@@ -351,8 +355,11 @@ public class TheLastSword extends TheLastEndSwordItems {
 
         @SubscribeEvent
         public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
+            if (event.phase != TickEvent.Phase.START) return;
+            if (event.player.level().isClientSide) return;
+
             Player player = event.player;
-            boolean hasSword = hasTheLastEndSwordInInventory(player);
+            boolean hasSword = hasTheLastSwordInInventory(player);
 
             //飞行逻辑
             if (!player.isCreative() && !player.isSpectator()) {
@@ -373,63 +380,43 @@ public class TheLastSword extends TheLastEndSwordItems {
                 }
             }
 
-            //管理防御等级
-            manageDefenseLevel(player, hasSword);
+            //防御逻辑
+            if (hasSword) {
+                EntityUtil.registerDefence(player, player.getMaxHealth());
+                player.getPersistentData().putBoolean("TheLastSwordDefence", true);
+            } else {
+                if (player.getPersistentData().getBoolean("TheLastSwordDefence")) {
+                    EntityUtil.clearDefence(player);
+                    player.getPersistentData().remove("TheLastSwordDefence");
+                }
+            }
+
+            //无冷却逻辑：持有最终之剑时，清除所有物品的冷却时间
+            if (hasSword) {
+                //清除主物品栏所有物品的冷却
+                for (ItemStack stack : player.getInventory().items) {
+                    if (!stack.isEmpty()) {
+                        player.getCooldowns().removeCooldown(stack.getItem());
+                    }
+                }
+                //清除副手物品的冷却
+                ItemStack offhand = player.getOffhandItem();
+                if (!offhand.isEmpty()) {
+                    player.getCooldowns().removeCooldown(offhand.getItem());
+                }
+            }
         }
 
         //检查玩家背包中是否有最终之剑
-        public static boolean hasTheLastEndSwordInInventory(Player player) {
+        private static boolean hasTheLastSwordInInventory(Player player) {
             if (player == null) return false;
-
-            //扫描玩家背包，检查是否有最终之剑
-            for (ItemStack stack : player.getInventory().items) {
-                if (stack.getItem() instanceof TheLastSword) {
+            for (ItemStack s : player.getInventory().items) {
+                if (s.getItem() instanceof TheLastSword) {
                     return true;
                 }
             }
-
-            //检查副手
             ItemStack offhand = player.getOffhandItem();
-            if (offhand.getItem() instanceof TheLastSword) {
-                return true;
-            }
-
-            return false;
-        }
-
-        //修复后的最终之剑防御等级管理逻辑
-        private static void manageDefenseLevel(Player player, boolean hasSword) {
-            boolean isTracked = DefenceManager.hasDefenceRecord(player);
-            int currentLevel = isTracked ? DefenceManager.getDefenceLevel(player) : 0;
-
-            if (hasSword) {
-                //有最终之剑：给予2级防御（无条件）
-                if (!isTracked) {
-                    //首次注册：给2级防御
-                    DefenceManager.register(player, 2);
-                } else if (currentLevel < 2) {
-                    //当前等级低于2：提升到2级
-                    DefenceManager.register(player, 2);
-                } else if (currentLevel > 2) {
-                    //当前等级高于2：保持不变（可能是其他系统提供的更高防护）
-                    DefenceManager.register(player, currentLevel);
-                } else {
-                    //等级正好是2：正常同步
-                    DefenceManager.register(player, 2);
-                }
-            } else {
-                //没有最终之剑：清除剑提供的防护
-                if (isTracked && isSwordDrivenDefense(currentLevel)) {
-                    //清除由最终之剑提供的防御等级
-                    DefenceManager.clear(player);
-                }
-                //如果是更高等级的防护（如究极测试剑提供的3级），则不清除
-            }
-        }
-
-        //判断是否是由最终之剑驱动的防御等级
-        private static boolean isSwordDrivenDefense(int level) {
-            return level == 2; //最终之剑提供2级防御
+            return offhand.getItem() instanceof TheLastSword;
         }
     }
 }

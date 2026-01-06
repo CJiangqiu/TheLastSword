@@ -3,54 +3,81 @@ package net.the_last_sword.item;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.the_last_sword.entity.TheLastEndSwordWraithEntity;
 import net.the_last_sword.init.ModEntities;
+import org.jetbrains.annotations.NotNull;
 
-//13级终焉剑灵召唤物品
+//13级终焉剑灵生成蛋
 public class TheLastEndSwordWraithLevel13SpawnEgg extends Item {
 
     public TheLastEndSwordWraithLevel13SpawnEgg() {
-        super(new Properties()
-                .stacksTo(64)
+        super(new Item.Properties()
+                .stacksTo(16)
                 .rarity(Rarity.EPIC)
+                .fireResistant()
         );
     }
 
     @Override
-    public InteractionResult useOn(UseOnContext context) {
-        if (!(context.getLevel() instanceof ServerLevel serverLevel)) {
+    public @NotNull InteractionResult useOn(@NotNull UseOnContext context) {
+        Level level = context.getLevel();
+        if (level.isClientSide) {
             return InteractionResult.SUCCESS;
         }
 
-        BlockPos pos = context.getClickedPos();
-        Direction direction = context.getClickedFace();
-        BlockPos spawnPos = pos.relative(direction);
+        //获取点击位置和方向
+        BlockPos clickedPos = context.getClickedPos();
+        Direction clickedFace = context.getClickedFace();
+        BlockPos spawnPos = clickedPos.relative(clickedFace);
 
-        //创建13级终焉剑灵
-        TheLastEndSwordWraithEntity wraith = ModEntities.THE_LAST_END_SWORD_WRAITH.get().create(serverLevel);
-        if (wraith != null) {
-            //设置位置
-            wraith.moveTo(spawnPos.getX() + 0.5, spawnPos.getY(), spawnPos.getZ() + 0.5, 0, 0);
+        //检查生成位置是否有足够空间
+        if (!level.getBlockState(spawnPos).isAir() && !level.getBlockState(spawnPos).canBeReplaced()) {
+            return InteractionResult.FAIL;
+        }
 
-            //设置等级为13
-            wraith.setEndLevel(13);
+        //在服务端生成实体
+        if (level instanceof ServerLevel serverLevel) {
+            TheLastEndSwordWraithEntity wraith = ModEntities.THE_LAST_END_SWORD_WRAITH.get().create(serverLevel);
+            if (wraith != null) {
+                //设置生成位置（在方块上方）
+                double x = spawnPos.getX() + 0.5;
+                double y = spawnPos.getY();
+                double z = spawnPos.getZ() + 0.5;
+                wraith.moveTo(x, y, z, context.getRotation(), 0.0F);
 
-            //设置已生成状态
-            wraith.setIsSpawned(true);
+                //设置等级为13
+                wraith.setTheLastEndLevel(13);
 
-            //添加到世界
-            serverLevel.addFreshEntity(wraith);
+                //设置朝向玩家
+                if (context.getPlayer() != null) {
+                    wraith.yBodyRot = context.getPlayer().getYRot();
+                    wraith.yHeadRot = context.getPlayer().getYRot();
+                }
 
-            //消耗物品
-            if (context.getPlayer() != null && !context.getPlayer().isCreative()) {
-                context.getItemInHand().shrink(1);
+                //添加到世界
+                serverLevel.addFreshEntity(wraith);
+
+                //播放音效
+                level.playSound(null, spawnPos, SoundEvents.ENDER_DRAGON_GROWL, SoundSource.NEUTRAL, 1.0F, 1.0F);
+
+                //触发游戏事件
+                level.gameEvent(context.getPlayer(), GameEvent.ENTITY_PLACE, spawnPos);
+
+                //非创造模式下减少物品
+                if (context.getPlayer() != null && !context.getPlayer().getAbilities().instabuild) {
+                    context.getItemInHand().shrink(1);
+                }
+
+                return InteractionResult.CONSUME;
             }
-
-            return InteractionResult.CONSUME;
         }
 
         return InteractionResult.FAIL;

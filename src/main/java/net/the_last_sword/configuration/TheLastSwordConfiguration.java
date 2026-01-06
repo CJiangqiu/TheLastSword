@@ -14,12 +14,6 @@ public class TheLastSwordConfiguration {
     public static ForgeConfigSpec.ConfigValue<Double> SWORD_INCREASE_VALUE;
     public static ForgeConfigSpec.ConfigValue<Double> SWORD_INCREASE_VALUE_HIGH_LEVEL;
     public static ForgeConfigSpec.ConfigValue<Boolean> SWORD_BLOCK_CANCEL_USE;
-    public static ForgeConfigSpec.ConfigValue<Boolean> SWORD_ATTACK_VILLAGERS;
-    public static ForgeConfigSpec.ConfigValue<Boolean> SWORD_ATTACK_ANIMALS;
-    public static ForgeConfigSpec.ConfigValue<Boolean> SWORD_ATTACK_TAMED;
-    public static ForgeConfigSpec.ConfigValue<Boolean> SWORD_ATTACK_PLAYERS;
-    public static ForgeConfigSpec.ConfigValue<Boolean> SWORD_ATTACK_GOLEMS;
-    public static ForgeConfigSpec.ConfigValue<Boolean> SWORD_ATTACK_NEUTRAL;
 
     // Armor Generic | 盔甲类通用配置（等级区间）
     public static ForgeConfigSpec.ConfigValue<Double> ARMOR_INCREASE_LOW_LEVEL;    // < 6级
@@ -44,17 +38,14 @@ public class TheLastSwordConfiguration {
     public static ForgeConfigSpec.ConfigValue<Integer> THE_LAST_SWORD_SUMMON_COOLDOWN;
 
     // Dragon Crystal Armor | 龙晶护甲配置
-    public static ForgeConfigSpec.ConfigValue<Boolean> DRAGON_CRYSTAL_ARMOR_ENABLE_NIGHT_VISION;
     public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_CRYSTAL_ARMOR_CRYSTAL_GUARD_REFRESH_INTERVAL;
 
     // Dragon Armor | 龙之甲配置
-    public static ForgeConfigSpec.ConfigValue<Boolean> DRAGON_ARMOR_ENABLE_NIGHT_VISION;
     public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_ARMOR_ENERGY_PER_LEVEL;
     public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_ARMOR_ENERGY_COST_PER_PIECE;
     public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_ARMOR_PHASING_ENERGY_COST;
     public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_ARMOR_ENDER_CRYSTAL_CHARGE_RATE;
     public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_ARMOR_ENDER_CRYSTAL_RANGE;
-    public static ForgeConfigSpec.ConfigValue<Boolean> DRAGON_ARMOR_ENABLE_HUD;
 
     // ═══════════════════════════════════════════════════════════════════════════════════
     // Entity Configuration | 实体配置
@@ -185,24 +176,6 @@ public class TheLastSwordConfiguration {
         SWORD_BLOCK_CANCEL_USE = BUILDER
             .comment("Cancel sword right-click usage by blocking with shield")
             .define("Block Cancel Use", true);
-        SWORD_ATTACK_VILLAGERS = BUILDER
-            .comment("Allows attacking villagers.")
-            .define("Attack Villagers", false);
-        SWORD_ATTACK_ANIMALS = BUILDER
-            .comment("Allows attacking animals.")
-            .define("Attack Animals", false);
-        SWORD_ATTACK_TAMED = BUILDER
-            .comment("Allows attacking tamed entities.")
-            .define("Attack Tamed", false);
-        SWORD_ATTACK_PLAYERS = BUILDER
-            .comment("Allows attacking players.")
-            .define("Attack Players", false);
-        SWORD_ATTACK_GOLEMS = BUILDER
-            .comment("Allows attacking golems.")
-            .define("Attack Golems", false);
-        SWORD_ATTACK_NEUTRAL = BUILDER
-            .comment("Allows attacking neutral mobs.")
-            .define("Attack Neutral", true);
         BUILDER.pop();
 
         // Dragon Sword Settings | 龙之剑设置
@@ -272,9 +245,6 @@ public class TheLastSwordConfiguration {
 
         // Dragon Crystal Armor Settings | 龙晶护甲设置
         BUILDER.push("Dragon Crystal Armor");
-        DRAGON_CRYSTAL_ARMOR_ENABLE_NIGHT_VISION = BUILDER
-            .comment("Enables night vision effect when wearing the helmet")
-            .define("Enable Night Vision", true);
         DRAGON_CRYSTAL_ARMOR_CRYSTAL_GUARD_REFRESH_INTERVAL = BUILDER
             .comment("Crystal Guard refresh interval in ticks (1200 ticks = 60 seconds)")
             .define("Crystal Guard Refresh Interval", 1200);
@@ -282,9 +252,6 @@ public class TheLastSwordConfiguration {
 
         // Dragon Armor Settings | 龙之甲设置
         BUILDER.push("Dragon Armor");
-        DRAGON_ARMOR_ENABLE_NIGHT_VISION = BUILDER
-            .comment("Enables night vision effect when wearing the helmet")
-            .define("Enable Night Vision", true);
         DRAGON_ARMOR_ENERGY_PER_LEVEL = BUILDER
             .comment("Energy capacity increase per level (FE)",
                      "Total capacity = Base (1,048,576) + Level × This value")
@@ -303,9 +270,6 @@ public class TheLastSwordConfiguration {
             .comment("Detection range for End Crystal charging (blocks)",
                      "Players within this range wearing Dragon Armor will be charged")
             .defineInRange("Ender Crystal Range", 8, 2, 32);
-        DRAGON_ARMOR_ENABLE_HUD = BUILDER
-            .comment("Enable the HUD effect when wearing full Dragon Armor set")
-            .define("Enable HUD Overlay", true);
         BUILDER.pop();
 
         BUILDER.pop(); // End Armor
@@ -627,30 +591,6 @@ public class TheLastSwordConfiguration {
         return safeGet(SWORD_BLOCK_CANCEL_USE, true);
     }
 
-    public static boolean getAttackVillagersSafely() {
-        return safeGet(SWORD_ATTACK_VILLAGERS, false);
-    }
-
-    public static boolean getAttackAnimalsSafely() {
-        return safeGet(SWORD_ATTACK_ANIMALS, false);
-    }
-
-    public static boolean getAttackTamedSafely() {
-        return safeGet(SWORD_ATTACK_TAMED, false);
-    }
-
-    public static boolean getAttackPlayersSafely() {
-        return safeGet(SWORD_ATTACK_PLAYERS, false);
-    }
-
-    public static boolean getAttackGolemsSafely() {
-        return safeGet(SWORD_ATTACK_GOLEMS, false);
-    }
-
-    public static boolean getAttackNeutralSafely() {
-        return safeGet(SWORD_ATTACK_NEUTRAL, true);
-    }
-
     //盔甲类通用配置（等级区间）
     public static double getArmorIncreaseLowLevelSafely() {
         return safeGet(ARMOR_INCREASE_LOW_LEVEL, 0.5);
@@ -719,19 +659,11 @@ public class TheLastSwordConfiguration {
     }
 
     //龙晶护甲配置
-    public static boolean getEnableNightVisionSafely() {
-        return safeGet(DRAGON_CRYSTAL_ARMOR_ENABLE_NIGHT_VISION, true);
-    }
-
     public static int getCrystalGuardRefreshIntervalSafely() {
         return safeGet(DRAGON_CRYSTAL_ARMOR_CRYSTAL_GUARD_REFRESH_INTERVAL, 1200);
     }
 
     //龙之甲配置
-    public static boolean getDragonArmorEnableNightVisionSafely() {
-        return safeGet(DRAGON_ARMOR_ENABLE_NIGHT_VISION, true);
-    }
-
     public static int getDragonArmorEnergyPerLevelSafely() {
         return safeGet(DRAGON_ARMOR_ENERGY_PER_LEVEL, 102400);
     }
@@ -750,10 +682,6 @@ public class TheLastSwordConfiguration {
 
     public static int getDragonArmorEnderCrystalRangeSafely() {
         return safeGet(DRAGON_ARMOR_ENDER_CRYSTAL_RANGE, 8);
-    }
-
-    public static boolean getDragonArmorEnableHUDSafely() {
-        return safeGet(DRAGON_ARMOR_ENABLE_HUD, true);
     }
 
     //攻击系统配置

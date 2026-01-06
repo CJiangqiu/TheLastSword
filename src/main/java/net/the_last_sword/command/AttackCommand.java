@@ -8,7 +8,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.the_last_sword.attack.AttackManager;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.the_last_sword.util.EntityUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,18 +53,17 @@ public class AttackCommand {
         return totalCount;
     }
 
-    //显示禁疗记录（使用新的API测试）
+    //显示禁疗记录
     private static int showHealNegationRecords(CommandSourceStack source, MinecraftServer server) {
         source.sendSuccess(() -> Component.literal("§e--- Heal Negation Records ---"), false);
 
         //收集所有有禁疗效果的实体
-        List<Entity> healNegatedEntities = new ArrayList<>();
+        List<LivingEntity> healNegatedEntities = new ArrayList<>();
 
         for (ServerLevel level : server.getAllLevels()) {
             for (Entity entity : level.getAllEntities()) {
-                //使用新的API检查
-                if (AttackManager.isHealNegated(entity)) {
-                    healNegatedEntities.add(entity);
+                if (entity instanceof LivingEntity living && EntityUtil.isHealBanned(living)) {
+                    healNegatedEntities.add(living);
                 }
             }
         }
@@ -73,30 +74,22 @@ public class AttackCommand {
         }
 
         //显示每个禁疗记录
-        for (Entity entity : healNegatedEntities) {
+        for (LivingEntity entity : healNegatedEntities) {
             UUID uuid = entity.getUUID();
             String entityName = entity.getName().getString();
             String dimensionName = entity.level().dimension().location().toString();
 
-            //使用新的API获取数据
-            float lockedHealth = AttackManager.getLockedHealth(entity);
-            int remainingTime = AttackManager.getRemainingTime(entity);
+            int remainingTime = EntityUtil.getHealBanTime(entity);
 
-            String timeDisplay;
-            if (remainingTime == -1) {
-                timeDisplay = "§dPermanent";
-            } else {
-                int minutes = remainingTime / 60;
-                int seconds = remainingTime % 60;
-                timeDisplay = String.format("§c%dm %ds", minutes, seconds);
-            }
+            int minutes = remainingTime / 60;
+            int seconds = remainingTime % 60;
+            String timeDisplay = String.format("§c%dm %ds", minutes, seconds);
 
             final String displayInfo = String.format(
-                "  §7UUID: §f%s\n  §7Name: §f%s\n  §7Dimension: §e%s\n  §7Locked Health: §c%.1f\n  §7Remaining Time: %s",
+                "  §7UUID: §f%s\n  §7Name: §f%s\n  §7Dimension: §e%s\n  §7Remaining Time: %s",
                 uuid.toString(),
                 entityName,
                 dimensionName,
-                lockedHealth,
                 timeDisplay
             );
 
@@ -111,7 +104,8 @@ public class AttackCommand {
     private static int showReviveBanRecords(CommandSourceStack source) {
         source.sendSuccess(() -> Component.literal("§e--- Revive Ban Records ---"), false);
 
-        Map<Class<?>, Integer> reviveBanTypes = AttackManager.getAllReviveBanTypes();
+        ServerLevel level = source.getLevel();
+        Map<EntityType<?>, Integer> reviveBanTypes = EntityUtil.getAllReviveBans(level);
 
         if (reviveBanTypes.isEmpty()) {
             source.sendSuccess(() -> Component.literal("§7No revive ban records found."), false);
@@ -119,20 +113,18 @@ public class AttackCommand {
         }
 
         for (var entry : reviveBanTypes.entrySet()) {
-            Class<?> entityClass = entry.getKey();
+            EntityType<?> entityType = entry.getKey();
             int remainingTime = entry.getValue();
 
-            String simpleClassName = entityClass.getSimpleName();
-            String fullClassName = entityClass.getName();
+            String entityTypeName = entityType.getDescriptionId();
 
             int minutes = remainingTime / 60;
             int seconds = remainingTime % 60;
             String timeDisplay = String.format("§c%dm %ds", minutes, seconds);
 
             final String displayInfo = String.format(
-                "  §7Class: §f%s\n  §7Full Name: §8%s\n  §7Remaining Time: %s",
-                simpleClassName,
-                fullClassName,
+                "  §7EntityType: §f%s\n  §7Remaining Time: %s",
+                entityTypeName,
                 timeDisplay
             );
 

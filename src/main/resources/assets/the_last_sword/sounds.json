@@ -16,5 +16,14 @@
         "stream": true
       }
     ]
+  },
+  "alarm": {
+    "subtitle": "subtitles.alarm",
+    "sounds": [
+      {
+        "name": "the_last_sword:alarm",
+        "stream": false
+      }
+    ]
   }
 }

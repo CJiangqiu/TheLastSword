@@ -5,7 +5,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.DeathScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
-import net.the_last_sword.defence.DefenceManager;
+import net.the_last_sword.util.EntityUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -20,8 +20,7 @@ public class DeathScreenMixin {
         Minecraft minecraft = Minecraft.getInstance();
         LocalPlayer player = minecraft.player;
         if (player != null && TheLastSwordConfiguration.getDefenceEnableRadicalLogicSafely()) {
-            int level = DefenceManager.hasDefenceRecord(player) ? DefenceManager.getDefenceLevel(player) : 0;
-            if (level >= 2) {
+            if (EntityUtil.hasProtection(player)) {
                 ci.cancel();
             }
         }
@@ -32,8 +31,7 @@ public class DeathScreenMixin {
         Minecraft minecraft = Minecraft.getInstance();
         LocalPlayer player = minecraft.player;
         if (player != null && TheLastSwordConfiguration.getDefenceEnableRadicalLogicSafely()) {
-            int level = DefenceManager.hasDefenceRecord(player) ? DefenceManager.getDefenceLevel(player) : 0;
-            if (level >= 2) {
+            if (EntityUtil.hasProtection(player)) {
                 ci.cancel();
             }
         }
@@ -45,8 +43,7 @@ public class DeathScreenMixin {
         Minecraft minecraft = Minecraft.getInstance();
         LocalPlayer player = minecraft.player;
         if (player != null && TheLastSwordConfiguration.getDefenceEnableRadicalLogicSafely()) {
-            int level = DefenceManager.hasDefenceRecord(player) ? DefenceManager.getDefenceLevel(player) : 0;
-            if (level >= 2) {
+            if (EntityUtil.hasProtection(player)) {
                 ci.cancel();
                 minecraft.setScreen(null);
             }
@@ -58,8 +55,7 @@ public class DeathScreenMixin {
         Minecraft minecraft = Minecraft.getInstance();
         LocalPlayer player = minecraft.player;
         if (player != null && TheLastSwordConfiguration.getDefenceEnableRadicalLogicSafely()) {
-            int level = DefenceManager.hasDefenceRecord(player) ? DefenceManager.getDefenceLevel(player) : 0;
-            if (level >= 2) {
+            if (EntityUtil.hasProtection(player)) {
                 ci.cancel();
                 minecraft.setScreen(null);
             }

@@ -12,6 +12,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.ToolAction;
 import net.minecraftforge.common.ToolActions;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
+import net.the_last_sword.util.EntityUtil;
 import net.the_last_sword.util.nbt.ItemLevelHelper;
 
 import java.util.List;
@@ -76,9 +77,12 @@ public abstract class TheLastEndSwordItems extends SwordItem {
         return ItemLevelHelper.getLevel(itemstack);
     }
 
-    //重写伤害逻辑：在造成物理伤害后清除无敌时间，允许子类添加额外伤害
+    //重写伤害逻辑：检查友方误伤，清除无敌时间允许子类添加额外伤害
     @Override
     public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        //友方检查：如果是友方则跳过所有额外伤害逻辑
+        if (!EntityUtil.canAttack(attacker, target)) return false;
+
         boolean result = super.hurtEnemy(stack, target, attacker);
 
         //清除目标的无敌时间，让后续的额外伤害能够生效（避免伤害冷却覆盖问题）

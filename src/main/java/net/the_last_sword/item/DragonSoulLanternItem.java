@@ -84,7 +84,8 @@ public class DragonSoulLanternItem extends BlockItem {
                 .append(" " + itemLevel));
 
         //主标语
-        tooltip.add(Component.translatable("item_tooltip.the_last_sword.dragon_soul_lantern"));
+        tooltip.add(Component.translatable("item_tooltip_lore.the_last_sword.dragon_soul_lantern")
+            .withStyle(net.minecraft.ChatFormatting.GRAY));
 
         //未按Shift时提示
         if (!Screen.hasShiftDown()) {

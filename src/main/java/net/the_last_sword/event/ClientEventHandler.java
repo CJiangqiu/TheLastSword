@@ -18,6 +18,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import net.the_last_sword.init.ModBlocks;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
@@ -27,11 +28,11 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.client.gui.DefenceConfigScreen;
+import net.the_last_sword.client.overlay.DragonArmorOverlay;
 import net.the_last_sword.client.overlay.JustifiedDefenceOverlay;
 import net.the_last_sword.client.shader.TheLastEndEffect;
 import net.the_last_sword.configuration.DefenceConfig;
-import net.the_last_sword.entity.TheLastEndSwordWraithEntity;
-import net.the_last_sword.entity.ai.TheLastEndSwordWraithAI;
+import net.the_last_sword.network.DefenceConfigPacket;
 import net.the_last_sword.init.ModKeyMappings;
 import net.the_last_sword.item.TheLastSword;
 import net.the_last_sword.network.CancelPreviewPacket;
@@ -39,6 +40,7 @@ import net.the_last_sword.network.ChangeModePacket;
 import net.the_last_sword.network.NetworkHandler;
 import net.the_last_sword.network.OpenSummonGuiPacket;
 import net.the_last_sword.util.nbt.ItemModeHelper;
+import net.the_last_sword.util.TheLastSwordLogger;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 
@@ -122,6 +124,14 @@ public class ClientEventHandler {
         }
     }
 
+    //玩家登录事件 - 同步配置到服务端
+    @SubscribeEvent
+    public static void onPlayerLogin(ClientPlayerNetworkEvent.LoggingIn event) {
+        //发送客户端配置到服务端
+        NetworkHandler.sendToServer(new DefenceConfigPacket(DefenceConfig.getData()));
+        TheLastSwordLogger.debug("Sent defence config to server on login");
+    }
+
     //按键输入事件
     @SubscribeEvent
     public static void onKeyInput(InputEvent.Key event) {
@@ -168,10 +178,16 @@ public class ClientEventHandler {
         }
     }
 
-    //HUD 渲染事件
+    //HUD 渲染事件（Pre）
     @SubscribeEvent
     public static void onRenderGuiOverlay(RenderGuiOverlayEvent.Pre event) {
         JustifiedDefenceOverlay.onRenderGuiOverlay(event);
+    }
+
+    //HUD 渲染事件（Post）- 龙之盔甲叠加层
+    @SubscribeEvent
+    public static void onRenderGuiOverlayPost(RenderGuiOverlayEvent.Post event) {
+        DragonArmorOverlay.onRenderGuiOverlay(event);
     }
 
     //客户端Tick事件 - 处理按键
@@ -208,28 +224,6 @@ public class ClientEventHandler {
             return;
         }
 
-        //查找所有激活万物终焉的剑灵
-        List<TheLastEndSwordWraithEntity> activeWraiths = findActiveWraiths(mc.level);
-
-        if (!activeWraiths.isEmpty()) {
-            //检查着色器是否可用
-            if (!TheLastEndEffect.isAvailable()) {
-                return;
-            }
-
-            //更新着色器uniform
-            TheLastEndEffect.applyUniforms();
-
-            rotation += event.getPartialTick() * 1.0f;
-
-            //为每个剑灵渲染球体
-            for (TheLastEndSwordWraithEntity wraith : activeWraiths) {
-                renderSphere(event.getPoseStack(), wraith.position(), event.getPartialTick());
-            }
-        } else {
-            rotation = 0.0f;
-        }
-
         //渲染挖掘预览
         if (!miningPreviewBlocks.isEmpty()) {
             //检查预览是否过期
@@ -242,15 +236,6 @@ public class ClientEventHandler {
 
         //渲染龙魂灯笼范围
         renderDragonSoulLanternRanges(event.getPoseStack(), event.getCamera(), mc.level);
-    }
-
-    //查找所有激活万物终焉的剑灵
-    private static List<TheLastEndSwordWraithEntity> findActiveWraiths(Level level) {
-        return level.getEntitiesOfClass(
-                TheLastEndSwordWraithEntity.class,
-                Minecraft.getInstance().player.getBoundingBox().inflate(128),
-                wraith -> TheLastEndSwordWraithAI.hasActiveAllThingsEndEffect(wraith)
-        );
     }
 
     //渲染球体

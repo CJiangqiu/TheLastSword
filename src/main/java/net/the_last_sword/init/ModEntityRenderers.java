@@ -6,6 +6,7 @@ import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.the_last_sword.TheLastSwordMod;
+import net.the_last_sword.client.model.WingsThatCoverTheWorldModel;
 import net.the_last_sword.client.renderer.*;
 
 //实体渲染器注册
@@ -20,6 +21,17 @@ public class ModEntityRenderers {
         event.registerEntityRenderer(ModEntities.THE_LAST_END_LIGHTING.get(), TheLastEndLightingRenderer::new);
         event.registerEntityRenderer(ModEntities.THE_LAST_END_SWORD_PROJECTILE.get(), ThrownItemRenderer::new);
         event.registerEntityRenderer(ModEntities.TEST_ENTITY.get(), TestEntityRenderer::new);
+        event.registerEntityRenderer(ModEntities.GUARDIAN_OF_SEALED_SPIRE.get(), GuardianOfSealedSpireRenderer::new);
+        event.registerEntityRenderer(ModEntities.GUARDIAN_SABER.get(), GuardianOfSealedSpireRenderer::new);
+        event.registerEntityRenderer(ModEntities.GUARDIAN_BERSERKER.get(), GuardianOfSealedSpireRenderer::new);
+        event.registerEntityRenderer(ModEntities.GUARDIAN_ARCHER.get(), GuardianOfSealedSpireRenderer::new);
+        event.registerEntityRenderer(ModEntities.LOST_WRAITH.get(), LostWraithRenderer::new);
         event.registerEntityRenderer(ModEntities.THE_LAST_END_SWORD_WRAITH.get(), TheLastEndSwordWraithRenderer::new);
+    }
+
+    //注册 Model Layer 定义
+    @SubscribeEvent
+    public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
+        event.registerLayerDefinition(WingsThatCoverTheWorldModel.LAYER_LOCATION, WingsThatCoverTheWorldModel::createBodyLayer);
     }
 }

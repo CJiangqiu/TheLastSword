@@ -38,7 +38,7 @@ public class DragonSword extends TheLastEndSwordItems {
 
                 @Override
                 public float getSpeed() {
-                    return 4.5f;
+                    return 9f;
                 }
 
                 @Override
@@ -85,8 +85,8 @@ public class DragonSword extends TheLastEndSwordItems {
     //近战攻击：造成物理伤害+龙息伤害
     @Override
     public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        //调用基类方法，造成物理伤害并清除无敌时间
-        boolean attackedSuccessfully = super.hurtEnemy(stack, target, attacker);
+        //调用基类方法，检查友方误伤并造成物理伤害
+        if (!super.hurtEnemy(stack, target, attacker)) return false;
 
         //造成额外龙息伤害
         if (!attacker.level().isClientSide) {
@@ -106,11 +106,12 @@ public class DragonSword extends TheLastEndSwordItems {
                     attacker
                 );
 
+                target.invulnerableTime = 0;
                 target.hurt(damageSource, extraDamage);
             }
         }
 
-        return attackedSuccessfully;
+        return true;
     }
 
     //右键使用
@@ -180,6 +181,7 @@ public class DragonSword extends TheLastEndSwordItems {
         }
 
         //Lore提示
-        list.add(Component.translatable("item_tooltip.the_last_sword.dragon_sword"));
+        list.add(Component.translatable("item_tooltip_lore.the_last_sword.dragon_sword")
+            .withStyle(net.minecraft.ChatFormatting.GRAY));
     }
 }

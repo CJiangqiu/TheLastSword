@@ -1,17 +1,18 @@
 package net.the_last_sword.client.renderer;
 
-import software.bernie.geckolib.renderer.GeoEntityRenderer;
-import software.bernie.geckolib.cache.object.BakedGeoModel;
-import net.the_last_sword.client.model.TheLastEndSwordWraithModel;
-import net.the_last_sword.client.layer.TheLastEndSwordWraithTheLastEndLayer;
-import net.the_last_sword.client.layer.TheLastEndSwordWraithLayer;
-import net.the_last_sword.entity.TheLastEndSwordWraithEntity;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.MultiBufferSource;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.resources.ResourceLocation;
+import net.the_last_sword.client.layer.TheLastEndSwordWraithLayer;
+import net.the_last_sword.client.layer.TheLastEndSwordWraithTheLastEndLayer;
+import net.the_last_sword.client.model.TheLastEndSwordWraithModel;
+import net.the_last_sword.entity.TheLastEndSwordWraithEntity;
+import software.bernie.geckolib.cache.object.BakedGeoModel;
+import software.bernie.geckolib.renderer.GeoEntityRenderer;
 
 public class TheLastEndSwordWraithRenderer extends GeoEntityRenderer<TheLastEndSwordWraithEntity> {
     public TheLastEndSwordWraithRenderer(EntityRendererProvider.Context renderManager) {
@@ -38,5 +39,11 @@ public class TheLastEndSwordWraithRenderer extends GeoEntityRenderer<TheLastEndS
     @Override
     protected float getDeathMaxRotation(TheLastEndSwordWraithEntity entityLivingBaseIn) {
         return 0.0F;
+    }
+
+    //受伤变红效果
+    @Override
+    public int getPackedOverlay(TheLastEndSwordWraithEntity entity, float u) {
+        return LivingEntityRenderer.getOverlayCoords(entity, 0);
     }
 }

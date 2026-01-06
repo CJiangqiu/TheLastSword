@@ -63,7 +63,7 @@ public class DragonCrystalUpgradeTemplate extends SmithingTemplateItem {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, level, tooltip, flag);
-        tooltip.add(Component.translatable("item_tooltip.the_last_sword.dragon_crystal_upgrade_template").withStyle(ChatFormatting.GRAY));
+        tooltip.add(Component.translatable("item_tooltip_lore.the_last_sword.dragon_crystal_upgrade_template").withStyle(ChatFormatting.GRAY));
     }
 
     @Override

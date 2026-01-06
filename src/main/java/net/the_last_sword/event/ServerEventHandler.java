@@ -1,7 +1,6 @@
 package net.the_last_sword.event;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -11,26 +10,19 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.level.LevelEvent;
-import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
-import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.item.TheLastEndArmorItem;
 import net.the_last_sword.item.TheLastEndSwordItems;
-import net.the_last_sword.attack.AttackManager;
-import net.the_last_sword.attack.AttackSavedData;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
-import net.the_last_sword.defence.DefenceManager;
-import net.the_last_sword.defence.DefenceSavedData;
-import net.the_last_sword.summon.WraithSummonManager;
 import net.the_last_sword.network.ClearPreviewPacket;
 import net.the_last_sword.network.NetworkHandler;
 import net.the_last_sword.network.PreviewBlocksPacket;
 import net.the_last_sword.recipe.ConfigRecipeManager;
 import net.the_last_sword.util.TheLastSwordLogger;
+import net.the_last_sword.util.EntityUtil;
 
 import java.util.*;
 
@@ -70,62 +62,13 @@ public class ServerEventHandler {
         ConfigRecipeManager.loadRecipes();
     }
 
-    //服务器启动后加载所有维度的数据
+    //玩家重生时清除防御数据，让物品重新注册
     @SubscribeEvent
-    public static void onServerStarted(ServerStartedEvent event) {
-        event.getServer().getAllLevels().forEach(AttackSavedData::loadToManager);
-        event.getServer().getAllLevels().forEach(DefenceSavedData::loadToManager);
-    }
+    public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        Player player = event.getEntity();
 
-    //服务器关闭前保存所有世界的数据
-    @SubscribeEvent
-    public static void onServerStopping(ServerStoppingEvent event) {
-        if (AttackManager.needsSave()) {
-            event.getServer().getAllLevels().forEach(AttackSavedData::persistData);
-        }
-        if (DefenceManager.needsSave()) {
-            event.getServer().getAllLevels().forEach(DefenceSavedData::persistData);
-        }
-        DefenceManager.clearAll();
-    }
-
-    //玩家离线时立即持久化数据并自动唤回所有剑灵
-    @SubscribeEvent
-    public static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
-        if (event.getEntity() instanceof ServerPlayer sp && sp.level() instanceof ServerLevel lvl) {
-            //自动唤回所有剑灵
-            WraithSummonManager.logoutRecall(sp, lvl);
-
-            //持久化其他数据
-            if (AttackManager.needsSave()) {
-                AttackSavedData.persistData(lvl);
-            }
-            if (DefenceManager.needsSave()) {
-                DefenceSavedData.persistData(lvl);
-            }
-        }
-    }
-
-    //世界加载时恢复数据到管理器
-    @SubscribeEvent
-    public static void onLevelLoad(LevelEvent.Load event) {
-        if (event.getLevel() instanceof ServerLevel lvl) {
-            AttackSavedData.loadToManager(lvl);
-            DefenceSavedData.loadToManager(lvl);
-        }
-    }
-
-    //世界卸载时保存数据
-    @SubscribeEvent
-    public static void onLevelUnload(LevelEvent.Unload event) {
-        if (event.getLevel() instanceof ServerLevel lvl) {
-            if (AttackManager.needsSave()) {
-                AttackSavedData.persistData(lvl);
-            }
-            if (DefenceManager.needsSave()) {
-                DefenceSavedData.persistData(lvl);
-            }
-        }
+        //清除所有防御数据，物品会在inventoryTick中重新注册
+        EntityUtil.clearDefence(player);
     }
 
     //========== 挖掘预览系统核心方法 ==========

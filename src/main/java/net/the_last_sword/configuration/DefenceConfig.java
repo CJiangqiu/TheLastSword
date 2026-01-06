@@ -77,4 +77,72 @@ public class DefenceConfig {
     public static DefenceConfigData getData() {
         return data;
     }
+
+    // ==================== 龙水晶盔甲配置 API ====================
+
+    public static DefenceConfigData.DragonCrystalArmorConfig getDragonCrystalArmorConfig() {
+        return data.armor.dragonCrystalArmor;
+    }
+
+    public static DefenceConfigData.DragonCrystalHelmetConfig getDragonCrystalHelmet() {
+        return data.armor.dragonCrystalArmor.helmet;
+    }
+
+    public static DefenceConfigData.DragonCrystalChestplateConfig getDragonCrystalChestplate() {
+        return data.armor.dragonCrystalArmor.chestplate;
+    }
+
+    public static DefenceConfigData.DragonCrystalLeggingsConfig getDragonCrystalLeggings() {
+        return data.armor.dragonCrystalArmor.leggings;
+    }
+
+    public static DefenceConfigData.DragonCrystalBootsConfig getDragonCrystalBoots() {
+        return data.armor.dragonCrystalArmor.boots;
+    }
+
+    public static DefenceConfigData.DragonCrystalFullSetConfig getDragonCrystalFullSet() {
+        return data.armor.dragonCrystalArmor.fullSet;
+    }
+
+    // ==================== 龙之甲配置 API ====================
+
+    public static DefenceConfigData.DragonArmorConfig getDragonArmorConfig() {
+        return data.armor.dragonArmor;
+    }
+
+    public static DefenceConfigData.DragonArmorHelmetConfig getDragonArmorHelmet() {
+        return data.armor.dragonArmor.helmet;
+    }
+
+    public static DefenceConfigData.DragonArmorChestplateConfig getDragonArmorChestplate() {
+        return data.armor.dragonArmor.chestplate;
+    }
+
+    public static DefenceConfigData.DragonArmorLeggingsConfig getDragonArmorLeggings() {
+        return data.armor.dragonArmor.leggings;
+    }
+
+    public static DefenceConfigData.DragonArmorBootsConfig getDragonArmorBoots() {
+        return data.armor.dragonArmor.boots;
+    }
+
+    public static DefenceConfigData.DragonArmorFullSetConfig getDragonArmorFullSet() {
+        return data.armor.dragonArmor.fullSet;
+    }
+
+    public static boolean isDragonArmorHudEnabled() {
+        return data.armor.dragonArmor.enableHud;
+    }
+
+    public static void setDragonArmorHudEnabled(boolean enabled) {
+        data.armor.dragonArmor.enableHud = enabled;
+    }
+
+    public static float getDragonArmorFlySpeed() {
+        return data.armor.dragonArmor.flySpeed;
+    }
+
+    public static void setDragonArmorFlySpeed(float speed) {
+        data.armor.dragonArmor.flySpeed = speed;
+    }
 }

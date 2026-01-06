@@ -62,6 +62,8 @@ public class TheLastEndRenderTypes {
                 .setCullState(RenderStateShard.NO_CULL)
                 //覆盖层
                 .setOverlayState(RenderStateShard.OVERLAY)
+                //只写入颜色，不写入深度（避免透明区域遮挡）
+                .setWriteMaskState(RenderStateShard.COLOR_WRITE)
                 .createCompositeState(true)
         );
     }

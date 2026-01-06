@@ -9,6 +9,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.configuration.DefenceConfig;
 import net.the_last_sword.configuration.DefenceConfigData;
+import net.the_last_sword.network.DefenceConfigPacket;
+import net.the_last_sword.network.NetworkHandler;
 
 public class JustifiedDefenceOverlayPositionScreen extends Screen {
     private static final ResourceLocation ICON_FULL =
@@ -51,6 +53,8 @@ public class JustifiedDefenceOverlayPositionScreen extends Screen {
                 //保存配置
                 DefenceConfig.setHudOffset("justified_defence_overlay", offsetX, offsetY);
                 DefenceConfig.save();
+                //发送配置到服务端
+                NetworkHandler.sendToServer(new DefenceConfigPacket(DefenceConfig.getData()));
 
                 //返回上一界面
                 if (this.minecraft != null) {

@@ -20,14 +20,10 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.server.ServerLifecycleHooks;
-import net.the_last_sword.attack.AbsoluteDestructionDamageSource;
-import net.the_last_sword.attack.PowerfulRangeAttack;
-import net.the_last_sword.defence.DefenceManager;
+import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
 import net.the_last_sword.init.ModKeyMappings;
 import net.the_last_sword.util.EntityUtil;
 import net.the_last_sword.util.nbt.ItemModeHelper;
@@ -132,7 +128,8 @@ public class UltraTestSwordItem extends TieredItem {
             );
         }
 
-        tooltip.add(Component.translatable("item_tooltip.the_last_sword.ultra_test_sword"));
+        tooltip.add(Component.translatable("item_tooltip_lore.the_last_sword.ultra_test_sword")
+            .withStyle(net.minecraft.ChatFormatting.GRAY));
         tooltip.add(
                 Component.translatable("item_tooltip.the_last_sword.mode_key")
                         .append(" ")
@@ -160,66 +157,20 @@ public class UltraTestSwordItem extends TieredItem {
             //仅允许（创造模式或旁观模式）且为管理员的玩家保留
             if (!(isCreativeOrSpec && isOp)) {
                 sp.getInventory().setItem(slot, ItemStack.EMPTY);
-                return;
-            }
-
-            //管理防御等级：持有剑=2级，防御模式=3级
-            manageDefenseLevel(sp);
-        }
-    }
-
-    //管理持有究极测试剑的玩家的防护等级
-    private static void manageDefenseLevel(ServerPlayer player) {
-        int requiredLevel = getRequiredDefenseLevel(player);
-        int currentLevel = DefenceManager.hasDefenceRecord(player) ? DefenceManager.getDefenceLevel(player) : 0;
-
-        if (requiredLevel > 0) {
-            if (currentLevel == 0) {
-                DefenceManager.register(player, requiredLevel);
-            } else {
-                if (isUltraTestSwordDrivenDefense(currentLevel)) {
-                    if (currentLevel != requiredLevel) {
-                        DefenceManager.register(player, requiredLevel);
-                    }
-                } else if (currentLevel < requiredLevel) {
-                    DefenceManager.register(player, requiredLevel);
-                }
-            }
-        } else {
-            if (currentLevel > 0 && isUltraTestSwordDrivenDefense(currentLevel)) {
-                DefenceManager.clear(player);
             }
         }
     }
 
-    //判断防御等级是否由究极测试剑提供
-    private static boolean isUltraTestSwordDrivenDefense(int level) {
-        return level == 2 || level == 3;
-    }
-
-    //获取玩家应该拥有的防护等级：默认模式2级，防御模式3级
-    private static int getRequiredDefenseLevel(Player player) {
-        if (player == null || player.getInventory() == null) return 0;
-
-        boolean hasDefenseMode = false;
-        boolean hasAnyMode = false;
+    //检查玩家是否持有究极测试剑
+    private static boolean hasUltraTestSword(Player player) {
+        if (player == null || player.getInventory() == null) return false;
 
         for (ItemStack stack : player.getInventory().items) {
             if (stack.getItem() instanceof UltraTestSwordItem) {
-                hasAnyMode = true;
-                //初始化模式系统
-                ItemModeHelper.initializeMode(stack, 0, MAX_MODES);
-                int mode = ItemModeHelper.getMode(stack);
-                if (mode == 1) {
-                    hasDefenseMode = true;
-                    break;
-                }
+                return true;
             }
         }
-
-        if (hasDefenseMode) return 3;  //防御模式 = 等级3
-        if (hasAnyMode) return 2;      //默认模式 = 等级2
-        return 0;                      //无剑 = 无防护
+        return false;
     }
 
     //检查玩家是否持有防御模式的究极测试剑
@@ -238,6 +189,30 @@ public class UltraTestSwordItem extends TieredItem {
         return false;
     }
 
+    //玩家刻：防御管理
+    @SubscribeEvent
+    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
+        if (event.phase != TickEvent.Phase.START) return;
+        if (event.player.level().isClientSide) return;
+        if (!(event.player instanceof ServerPlayer sp)) return;
+
+        //权限检查：仅OP创造/旁观模式玩家
+        boolean isCreativeOrSpec = sp.isCreative() || sp.isSpectator();
+        boolean isOp = sp.hasPermissions(2);
+        if (!(isCreativeOrSpec && isOp)) return;
+
+        //防御逻辑
+        if (hasUltraTestSword(sp)) {
+            EntityUtil.registerDefence(sp, sp.getMaxHealth());
+            sp.getPersistentData().putBoolean("UltraTestSwordDefence", true);
+        } else {
+            if (sp.getPersistentData().getBoolean("UltraTestSwordDefence")) {
+                EntityUtil.clearDefence(sp);
+                sp.getPersistentData().remove("UltraTestSwordDefence");
+            }
+        }
+    }
+
     //防止持有防御模式剑的玩家进行维度旅行
     @SubscribeEvent
     public static void onEntityTravelToDimension(EntityTravelToDimensionEvent event) {
@@ -251,56 +226,6 @@ public class UltraTestSwordItem extends TieredItem {
     public static void onPlayerChangeGameMode(PlayerEvent.PlayerChangeGameModeEvent event) {
         if (hasDefenseSword(event.getEntity())) {
             event.setCanceled(true);
-        }
-    }
-
-    //玩家离线时清理究极测试剑提供的防御等级
-    @SubscribeEvent
-    public static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) {
-            cleanupUltraTestSwordDefense(player);
-        }
-    }
-
-    //玩家死亡时清理究极测试剑提供的防御等级
-    @SubscribeEvent
-    public static void onLivingDeath(LivingDeathEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) {
-            cleanupUltraTestSwordDefense(player);
-        }
-    }
-
-    //清理由究极测试剑提供的防御等级
-    private static void cleanupUltraTestSwordDefense(ServerPlayer player) {
-        int currentLevel = DefenceManager.hasDefenceRecord(player) ? DefenceManager.getDefenceLevel(player) : 0;
-        if (isUltraTestSwordDrivenDefense(currentLevel)) {
-            DefenceManager.clear(player);
-        }
-    }
-
-    //全局tick检查：确保所有有防御等级的玩家都正确地拥有究极测试剑
-    @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
-
-        var server = ServerLifecycleHooks.getCurrentServer();
-        if (server == null) return;
-
-        //每5秒检查一次（100 ticks）
-        if (server.getTickCount() % 100 == 0) {
-            for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-                try {
-                    int currentLevel = DefenceManager.hasDefenceRecord(player) ? DefenceManager.getDefenceLevel(player) : 0;
-                    if (isUltraTestSwordDrivenDefense(currentLevel)) {
-                        int requiredLevel = getRequiredDefenseLevel(player);
-                        if (requiredLevel == 0) {
-                            DefenceManager.clear(player);
-                        }
-                    }
-                } catch (Exception e) {
-                    //防止单个玩家的错误影响整个tick循环
-                }
-            }
         }
     }
 }

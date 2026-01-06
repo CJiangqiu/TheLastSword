@@ -45,12 +45,13 @@ dependencies {
     implementation 'org.ow2.asm:asm:9.2'
     implementation 'org.ow2.asm:asm-commons:9.2'
 
-    implementation fg.deobf("curse.maven:jei-238222:6600311")
-    implementation fg.deobf("curse.maven:jade-324717:5876199")
-    implementation fg.deobf("curse.maven:attributefix-280510:4911084")
-    implementation fg.deobf("curse.maven:geckolib-388172:5675221")
-    implementation fg.deobf("curse.maven:lendercataclysm-551586:6906993")
+    implementation fg.deobf("curse.maven:epic-core-api-977556:7416410")
+    implementation fg.deobf("curse.maven:geckolib-388172:7025129")
     implementation fg.deobf("curse.maven:curios-309927:6418456")
+
+    implementation fg.deobf("curse.maven:jei-238222:7391695")
+    implementation fg.deobf("curse.maven:jade-324717:5876199")
+    implementation fg.deobf("curse.maven:lendercataclysm-551586:6906993")
     implementation fg.deobf("curse.maven:lionfish-api-1001614:5922047")
     implementation fg.deobf("curse.maven:touhou-little-maid-355044:6979039")
 }
@@ -67,37 +68,3 @@ processResources {
 
 tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
 tasks.jar { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
-
-tasks.register('agentJar', Jar) {
-    group = 'build'
-    description = 'Build inner agent.jar (package opening only)'
-    dependsOn tasks.named('classes')
-    archiveBaseName = 'agent'
-    destinationDirectory = layout.buildDirectory.dir('embedded-agent')
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-
-    //只打包 agent 类和依赖
-    from(sourceSets.main.output) {
-        include 'net/the_last_sword/agent/**'
-        include 'net/the_last_sword/util/health/**'
-        include 'net/the_last_sword/util/TheLastSwordLogger.class'
-    }
-
-    manifest {
-        attributes(
-                'Agent-Class': 'net.the_last_sword.agent.TheLastSwordAgent',
-                'Can-Redefine-Classes': 'true',
-                'Can-Retransform-Classes': 'true'
-        )
-    }
-}
-
-
-tasks.named('jar') {
-    dependsOn tasks.named('agentJar')
-    from(tasks.named('agentJar').flatMap { it.archiveFile }) {
-        into 'net/the_last_sword/agent'
-        rename { 'agent.jar' }
-    }
-    //exclude 'net/the_last_sword/agent/**'
-}

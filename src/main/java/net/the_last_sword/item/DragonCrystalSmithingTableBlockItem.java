@@ -25,7 +25,7 @@ public class DragonCrystalSmithingTableBlockItem extends BlockItem {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, level, tooltip, flag);
-        tooltip.add(Component.translatable("item_tooltip.the_last_sword.dragon_crystal_smithing_table")
+        tooltip.add(Component.translatable("item_tooltip_lore.the_last_sword.dragon_crystal_smithing_table")
             .withStyle(ChatFormatting.GRAY));
     }
 }

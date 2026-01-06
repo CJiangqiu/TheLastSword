@@ -9,9 +9,10 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.the_last_sword.defence.DefenceManager;
+import net.the_last_sword.util.EntityUtil;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class DefenceCommand {
@@ -31,60 +32,55 @@ public class DefenceCommand {
 
         source.sendSuccess(() -> Component.literal("§6========== Defence Records =========="), false);
 
-        int totalCount = 0;
+        //收集所有受保护的实体
+        List<LivingEntity> trackedEntities = new ArrayList<>();
 
-        //获取所有有防御记录的实体UUID
-        Set<UUID> allEntityIds = DefenceManager.getAllDefenceEntityIds();
+        for (ServerLevel level : server.getAllLevels()) {
+            for (Entity entity : level.getAllEntities()) {
+                if (entity instanceof LivingEntity livingEntity) {
+                    //检查是否受保护
+                    if (EntityUtil.hasProtection(livingEntity)) {
+                        trackedEntities.add(livingEntity);
+                    }
+                }
+            }
+        }
 
-        if (allEntityIds.isEmpty()) {
+        if (trackedEntities.isEmpty()) {
             source.sendSuccess(() -> Component.literal("§7No defence records found."), false);
+            source.sendSuccess(() -> Component.literal("§6======================================"), false);
             return 0;
         }
 
-        //遍历所有记录并显示
-        for (UUID uuid : allEntityIds) {
-            //尝试在所有维度中查找实体
-            LivingEntity entity = null;
-            String entityName = "Unknown";
-            String dimensionName = "Unknown";
+        //显示每个防御记录
+        for (LivingEntity entity : trackedEntities) {
+            UUID uuid = entity.getUUID();
+            String entityName = entity.getName().getString();
+            String dimensionName = entity.level().dimension().location().toString();
 
-            for (ServerLevel level : server.getAllLevels()) {
-                Entity foundEntity = level.getEntity(uuid);
-                if (foundEntity instanceof LivingEntity) {
-                    entity = (LivingEntity) foundEntity;
-                    entityName = entity.getName().getString();
-                    dimensionName = level.dimension().location().toString();
-                    break;
-                }
-            }
-
-            //使用新的API获取数据
-            float health = entity != null ? DefenceManager.getHealth(entity) : 0.0f;
-            float maxHealth = entity != null ? DefenceManager.getMaxHealth(entity) : 0.0f;
-            int defenceLevel = entity != null ? DefenceManager.getDefenceLevel(entity) : 0;
+            //获取真实生命值
+            float realHealth = EntityUtil.getTrueHealth(entity);
+            float realMaxHealth = EntityUtil.getTrueMaxHealth(entity);
 
             final String displayInfo = String.format(
-                "  §7UUID: §f%s\n  §7Name: §f%s\n  §7Dimension: §e%s\n  §7Health: §a%.1f§f/§a%.1f\n  §7Defence Level: §b%d",
-                uuid.toString(),
+                "  §7Entity: §f%s\n  §7UUID: §8%s\n  §7Dimension: §e%s\n  §7Real Health: §a%.1f§7/§a%.1f",
                 entityName,
+                uuid.toString(),
                 dimensionName,
-                health,
-                maxHealth,
-                defenceLevel
+                realHealth,
+                realMaxHealth
             );
 
             source.sendSuccess(() -> Component.literal(displayInfo), false);
             source.sendSuccess(() -> Component.literal("  §8---"), false);
-
-            totalCount++;
         }
 
-        final int finalTotalCount = totalCount;
+        final int count = trackedEntities.size();
         source.sendSuccess(() -> Component.literal(
-            String.format("§aTotal: %d records", finalTotalCount)
+            String.format("§aTotal: %d entities with defence tracking", count)
         ), false);
         source.sendSuccess(() -> Component.literal("§6======================================"), false);
 
-        return totalCount;
+        return count;
     }
 }

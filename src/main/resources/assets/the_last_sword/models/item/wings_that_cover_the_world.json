@@ -1,0 +1,6 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "the_last_sword:item/wings_that_cover_the_world"
+  }
+}

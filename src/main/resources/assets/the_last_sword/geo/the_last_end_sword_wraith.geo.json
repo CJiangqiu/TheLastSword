@@ -13,10 +13,7 @@
 			"bones": [
 				{
 					"name": "the_last_end_sword_wraith",
-					"pivot": [0, -1, 0],
-					"locators": {
-						"locator": [0, 0, 0]
-					}
+					"pivot": [0, -1, 0]
 				},
 				{
 					"name": "left_arm",
@@ -25,8 +22,16 @@
 					"cubes": [
 						{"origin": [9.5, 38, -3], "size": [5, 8, 5], "inflate": 0.7, "pivot": [9.5, 19, 2], "rotation": [0, 0, -5], "uv": [62, 0], "mirror": true},
 						{"origin": [9.5, 19, -3], "size": [5, 27, 5], "inflate": 0.3, "pivot": [9.5, 19, 2], "rotation": [0, 0, -5], "uv": [108, 25], "mirror": true},
+						{"origin": [9.5, 30, -3], "size": [5, 16, 5], "pivot": [9.5, 19, 2], "rotation": [0, 0, -5], "uv": [42, 0], "mirror": true}
+					]
+				},
+				{
+					"name": "left_hand",
+					"parent": "left_arm",
+					"pivot": [11.5, 31, 2],
+					"cubes": [
 						{"origin": [9.5, 23, -3], "size": [5, 3, 5], "inflate": 1, "pivot": [9.5, 19, 2], "rotation": [0, 0, -5], "uv": [82, 1], "mirror": true},
-						{"origin": [9.5, 19, -3], "size": [5, 27, 5], "pivot": [9.5, 19, 2], "rotation": [0, 0, -5], "uv": [42, 0], "mirror": true}
+						{"origin": [9.49239, 18.82569, -3], "size": [5, 11, 5], "pivot": [7.5, 19, 2], "rotation": [0, 0, -5], "uv": [42, 16], "mirror": true}
 					]
 				},
 				{
@@ -44,9 +49,8 @@
 					"pivot": [-7.0043, 43.04009, -0.5],
 					"cubes": [
 						{"origin": [-14.70407, 38.43578, -3], "size": [5, 8, 5], "inflate": 0.7, "pivot": [-14.70407, 19.43578, 2], "rotation": [0, 0, 5], "uv": [62, 0]},
-						{"origin": [-14.70407, 23.43578, -3], "size": [5, 3, 5], "inflate": 1, "pivot": [-14.70407, 19.43578, 2], "rotation": [0, 0, 5], "uv": [82, 1]},
 						{"origin": [-14.70407, 19.43578, -3], "size": [5, 27, 5], "inflate": 0.3, "pivot": [-14.70407, 19.43578, 2], "rotation": [0, 0, 5], "uv": [108, 25]},
-						{"origin": [-14.70407, 19.43578, -3], "size": [5, 27, 5], "pivot": [-14.70407, 19.43578, 2], "rotation": [0, 0, 5], "uv": [42, 0]}
+						{"origin": [-14.70407, 31.43578, -3], "size": [5, 15, 5], "pivot": [-14.70407, 19.43578, 2], "rotation": [0, 0, 5], "uv": [42, 0]}
 					]
 				},
 				{
@@ -77,13 +81,30 @@
 					]
 				},
 				{
+					"name": "right_hand",
+					"parent": "right_arm",
+					"pivot": [-10.0043, 31.04009, -0.5],
+					"cubes": [
+						{"origin": [-14.70407, 19.43578, -3], "size": [5, 11.9, 5], "pivot": [-14.70407, 19.43578, 2], "rotation": [0, 0, 5], "uv": [41, 16]},
+						{"origin": [-14.70407, 23.43578, -3], "size": [5, 3, 5], "inflate": 1, "pivot": [-14.70407, 19.43578, 2], "rotation": [0, 0, 5], "uv": [82, 1]}
+					]
+				},
+				{
 					"name": "left_leg",
 					"parent": "the_last_end_sword_wraith",
 					"pivot": [2.57684, 23.11104, -0.33333],
 					"cubes": [
-						{"origin": [0.5, 0, -5], "size": [6, 3, 8], "uv": [68, 23], "mirror": true},
-						{"origin": [0.5, 3, -3], "size": [6, 19, 6], "uv": [104, 0], "mirror": true},
+						{"origin": [0.5, 11, -3], "size": [6, 11, 6], "uv": [104, 0], "mirror": true},
 						{"origin": [1.06421, 3.73853, -3.5], "size": [7, 19, 7], "inflate": 0.6, "pivot": [3.06421, 3.73853, 1.5], "rotation": [0, 0, -5], "uv": [40, 32], "mirror": true}
+					]
+				},
+				{
+					"name": "left_foot",
+					"parent": "left_leg",
+					"pivot": [2.57684, 11.11104, -0.33333],
+					"cubes": [
+						{"origin": [0.5, 0, -5], "size": [6, 3, 8], "uv": [68, 23], "mirror": true},
+						{"origin": [0.5, 3, -3], "size": [6, 8, 6], "uv": [104, 0], "mirror": true}
 					]
 				},
 				{
@@ -91,9 +112,17 @@
 					"parent": "the_last_end_sword_wraith",
 					"pivot": [-2.55924, 23.11104, -0.33333],
 					"cubes": [
-						{"origin": [-6.5, 0, -5], "size": [6, 3, 8], "uv": [68, 23]},
-						{"origin": [-6.5, 3, -3], "size": [6, 19, 6], "uv": [104, 0]},
+						{"origin": [-5.5, 11, -3], "size": [6, 11, 6], "uv": [104, 0]},
 						{"origin": [-8, 4, -3.5], "size": [7, 19, 7], "inflate": 0.6, "pivot": [-6, 4, 1.5], "rotation": [0, 0, 5], "uv": [40, 32]}
+					]
+				},
+				{
+					"name": "right_foot",
+					"parent": "right_leg",
+					"pivot": [-2.55924, 11.11104, -0.33333],
+					"cubes": [
+						{"origin": [-6.5, 0, -5], "size": [6, 3, 8], "uv": [68, 23]},
+						{"origin": [-6.5, 3, -3], "size": [6, 8, 6], "uv": [104, 0]}
 					]
 				},
 				{

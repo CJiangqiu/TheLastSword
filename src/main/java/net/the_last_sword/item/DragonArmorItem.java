@@ -218,7 +218,8 @@ public abstract class DragonArmorItem extends TheLastEndArmorItem implements Geo
 
         // 全套效果描述
         list.add(Component.translatable("item_tooltip.the_last_sword.dragon_armor_skill"));
-        list.add(Component.translatable("item_tooltip.the_last_sword.dragon_armor"));
+        list.add(Component.translatable("item_tooltip_lore.the_last_sword.dragon_armor")
+            .withStyle(net.minecraft.ChatFormatting.GRAY));
     }
 
     // ==================== GeckoLib动画 ====================

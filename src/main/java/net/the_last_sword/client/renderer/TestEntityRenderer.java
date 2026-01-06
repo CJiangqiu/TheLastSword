@@ -14,7 +14,7 @@ import net.the_last_sword.test.TestEntity;
 public class TestEntityRenderer extends HumanoidMobRenderer<TestEntity, HumanoidModel<TestEntity>> {
 
     private static final ResourceLocation TEXTURE =
-        new ResourceLocation(TheLastSwordMod.MOD_ID, "textures/entity/test_entity.png");
+        new ResourceLocation(TheLastSwordMod.MOD_ID, "textures/entities/test_entity.png");
 
     public TestEntityRenderer(EntityRendererProvider.Context context) {
         super(

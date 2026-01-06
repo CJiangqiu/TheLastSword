@@ -7,7 +7,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.the_last_sword.TheLastSwordMod;
-import net.the_last_sword.block.menu.DragonCrystalSmithingTableMenu;
+import net.the_last_sword.client.gui.menu.DragonCrystalSmithingTableMenu;
 import net.the_last_sword.client.gui.menu.SummonWraithGuiMenu;
 
 public class ModMenus {

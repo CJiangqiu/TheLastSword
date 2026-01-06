@@ -29,8 +29,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.the_last_sword.TheLastSwordMod;
-import net.the_last_sword.attack.PowerfulRangeAttack;
-import net.the_last_sword.defence.DefenceManager;
 import net.the_last_sword.init.ModEffects;
 import net.the_last_sword.util.EntityUtil;
 
@@ -83,10 +81,8 @@ public class TestEntity extends PathfinderMob {
         public static void TheLastSwordTestEntityOnJoin(EntityJoinLevelEvent e) {
             if (e.getLevel().isClientSide()) return;
             if (e.getEntity() instanceof TestEntity te) {
-                // 只有当 RECORDS 里还没有这条 UUID 时才登记
-                if (!DefenceManager.hasDefenceRecord(te) || DefenceManager.getDefenceLevel(te) < 1) {
-                    DefenceManager.register(te, 3);
-                }
+                //注册防御（如果还没有防御数据）
+                EntityUtil.registerDefence(te, te.getMaxHealth());
             }
         }
     }
@@ -234,7 +230,7 @@ public class TestEntity extends PathfinderMob {
             }
         }
 
-        DefenceManager.clear(this);
+        EntityUtil.clearDefence(this);
         EntityUtil.theLastEndRemove(this, RemovalReason.KILLED);
     }
 

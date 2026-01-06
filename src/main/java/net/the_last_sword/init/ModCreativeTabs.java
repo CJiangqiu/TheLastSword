@@ -8,6 +8,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 import net.the_last_sword.TheLastSwordMod;
+import net.the_last_sword.compat.CompatCheck;
 
 public class ModCreativeTabs {
 
@@ -18,8 +19,9 @@ public class ModCreativeTabs {
     public static final RegistryObject<CreativeModeTab> THE_LAST_SWORD_TAB = CREATIVE_MODE_TABS.register("the_last_sword_tab",
         () -> CreativeModeTab.builder()
             .title(Component.translatable("item_group.the_last_sword.the_last_sword_tab"))
-            .icon(() -> new ItemStack(ModItems.DRAGON_CRYSTAL.get()))
+            .icon(() -> new ItemStack(ModItems.THE_LAST_SWORD.get()))
             .displayItems((parameters, output) -> {
+                output.accept(ModItems.THE_LAST_END_SCROLL.get());
                 output.accept(ModItems.DRAGON_CRYSTAL.get());
                 output.accept(ModItems.DRAGON_CRYSTAL_UPGRADE_TEMPLATE.get());
                 output.accept(ModItems.DRAGON_CRYSTAL_SMITHING_TABLE.get());
@@ -37,12 +39,36 @@ public class ModCreativeTabs {
                 output.accept(ModItems.DRAGON_CRYSTAL_SOUL_STONE.get());
                 output.accept(ModItems.SWORD_SOUL_STONE.get());
                 output.accept(ModItems.DRAGON_SOUL_LANTERN.get());
+                output.accept(ModItems.GUARDIAN_OF_SEALED_SPIRE_SPAWN_EGG.get());
+                output.accept(ModItems.GUARDIAN_SABER_SPAWN_EGG.get());
+                output.accept(ModItems.GUARDIAN_BERSERKER_SPAWN_EGG.get());
+                output.accept(ModItems.GUARDIAN_ARCHER_SPAWN_EGG.get());
+                output.accept(ModItems.LOST_WRAITH_SPAWN_EGG.get());
                 output.accept(ModItems.THE_LAST_END_SWORD_WRAITH_SPAWN_EGG.get());
                 output.accept(ModItems.THE_LAST_END_SWORD_WRAITH_LEVEL_13_SPAWN_EGG.get());
-
                 //测试物品
                 output.accept(ModItems.ULTRA_TEST_SWORD.get());
                 output.accept(ModItems.TEST_ENTITY_SPAWN_EGG.get());
+
+                //Cataclysm联动奖章
+                if (CompatCheck.isCataclysmLoaded() && ModItems.ANCIENT_REMNANT_MEDAL != null) {
+                    output.accept(ModItems.ANCIENT_REMNANT_MEDAL.get());
+                    output.accept(ModItems.ENDER_GUARDIAN_MEDAL.get());
+                    output.accept(ModItems.IGNIS_MEDAL.get());
+                    output.accept(ModItems.MALEDICTUS_MEDAL.get());
+                    output.accept(ModItems.NETHERITE_MONSTROSITY_MEDAL.get());
+                    output.accept(ModItems.THE_HARBINGER_MEDAL.get());
+                    output.accept(ModItems.THE_LEVIATHAN_MEDAL.get());
+                    output.accept(ModItems.SCYLLA_MEDAL.get());
+                }
+
+                //Curios联动饰品
+                if (CompatCheck.isCuriosLoaded() && ModItems.DRAGON_CRYSTAL_RING != null) {
+                    output.accept(ModItems.DRAGON_CRYSTAL_RING.get());
+                    output.accept(ModItems.DRAGON_CRYSTAL_NECKLACE.get());
+                    output.accept(ModItems.DRAGON_CRYSTAL_CROWN.get());
+                    output.accept(ModItems.WINGS_THAT_COVER_THE_WORLD.get());
+                }
             })
             .build()
     );

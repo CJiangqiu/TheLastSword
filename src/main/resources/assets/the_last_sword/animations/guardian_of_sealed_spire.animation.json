@@ -3,7 +3,7 @@
 	"animations": {
 		"attack": {
 			"loop": true,
-			"animation_length": 1,
+			"animation_length": 1.25,
 			"bones": {
 				"guardian_of_sealed_spire": {
 					"rotation": {
@@ -17,7 +17,7 @@
 							"vector": [15, 0, 0],
 							"easing": "easeInBack"
 						},
-						"1.0": {
+						"1.25": {
 							"vector": [0, 0, 0]
 						}
 					}
@@ -34,7 +34,7 @@
 							"vector": [35, 0, 0],
 							"easing": "easeInBack"
 						},
-						"1.0": {
+						"1.25": {
 							"vector": [0, 0, 0]
 						}
 					}
@@ -51,7 +51,7 @@
 							"vector": [-71.92221, -14.2906, -4.60659],
 							"easing": "easeInBack"
 						},
-						"1.0": {
+						"1.25": {
 							"vector": [2.5, 0, 0]
 						}
 					}
@@ -68,7 +68,7 @@
 							"vector": [-7.5, 0, 0],
 							"easing": "easeInBack"
 						},
-						"1.0": {
+						"1.25": {
 							"vector": [0, 0, 0]
 						}
 					}
@@ -84,7 +84,7 @@
 						"0.75": {
 							"vector": [-12.5, 0, 0]
 						},
-						"1.0": {
+						"1.25": {
 							"vector": [0, 0, 0]
 						}
 					}

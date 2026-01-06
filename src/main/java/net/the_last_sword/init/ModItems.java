@@ -7,6 +7,9 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.the_last_sword.TheLastSwordMod;
+import net.the_last_sword.compat.CompatCheck;
+import net.the_last_sword.compat.cataclysm.CataclysmItemsRegistry;
+import net.the_last_sword.compat.curios.CuriosItemsRegistry;
 import net.the_last_sword.item.*;
 import net.the_last_sword.test.UltraTestSwordItem;
 import net.minecraft.world.item.Rarity;
@@ -15,6 +18,11 @@ public class ModItems {
 
     public static final DeferredRegister<Item> ITEMS =
         DeferredRegister.create(ForgeRegistries.ITEMS, TheLastSwordMod.MOD_ID);
+
+    //终焉卷轴 - 知识书
+    public static final RegistryObject<Item> THE_LAST_END_SCROLL = ITEMS.register("the_last_end_scroll",
+        TheLastEndScroll::new
+    );
 
     public static final RegistryObject<Item> DRAGON_CRYSTAL = ITEMS.register("dragon_crystal",
         DragonCrystal::new
@@ -92,22 +100,88 @@ public class ModItems {
         DragonArmorItem.Boots::new
     );
 
-    //终焉剑灵刷怪蛋
-    public static final RegistryObject<Item> THE_LAST_END_SWORD_WRAITH_SPAWN_EGG = ITEMS.register("the_last_end_sword_wraith_spawn_egg",
-        () -> new ForgeSpawnEggItem(ModEntities.THE_LAST_END_SWORD_WRAITH, -13434829, -16777216, new Item.Properties())
-    );
-
-    //13级终焉剑灵刷怪蛋
-    public static final RegistryObject<Item> THE_LAST_END_SWORD_WRAITH_LEVEL_13_SPAWN_EGG = ITEMS.register("the_last_end_sword_wraith_level_13_spawn_egg",
-        TheLastEndSwordWraithLevel13SpawnEgg::new
-    );
-
     //测试实体刷怪蛋
     public static final RegistryObject<Item> TEST_ENTITY_SPAWN_EGG = ITEMS.register("test_entity_spawn_egg",
         () -> new ForgeSpawnEggItem(ModEntities.TEST_ENTITY, -1, -1, new Item.Properties())
     );
 
+    //封印尖塔守卫刷怪蛋（深灰色 + 紫色）
+    public static final RegistryObject<Item> GUARDIAN_OF_SEALED_SPIRE_SPAWN_EGG = ITEMS.register("guardian_of_sealed_spire_spawn_egg",
+        () -> new ForgeSpawnEggItem(ModEntities.GUARDIAN_OF_SEALED_SPIRE, 0x4B4B4B, 0x8B00FF, new Item.Properties())
+    );
+
+    //守卫剑士刷怪蛋（深灰色 + 蓝色）
+    public static final RegistryObject<Item> GUARDIAN_SABER_SPAWN_EGG = ITEMS.register("guardian_saber_spawn_egg",
+        () -> new ForgeSpawnEggItem(ModEntities.GUARDIAN_SABER, 0x4B4B4B, 0x0080FF, new Item.Properties())
+    );
+
+    //守卫狂战士刷怪蛋（深灰色 + 红色）
+    public static final RegistryObject<Item> GUARDIAN_BERSERKER_SPAWN_EGG = ITEMS.register("guardian_berserker_spawn_egg",
+        () -> new ForgeSpawnEggItem(ModEntities.GUARDIAN_BERSERKER, 0x4B4B4B, 0xDC143C, new Item.Properties())
+    );
+
+    //守卫弓箭手刷怪蛋（深灰色 + 绿色）
+    public static final RegistryObject<Item> GUARDIAN_ARCHER_SPAWN_EGG = ITEMS.register("guardian_archer_spawn_egg",
+        () -> new ForgeSpawnEggItem(ModEntities.GUARDIAN_ARCHER, 0x4B4B4B, 0x00AA00, new Item.Properties())
+    );
+
+    //迷失战魂刷怪蛋（黑色 + 深灰色）
+    public static final RegistryObject<Item> LOST_WRAITH_SPAWN_EGG = ITEMS.register("lost_wraith_spawn_egg",
+        () -> new ForgeSpawnEggItem(ModEntities.LOST_WRAITH, 0x000000, 0x4B4B4B, new Item.Properties())
+    );
+
+    //终焉剑灵刷怪蛋（黑色 + 白色）
+    public static final RegistryObject<Item> THE_LAST_END_SWORD_WRAITH_SPAWN_EGG = ITEMS.register("the_last_end_sword_wraith_spawn_egg",
+        () -> new ForgeSpawnEggItem(ModEntities.THE_LAST_END_SWORD_WRAITH, 0x000000, 0xFFFFFF, new Item.Properties())
+    );
+
+    //13级终焉剑灵生成蛋（自定义物品）
+    public static final RegistryObject<Item> THE_LAST_END_SWORD_WRAITH_LEVEL_13_SPAWN_EGG = ITEMS.register("the_last_end_sword_wraith_level_13_spawn_egg",
+        TheLastEndSwordWraithLevel13SpawnEgg::new
+    );
+
+
+    public static RegistryObject<Item> ANCIENT_REMNANT_MEDAL;
+    public static RegistryObject<Item> ENDER_GUARDIAN_MEDAL;
+    public static RegistryObject<Item> IGNIS_MEDAL;
+    public static RegistryObject<Item> MALEDICTUS_MEDAL;
+    public static RegistryObject<Item> NETHERITE_MONSTROSITY_MEDAL;
+    public static RegistryObject<Item> THE_HARBINGER_MEDAL;
+    public static RegistryObject<Item> THE_LEVIATHAN_MEDAL;
+    public static RegistryObject<Item> SCYLLA_MEDAL;
+    public static RegistryObject<Item> DRAGON_CRYSTAL_RING;
+    public static RegistryObject<Item> DRAGON_CRYSTAL_NECKLACE;
+    public static RegistryObject<Item> DRAGON_CRYSTAL_CROWN;
+    public static RegistryObject<Item> WINGS_THAT_COVER_THE_WORLD;
+
     public static void register(IEventBus eventBus) {
+        //注册条件物品
+        registerConditionalItems();
+
+        //注册到事件总线
         ITEMS.register(eventBus);
+    }
+
+    //注册联动物品（直接调用，Java懒加载保证不会在未加载时执行）
+    private static void registerConditionalItems() {
+        //灾变奖章
+        if (CompatCheck.isCataclysmLoaded()) {
+            ANCIENT_REMNANT_MEDAL = CataclysmItemsRegistry.registerAncientRemnantMedal(ITEMS);
+            ENDER_GUARDIAN_MEDAL = CataclysmItemsRegistry.registerEnderGuardianMedal(ITEMS);
+            IGNIS_MEDAL = CataclysmItemsRegistry.registerIgnisMedal(ITEMS);
+            MALEDICTUS_MEDAL = CataclysmItemsRegistry.registerMaledictusMedal(ITEMS);
+            NETHERITE_MONSTROSITY_MEDAL = CataclysmItemsRegistry.registerNetheriteMonstrosityMedal(ITEMS);
+            THE_HARBINGER_MEDAL = CataclysmItemsRegistry.registerTheHarbingerMedal(ITEMS);
+            THE_LEVIATHAN_MEDAL = CataclysmItemsRegistry.registerTheLeviathanMedal(ITEMS);
+            SCYLLA_MEDAL = CataclysmItemsRegistry.registerScyllaMedal(ITEMS);
+        }
+
+        //Curios饰品
+        if (CompatCheck.isCuriosLoaded()) {
+            DRAGON_CRYSTAL_RING = CuriosItemsRegistry.registerDragonCrystalRing(ITEMS);
+            DRAGON_CRYSTAL_NECKLACE = CuriosItemsRegistry.registerDragonCrystalNecklace(ITEMS);
+            DRAGON_CRYSTAL_CROWN = CuriosItemsRegistry.registerDragonCrystalCrown(ITEMS);
+            WINGS_THAT_COVER_THE_WORLD = CuriosItemsRegistry.registerWingsThatCoverTheWorld(ITEMS);
+        }
     }
 }

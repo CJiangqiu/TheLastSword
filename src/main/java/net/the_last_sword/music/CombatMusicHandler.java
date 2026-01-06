@@ -14,6 +14,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
+import net.the_last_sword.entity.LostWraithEntity;
 import net.the_last_sword.entity.TheLastEndSwordWraithEntity;
 import net.the_last_sword.init.ModSounds;
 
@@ -44,45 +45,49 @@ public class CombatMusicHandler {
             return;
         }
 
-        if (++musicCheckCounter < MUSIC_CHECK_INTERVAL) {
+        //每20tick检测一次
+        musicCheckCounter++;
+        if (musicCheckCounter < MUSIC_CHECK_INTERVAL) {
             return;
         }
         musicCheckCounter = 0;
 
-        ClientLevel level = (ClientLevel) player.level();
-        AABB searchArea = new AABB(
-                player.getX() - 64,
-                player.getY() - 32,
-                player.getZ() - 64,
-                player.getX() + 64,
-                player.getY() + 32,
-                player.getZ() + 64
+        //检测附近的Boss实体
+        ClientLevel level = mc.level;
+        AABB searchArea = player.getBoundingBox().inflate(64.0);
+        String targetMusicType = null;
+
+        //检测迷失战魂
+        List<LostWraithEntity> nearbyLostWraiths = level.getEntitiesOfClass(
+            LostWraithEntity.class,
+            searchArea,
+            wraith -> wraith.isSpawned() && wraith.isAlive() && !wraith.shouldLeave()
         );
-
-        //检测终焉剑灵（只有完成spawn状态的才计入）
-        List<TheLastEndSwordWraithEntity> wraithEntities =
-            level.getEntitiesOfClass(TheLastEndSwordWraithEntity.class, searchArea);
-        wraithEntities.removeIf(entity -> !entity.getIsSpawned());
-
-        //决定播放哪种音乐
-        String requiredMusicType = "";
-        if (!wraithEntities.isEmpty()) {
-            requiredMusicType = "wraith";
+        if (!nearbyLostWraiths.isEmpty()) {
+            targetMusicType = "lost_wraith";
         }
 
-        if (requiredMusicType.isEmpty()) {
-            //没有敌对实体，停止音乐
-            if (isPlaying) {
+        //检测终焉剑灵（后检测，会覆盖迷失战魂）
+        List<TheLastEndSwordWraithEntity> nearbySwordWraiths = level.getEntitiesOfClass(
+            TheLastEndSwordWraithEntity.class,
+            searchArea,
+            wraith -> wraith.isSpawned() && wraith.isAlive() && !wraith.shouldLeave()
+        );
+        if (!nearbySwordWraiths.isEmpty()) {
+            targetMusicType = "wraith";
+        }
+
+        //根据检测结果播放或停止音乐
+        if (targetMusicType != null) {
+            //有Boss，播放对应音乐
+            if (!isPlaying || !currentMusicType.equals(targetMusicType)) {
                 stopBattleMusic();
+                playBattleMusic(targetMusicType);
             }
         } else {
-            //需要播放战斗音乐
-            if (!isPlaying || !currentMusicType.equals(requiredMusicType)) {
-                //如果没在播放或需要切换音乐类型
-                if (isPlaying) {
-                    stopBattleMusic();
-                }
-                playBattleMusic(requiredMusicType);
+            //没有Boss，停止音乐
+            if (isPlaying) {
+                stopBattleMusic();
             }
         }
     }
@@ -100,6 +105,9 @@ public class CombatMusicHandler {
         switch (musicType) {
             case "wraith":
                 musicEvent = ModSounds.THE_LAST_END_SWORD_WRAITH.get();
+                break;
+            case "lost_wraith":
+                musicEvent = ModSounds.LOST_WRAITH.get();
                 break;
             default:
                 return;

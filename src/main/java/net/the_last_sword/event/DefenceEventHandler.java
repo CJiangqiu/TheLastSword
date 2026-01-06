@@ -22,10 +22,13 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.the_last_sword.TheLastSwordMod;
+import net.the_last_sword.configuration.DefenceConfigData;
+import net.the_last_sword.configuration.DefenceConfigData.*;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.init.ModAttributes;
 import net.the_last_sword.item.DragonArmorItem;
 import net.the_last_sword.item.DragonCrystalArmorItem;
+import net.the_last_sword.network.DefenceConfigPacket;
 import net.the_last_sword.util.EntityUtil;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraft.world.damagesource.DamageSource;
@@ -107,6 +110,10 @@ public final class DefenceEventHandler {
             if (!(event.getEntity() instanceof Player player)) return;
             if (!DragonArmorItem.isFullSet(player)) return;
 
+            //检查伤害减免配置是否启用（从玩家同步的配置读取）
+            DefenceConfigData playerConfig = DefenceConfigPacket.getPlayerConfig(player.getUUID());
+            if (!playerConfig.armor.dragonArmor.fullSet.enableDamageReduction) return;
+
             DamageSource source = event.getSource();
 
             //检查是否为非玩家攻击或爆炸伤害
@@ -136,6 +143,42 @@ public final class DefenceEventHandler {
 
             //直接同步血量
             syncHealthToMaxHealth(player);
+        }
+
+        //客户端Tick事件 - 飞行速度（飞行速度计算在客户端）
+        @SubscribeEvent
+        public static void onClientPlayerTick(TickEvent.PlayerTickEvent event) {
+            if (event.phase != TickEvent.Phase.END || !event.player.level().isClientSide()) return;
+
+            Player player = event.player;
+            ItemStack chestplate = player.getItemBySlot(EquipmentSlot.CHEST);
+
+            //检查是否穿戴龙之甲胸甲
+            if (chestplate.isEmpty() || !(chestplate.getItem() instanceof DragonArmorItem.Chestplate)) {
+                //不穿龙甲时恢复默认速度
+                if (player.getAbilities().getFlyingSpeed() != 0.05f) {
+                    player.getAbilities().setFlyingSpeed(0.05f);
+                }
+                return;
+            }
+
+            //获取玩家配置
+            DefenceConfigData playerConfig = DefenceConfigPacket.getPlayerConfig(player.getUUID());
+            if (!playerConfig.armor.dragonArmor.chestplate.enableFlight) {
+                player.getAbilities().setFlyingSpeed(0.05f);
+                return;
+            }
+
+            //检查能量
+            boolean hasEnergy = chestplate.getCapability(ForgeCapabilities.ENERGY)
+                    .map(energy -> energy.getEnergyStored() > 0)
+                    .orElse(false);
+
+            //有电时应用配置速度，无电时恢复默认
+            float targetSpeed = hasEnergy ? playerConfig.armor.dragonArmor.flySpeed : 0.05f;
+            if (player.getAbilities().getFlyingSpeed() != targetSpeed) {
+                player.getAbilities().setFlyingSpeed(targetSpeed);
+            }
         }
     }
 
@@ -201,35 +244,59 @@ public final class DefenceEventHandler {
         ItemStack leggings = player.getItemBySlot(EquipmentSlot.LEGS);
         ItemStack boots = player.getItemBySlot(EquipmentSlot.FEET);
 
+        //获取玩家同步的配置
+        DefenceConfigData playerConfig = DefenceConfigPacket.getPlayerConfig(player.getUUID());
+        DragonCrystalArmorConfig config = playerConfig.armor.dragonCrystalArmor;
+
         //头盔效果：夜视 + 水下呼吸
         if (!helmet.isEmpty() && helmet.getItem() instanceof DragonCrystalArmorItem.Helmet) {
-            if (TheLastSwordConfiguration.getEnableNightVisionSafely()) {
+            if (config.helmet.enableNightVision) {
                 player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 240, 2, false, false));
             }
-            player.addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, 240, 2, false, false));
+            if (config.helmet.enableWaterBreathing) {
+                player.addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, 240, 2, false, false));
+            }
         }
 
         //胸甲效果：伤害抗性 + 力量
         if (!chestplate.isEmpty() && chestplate.getItem() instanceof DragonCrystalArmorItem.Chestplate) {
-            player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 240, 2, false, false));
-            player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 240, 2, false, false));
+            if (config.chestplate.enableDamageResistance) {
+                player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 240, 2, false, false));
+            }
+            if (config.chestplate.enableStrength) {
+                player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 240, 2, false, false));
+            }
         }
 
         //护腿效果：生命恢复 + 跳跃提升
         if (!leggings.isEmpty() && leggings.getItem() instanceof DragonCrystalArmorItem.Leggings) {
-            player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 240, 2, false, false));
-            player.addEffect(new MobEffectInstance(MobEffects.JUMP, 240, 0, false, false));
+            if (config.leggings.enableRegeneration) {
+                player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 240, 2, false, false));
+            }
+            if (config.leggings.enableJumpBoost) {
+                player.addEffect(new MobEffectInstance(MobEffects.JUMP, 240, 0, false, false));
+            }
         }
 
         //靴子效果：速度 + 火焰抗性
         if (!boots.isEmpty() && boots.getItem() instanceof DragonCrystalArmorItem.Boots) {
-            player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 240, 0, false, false));
-            player.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 240, 2, false, false));
+            if (config.boots.enableSpeed) {
+                player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 240, 0, false, false));
+            }
+            if (config.boots.enableFireResistance) {
+                player.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 240, 2, false, false));
+            }
         }
     }
 
     //水晶守护技能：给予吸收伤害效果（等于最大生命值），按配置时间刷新
     private static void applyCrystalGuard(Player player) {
+        //检查玩家配置是否启用
+        DefenceConfigData playerConfig = DefenceConfigPacket.getPlayerConfig(player.getUUID());
+        if (!playerConfig.armor.dragonCrystalArmor.fullSet.enableCrystalGuard) {
+            return;
+        }
+
         UUID id = player.getUUID();
         int maxHealth = (int) player.getMaxHealth();
         player.setAbsorptionAmount(maxHealth);
@@ -271,6 +338,10 @@ public final class DefenceEventHandler {
 
     //龙之盔甲单件效果
     private static void applyDragonArmorEffects(Player player) {
+        //获取玩家同步的配置
+        DefenceConfigData playerConfig = DefenceConfigPacket.getPlayerConfig(player.getUUID());
+        DragonArmorConfig config = playerConfig.armor.dragonArmor;
+
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             if (slot.getType() != EquipmentSlot.Type.ARMOR) continue;
 
@@ -289,21 +360,28 @@ public final class DefenceEventHandler {
 
             switch (slot) {
                 case HEAD -> {
-                    if (TheLastSwordConfiguration.getDragonArmorEnableNightVisionSafely())
+                    if (config.helmet.enableNightVision)
                         player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 240, baseLevel, false, false));
-                    player.addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, 240, baseLevel, false, false));
+                    if (config.helmet.enableWaterBreathing)
+                        player.addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, 240, baseLevel, false, false));
                 }
                 case CHEST -> {
-                    player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 240, baseLevel, false, false));
-                    player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 240, baseLevel, false, false));
+                    if (config.chestplate.enableDamageResistance)
+                        player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 240, baseLevel, false, false));
+                    if (config.chestplate.enableStrength)
+                        player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 240, baseLevel, false, false));
                 }
                 case LEGS -> {
-                    player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 240, baseLevel, false, false));
-                    player.addEffect(new MobEffectInstance(MobEffects.JUMP, 240, speedJumpLevel, false, false));
+                    if (config.leggings.enableRegeneration)
+                        player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 240, baseLevel, false, false));
+                    if (config.leggings.enableJumpBoost)
+                        player.addEffect(new MobEffectInstance(MobEffects.JUMP, 240, speedJumpLevel, false, false));
                 }
                 case FEET -> {
-                    player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 240, speedJumpLevel, false, false));
-                    player.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 240, baseLevel, false, false));
+                    if (config.boots.enableSpeed)
+                        player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 240, speedJumpLevel, false, false));
+                    if (config.boots.enableFireResistance)
+                        player.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 240, baseLevel, false, false));
                 }
             }
         }
@@ -311,6 +389,10 @@ public final class DefenceEventHandler {
 
     //龙之盔甲全套效果
     private static void handleDragonArmorFullSetEffects(Player player) {
+        //获取玩家同步的配置
+        DefenceConfigData playerConfig = DefenceConfigPacket.getPlayerConfig(player.getUUID());
+        DragonArmorFullSetConfig config = playerConfig.armor.dragonArmor.fullSet;
+
         int fullSetWithEnergy = 0;
 
         //检查每件装备的能量并消耗
@@ -330,7 +412,7 @@ public final class DefenceEventHandler {
             }
 
             //能量消耗：每件盔甲每刻消耗配置值
-            int costPerPiece = TheLastSwordConfiguration.getDragonArmorEnergyCostPerPieceSafely();
+            int costPerPiece = net.the_last_sword.configuration.TheLastSwordConfiguration.getDragonArmorEnergyCostPerPieceSafely();
             stack.getCapability(ForgeCapabilities.ENERGY).ifPresent(energy -> {
                 energy.extractEnergy(costPerPiece, false);
             });
@@ -338,20 +420,24 @@ public final class DefenceEventHandler {
 
         //全套效果1：饱和V + 冰火不侵（需要4件都有能量）
         if (fullSetWithEnergy == 4) {
-            player.addEffect(new MobEffectInstance(MobEffects.SATURATION, 240, 4, false, false));
-            //清除冻伤
-            player.setTicksFrozen(0);
-            //清除燃烧
-            player.clearFire();
+            if (config.enableSaturation) {
+                player.addEffect(new MobEffectInstance(MobEffects.SATURATION, 240, 4, false, false));
+            }
+            if (config.enableIceFireImmunity) {
+                //清除冻伤
+                player.setTicksFrozen(0);
+                //清除燃烧
+                player.clearFire();
+            }
         }
 
         //全套效果2：虚化（需要全套有电且处于飞行状态）
-        if (fullSetWithEnergy == 4 && player.getAbilities().flying) {
+        if (fullSetWithEnergy == 4 && player.getAbilities().flying && config.enablePhasing) {
             //给予虚化效果
             player.addEffect(new MobEffectInstance(ModEffects.PHASING.get(), 240, 0, false, false));
 
             //虚化额外能量消耗：胸甲额外消耗配置值
-            int phasingCost = TheLastSwordConfiguration.getDragonArmorPhasingEnergyCostSafely();
+            int phasingCost = net.the_last_sword.configuration.TheLastSwordConfiguration.getDragonArmorPhasingEnergyCostSafely();
             ItemStack chestplate = player.getItemBySlot(EquipmentSlot.CHEST);
             chestplate.getCapability(ForgeCapabilities.ENERGY).ifPresent(energy -> {
                 energy.extractEnergy(phasingCost, false);
@@ -359,8 +445,22 @@ public final class DefenceEventHandler {
         }
     }
 
-    //龙之盔甲飞行能力处理
+    //龙之盔甲飞行能力处理（服务端：只处理飞行能力，不处理速度）
     private static void handleDragonArmorFlying(Player player) {
+        //获取玩家同步的配置检查飞行是否启用
+        DefenceConfigData playerConfig = DefenceConfigPacket.getPlayerConfig(player.getUUID());
+        if (!playerConfig.armor.dragonArmor.chestplate.enableFlight) {
+            //如果飞行被禁用，移除龙之甲赋予的飞行能力
+            if (player.getPersistentData().getBoolean("DragonArmorFly")) {
+                player.getAbilities().mayfly = false;
+                player.getAbilities().flying = false;
+                player.getPersistentData().remove("DragonArmorFly");
+                player.getPersistentData().remove("DragonArmorFlyAnim");
+                player.onUpdateAbilities();
+            }
+            return;
+        }
+
         ItemStack chestplate = player.getItemBySlot(EquipmentSlot.CHEST);
 
         //检查是否穿戴龙之甲胸甲
@@ -371,7 +471,7 @@ public final class DefenceEventHandler {
         if (wearingDragonChestplate && !player.isCreative() && !player.isSpectator()) {
             if (!player.getAbilities().mayfly) {
                 player.getAbilities().mayfly = true;
-                player.getPersistentData().putBoolean("DragonArmorFly", true); // 标记是龙之甲赋予的
+                player.getPersistentData().putBoolean("DragonArmorFly", true);
                 player.onUpdateAbilities();
             }
         } else if (!player.isCreative() && !player.isSpectator()) {
@@ -380,7 +480,7 @@ public final class DefenceEventHandler {
                 player.getAbilities().mayfly = false;
                 player.getAbilities().flying = false;
                 player.getPersistentData().remove("DragonArmorFly");
-                player.getPersistentData().remove("DragonArmorFlyAnim"); // 清除动画状态标记
+                player.getPersistentData().remove("DragonArmorFlyAnim");
                 player.onUpdateAbilities();
             }
         }

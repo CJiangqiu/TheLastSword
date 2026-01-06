@@ -1,5 +1,8 @@
 package net.the_last_sword.mixin;
 
+import net.eca.api.EcaAPI;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -7,12 +10,9 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.the_last_sword.attack.AbsoluteDestructionDamageSource;
-import net.the_last_sword.attack.AttackManager;
+import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
-import net.the_last_sword.defence.DefenceManager;
 import net.the_last_sword.init.ModAttributes;
-import net.the_last_sword.init.ModEffects;
 import net.the_last_sword.util.EntityUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -23,16 +23,27 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
-import java.util.UUID;
 
 @Mixin(value = LivingEntity.class, priority = 1024)
 public class LivingEntityMixin {
 
-    //直接获取防御等级
-    @Unique
-    private static int getDefenceLevel(LivingEntity entity) {
-        return DefenceManager.getDefenceLevel(entity);
+    //静态初始化注入：在原版 defineId 调用后紧接着定义我们的 EntityDataAccessor
+    @Inject(method = "<clinit>", at = @At("TAIL"))
+    private static void the_last_sword$onClinit(CallbackInfo ci) {
+        EntityUtil.TRUE_HEALTH = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.STRING);
+        EntityUtil.TRUE_MAX_HEALTH = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.STRING);
+        EntityUtil.HEAL_BAN_TIME = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.INT);
+        EntityUtil.IS_PROTECTED = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.BOOLEAN);
+    }
+
+    //注册实体数据（在每个实例的 defineSynchedData 中调用）
+    @Inject(method = "defineSynchedData", at = @At("TAIL"))
+    private void the_last_sword$onDefineSynchedData(CallbackInfo ci) {
+        LivingEntity entity = (LivingEntity) (Object) this;
+        entity.getEntityData().define(EntityUtil.TRUE_HEALTH, "-1024.0");
+        entity.getEntityData().define(EntityUtil.TRUE_MAX_HEALTH, "-2048.0");
+        entity.getEntityData().define(EntityUtil.HEAL_BAN_TIME, 0);
+        entity.getEntityData().define(EntityUtil.IS_PROTECTED, false);
     }
 
     //检查是否是绝对毁灭伤害源
@@ -41,16 +52,6 @@ public class LivingEntityMixin {
         return source instanceof AbsoluteDestructionDamageSource;
     }
 
-    //虚化效果防御同步
-    @Unique
-    private void the_last_sword$syncPhasingDefence(LivingEntity entity) {
-        boolean hasPhasing = entity.hasEffect(ModEffects.PHASING.get());
-        int level = getDefenceLevel(entity);
-
-        if (hasPhasing && level < 3) {
-            DefenceManager.register(entity, 3);
-        }
-    }
 
     //护盾自动回复系统（两层分支优化）
     @Unique
@@ -93,18 +94,11 @@ public class LivingEntityMixin {
         }
     }
 
-    //处理禁疗系统
+    //防御系统的强化免疫系统
     @Unique
-    private void the_last_sword$handleHealNegationSystem(LivingEntity entity) {
-        if (AttackManager.isHealNegated(entity)) {
-            float expectedHealth = AttackManager.getLockedHealth(entity);
-            EntityUtil.theLastEndSetHealth(entity, expectedHealth);
+    private void the_last_sword$handleDefenceProtection(LivingEntity entity) {
+        if(TheLastSwordConfiguration.getDefenceEnableRadicalLogicSafely()){
         }
-    }
-
-    //防御等级≥2的强化免疫系统
-    @Unique
-    private void the_last_sword$handleDefenceLevel2Protection(LivingEntity entity) {
         if (entity.isOnFire()) {
             entity.clearFire();
         }
@@ -138,18 +132,18 @@ public class LivingEntityMixin {
             return;
         }
 
-        the_last_sword$syncPhasingDefence(entity);
-
         the_last_sword$handleShieldRegeneration(entity);
 
-        the_last_sword$handleHealNegationSystem(entity);
+        //每 tick 更新禁疗计时器
+        EntityUtil.tickHealBanTime(entity);
 
-        int defenceLevel = getDefenceLevel(entity);
-        if (defenceLevel >= 1) {
-            DefenceManager.pushToEntity(entity);
-            EntityUtil.theLastEndRevive(entity);
-            if (defenceLevel >= 2) {
-                the_last_sword$handleDefenceLevel2Protection(entity);
+        //防御系统tick逻辑
+        if (EntityUtil.hasProtection(entity)) {
+            float realHealth = EntityUtil.getTrueHealth(entity);
+            if (realHealth <= 0 ) {
+                EntityUtil.setProtection(entity, false);
+            } else if (realHealth > 0) {
+                the_last_sword$handleDefenceProtection(entity);
             }
         }
     }
@@ -157,13 +151,14 @@ public class LivingEntityMixin {
     @Inject(method = "tickDeath", at = @At("HEAD"), cancellable = true)
     private void onLivingEntityTickDeath(CallbackInfo ci) {
         LivingEntity entity = (LivingEntity) (Object) this;
-        if (getDefenceLevel(entity) >= 1) {
+        if (EntityUtil.hasProtection(entity)) {
             ci.cancel();
         }
     }
 
-    @Inject(method = "actuallyHurt", at = @At("HEAD"), cancellable = true)
-    private void onLivingEntityActuallyHurt(DamageSource damageSource, float damageAmount, CallbackInfo ci) {
+    //hurt：盟友判断
+    @Inject(method = "hurt", at = @At("HEAD"), cancellable = true)
+    private void onLivingEntityHurt(DamageSource damageSource, float damageAmount, CallbackInfoReturnable<Boolean> cir) {
         LivingEntity entity = (LivingEntity) (Object) this;
 
         if (entity.level().isClientSide) {
@@ -173,47 +168,38 @@ public class LivingEntityMixin {
         //统一使用 canAttack 判断盟友关系（包含剑灵的所有盟友关系）
         if (damageSource.getEntity() instanceof LivingEntity attacker) {
             if (!EntityUtil.canAttack(attacker, entity)) {
-                ci.cancel();
-                return;
+                cir.setReturnValue(false);
             }
         }
+    }
 
-        if (AttackManager.isHealNegated(entity) && !the_last_sword$isAbsoluteDestructionDamage(damageSource)) {
-            float currentHealNegationHealth = AttackManager.getLockedHealth(entity);
-            float expectedHealthAfterDamage = currentHealNegationHealth - damageAmount;
-            AttackManager.updateHealNegationHealth(entity, expectedHealthAfterDamage);
-        }
+    //actuallyHurt：限伤逻辑
+    @Inject(method = "actuallyHurt", at = @At("HEAD"), cancellable = true)
+    private void onLivingEntityActuallyHurt(DamageSource damageSource, float damageAmount, CallbackInfo ci) {
+        LivingEntity entity = (LivingEntity) (Object) this;
 
-        int defenceLevel = getDefenceLevel(entity);
-        if (defenceLevel < 1) {
+        if (entity.level().isClientSide) {
             return;
         }
 
+        if (!EntityUtil.hasProtection(entity)) {
+            return;
+        }
+
+        //限伤计算
         float maxHealth = (float) entity.getAttributeValue(Attributes.MAX_HEALTH);
         float damageReductionRatio = (float) TheLastSwordConfiguration.getDefenceCustomHealthDamageReductionSafely();
         float maxDamagePerHit = (float) TheLastSwordConfiguration.getDefenceMaxDamagePerHitSafely();
         float damageLimit = Math.min(maxHealth * damageReductionRatio, maxDamagePerHit);
+        float realDamage = Math.min(damageAmount, damageLimit);
 
-        float realDamage;
-
-        if (defenceLevel >= 3) {
-            realDamage = 0.0f;
-        } else if (defenceLevel == 2) {
-            if (damageAmount > damageLimit) {
-                realDamage = 0.0f;
-            } else {
-                realDamage = damageAmount;
-            }
-        } else {
-            realDamage = Math.min(damageAmount, damageLimit);
-        }
-
+        //扣除自定义血量
         if (realDamage > 0.0f) {
-            float currentHealth = DefenceManager.getHealth(entity);
-            float newHealth = currentHealth - realDamage;
-            DefenceManager.modifyHealth(entity, newHealth);
+            float currentHealth = EntityUtil.getTrueHealth(entity);
+            EntityUtil.setTrueHealth(entity, currentHealth - realDamage);
         }
 
+        //取消原版扣血
         ci.cancel();
     }
 
@@ -225,17 +211,19 @@ public class LivingEntityMixin {
             return;
         }
 
-        if (AttackManager.isHealNegated(entity)) {
+        //禁疗状态下禁止回血
+        if (EntityUtil.isHealBanned(entity)) {
             ci.cancel();
             return;
         }
 
-        if (getDefenceLevel(entity) >= 1) {
+        //检查是否受保护
+        if (EntityUtil.hasProtection(entity)) {
             if (healAmount > 0) {
-                float currentHealth = DefenceManager.getHealth(entity);
+                float currentHealth = EntityUtil.getTrueHealth(entity);
                 float maxHealth = (float) entity.getAttributeValue(Attributes.MAX_HEALTH);
                 float newHealth = Math.min(currentHealth + healAmount, maxHealth);
-                DefenceManager.modifyHealth(entity, newHealth);
+                EntityUtil.setTrueHealth(entity, newHealth);
             }
             ci.cancel();
         }
@@ -249,24 +237,22 @@ public class LivingEntityMixin {
             return;
         }
 
-        if (AttackManager.isHealNegated(entity)) {
-            float currentHealNegationHealth = AttackManager.getLockedHealth(entity);
-            if (health > currentHealNegationHealth) {
+        //禁疗状态下阻止提升血量
+        if (EntityUtil.isHealBanned(entity)) {
+            float currentHealth = entity.getHealth();
+            if (health > currentHealth) {
                 ci.cancel();
                 return;
             }
-            if (health < currentHealNegationHealth) {
-                AttackManager.updateHealNegationHealth(entity, health);
-            }
-            return;
         }
 
-        if (getDefenceLevel(entity) >= 1) {
-            float currentHealth = DefenceManager.getHealth(entity);
+        //检查是否受保护
+        if (EntityUtil.hasProtection(entity)) {
+            float currentHealth = EntityUtil.getTrueHealth(entity);
             if (health > currentHealth) {
                 float maxHealth = (float) entity.getAttributeValue(Attributes.MAX_HEALTH);
                 float newHealth = Math.min(health, maxHealth);
-                DefenceManager.modifyHealth(entity, newHealth);
+                EntityUtil.setTrueHealth(entity, newHealth);
             }
             ci.cancel();
         }
@@ -276,18 +262,9 @@ public class LivingEntityMixin {
     private void onLivingEntityGetHealth(CallbackInfoReturnable<Float> cir) {
         LivingEntity entity = (LivingEntity) (Object) this;
 
-        if (entity.level().isClientSide) {
-            return;
-        }
-
-        if (AttackManager.isHealNegated(entity)) {
-            float healNegationHealth = AttackManager.getLockedHealth(entity);
-            cir.setReturnValue(healNegationHealth);
-            return;
-        }
-
-        if (getDefenceLevel(entity) >= 1) {
-            float trueHealth = DefenceManager.getHealth(entity);
+        //防御系统返回真实血量（双端一致）
+        if (EntityUtil.hasProtection(entity)) {
+            float trueHealth = EntityUtil.getTrueHealth(entity);
             cir.setReturnValue(trueHealth);
         }
     }
@@ -295,7 +272,7 @@ public class LivingEntityMixin {
     @Inject(method = "die", at = @At("HEAD"), cancellable = true)
     private void onLivingEntityDie(DamageSource damageSource, CallbackInfo ci) {
         LivingEntity entity = (LivingEntity) (Object) this;
-        if (getDefenceLevel(entity) >= 1) {
+        if (EntityUtil.hasProtection(entity)) {
             ci.cancel();
         }
     }
@@ -303,7 +280,6 @@ public class LivingEntityMixin {
     @Inject(method = "die", at = @At("RETURN"))
     private void onLivingEntityDieReturn(DamageSource damageSource, CallbackInfo ci) {
         LivingEntity entity = (LivingEntity) (Object) this;
-        AttackManager.clearHealNegation(entity);
-        AttackManager.clearAll(entity);
+        EntityUtil.clearHealBan(entity);
     }
 }

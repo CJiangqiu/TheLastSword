@@ -19,7 +19,7 @@ public class TestEntityTheLastEndLayer extends RenderLayer<TestEntity, HumanoidM
 
     //测试实体纹理（着色器会在黑色区域自动应用星空效果）
     private static final ResourceLocation TEXTURE =
-        new ResourceLocation(TheLastSwordMod.MOD_ID, "textures/entity/test_entity.png");
+        new ResourceLocation(TheLastSwordMod.MOD_ID, "textures/entities/test_entity.png");
 
     public TestEntityTheLastEndLayer(RenderLayerParent<TestEntity, HumanoidModel<TestEntity>> renderer) {
         super(renderer);

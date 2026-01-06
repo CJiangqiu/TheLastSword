@@ -22,4 +22,10 @@ public class ModSounds {
             SOUNDS.register("lost_wraith",
                     () -> SoundEvent.createVariableRangeEvent(
                             new ResourceLocation(TheLastSwordMod.MOD_ID, "lost_wraith")));
+
+    //危险技能提醒音效
+    public static final RegistryObject<SoundEvent> ALARM =
+            SOUNDS.register("alarm",
+                    () -> SoundEvent.createVariableRangeEvent(
+                            new ResourceLocation(TheLastSwordMod.MOD_ID, "alarm")));
 }

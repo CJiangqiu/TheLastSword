@@ -10,10 +10,10 @@ public class TheLastSwordCommand {
         dispatcher.register(
             Commands.literal("the_last_sword")
                 .requires(source -> source.hasPermission(2))
-                //防御系统子命令
-                .then(DefenceCommand.registerSubCommand())
                 //攻击系统子命令
                 .then(AttackCommand.registerSubCommand())
+                //防御系统子命令
+                .then(DefenceCommand.registerSubCommand())
         );
     }
 }

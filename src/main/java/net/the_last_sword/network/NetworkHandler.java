@@ -35,12 +35,6 @@ public class NetworkHandler {
                 .consumerMainThread(ChangeModePacket::handle)
                 .add();
 
-        CHANNEL.messageBuilder(TheLastEndRemoveClientPacket.class, id())
-                .encoder(TheLastEndRemoveClientPacket::encode)
-                .decoder(TheLastEndRemoveClientPacket::decode)
-                .consumerMainThread(TheLastEndRemoveClientPacket::handle)
-                .add();
-
         //挖掘预览系统网络包
         CHANNEL.messageBuilder(PreviewBlocksPacket.class, id())
                 .encoder(PreviewBlocksPacket::encode)
@@ -71,6 +65,13 @@ public class NetworkHandler {
                 .encoder(SyncSummonGuiPacket::encode)
                 .decoder(SyncSummonGuiPacket::decode)
                 .consumerMainThread(SyncSummonGuiPacket::handle)
+                .add();
+
+        //防御配置同步网络包
+        CHANNEL.messageBuilder(DefenceConfigPacket.class, id())
+                .encoder(DefenceConfigPacket::encode)
+                .decoder(DefenceConfigPacket::new)
+                .consumerMainThread(DefenceConfigPacket::handle)
                 .add();
     }
 

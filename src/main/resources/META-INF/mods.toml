@@ -11,22 +11,34 @@ credits="Original texture resource owner&Original author: queenofsquiggles,Test:
 authors="CJiangqiu"
 description="An unofficial version of The Last Sword Mod,bringing this classic weapon to Forge 1.20.1."
 logoFile="assets/the_last_sword/textures/logo.png"
+
 [[dependencies.the_last_sword]]
-    modId="minecraft"
-    mandatory=true
-    versionRange="[1.20.1]"
-    ordering="NONE"
-    side="BOTH"
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1]"
+ordering="NONE"
+side="BOTH"
+
 [[dependencies.the_last_sword]]
-    modId="jei"
-    mandatory=false
-    versionRange="[1,)"
-    ordering="NONE"
-    side="BOTH"
+modId="eca"
+mandatory=true
+versionRange="[1.0.5,)"
+ordering="NONE"
+side="BOTH"
+
 [[dependencies.the_last_sword]]
-    modId="geckolib"
-    mandatory=true
-    versionRange="[1,)"
-    ordering="NONE"
-    side="BOTH"
+modId="geckolib"
+mandatory=true
+versionRange="[4.8.2,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.the_last_sword]]
+modId="curios"
+mandatory=true
+versionRange="[5.14.1,)"
+ordering="NONE"
+side="BOTH"
+
+
 

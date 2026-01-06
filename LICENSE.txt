@@ -1,61 +1,184 @@
-Anything Goes As Long As It’s Free Mod License (AGALAF-Mod) Version 2.0
+As Long As It’s Free License (ALIF)
+Version 1.0
+
 Copyright (c) 2025 CJiangqiu
-────────────────────────────────────────────────────────────────────────
+
+────────────────────────────────────────────────────────
+0. Purpose (Non-normative)
+This license is intended to allow almost any form of use, modification, and
+redistribution of the Work, while prohibiting resale or long-term paywalling
+of the Work (or any part of it) as something obtainable only through payment.
+Early-access sponsorship is allowed, but it must be released to the public for
+free within a limited period.
+
+────────────────────────────────────────────────────────
 1. Definitions
-   1.1 “Work” means all files covered by this license, including source code,
-        scripts, documentation, and the following protected “Assets”.
-   1.2 “Assets” means original visual or audio materials supplied with the
-        Work, such as textures, models, icons, UI layouts, sound effects,
-        as well as any AI model weights provided by the author.
-   1.3 “Direct Monetization” means charging money specifically for the
-        Work or any of its Assets—e.g. paid downloads, paid modpacks,
-        in-server stores, or selling extracted Assets.
-   1.4 “Indirect Monetization” means earning revenue from a larger work or
-        service that merely **uses** the Work (e.g. ad-supported videos,
-        map entrance fees, server subscriptions) without charging for the
-        Work or its Assets themselves.
-   1.5 “Modified Work” means any derivative, translation, alteration, or
-        merger of the Work.
+1.1 “Work” means all content released under this license, including but not
+limited to source code, scripts, documentation, configuration, data files, and
+“Resources/Assets”.
 
+1.2 “Resources/Assets” means original materials and data included in or
+distributed with the Work, including but not limited to images/textures,
+models, icons, UI layouts, audio/sound effects/music, text content, and any AI
+model weights or training artifacts provided by the author.
+
+1.3 “Distribute” means to provide the Work or any part of it to any third party
+by any means, including but not limited to uploading, reposting, publishing,
+mirroring, bundling, providing it in a pack, or making it available for
+download or access via a server/network service.
+
+1.4 “Modified Work” means any derivative of the Work, including any
+derivation, translation, modification, adaptation, merger, port, refactor, or
+other transformation (including changes to Resources/Assets). Forks and ports
+typically constitute a Modified Work.
+
+1.5 “Free Access Channel” means a channel through which any person can obtain a
+copy of the Work (or a Modified Work), a download link, or access rights
+without paying any fee and without any paywall, and without gaining additional
+access rights by payment.
+
+1.6 “Paywall” includes but is not limited to paid downloads, paid
+subscriptions/memberships, sponsorship/tips used as an unlock, paid early
+access, “sponsors-only” availability, requiring payment to obtain a download
+link/join a download group/access a page, or requiring payment to unlock
+features or content.
+
+1.7 “Direct Monetization / Resale” means charging for the Work or any of its
+Resources/Assets, or placing the ability to obtain, access, download, use, or
+unlock the Work (or its features/content) behind any Paywall; and also includes
+selling/reselling the Work or extracted Resources/Assets.
+
+1.8 “Indirect Revenue” means earning revenue from a broader work or service
+that uses the Work, provided that the Work and its Resources/Assets are not
+placed behind any Paywall (e.g., platform playback rewards, ad revenue, general
+sponsorship).
+
+1.9 “Early Access Version” means a preview/beta/dev/pre-release version that is
+provided to sponsors before it is released publicly for free, including any
+builds or version content available only to sponsors.
+
+1.10 “Written Permission” means explicit permission from the original author
+given in a verifiable written form (e.g., email, direct message, or an Issue/PR
+comment with provable identity).
+
+────────────────────────────────────────────────────────
 2. Grant of Rights
-   Provided you comply with Sections 3 and 4, the copyright holder grants
-   you a worldwide, royalty-free, non-exclusive, sublicensable license to:
-   a) use, copy, modify, and merge the Work;
-   b) redistribute the Work or any Modified Work **free of charge**; and
-   c) employ the Work in projects or services that yield Indirect
-      Monetization, provided all other terms of this license are met.
+Subject to Sections 3 and 4, the copyright holder grants you a worldwide,
+royalty-free, non-exclusive license to:
+(a) use, copy, and run the Work;
+(b) modify the Work and create Modified Works;
+(c) Distribute the Work or any Modified Work; and
+(d) use the Work in contexts that may generate Indirect Revenue.
 
-3. Restrictions
-   3.1 **Direct Monetization is prohibited.**
-   3.2 You may not place the Work or its Assets in any paid product,
-       resource store, subscription bundle, or similar offering.
-   3.3 You must not remove or alter this license text or the copyright
-       notice from any copy or Modified Work.
-   3.4 You must not suggest that the original author provides support or
-       accepts liability for any Modified Work.
+────────────────────────────────────────────────────────
+3. Monetization & Distribution Rules (Core Terms)
+3.1 Direct Monetization / Resale is prohibited unless you have the original
+author’s prior Written Permission.
 
-4. Conditions
-   4.1 Every copy or Modified Work you distribute must include the complete
-       copyright notice and this license in full.
-   4.2 Any Modified Work **remains subject to this license** unless you
-       obtain the author’s written permission to relicense it.
-   4.3 You must comply with all applicable laws and platform terms of
-       service when using or distributing the Work.
+3.2 Without Written Permission, you must not Distribute or provide the Work or
+any of its Resources/Assets (including extracted Resources/Assets), whether as
+a whole or in parts, in a manner that is obtainable only through a Paywall.
 
-5. Disclaimer of Warranty
-   The Work is provided “AS IS”, without warranty of any kind, express or
-   implied, including but not limited to the warranties of merchantability,
-   fitness for a particular purpose, and non-infringement.
+3.3 Sponsorship/donations/tips are allowed, and Early Access Versions are
+allowed, but only if all of the following conditions are met:
+    (a) A publicly available version must always exist: at all times you must
+        provide at least one usable public version via a Free Access Channel
+        (e.g., the latest public release or a stable public release).
+    (b) Early access must be released within a time limit: any Early Access
+        Version must be released publicly via a Free Access Channel no later
+        than 6 calendar months from the date it is first provided to any
+        sponsor.
+    (c) Public release must be the same version and content: the public release
+        at/within the time limit must not be a “crippled” or “feature-removed”
+        version intended to evade this requirement; the same version content
+        provided to sponsors must become freely available within the time limit
+        (necessary security/stability fixes before release are allowed, but may
+        not be used as a reason to delay indefinitely).
+    (d) No permanent sponsors-only content: you must not create any version,
+        feature, or content that is permanently obtainable only by sponsors. Any
+        extension beyond 6 calendar months requires the original author’s prior
+        Written Permission.
+    (e) No paid asset listing/resale: even with early access, you must not sell
+        or list the Work or its Resources/Assets as paid “assets”, paid packs,
+        or paid store items for resale.
 
-6. Limitation of Liability
-   In no event shall the author be liable for any claim, damages, or other
-   liability, whether in an action of contract, tort, or otherwise, arising
-   from, out of, or in connection with the Work or the use or other dealings
-   in the Work. All legal risk arising from your use, modification, or
-   distribution of the Work is borne solely by you.
+3.4 Indirect Revenue is allowed (e.g., making videos, livestreams, tutorials,
+maps, demo projects using the Work and earning revenue). However, if you
+Distribute such a derivative/secondary work, that secondary work must also have
+a Free Access Channel and must not be obtainable only through a Paywall, unless
+you have the original author’s prior Written Permission.
 
-7. Governing Law & Dispute Resolution
-   This license shall be governed by the laws of the jurisdiction chosen by
-   the author. Any dispute arising under this license shall be settled in
-   the courts or arbitration forum designated by the author.
-────────────────────────────────────────────────────────────────────────
+3.5 You must not impose additional restrictions (whether by technical measures
+or contractual terms) that conflict with this license (e.g., restricting others
+from copying, modifying, or freely redistributing the Work).
+
+────────────────────────────────────────────────────────
+4. Attribution, License Continuity, and Modification Marking
+4.1 For every Distribution of the Work or any Modified Work, you must include,
+in the same distribution package or on the same release page:
+    (a) the complete copyright notice; and
+    (b) this license text in full.
+
+4.2 Any Modified Work that you Distribute must remain under this ALIF license
+(license continuity), unless you obtain the original author’s prior Written
+Permission to relicense.
+
+4.3 When you Distribute a Modified Work, you should clearly mark that it is
+modified/ported/refactored/forked to avoid confusion with the original Work
+(e.g., in README, release notes, or a changelog).
+
+4.4 You must not remove, alter, or hide this license text or the copyright
+notice.
+
+────────────────────────────────────────────────────────
+5. No Endorsement & Fork Liability Separation
+5.1 Any third-party Modified Work (including forks, ports, refactors) is solely
+the responsibility of its publisher. The original author is not responsible
+for the legality, security, compliance, quality, availability, or any losses
+caused by such versions.
+
+5.2 You must not state or imply that the original author endorses, supports, or
+accepts liability for your Modified Work, unless you have the original author’s
+Written Permission.
+
+────────────────────────────────────────────────────────
+6. Trademarks and Branding
+This license does not grant any rights to the original author’s name,
+trademarks, logos, or branding. Except as necessary for attribution/source
+notice, you must not use them to imply endorsement.
+
+────────────────────────────────────────────────────────
+7. Disclaimer of Warranty
+THE WORK IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+
+────────────────────────────────────────────────────────
+8. Limitation of Liability
+TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT SHALL THE ORIGINAL AUTHOR
+BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE
+WORK OR THE USE, MODIFICATION, OR DISTRIBUTION OF THE WORK. ALL RISK ARISING
+FROM YOUR USE, MODIFICATION, OR DISTRIBUTION OF THE WORK IS BORNE SOLELY BY
+YOU.
+
+────────────────────────────────────────────────────────
+9. Termination
+If you breach any term of this license, the rights granted to you under this
+license terminate automatically. Upon termination, you must immediately cease
+any distribution or provision that violates this license (especially any
+Direct Monetization/Paywalling or failure to release early access within the
+time limit).
+
+────────────────────────────────────────────────────────
+10. Governing Law and Dispute Resolution
+This license is governed by the laws of the original author’s principal place
+of residence (or principal place of business), excluding conflict-of-law rules.
+Disputes arising from this license shall be handled by courts with jurisdiction
+in that location, unless both parties agree in writing to an alternative forum.
+
+────────────────────────────────────────────────────────
+11. Severability
+If any provision of this license is held invalid or unenforceable, the
+remaining provisions shall remain in full force and effect.
+────────────────────────────────────────────────────────

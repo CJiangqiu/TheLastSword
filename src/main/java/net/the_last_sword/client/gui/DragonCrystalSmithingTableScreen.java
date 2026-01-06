@@ -7,7 +7,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.the_last_sword.TheLastSwordMod;
-import net.the_last_sword.block.menu.DragonCrystalSmithingTableMenu;
+import net.the_last_sword.client.gui.menu.DragonCrystalSmithingTableMenu;
 
 public class DragonCrystalSmithingTableScreen extends AbstractContainerScreen<DragonCrystalSmithingTableMenu> {
 

@@ -14,6 +14,11 @@ import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.entity.DragonCrystalSwordProjectile;
 import net.the_last_sword.entity.DragonLightingEntity;
 import net.the_last_sword.entity.DragonSwordProjectile;
+import net.the_last_sword.entity.GuardianArcherEntity;
+import net.the_last_sword.entity.GuardianBerserkerEntity;
+import net.the_last_sword.entity.GuardianOfSealedSpireEntity;
+import net.the_last_sword.entity.GuardianSaberEntity;
+import net.the_last_sword.entity.LostWraithEntity;
 import net.the_last_sword.entity.TheLastEndLightingEntity;
 import net.the_last_sword.entity.TheLastEndSwordProjectile;
 import net.the_last_sword.entity.TheLastEndSwordWraithEntity;
@@ -78,18 +83,6 @@ public class ModEntities {
                 .build("the_last_end_sword_projectile")
         );
 
-    //终焉剑灵
-    public static final RegistryObject<EntityType<TheLastEndSwordWraithEntity>> THE_LAST_END_SWORD_WRAITH =
-        ENTITY_TYPES.register("the_last_end_sword_wraith",
-            () -> EntityType.Builder.of((EntityType<TheLastEndSwordWraithEntity> type, Level level) ->
-                    new TheLastEndSwordWraithEntity(type, level), MobCategory.CREATURE)
-                .sized(0.6f, 1.95f)
-                .clientTrackingRange(64)
-                .updateInterval(3)
-                .fireImmune()
-                .build("the_last_end_sword_wraith")
-        );
-
     //测试实体
     public static final RegistryObject<EntityType<TestEntity>> TEST_ENTITY =
         ENTITY_TYPES.register("test_entity",
@@ -101,6 +94,72 @@ public class ModEntities {
                 .build("test_entity")
         );
 
+    //封印尖塔守卫
+    public static final RegistryObject<EntityType<GuardianOfSealedSpireEntity>> GUARDIAN_OF_SEALED_SPIRE =
+        ENTITY_TYPES.register("guardian_of_sealed_spire",
+            () -> EntityType.Builder.of(GuardianOfSealedSpireEntity::new, MobCategory.MONSTER)
+                .sized(0.6f, 1.95f)
+                .clientTrackingRange(64)
+                .updateInterval(3)
+                .fireImmune()
+                .build("guardian_of_sealed_spire")
+        );
+
+    //守卫剑士
+    public static final RegistryObject<EntityType<GuardianSaberEntity>> GUARDIAN_SABER =
+        ENTITY_TYPES.register("guardian_saber",
+            () -> EntityType.Builder.of(GuardianSaberEntity::new, MobCategory.MONSTER)
+                .sized(0.6f, 1.95f)
+                .clientTrackingRange(64)
+                .updateInterval(3)
+                .fireImmune()
+                .build("guardian_saber")
+        );
+
+    //守卫狂战士
+    public static final RegistryObject<EntityType<GuardianBerserkerEntity>> GUARDIAN_BERSERKER =
+        ENTITY_TYPES.register("guardian_berserker",
+            () -> EntityType.Builder.of(GuardianBerserkerEntity::new, MobCategory.MONSTER)
+                .sized(0.6f, 1.95f)
+                .clientTrackingRange(64)
+                .updateInterval(3)
+                .fireImmune()
+                .build("guardian_berserker")
+        );
+
+    //守卫弓箭手
+    public static final RegistryObject<EntityType<GuardianArcherEntity>> GUARDIAN_ARCHER =
+        ENTITY_TYPES.register("guardian_archer",
+            () -> EntityType.Builder.of(GuardianArcherEntity::new, MobCategory.MONSTER)
+                .sized(0.6f, 1.95f)
+                .clientTrackingRange(64)
+                .updateInterval(3)
+                .fireImmune()
+                .build("guardian_archer")
+        );
+
+    //迷失战魂
+    public static final RegistryObject<EntityType<LostWraithEntity>> LOST_WRAITH =
+        ENTITY_TYPES.register("lost_wraith",
+            () -> EntityType.Builder.of(LostWraithEntity::new, MobCategory.MONSTER)
+                .sized(0.6f, 1.95f)
+                .clientTrackingRange(64)
+                .updateInterval(3)
+                .fireImmune()
+                .build("lost_wraith")
+        );
+
+    //终焉剑灵
+    public static final RegistryObject<EntityType<TheLastEndSwordWraithEntity>> THE_LAST_END_SWORD_WRAITH =
+        ENTITY_TYPES.register("the_last_end_sword_wraith",
+            () -> EntityType.Builder.of(TheLastEndSwordWraithEntity::new, MobCategory.MONSTER)
+                .sized(0.6f, 1.95f)
+                .clientTrackingRange(64)
+                .updateInterval(3)
+                .fireImmune()
+                .build("the_last_end_sword_wraith")
+        );
+
     public static void register(IEventBus eventBus) {
         ENTITY_TYPES.register(eventBus);
     }
@@ -108,7 +167,12 @@ public class ModEntities {
     //注册实体属性
     @SubscribeEvent
     public static void registerAttributes(EntityAttributeCreationEvent event) {
-        event.put(THE_LAST_END_SWORD_WRAITH.get(), TheLastEndSwordWraithEntity.createAttributes().build());
         event.put(TEST_ENTITY.get(), TestEntity.createAttributes().build());
+        event.put(GUARDIAN_OF_SEALED_SPIRE.get(), GuardianOfSealedSpireEntity.createAttributes().build());
+        event.put(GUARDIAN_SABER.get(), GuardianSaberEntity.createAttributes().build());
+        event.put(GUARDIAN_BERSERKER.get(), GuardianBerserkerEntity.createAttributes().build());
+        event.put(GUARDIAN_ARCHER.get(), GuardianArcherEntity.createAttributes().build());
+        event.put(LOST_WRAITH.get(), LostWraithEntity.createAttributes().build());
+        event.put(THE_LAST_END_SWORD_WRAITH.get(), TheLastEndSwordWraithEntity.createAttributes().build());
     }
 }

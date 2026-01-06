@@ -2,7 +2,6 @@ package net.the_last_sword.mixin;
 
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.the_last_sword.defence.DefenceManager;
 import net.the_last_sword.util.EntityUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -21,13 +20,7 @@ public class MobTargetingMixin {
             return;
         }
 
-        int level = DefenceManager.hasDefenceRecord(target) ? DefenceManager.getDefenceLevel(target) : 0;
-        if (level >= 3) {
-            ci.cancel();
-            return;
-        }
-
-        //统一使用 canAttack 判断（包含宠物、剑灵的所有盟友关系）
+        //判断盟友关系
         if (!EntityUtil.canAttack(mob, target)) {
             ci.cancel();
         }

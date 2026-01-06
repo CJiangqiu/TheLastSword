@@ -19,7 +19,7 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.wrapper.SidedInvWrapper;
 import net.the_last_sword.init.ModBlockEntities;
-import net.the_last_sword.block.menu.DragonCrystalSmithingTableMenu;
+import net.the_last_sword.client.gui.menu.DragonCrystalSmithingTableMenu;
 
 import javax.annotation.Nullable;
 import java.util.stream.IntStream;

@@ -22,6 +22,7 @@ public class DragonCrystal extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
-        tooltip.add(Component.translatable("item_tooltip.the_last_sword.dragon_crystal"));
+        tooltip.add(Component.translatable("item_tooltip_lore.the_last_sword.dragon_crystal")
+            .withStyle(net.minecraft.ChatFormatting.GRAY));
     }
 }

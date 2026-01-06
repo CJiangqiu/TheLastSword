@@ -4,8 +4,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.entity.EntityInLevelCallback;
-import net.the_last_sword.defence.DefenceManager;
 import net.the_last_sword.init.ModEffects;
+import net.the_last_sword.summon.WraithSummonManager;
+import net.the_last_sword.util.EntityUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -19,8 +20,7 @@ public class EntityMixin {
     private void theLastSword$preventKill(CallbackInfo ci) {
         Entity self = (Entity) (Object) this;
         if (self instanceof LivingEntity livingEntity) {
-            int level = DefenceManager.hasDefenceRecord(livingEntity) ? DefenceManager.getDefenceLevel(livingEntity) : 0;
-            if (level >= 1) {
+            if (EntityUtil.hasProtection(livingEntity)) {
                 ci.cancel();
             }
         }
@@ -30,8 +30,7 @@ public class EntityMixin {
     private void theLastSword$preventDiscard(CallbackInfo ci) {
         Entity self = (Entity) (Object) this;
         if (self instanceof LivingEntity livingEntity) {
-            int level = DefenceManager.hasDefenceRecord(livingEntity) ? DefenceManager.getDefenceLevel(livingEntity) : 0;
-            if (level >= 1) {
+            if (EntityUtil.hasProtection(livingEntity)) {
                 ci.cancel();
             }
         }
@@ -39,41 +38,45 @@ public class EntityMixin {
 
     @Inject(method = "remove", at = @At("HEAD"), cancellable = true)
     private void theLastSword$preventRemove(Entity.RemovalReason reason, CallbackInfo ci) {
+        //维度切换时不阻止移除
+        if (reason == Entity.RemovalReason.CHANGED_DIMENSION) {
+            return;
+        }
         Entity self = (Entity) (Object) this;
         if (!(self instanceof LivingEntity living)) {
             return;
         }
-        int level = DefenceManager.hasDefenceRecord(living) ? DefenceManager.getDefenceLevel(living) : 0;
-        if (level >= 1) {
-            if (!(living instanceof Player && reason == Entity.RemovalReason.CHANGED_DIMENSION)) {
-                ci.cancel();
-            }
+        if (EntityUtil.hasProtection(living)) {
+            ci.cancel();
         }
     }
 
     @Inject(method = "setRemoved", at = @At("HEAD"), cancellable = true)
     private void theLastSword$preventSetRemoved(Entity.RemovalReason reason, CallbackInfo ci) {
+        //维度切换时不阻止移除
+        if (reason == Entity.RemovalReason.CHANGED_DIMENSION) {
+            return;
+        }
         Entity self = (Entity) (Object) this;
         if (!(self instanceof LivingEntity living)) {
             return;
         }
-        int level = DefenceManager.hasDefenceRecord(living) ? DefenceManager.getDefenceLevel(living) : 0;
-        if (level >= 1) {
-            if (!(living instanceof Player && reason == Entity.RemovalReason.CHANGED_DIMENSION)) {
-                ci.cancel();
-            }
+        if (EntityUtil.hasProtection(living)) {
+            ci.cancel();
         }
     }
 
     @Inject(method = "setLevelCallback", at = @At("HEAD"), cancellable = true)
     private void theLastSword$preventSetLevelCallback(EntityInLevelCallback callback, CallbackInfo ci) {
         Entity self = (Entity) (Object) this;
+        //维度切换时不阻止（检查实体的移除原因）
+        if (self.getRemovalReason() == Entity.RemovalReason.CHANGED_DIMENSION) {
+            return;
+        }
         if (!(self instanceof LivingEntity living)) {
             return;
         }
-
-        int level = DefenceManager.hasDefenceRecord(living) ? DefenceManager.getDefenceLevel(living) : 0;
-        if (level >= 2) {
+        if (EntityUtil.hasProtection(living)) {
             if (callback == EntityInLevelCallback.NULL) {
                 ci.cancel();
             }
@@ -87,6 +90,46 @@ public class EntityMixin {
         if (self instanceof LivingEntity livingEntity) {
             if (livingEntity.hasEffect(ModEffects.PHASING.get())) {
                 cir.setReturnValue(false);
+            }
+        }
+    }
+
+    //剑灵系统盟友判断
+    @Inject(method = "isAlliedTo", at = @At("HEAD"), cancellable = true)
+    private void theLastSword$checkWraithAllied(Entity other, CallbackInfoReturnable<Boolean> cir) {
+        Entity self = (Entity)(Object)this;
+
+        //情况1：自己是剑灵 - 检查对方是否是主人或主人的盟友
+        if (self instanceof LivingEntity living && WraithSummonManager.isWraith(living)) {
+            Player owner = WraithSummonManager.getOwner(living, self.level());
+            if (owner != null) {
+                //不攻击主人
+                if (other == owner) {
+                    cir.setReturnValue(true);
+                    return;
+                }
+                //不攻击主人的盟友
+                if (EntityUtil.areOriginalAllies(owner, other)) {
+                    cir.setReturnValue(true);
+                    return;
+                }
+            }
+        }
+
+        //情况2：对方是剑灵 - 检查自己是否是对方主人或主人的盟友
+        if (other instanceof LivingEntity living && WraithSummonManager.isWraith(living)) {
+            Player owner = WraithSummonManager.getOwner(living, other.level());
+            if (owner != null) {
+                //主人不攻击剑灵
+                if (self == owner) {
+                    cir.setReturnValue(true);
+                    return;
+                }
+                //主人的盟友不攻击剑灵
+                if (EntityUtil.areOriginalAllies(owner, self)) {
+                    cir.setReturnValue(true);
+                    return;
+                }
             }
         }
     }

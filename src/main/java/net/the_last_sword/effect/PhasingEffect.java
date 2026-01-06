@@ -8,10 +8,10 @@ import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
-import net.the_last_sword.defence.DefenceManager;
 import net.the_last_sword.init.ModEffects;
+import net.eca.api.EcaAPI;
 
-//虚化效果：穿墙、透视、免疫伤害、3级防御
+//虚化效果：穿墙、透视、免疫伤害（通过ECA无敌）
 public class PhasingEffect extends MobEffect {
 
     public PhasingEffect() {
@@ -22,9 +22,9 @@ public class PhasingEffect extends MobEffect {
     public void addAttributeModifiers(LivingEntity entity, AttributeMap attributeMap, int amplifier) {
         super.addAttributeModifiers(entity, attributeMap, amplifier);
 
-        //虚化效果自动获得3级防御
+        //虚化效果设置ECA无敌
         if (!entity.level().isClientSide) {
-            DefenceManager.register(entity, 3);
+            EcaAPI.setInvulnerable(entity, true);
         }
     }
 
@@ -34,9 +34,9 @@ public class PhasingEffect extends MobEffect {
 
         //只在buff真正结束时执行清理（检查实体是否还有虚化效果）
         if (!entity.hasEffect(ModEffects.PHASING.get())) {
-            //移除虚化时自动添加的3级防御
+            //移除ECA无敌
             if (!entity.level().isClientSide) {
-                DefenceManager.clear(entity);
+                EcaAPI.setInvulnerable(entity, false);
             }
 
             //检查配置是否启用虚化结束时破坏方块功能
