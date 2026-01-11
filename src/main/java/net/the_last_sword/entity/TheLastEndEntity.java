@@ -126,6 +126,14 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
         if (tag.contains("SPAWN_TICK")) {
             setSpawnTick(tag.getInt("SPAWN_TICK"));
         }
+
+        //从结构加载时重新注册防御系统（结构加载不会调用 finalizeSpawn）
+        if (!level().isClientSide) {
+            float maxHealth = (float) getAttributeValue(Attributes.MAX_HEALTH);
+            if (!EntityUtil.hasProtection(this)) {
+                EntityUtil.registerDefence(this, maxHealth);
+            }
+        }
     }
 
     @Override

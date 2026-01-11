@@ -1,7 +1,7 @@
 {
   "type": "the_last_sword:dragon_crystal_smithing",
   "template": {
-    "item": "the_last_sword:dragon_crystal_upgrade_template"
+    "item": "the_last_sword:ancient_energy_core"
   },
   "input": {
     "item": "the_last_sword:dragon_crystal_armor_boots",

@@ -10,6 +10,7 @@ public class CompatCheck {
     private static Boolean curiosLoaded = null;
     private static Boolean touhouLittleMaidLoaded = null;
     private static Boolean jadeLoaded = null;
+    private static Boolean tlsuvLoaded = null;
 
     public static boolean isJeiLoaded() {
         if (jeiLoaded == null) {
@@ -37,6 +38,14 @@ public class CompatCheck {
             touhouLittleMaidLoaded = ModList.get().isLoaded("touhou_little_maid");
         }
         return touhouLittleMaidLoaded;
+    }
+
+    //检测"最终之剑：虚空之下"附属mod
+    public static boolean isTLSUVLoaded() {
+        if (tlsuvLoaded == null) {
+            tlsuvLoaded = ModList.get().isLoaded("tlsuv");
+        }
+        return tlsuvLoaded;
     }
 
 }

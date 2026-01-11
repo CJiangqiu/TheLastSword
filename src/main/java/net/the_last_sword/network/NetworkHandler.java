@@ -73,6 +73,13 @@ public class NetworkHandler {
                 .decoder(DefenceConfigPacket::new)
                 .consumerMainThread(DefenceConfigPacket::handle)
                 .add();
+
+        //附魔应用网络包
+        CHANNEL.messageBuilder(EnchantmentApplyPacket.class, id())
+                .encoder(EnchantmentApplyPacket::encode)
+                .decoder(EnchantmentApplyPacket::decode)
+                .consumerMainThread(EnchantmentApplyPacket::handle)
+                .add();
     }
 
     //发送到服务端

@@ -1,10 +1,12 @@
 package net.the_last_sword.init;
 
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.client.model.WingsThatCoverTheWorldModel;
 import net.the_last_sword.client.renderer.*;
@@ -33,5 +35,14 @@ public class ModEntityRenderers {
     @SubscribeEvent
     public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
         event.registerLayerDefinition(WingsThatCoverTheWorldModel.LAYER_LOCATION, WingsThatCoverTheWorldModel::createBodyLayer);
+    }
+
+    //注册方块实体渲染器
+    @SubscribeEvent
+    public static void onClientSetup(FMLClientSetupEvent event) {
+        event.enqueueWork(() -> {
+            BlockEntityRenderers.register(ModBlockEntities.DRAGON_CRYSTAL_ENCHANTING_TABLE.get(),
+                context -> new DragonCrystalEnchantingTableRenderer());
+        });
     }
 }

@@ -81,7 +81,7 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:dragon_egg",
-          "weight": 3,
+          "weight": 5,
           "functions": [
             {
               "function": "set_count",
@@ -108,6 +108,64 @@
             {
               "function": "set_count",
               "count": 1
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "the_last_sword:dragon_crystal_necklace",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "set_count",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "the_last_sword:dragon_crystal_ring",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "set_count",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "the_last_sword:dragon_crystal_crown",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "set_count",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "the_last_sword:ancient_energy_core",
+          "weight": 5,
+          "functions": [
+            {
+              "function": "set_count",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "the_last_sword:dragon_crystal",
+          "weight": 5,
+          "functions": [
+            {
+              "function": "set_count",
+              "count": {
+                "min": 8,
+                "max": 16
+              }
             }
           ]
         }

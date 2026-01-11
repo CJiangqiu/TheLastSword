@@ -28,10 +28,16 @@ public class ModCreativeTabs {
                 output.accept(ModItems.DRAGON_CRYSTAL_SWORD.get());
                 output.accept(ModItems.DRAGON_SWORD.get());
                 output.accept(ModItems.THE_LAST_SWORD.get());
+                output.accept(ModItems.DRAGON_CRYSTAL_RING.get());
+                output.accept(ModItems.DRAGON_CRYSTAL_NECKLACE.get());
+                output.accept(ModItems.DRAGON_CRYSTAL_CROWN.get());
+                output.accept(ModItems.WINGS_THAT_COVER_THE_WORLD.get());
                 output.accept(ModItems.DRAGON_CRYSTAL_ARMOR_HELMET.get());
                 output.accept(ModItems.DRAGON_CRYSTAL_ARMOR_CHESTPLATE.get());
                 output.accept(ModItems.DRAGON_CRYSTAL_ARMOR_LEGGINGS.get());
                 output.accept(ModItems.DRAGON_CRYSTAL_ARMOR_BOOTS.get());
+                output.accept(ModItems.ANCIENT_ENERGY_CORE.get());
+                output.accept(ModItems.DRAGON_CRYSTAL_ENCHANTING_TABLE.get());
                 output.accept(ModItems.DRAGON_ARMOR_HELMET.get());
                 output.accept(ModItems.DRAGON_ARMOR_CHESTPLATE.get());
                 output.accept(ModItems.DRAGON_ARMOR_LEGGINGS.get());
@@ -60,14 +66,6 @@ public class ModCreativeTabs {
                     output.accept(ModItems.THE_HARBINGER_MEDAL.get());
                     output.accept(ModItems.THE_LEVIATHAN_MEDAL.get());
                     output.accept(ModItems.SCYLLA_MEDAL.get());
-                }
-
-                //Curios联动饰品
-                if (CompatCheck.isCuriosLoaded() && ModItems.DRAGON_CRYSTAL_RING != null) {
-                    output.accept(ModItems.DRAGON_CRYSTAL_RING.get());
-                    output.accept(ModItems.DRAGON_CRYSTAL_NECKLACE.get());
-                    output.accept(ModItems.DRAGON_CRYSTAL_CROWN.get());
-                    output.accept(ModItems.WINGS_THAT_COVER_THE_WORLD.get());
                 }
             })
             .build()

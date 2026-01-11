@@ -43,7 +43,7 @@ public class DragonSword extends TheLastEndSwordItems {
 
                 @Override
                 public float getAttackDamageBonus() {
-                    return 96f;
+                    return 196f;
                 }
 
                 @Override

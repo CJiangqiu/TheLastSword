@@ -31,6 +31,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.the_last_sword.entity.ai.GuardianOfSealedSpireAI;
 import net.the_last_sword.entity.ai.TheLastEndAI;
 import net.the_last_sword.init.ModEntities;
+import net.the_last_sword.util.EntityUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -160,6 +161,11 @@ public class GuardianOfSealedSpireEntity extends TheLastEndEntity {
             float maxHealth = (float) getAttributeValue(Attributes.MAX_HEALTH);
             setTheLastEndMaxHealth(maxHealth);
             setTheLastEndHealth(maxHealth);
+
+            //提前注册防御系统（确保 IS_PROTECTED 和 HEALTH_LOCK_ENABLED 同步）
+            if (!EntityUtil.hasProtection(this)) {
+                EntityUtil.registerDefence(this, maxHealth);
+            }
 
             //初始化等级为1（守卫固定1级）
             setTheLastEndLevel(1);

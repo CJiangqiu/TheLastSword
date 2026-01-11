@@ -1,14 +1,14 @@
 {
   "type": "the_last_sword:dragon_crystal_smithing",
   "template": {
-    "item": "the_last_sword:dragon_crystal_upgrade_template"
+    "item": "the_last_sword:ancient_energy_core"
   },
   "input": {
     "item": "the_last_sword:dragon_crystal_armor_helmet",
     "inputLevel": 5
   },
   "addition": {
-    "item": "the_last_sword:dragon_crystal"
+    "item": "the_last_sword:dragon_crystal_crown"
   },
   "output": {
     "item": "the_last_sword:dragon_armor_helmet",

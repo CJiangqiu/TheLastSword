@@ -261,7 +261,7 @@ public class TheLastEndSwordWraithAI extends TheLastEndAI {
         //超过16格立刻传送
         if (distance > 16.0) {
             Vec3 ownerPos = owner.position();
-            wraith.teleportTo(ownerPos.x, ownerPos.y, ownerPos.z);
+            EntityUtil.theLastEndTeleport(wraith, ownerPos.x, ownerPos.y, ownerPos.z);
             return;
         }
 
@@ -303,7 +303,7 @@ public class TheLastEndSwordWraithAI extends TheLastEndAI {
 
             //传送到主人身边
             Vec3 ownerPos = owner.position();
-            wraith.teleportTo(ownerPos.x, ownerPos.y, ownerPos.z);
+            EntityUtil.theLastEndTeleport(wraith, ownerPos.x, ownerPos.y, ownerPos.z);
 
             return true;
         }
@@ -561,6 +561,9 @@ public class TheLastEndSwordWraithAI extends TheLastEndAI {
 
             //执行传送（使用EntityUtil的传送方法）
             EntityUtil.theLastEndTeleport(wraith, targetX, targetY, targetZ);
+
+            //传送后强制转向目标
+            EntityUtil.faceTarget(wraith, target);
 
             //生成传送粒子效果（传送后）
             ParticleUtil.spawnCrossSlashTeleportParticles(wraith.level(),

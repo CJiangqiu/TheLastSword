@@ -55,7 +55,7 @@ public class TheLastSword extends TheLastEndSwordItems {
 
             @Override
             public float getAttackDamageBonus() {
-                return 196f; //高额攻击伤害
+                return 1020f; //高额攻击伤害
             }
 
             @Override

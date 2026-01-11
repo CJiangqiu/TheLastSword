@@ -28,12 +28,25 @@ public class ModItems {
         DragonCrystal::new
     );
 
+    public static final RegistryObject<Item> ANCIENT_ENERGY_CORE = ITEMS.register("ancient_energy_core",
+        AncientEnergyCore::new
+    );
+
     public static final RegistryObject<Item> DRAGON_CRYSTAL_UPGRADE_TEMPLATE = ITEMS.register("dragon_crystal_upgrade_template",
         DragonCrystalUpgradeTemplate::new
     );
 
     public static final RegistryObject<Item> DRAGON_CRYSTAL_SMITHING_TABLE = ITEMS.register("dragon_crystal_smithing_table",
         DragonCrystalSmithingTableBlockItem::new
+    );
+
+    public static final RegistryObject<Item> DRAGON_CRYSTAL_ENCHANTING_TABLE = ITEMS.register("dragon_crystal_enchanting_table",
+        () -> new net.the_last_sword.item.display.DragonCrystalEnchantingTableDisplayItem(
+            ModBlocks.DRAGON_CRYSTAL_ENCHANTING_TABLE.get(),
+            new Item.Properties()
+                .rarity(Rarity.UNCOMMON)
+                .fireResistant()
+        )
     );
 
     public static final RegistryObject<Item> DRAGON_CRYSTAL_SWORD = ITEMS.register("dragon_crystal_sword",
@@ -140,7 +153,13 @@ public class ModItems {
         TheLastEndSwordWraithLevel13SpawnEgg::new
     );
 
+    //Curios饰品（前置mod，直接注册）
+    public static final RegistryObject<Item> DRAGON_CRYSTAL_RING = CuriosItemsRegistry.registerDragonCrystalRing(ITEMS);
+    public static final RegistryObject<Item> DRAGON_CRYSTAL_NECKLACE = CuriosItemsRegistry.registerDragonCrystalNecklace(ITEMS);
+    public static final RegistryObject<Item> DRAGON_CRYSTAL_CROWN = CuriosItemsRegistry.registerDragonCrystalCrown(ITEMS);
+    public static final RegistryObject<Item> WINGS_THAT_COVER_THE_WORLD = CuriosItemsRegistry.registerWingsThatCoverTheWorld(ITEMS);
 
+    //Cataclysm联动物品（条件注册）
     public static RegistryObject<Item> ANCIENT_REMNANT_MEDAL;
     public static RegistryObject<Item> ENDER_GUARDIAN_MEDAL;
     public static RegistryObject<Item> IGNIS_MEDAL;
@@ -149,15 +168,10 @@ public class ModItems {
     public static RegistryObject<Item> THE_HARBINGER_MEDAL;
     public static RegistryObject<Item> THE_LEVIATHAN_MEDAL;
     public static RegistryObject<Item> SCYLLA_MEDAL;
-    public static RegistryObject<Item> DRAGON_CRYSTAL_RING;
-    public static RegistryObject<Item> DRAGON_CRYSTAL_NECKLACE;
-    public static RegistryObject<Item> DRAGON_CRYSTAL_CROWN;
-    public static RegistryObject<Item> WINGS_THAT_COVER_THE_WORLD;
 
     public static void register(IEventBus eventBus) {
         //注册条件物品
         registerConditionalItems();
-
         //注册到事件总线
         ITEMS.register(eventBus);
     }
@@ -174,14 +188,6 @@ public class ModItems {
             THE_HARBINGER_MEDAL = CataclysmItemsRegistry.registerTheHarbingerMedal(ITEMS);
             THE_LEVIATHAN_MEDAL = CataclysmItemsRegistry.registerTheLeviathanMedal(ITEMS);
             SCYLLA_MEDAL = CataclysmItemsRegistry.registerScyllaMedal(ITEMS);
-        }
-
-        //Curios饰品
-        if (CompatCheck.isCuriosLoaded()) {
-            DRAGON_CRYSTAL_RING = CuriosItemsRegistry.registerDragonCrystalRing(ITEMS);
-            DRAGON_CRYSTAL_NECKLACE = CuriosItemsRegistry.registerDragonCrystalNecklace(ITEMS);
-            DRAGON_CRYSTAL_CROWN = CuriosItemsRegistry.registerDragonCrystalCrown(ITEMS);
-            WINGS_THAT_COVER_THE_WORLD = CuriosItemsRegistry.registerWingsThatCoverTheWorld(ITEMS);
         }
     }
 }

@@ -8,7 +8,7 @@
     "inputLevel": 2
   },
   "addition": {
-    "item": "minecraft:dragon_egg"
+    "item": "the_last_sword:dragon_crystal"
   },
   "output": {
     "item": "the_last_sword:dragon_crystal_sword",

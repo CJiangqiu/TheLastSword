@@ -187,7 +187,7 @@ public class LostWraithEntity extends TheLastEndEntity {
 
     @Override
     protected float getStandingEyeHeight(@NotNull Pose pose, @NotNull EntityDimensions dimensions) {
-        return dimensions.height * 0.85f;
+        return 3.0f;  //固定眼睛高度为3格
     }
 
     @Override

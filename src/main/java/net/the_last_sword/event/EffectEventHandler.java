@@ -14,6 +14,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
+import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
 import net.the_last_sword.init.ModEffects;
 import net.the_last_sword.util.EntityUtil;
 import net.the_last_sword.util.TheLastSwordLogger;
@@ -59,8 +60,13 @@ public class EffectEventHandler {
             return;
         }
 
-        //防止无限递归（虚空伤害触发虚空伤害）
+        //防止无限递归（跳过虚空伤害和绝毁伤害）
         if (damageSource.is(DamageTypes.FELL_OUT_OF_WORLD)) {
+            return;
+        }
+
+        //防止与剑灵绝毁伤害形成递归
+        if (damageSource instanceof AbsoluteDestructionDamageSource) {
             return;
         }
 

@@ -16,11 +16,12 @@ import net.minecraft.world.level.block.Block;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.summon.WraithSummonManager;
 import net.the_last_sword.util.nbt.ItemLevelHelper;
+import top.theillusivec4.curios.api.type.capability.ICurioItem;
 
 import java.util.List;
 
-//龙魂灯笼物品 - 可召唤剑灵或放置为方块
-public class DragonSoulLanternItem extends BlockItem {
+//龙魂灯笼物品 - 可召唤剑灵、放置为方块或作为腰带饰品
+public class DragonSoulLanternItem extends BlockItem implements ICurioItem {
 
     public DragonSoulLanternItem(Block block, Properties properties) {
         super(block, properties);

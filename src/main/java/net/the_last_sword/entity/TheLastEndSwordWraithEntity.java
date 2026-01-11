@@ -25,6 +25,7 @@ import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.entity.ai.TheLastEndAI;
 import net.the_last_sword.entity.ai.TheLastEndSwordWraithAI;
 import net.the_last_sword.init.ModEffects;
+import net.the_last_sword.util.EntityUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -196,6 +197,11 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
             float maxHealth = (float) getAttributeValue(Attributes.MAX_HEALTH);
             setTheLastEndMaxHealth(maxHealth);
             setTheLastEndHealth(maxHealth);
+
+            //提前注册防御系统（确保 IS_PROTECTED 和 HEALTH_LOCK_ENABLED 同步）
+            if (!EntityUtil.hasProtection(this)) {
+                EntityUtil.registerDefence(this, maxHealth);
+            }
         }
 
         return result;

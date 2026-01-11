@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "the_last_sword:block/dragon_crystal_enchanting_table"
+  }
+}

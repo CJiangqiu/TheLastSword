@@ -31,9 +31,9 @@ public class DragonCrystalCrown extends Item implements ICurioItem {
     public Multimap<Attribute, AttributeModifier> getAttributeModifiers(SlotContext slotContext, UUID uuid, ItemStack stack) {
         Multimap<Attribute, AttributeModifier> modifiers = LinkedHashMultimap.create();
 
-        //最大生命值 +20
+        //最大生命值 +200
         modifiers.put(Attributes.MAX_HEALTH,
-            new AttributeModifier(CROWN_UUID, "dragon_crystal_crown_health", 20.0,
+            new AttributeModifier(CROWN_UUID, "dragon_crystal_crown_health", 200.0,
                 AttributeModifier.Operation.ADDITION));
 
         //攻击力 +20

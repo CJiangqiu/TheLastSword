@@ -49,7 +49,7 @@ public class DragonCrystalSmithingTableMenu extends AbstractContainerMenu {
         this.addSlot(new Slot(container, 0, 48, 40) {
             @Override
             public boolean mayPlace(ItemStack stack) {
-                return stack.is(ModItems.DRAGON_CRYSTAL_UPGRADE_TEMPLATE.get());
+                return !stack.isEmpty() && stack.getItem() instanceof net.the_last_sword.item.IDragonSmithingTemplate;
             }
 
             @Override

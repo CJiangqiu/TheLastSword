@@ -2,13 +2,14 @@ package net.the_last_sword.compat.curios;
 
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -35,6 +36,31 @@ public class CuriosEffectHandler {
         }
 
         handleDragonCrystalRingDamageBonus(event, attacker);
+    }
+
+    @SubscribeEvent
+    public static void onCriticalHit(CriticalHitEvent event) {
+        if (!CompatCheck.isCuriosLoaded()) {
+            return;
+        }
+
+        //只处理真正的暴击
+        if (!event.isVanillaCritical()) {
+            return;
+        }
+
+        Player player = event.getEntity();
+        if (!hasCurioEquipped(player, ModItems.DRAGON_CRYSTAL_NECKLACE.get())) {
+            return;
+        }
+
+        //计算暴击加成：20% + 幸运值×20%
+        double luck = player.getAttributeValue(Attributes.LUCK);
+        float bonusMultiplier = (float) (0.2 + luck * 0.2);
+
+        //在原有暴击倍率基础上增加
+        float newModifier = event.getDamageModifier() + bonusMultiplier;
+        event.setDamageModifier(newModifier);
     }
 
     @SubscribeEvent(priority = EventPriority.HIGH)
@@ -90,15 +116,10 @@ public class CuriosEffectHandler {
             return;
         }
 
-        //计算免疫概率：20% + 幸运等级*10%
-        double baseChance = 0.2;
-        int luckLevel = 0;
-        if (player.hasEffect(MobEffects.LUCK)) {
-            luckLevel = player.getEffect(MobEffects.LUCK).getAmplifier() + 1;
-        }
-        double totalChance = baseChance + (luckLevel * 0.1);
+        //计算免疫概率：20% + 幸运值×20%，最高90%
+        double luck = player.getAttributeValue(Attributes.LUCK);
+        double totalChance = Math.min(0.9, 0.2 + luck * 0.2);
 
-        //随机判定
         if (player.getRandom().nextDouble() < totalChance) {
             event.setCanceled(true);
         }

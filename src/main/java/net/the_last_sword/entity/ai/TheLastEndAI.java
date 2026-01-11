@@ -1,7 +1,9 @@
 package net.the_last_sword.entity.ai;
 
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 import net.the_last_sword.entity.TheLastEndEntity;
+import net.the_last_sword.util.EntityUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,6 +77,12 @@ public abstract class TheLastEndAI {
     //使用指定技能
     protected void useSkill(Skill skill) {
         if (currentSkill == null) {
+            //技能释放前强制转向目标
+            LivingEntity target = entity.getTarget();
+            if (target != null && target.isAlive()) {
+                EntityUtil.faceTarget(entity, target);
+            }
+
             currentSkill = skill;
             skill.use();
         }

@@ -47,6 +47,9 @@ public class TheLastSwordConfiguration {
     public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_ARMOR_ENDER_CRYSTAL_CHARGE_RATE;
     public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_ARMOR_ENDER_CRYSTAL_RANGE;
 
+    // The Last End Scroll Configuration | 终焉卷轴配置
+    public static ForgeConfigSpec.ConfigValue<Boolean> THE_LAST_END_SCROLL_ENABLE_PARTICLE_EFFECTS;
+
     // ═══════════════════════════════════════════════════════════════════════════════════
     // Entity Configuration | 实体配置
     // ═══════════════════════════════════════════════════════════════════════════════════
@@ -155,7 +158,6 @@ public class TheLastSwordConfiguration {
     // Compat Mods | 联动Mod配置
     public static ForgeConfigSpec.ConfigValue<Boolean> COMPAT_CATACLYSM_ENABLE;
 
-
     static {
         // ═══════════════════════════════════════════════════════════════════════════════
         // Item Configuration | 物品配置
@@ -169,10 +171,10 @@ public class TheLastSwordConfiguration {
         BUILDER.push("Generic");
         SWORD_INCREASE_VALUE = BUILDER
             .comment("Damage increased per level of upgrade when level<6.")
-            .define("Increase Value", 200.0);
+            .define("Increase Value", 20.0);
         SWORD_INCREASE_VALUE_HIGH_LEVEL = BUILDER
             .comment("Damage increased per level of upgrade when level>=6.")
-            .define("Increase Value High Level", 1024.0);
+            .define("Increase Value High Level", 200.0);
         SWORD_BLOCK_CANCEL_USE = BUILDER
             .comment("Cancel sword right-click usage by blocking with shield")
             .define("Block Cancel Use", true);
@@ -258,10 +260,10 @@ public class TheLastSwordConfiguration {
             .defineInRange("Energy Per Level", 102400, 0, Integer.MAX_VALUE);
         DRAGON_ARMOR_ENERGY_COST_PER_PIECE = BUILDER
             .comment("Energy consumption per armor piece per tick (1 tick = 1/20 second)")
-            .defineInRange("Energy Cost Per Piece", 1, 0, Integer.MAX_VALUE);
+            .defineInRange("Energy Cost Per Piece", 1024, 0, Integer.MAX_VALUE);
         DRAGON_ARMOR_PHASING_ENERGY_COST = BUILDER
-            .comment("Additional energy consumption per tick when in Phasing state")
-            .defineInRange("Phasing Energy Cost", 1, 0, Integer.MAX_VALUE);
+            .comment("Additional energy consumption per tick when in Phasing state (flying)")
+            .defineInRange("Phasing Energy Cost", 1024, 0, Integer.MAX_VALUE);
         DRAGON_ARMOR_ENDER_CRYSTAL_CHARGE_RATE = BUILDER
             .comment("Energy charge rate from End Crystals per tick (FE)",
                      "End Crystals will charge all items with energy capability")
@@ -270,6 +272,13 @@ public class TheLastSwordConfiguration {
             .comment("Detection range for End Crystal charging (blocks)",
                      "Players within this range wearing Dragon Armor will be charged")
             .defineInRange("Ender Crystal Range", 8, 2, 32);
+        BUILDER.pop();
+
+        // The Last End Scroll Configuration | 终焉卷轴配置
+        BUILDER.push("The Last End Scroll");
+        THE_LAST_END_SCROLL_ENABLE_PARTICLE_EFFECTS = BUILDER
+            .comment("Enable particle effects in The Last End Scroll GUI")
+            .define("Enable Particle Effects", true);
         BUILDER.pop();
 
         BUILDER.pop(); // End Armor
@@ -580,11 +589,11 @@ public class TheLastSwordConfiguration {
 
     //剑类配置
     public static double getIncreaseValueSafely() {
-        return safeGet(SWORD_INCREASE_VALUE, 200.0);
+        return safeGet(SWORD_INCREASE_VALUE, 20.0);
     }
 
     public static double getIncreaseValueHighLevelSafely() {
-        return safeGet(SWORD_INCREASE_VALUE_HIGH_LEVEL, 1024.0);
+        return safeGet(SWORD_INCREASE_VALUE_HIGH_LEVEL, 200.0);
     }
 
     public static boolean getBlockCancelUseSafely() {
@@ -669,11 +678,11 @@ public class TheLastSwordConfiguration {
     }
 
     public static int getDragonArmorEnergyCostPerPieceSafely() {
-        return safeGet(DRAGON_ARMOR_ENERGY_COST_PER_PIECE, 1);
+        return safeGet(DRAGON_ARMOR_ENERGY_COST_PER_PIECE, 1024);
     }
 
     public static int getDragonArmorPhasingEnergyCostSafely() {
-        return safeGet(DRAGON_ARMOR_PHASING_ENERGY_COST, 1);
+        return safeGet(DRAGON_ARMOR_PHASING_ENERGY_COST, 1024);
     }
 
     public static int getDragonArmorEnderCrystalChargeRateSafely() {
@@ -682,6 +691,11 @@ public class TheLastSwordConfiguration {
 
     public static int getDragonArmorEnderCrystalRangeSafely() {
         return safeGet(DRAGON_ARMOR_ENDER_CRYSTAL_RANGE, 8);
+    }
+
+    //终焉卷轴配置
+    public static boolean getTheLastEndScrollEnableParticleEffectsSafely() {
+        return safeGet(THE_LAST_END_SCROLL_ENABLE_PARTICLE_EFFECTS, true);
     }
 
     //攻击系统配置

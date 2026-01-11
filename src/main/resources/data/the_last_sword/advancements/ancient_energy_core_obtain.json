@@ -1,0 +1,38 @@
+{
+  "display": {
+    "icon": {
+      "item": "the_last_sword:ancient_energy_core"
+    },
+    "title": {
+      "translate": "advancements.ancient_energy_core_obtain.title"
+    },
+    "description": {
+      "translate": "advancements.ancient_energy_core_obtain.descr"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "ancient_energy_core_obtain": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "the_last_sword:ancient_energy_core"
+            ],
+            "count": {
+              "min": 1
+            }
+          }
+        ]
+      }
+    }
+  },
+  "rewards": {
+    "experience": 50
+  },
+  "parent": "the_last_sword:dragon_crystal_armor_set_obtain"
+}

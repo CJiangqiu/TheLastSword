@@ -1,7 +1,6 @@
 package net.the_last_sword.util;
 
 import net.eca.api.EcaAPI;
-import net.eca.util.health.HealthLockManager;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -67,21 +66,10 @@ public class EntityUtil {
         }
     }
 
-    //设置真实生命值（结合 ECA 锁血 API）
+    //设置真实生命值
     public static void setTrueHealth(LivingEntity entity, float health) {
         if (entity == null) return;
         entity.getEntityData().set(TRUE_HEALTH, Float.toString(health - 1024.0f));
-
-        //同步更新 ECA 锁定值
-        //如果已经锁血，只更新锁定值（避免触发完整 lockHealth 流程）
-        //如果未锁血，启用锁血（首次注册时）
-        if (EcaAPI.isHealthLocked(entity)) {
-            //直接更新锁定值，不触发 ECA 的多阶段 setHealth
-            HealthLockManager.setLock(entity, health);
-        } else {
-            //首次锁血
-            EcaAPI.lockHealth(entity, health);
-        }
     }
 
     //获取真实最大生命值
@@ -144,14 +132,11 @@ public class EntityUtil {
         setTrueMaxHealth(entity, maxHealth);
     }
 
-    //清除真实生命值（重置为0并解除锁血）
+    //清除真实生命值
     public static void clearTrueHealth(LivingEntity entity) {
         if (entity == null) return;
         setTrueHealth(entity, 0.0f);
         setTrueMaxHealth(entity, 0.0f);
-
-        //解除 ECA 血量锁定
-        EcaAPI.unlockHealth(entity);
     }
 
     // ==================== 防御保护 API ====================
@@ -169,7 +154,6 @@ public class EntityUtil {
     }
 
     //注册防御（如果没有保护才设置）
-    //同步机制：setTrueHealth 会自动同步启用 ECA 锁血
     public static void registerDefence(LivingEntity entity, float maxHealth) {
         if (entity == null) return;
 
@@ -181,20 +165,19 @@ public class EntityUtil {
         //设置保护标志（TLS 主系统）
         setProtection(entity, true);
 
-        //设置真实生命值（同步启用 ECA 锁血）
+        //设置真实生命值
         setTrueHealth(entity, maxHealth);
         setTrueMaxHealth(entity, maxHealth);
     }
 
     //清除防御数据
-    //同步机制：clearTrueHealth 会自动同步解除 ECA 锁血
     public static void clearDefence(LivingEntity entity) {
         if (entity == null) return;
 
         //清除保护标志（TLS 主系统）
         setProtection(entity, false);
 
-        //清除真实生命值（同步解除 ECA 锁血）
+        //清除真实生命值
         clearTrueHealth(entity);
     }
 
@@ -210,6 +193,9 @@ public class EntityUtil {
         if (entity == null) return false;
 
         try {
+            // 同步更新你们的实体数据系统
+            setTrueHealth(entity, expectedHealth);
+
             //玩家实体只执行基础修改
             if (entity instanceof Player) {
                 return EcaAPI.setHealth(entity, expectedHealth);

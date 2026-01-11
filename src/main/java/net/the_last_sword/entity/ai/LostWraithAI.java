@@ -17,6 +17,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
 import net.the_last_sword.entity.DragonLightingEntity;
+import net.the_last_sword.entity.GuardianOfSealedSpireEntity;
 import net.the_last_sword.entity.LostWraithEntity;
 import net.the_last_sword.init.ModEffects;
 import net.the_last_sword.init.ModEntities;
@@ -135,23 +136,23 @@ public class LostWraithAI extends TheLastEndAI {
             return;
         }
 
-        //寻找怪物目标
+        //寻找目标：玩家或封印尖塔守卫
         if (currentTarget == null) {
-            List<LivingEntity> nearbyMonsters = wraith.level().getEntitiesOfClass(
+            List<LivingEntity> nearbyTargets = wraith.level().getEntitiesOfClass(
                 LivingEntity.class,
                 wraith.getBoundingBox().inflate(MAX_SEARCH_DISTANCE),
                 entity -> entity.isAlive()
-                    && entity instanceof net.minecraft.world.entity.monster.Monster
+                    && (entity instanceof Player || entity instanceof net.the_last_sword.entity.GuardianOfSealedSpireEntity)
                     && EntityUtil.canAttack(wraith, entity)
             );
 
-            if (!nearbyMonsters.isEmpty()) {
-                LivingEntity closestMonster = nearbyMonsters.stream()
+            if (!nearbyTargets.isEmpty()) {
+                LivingEntity closestTarget = nearbyTargets.stream()
                     .min(Comparator.comparingDouble(m -> m.distanceToSqr(wraith)))
                     .orElse(null);
 
-                if (closestMonster != null) {
-                    wraith.setTarget(closestMonster);
+                if (closestTarget != null) {
+                    wraith.setTarget(closestTarget);
                 }
             }
         }

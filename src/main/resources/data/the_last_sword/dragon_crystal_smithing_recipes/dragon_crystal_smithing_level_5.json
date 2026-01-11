@@ -8,7 +8,7 @@
     "inputLevel": 5
   },
   "addition": {
-    "item": "minecraft:dragon_egg"
+    "item": "the_last_sword:dragon_soul_lantern"
   },
   "output": {
     "item": "the_last_sword:dragon_sword",

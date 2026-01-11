@@ -12,7 +12,7 @@ import net.minecraft.world.level.Level;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class DragonCrystalUpgradeTemplate extends SmithingTemplateItem {
+public class DragonCrystalUpgradeTemplate extends SmithingTemplateItem implements IDragonSmithingTemplate {
 
     private static final Component DRAGON_CRYSTAL_UPGRADE =
         Component.translatable("item.the_last_sword.dragon_crystal_upgrade_template").withStyle(ChatFormatting.GRAY);

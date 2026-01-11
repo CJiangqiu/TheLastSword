@@ -2,6 +2,7 @@ package net.the_last_sword.event;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
@@ -80,6 +81,10 @@ public class WraithSummonEventHandler {
         }
         //检查伤害源类型：如果已经是绝毁伤害，跳过
         if (event.getSource() instanceof AbsoluteDestructionDamageSource) {
+            return;
+        }
+        //防止与虚空附魔形成递归：跳过虚空伤害
+        if (event.getSource().is(DamageTypes.FELL_OUT_OF_WORLD)) {
             return;
         }
         //必须是生物造成的伤害

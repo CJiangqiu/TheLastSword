@@ -142,7 +142,7 @@ public class ModEntities {
     public static final RegistryObject<EntityType<LostWraithEntity>> LOST_WRAITH =
         ENTITY_TYPES.register("lost_wraith",
             () -> EntityType.Builder.of(LostWraithEntity::new, MobCategory.MONSTER)
-                .sized(0.6f, 1.95f)
+                .sized(0.6f, 3.5f)
                 .clientTrackingRange(64)
                 .updateInterval(3)
                 .fireImmune()
