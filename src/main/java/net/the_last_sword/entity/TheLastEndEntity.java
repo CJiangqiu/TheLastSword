@@ -1,8 +1,6 @@
 package net.the_last_sword.entity;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -12,13 +10,12 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraftforge.network.NetworkHooks;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
-import net.the_last_sword.entity.ai.TheLastEndAI;
 import net.the_last_sword.util.EntityUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -31,50 +28,32 @@ import software.bernie.geckolib.core.animation.RawAnimation;
 import software.bernie.geckolib.core.object.PlayState;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
-//终焉种基类
+// 终焉种基类
 public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntity {
 
-    //GeckoLib动画缓存
-   private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+    // 状态常量
+    public static final int STATE_DEATH = -1;
+    public static final int STATE_UNSPAWNED = 0;
+    public static final int STATE_SPAWNING = 1;
+    public static final int STATE_IDLE = 2;
 
-    //AI系统
-    private TheLastEndAI ai;
-
-    //动画字段
-    private static final EntityDataAccessor<String> ANIMATION =
-            SynchedEntityData.defineId(TheLastEndEntity.class, EntityDataSerializers.STRING);
-
-    //技能计时器
-    private static final EntityDataAccessor<Integer> SKILL_TICK =
+    // 同步字段
+    private static final EntityDataAccessor<Integer> ANIMATION_STATE =
             SynchedEntityData.defineId(TheLastEndEntity.class, EntityDataSerializers.INT);
 
-    //自定义无敌帧
-    private static final EntityDataAccessor<Integer> ALLOW_HURT_TICK =
+    private static final EntityDataAccessor<Integer> HURT_RESIST_TICK =
             SynchedEntityData.defineId(TheLastEndEntity.class, EntityDataSerializers.INT);
 
-    //等级
-    private static final EntityDataAccessor<Integer> THE_LAST_END_LEVEL =
+    private static final EntityDataAccessor<Integer> LEVEL =
             SynchedEntityData.defineId(TheLastEndEntity.class, EntityDataSerializers.INT);
 
-    //死亡字段
-    private static final EntityDataAccessor<Boolean> SHOULD_LEAVE =
+    private static final EntityDataAccessor<Integer> DEATH_TICK =
+            SynchedEntityData.defineId(TheLastEndEntity.class, EntityDataSerializers.INT);
+
+    private static final EntityDataAccessor<Boolean> ALL_THINGS_END =
             SynchedEntityData.defineId(TheLastEndEntity.class, EntityDataSerializers.BOOLEAN);
 
-    //死亡计时器
-    private static final EntityDataAccessor<Integer> LEAVE_TICK =
-            SynchedEntityData.defineId(TheLastEndEntity.class, EntityDataSerializers.INT);
-
-    //万物终焉状态
-    private static final EntityDataAccessor<Boolean> IS_ALL_THINGS_END =
-            SynchedEntityData.defineId(TheLastEndEntity.class, EntityDataSerializers.BOOLEAN);
-
-    //生成完成标记（用于出场动画）
-    private static final EntityDataAccessor<Boolean> IS_SPAWNED =
-            SynchedEntityData.defineId(TheLastEndEntity.class, EntityDataSerializers.BOOLEAN);
-
-    //生成时间计时器
-    private static final EntityDataAccessor<Integer> SPAWN_TICK =
-            SynchedEntityData.defineId(TheLastEndEntity.class, EntityDataSerializers.INT);
+    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
     protected TheLastEndEntity(EntityType<? extends TamableAnimal> entityType, Level level) {
         super(entityType, level);
@@ -83,126 +62,91 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
-        this.entityData.define(ANIMATION, "idle");
-        this.entityData.define(SKILL_TICK, 0);
-        this.entityData.define(ALLOW_HURT_TICK, 0);
-        this.entityData.define(THE_LAST_END_LEVEL, 1);
-        this.entityData.define(SHOULD_LEAVE, false);
-        this.entityData.define(LEAVE_TICK, 0);
-        this.entityData.define(IS_ALL_THINGS_END, false);
-        this.entityData.define(IS_SPAWNED, false);
-        this.entityData.define(SPAWN_TICK, 0);
+        this.entityData.define(ANIMATION_STATE, STATE_UNSPAWNED);
+        this.entityData.define(HURT_RESIST_TICK, 0);
+        this.entityData.define(LEVEL, 1);
+        this.entityData.define(DEATH_TICK, 0);
+        this.entityData.define(ALL_THINGS_END, false);
     }
 
-
-
-    @Override
-    public void readAdditionalSaveData(@NotNull CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        if (tag.contains("ANIMATION")) {
-            setAnimation(tag.getString("ANIMATION"));
-        }
-        if (tag.contains("SKILL_TICK")) {
-            setSkillTick(tag.getInt("SKILL_TICK"));
-        }
-        if (tag.contains("ALLOW_HURT_TICK")) {
-            setAllowHurtTick(tag.getInt("ALLOW_HURT_TICK"));
-        }
-        if (tag.contains("THE_LAST_END_LEVEL")) {
-            setTheLastEndLevel(tag.getInt("THE_LAST_END_LEVEL"));
-        }
-        if (tag.contains("SHOULD_LEAVE")) {
-            setShouldLeave(tag.getBoolean("SHOULD_LEAVE"));
-        }
-        if (tag.contains("LEAVE_TICK")) {
-            setLeaveTick(tag.getInt("LEAVE_TICK"));
-        }
-        if (tag.contains("IS_ALL_THINGS_END")) {
-            setAllThingsEnd(tag.getBoolean("IS_ALL_THINGS_END"));
-        }
-        if (tag.contains("IS_SPAWNED")) {
-            setSpawned(tag.getBoolean("IS_SPAWNED"));
-        }
-        if (tag.contains("SPAWN_TICK")) {
-            setSpawnTick(tag.getInt("SPAWN_TICK"));
-        }
-
-        //从结构加载时重新注册防御系统（结构加载不会调用 finalizeSpawn）
-        if (!level().isClientSide) {
-            float maxHealth = (float) getAttributeValue(Attributes.MAX_HEALTH);
-            if (!EntityUtil.hasProtection(this)) {
-                EntityUtil.registerDefence(this, maxHealth);
-            }
-        }
+    // 状态访问器
+    public int getAnimationState() {
+        return this.entityData.get(ANIMATION_STATE);
     }
 
-    @Override
-    public void addAdditionalSaveData(@NotNull CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
-        tag.putString("ANIMATION", getAnimation());
-        tag.putInt("SKILL_TICK", getSkillTick());
-        tag.putInt("ALLOW_HURT_TICK", getAllowHurtTick());
-        tag.putInt("THE_LAST_END_LEVEL", getTheLastEndLevel());
-        tag.putBoolean("SHOULD_LEAVE", shouldLeave());
-        tag.putInt("LEAVE_TICK", getLeaveTick());
-        tag.putBoolean("IS_ALL_THINGS_END", isAllThingsEnd());
-        tag.putBoolean("IS_SPAWNED", isSpawned());
-        tag.putInt("SPAWN_TICK", getSpawnTick());
-        setSkillTick(0);
-        setAnimation(getIdleAnimationName());
+    public void setAnimationState(int state) {
+        this.entityData.set(ANIMATION_STATE, state);
     }
 
-    //动画字段
-    public String getAnimation() {
-        return this.entityData.get(ANIMATION);
+    public boolean isReady() {
+        return getAnimationState() >= STATE_IDLE;
     }
 
-    public void setAnimation(String animation) {
-        this.entityData.set(ANIMATION, animation);
+    public boolean isDying() {
+        return getAnimationState() == STATE_DEATH;
     }
 
-    //技能计时器
-    public int getSkillTick() {
-        return this.entityData.get(SKILL_TICK);
+    public boolean canAct() {
+        return getAnimationState() >= STATE_IDLE;
     }
 
-    public void setSkillTick(int tick) {
-        this.entityData.set(SKILL_TICK, tick);
+    // 无敌帧
+    public int getHurtResistTick() {
+        return this.entityData.get(HURT_RESIST_TICK);
     }
 
-    //自定义血量（使用防御系统）
-    public float getTheLastEndHealth() {
-        return EntityUtil.getTrueHealth(this);
+    public void setHurtResistTick(int tick) {
+        this.entityData.set(HURT_RESIST_TICK, tick);
     }
 
-    public void setTheLastEndHealth(float health) {
-        EntityUtil.setTrueHealth(this, health);
-    }
-
-    //自定义最大血量（使用防御系统）
-    public float getTheLastEndMaxHealth() {
-        return EntityUtil.getTrueMaxHealth(this);
-    }
-
-    public void setTheLastEndMaxHealth(float maxHealth) {
-        EntityUtil.setTrueMaxHealth(this, maxHealth);
-    }
-
-    //自定义无敌帧
-    public int getAllowHurtTick() {
-        return this.entityData.get(ALLOW_HURT_TICK);
-    }
-
-    public void setAllowHurtTick(int tick) {
-        this.entityData.set(ALLOW_HURT_TICK, tick);
-    }
-
-    //子类可覆写：返回受伤后的无敌帧时长
-    protected int getAllowHurtTime() {
+    protected int getHurtResistTime() {
         return 20;
     }
 
-    //子类可覆写：返回单次受伤的限伤值
+    // 等级
+    public int getTheLastEndLevel() {
+        return this.entityData.get(LEVEL);
+    }
+
+    public void setTheLastEndLevel(int level) {
+        this.entityData.set(LEVEL, level);
+    }
+
+    // 死亡计时
+    public int getDeathTick() {
+        return this.entityData.get(DEATH_TICK);
+    }
+
+    public void setDeathTick(int tick) {
+        this.entityData.set(DEATH_TICK, tick);
+    }
+
+    // 万物终焉
+    public boolean isAllThingsEnd() {
+        return this.entityData.get(ALL_THINGS_END);
+    }
+
+    public void setAllThingsEnd(boolean value) {
+        this.entityData.set(ALL_THINGS_END, value);
+    }
+
+    // 自定义血量
+    public float getWorldAnchor() {
+        return EntityUtil.getWorldAnchor(this);
+    }
+
+    public void setWorldAnchor(float health) {
+        EntityUtil.setWorldAnchor(this, health);
+    }
+
+    public float getWorldAnchorMax() {
+        return EntityUtil.getWorldAnchorMax(this);
+    }
+
+    public void setWorldAnchorMax(float maxHealth) {
+        EntityUtil.setWorldAnchorMax(this, maxHealth);
+    }
+
     protected float getDamageLimit() {
         float maxHealth = (float) this.getAttributeValue(Attributes.MAX_HEALTH);
         float ratio = (float) TheLastSwordConfiguration.getDefenceCustomHealthDamageReductionSafely();
@@ -210,113 +154,47 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
         return Math.min(maxHealth * ratio, maxDamage);
     }
 
-    //等级
-    public int getTheLastEndLevel() {
-        return this.entityData.get(THE_LAST_END_LEVEL);
-    }
-
-    public void setTheLastEndLevel(int level) {
-        this.entityData.set(THE_LAST_END_LEVEL, level);
-    }
-
-    //死亡字段
-    public boolean shouldLeave() {
-        return this.entityData.get(SHOULD_LEAVE);
-    }
-
-    public void setShouldLeave(boolean shouldLeave) {
-        this.entityData.set(SHOULD_LEAVE, shouldLeave);
-    }
-
-    //死亡计时器
-    public int getLeaveTick() {
-        return this.entityData.get(LEAVE_TICK);
-    }
-
-    public void setLeaveTick(int tick) {
-        this.entityData.set(LEAVE_TICK, tick);
-    }
-
-    //万物终焉状态
-    public boolean isAllThingsEnd() {
-        return this.entityData.get(IS_ALL_THINGS_END);
-    }
-
-    public void setAllThingsEnd(boolean allThingsEnd) {
-        this.entityData.set(IS_ALL_THINGS_END, allThingsEnd);
-    }
-
-    //生成完成标记
-    public boolean isSpawned() {
-        return this.entityData.get(IS_SPAWNED);
-    }
-
-    public void setSpawned(boolean spawned) {
-        this.entityData.set(IS_SPAWNED, spawned);
-    }
-
-    //生成时间计时器
-    public int getSpawnTick() {
-        return this.entityData.get(SPAWN_TICK);
-    }
-
-    public void setSpawnTick(int tick) {
-        this.entityData.set(SPAWN_TICK, tick);
-    }
-
-    //子类可覆写：返回生成动画时长（tick）
-    protected int getSpawnAnimationDuration() {
-        return 110;  //默认5.5秒
-    }
-
-    //GeckoLib动画系统
+    // 动画系统
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        //运动控制器
-        controllers.add(new AnimationController<>(this, "movement", 0, this::movementAnimationPredicate));
-        //技能控制器
-        controllers.add(new AnimationController<>(this, "skill", 0, this::skillAnimationPredicate));
+        controllers.add(new AnimationController<>(this, "main", 0, this::animationPredicate));
     }
 
-    //运动动画逻辑
-    private PlayState movementAnimationPredicate(AnimationState<TheLastEndEntity> state) {
-        String currentAnim = getAnimation();
-        //如果正在播放技能动画，运动控制器停止
-        if (!currentAnim.equals("idle") && !currentAnim.equals(getIdleAnimationName())) {
+    private PlayState animationPredicate(AnimationState<TheLastEndEntity> state) {
+        int attackState = getAnimationState();
+
+        if (attackState == STATE_UNSPAWNED) {
+            String waitAnim = getWaitAnimationName();
+            if (waitAnim != null && !waitAnim.isEmpty()) {
+                state.setAnimation(RawAnimation.begin().thenLoop(waitAnim));
+                return PlayState.CONTINUE;
+            }
             return PlayState.STOP;
         }
 
-        //正常的运动动画逻辑（使用 GeckoLib 的移动检测）
-        if (state.isMoving()) {
-            state.setAnimation(RawAnimation.begin().thenLoop(getMovementAnimationName()));
-        } else {
-            state.setAnimation(RawAnimation.begin().thenLoop(getIdleAnimationName()));
-        }
-        return PlayState.CONTINUE;
-    }
-
-    //技能动画逻辑
-    private PlayState skillAnimationPredicate(AnimationState<TheLastEndEntity> state) {
-        String currentAnim = getAnimation();
-        String idleName = getIdleAnimationName();
-        String deathName = getDeathAnimationName();
-        String spawnName = getSpawnAnimationName();
-
-        //死亡动画优先级最高，直接播放
-        if (currentAnim.equals(deathName)) {
-            state.setAnimation(RawAnimation.begin().thenPlay(deathName));
+        if (attackState == STATE_IDLE) {
+            if (state.isMoving()) {
+                state.setAnimation(RawAnimation.begin().thenLoop(getWalkAnimationName()));
+            } else {
+                state.setAnimation(RawAnimation.begin().thenLoop(getIdleAnimationName()));
+            }
             return PlayState.CONTINUE;
         }
 
-        //生成动画优先级次之
-        if (currentAnim.equals(spawnName)) {
-            state.setAnimation(RawAnimation.begin().thenPlay(spawnName));
+        if (attackState == STATE_SPAWNING) {
+            state.setAnimation(RawAnimation.begin().thenPlay(getSpawnAnimationName()));
             return PlayState.CONTINUE;
         }
 
-        //技能动画播放（重置逻辑由技能系统自动管理）
-        if (!currentAnim.equals("idle") && !currentAnim.equals(idleName)) {
-            state.setAnimation(RawAnimation.begin().thenPlay(currentAnim));
+        if (attackState == STATE_DEATH) {
+            state.setAnimation(RawAnimation.begin().thenPlay(getDeathAnimationName()));
+            return PlayState.CONTINUE;
+        }
+
+        // 技能状态
+        String skillAnim = getSkillAnimationName(attackState);
+        if (skillAnim != null && !skillAnim.isEmpty()) {
+            state.setAnimation(RawAnimation.begin().thenPlay(skillAnim));
             return PlayState.CONTINUE;
         }
 
@@ -328,47 +206,30 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
         return this.cache;
     }
 
-    //子类实现：返回待机动画名称
+    // 子类必须实现的动画方法
     public abstract String getIdleAnimationName();
-
-    //子类实现：返回移动动画名称
-    public abstract String getMovementAnimationName();
-
-    //子类实现：返回死亡动画名称
+    public abstract String getWalkAnimationName();
     public abstract String getDeathAnimationName();
-
-    //子类实现：返回生成动画名称
     public abstract String getSpawnAnimationName();
 
-    //子类实现：创建AI实例
-    public abstract TheLastEndAI createAI();
+    public String getWaitAnimationName() {
+        return "";
+    }
 
-    //获取死亡动画时长（tick）- 子类可覆写
+    public abstract String getSkillAnimationName(int attackState);
+
     public int getDeathAnimationDuration() {
-        return 20;  //默认20tick（1秒）
+        return 20;
     }
 
-    //死亡开始时的自定义逻辑 - 子类可覆写
-    protected void onDeathStart() {
-        //默认为空，子类按需实现
+    public int getSpawnAnimationDuration() {
+        return 60;
     }
 
-    //安全移除实体（后门方法）
-    public void safeRemove() {
-        setTheLastEndHealth(0);
-        setShouldLeave(true);
-        if (ai != null) {
-            ai.shutdown();
-        }
-        //清除防御保护
-        EntityUtil.clearDefence(this);
-        EntityUtil.theLastEndRemove(this, RemovalReason.KILLED);
-    }
-
-    //覆写逻辑
+    // Tick逻辑
     @Override
     public void tick() {
-        //首次 tick：初始化防御保护（服务端）
+        // 首次tick初始化防御系统
         if (!level().isClientSide && tickCount == 1) {
             if (!EntityUtil.hasProtection(this)) {
                 float maxHealth = (float) this.getAttributeValue(Attributes.MAX_HEALTH);
@@ -376,123 +237,124 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
             }
         }
 
+        // 无效目标清理
+        if (!level().isClientSide) {
+            LivingEntity target = getTarget();
+            if (!EntityUtil.canAttack(this, target)) {
+                setTarget(null);
+            }
+        }
+
+        // 死亡状态
+        if (isDying()) {
+            handleDeathTick();
+            return;
+        }
+
+        // 未生成状态
+        if (getAnimationState() == STATE_UNSPAWNED) {
+            onUnspawnedTick();
+            return;
+        }
+
+        // 生成动画状态
+        if (getAnimationState() == STATE_SPAWNING) {
+            super.baseTick();
+            onSpawningTick();
+            return;
+        }
+
+        // 正常状态
         super.tick();
 
-        //统一死亡处理
-        handleDeath();
-
-        //生成动画处理
-        handleSpawn();
-
-        //AI系统（生成完成后才执行）
-        if (isSpawned()) {
-            if (ai == null) {
-                ai = createAI();
-            }
-            ai.update();
-        }
-
-        //无敌帧递减
-        if (getAllowHurtTick() > 0) {
-            setAllowHurtTick(getAllowHurtTick() - 1);
+        // 无敌帧递减
+        if (getHurtResistTick() > 0) {
+            setHurtResistTick(getHurtResistTick() - 1);
         }
     }
 
-    //统一死亡处理流程
-    private void handleDeath() {
-        //死亡处理
-        if (shouldLeave()) {
-            int leaveTick = getLeaveTick();
-            if (leaveTick == 0) {
-                if (ai != null) {
-                    ai.shutdown();  //关闭AI
-                }
-                //死亡开始：播放死亡动画
-                setAnimation(getDeathAnimationName());
-                //调用子类自定义死亡开始逻辑
-                onDeathStart();
-            }
-            setLeaveTick(leaveTick + 1);
+    protected void onUnspawnedTick() {
+    }
 
-            //死亡动画播放完毕后移除实体
-            if (leaveTick >= getDeathAnimationDuration()) {
-                //只在服务端掉落战利品
-                if (!level().isClientSide) {
-                    this.dropAllDeathLoot(damageSources().generic());
-                }
-                this.safeRemove();
-            }
-            return;
+    protected void onSpawningTick() {
+    }
+
+    private void handleDeathTick() {
+        int deathTick = getDeathTick();
+
+        if (deathTick == 0) {
+            onDeathStart();
         }
 
-        //血量归零触发死亡
-        if (getTheLastEndHealth() <= 0 && !shouldLeave()) {
-            setShouldLeave(true);
+        setDeathTick(deathTick + 1);
+
+        if (deathTick >= getDeathAnimationDuration()) {
+            onDeathEnd();
         }
     }
 
-    //统一生成动画处理流程
-    private void handleSpawn() {
-        //如果已经生成完成或正在死亡，跳过
-        if (isSpawned() || shouldLeave()) {
-            return;
+    protected void onDeathStart() {
+    }
+
+    protected void onDeathEnd() {
+        if (!level().isClientSide) {
+            this.dropAllDeathLoot(damageSources().generic());
         }
+        safeRemove();
+    }
 
-        int spawnTick = getSpawnTick();
-
-        //第一次tick，播放生成动画
-        if (spawnTick == 0) {
-            setAnimation(getSpawnAnimationName());
-        }
-
-        //递增生成计时器
-        setSpawnTick(spawnTick + 1);
-
-        //生成动画播放完毕
-        if (spawnTick >= getSpawnAnimationDuration()) {
-            setSpawned(true);
-            setAnimation(getIdleAnimationName());
+    public void triggerDeath() {
+        if (!isDying()) {
+            setAnimationState(STATE_DEATH);
+            setDeathTick(0);
         }
     }
 
-    //自定义血量系统（由 LivingEntityMixin 接管）
-    //getHealth() 和 getMaxHealth() 由 Mixin 覆写，无需在此重复定义
+    public void safeRemove() {
+        setWorldAnchor(0);
+        EntityUtil.clearDefence(this);
+        EntityUtil.theLastEndRemove(this, RemovalReason.KILLED);
+    }
 
+    // 伤害处理
     @Override
     public void actuallyHurt(@NotNull DamageSource damageSource, float damageAmount) {
-        //无敌帧检查
-        if (getAllowHurtTick() > 0) {
+        if (getHurtResistTick() > 0) {
             return;
         }
-        //获取限伤值
+
         float damageLimit = getDamageLimit();
         int level = getTheLastEndLevel();
         float realDamage;
+
         if (level <= 5) {
-            //0-5级：限伤后扣血
             realDamage = Math.min(damageAmount, damageLimit);
         } else {
-            //6-13级：超过限伤值则免疫
             if (damageAmount > damageLimit) {
                 return;
             }
             realDamage = damageAmount;
         }
-        //扣除真实血量
+
         if (realDamage > 0) {
-            float currentHealth = getTheLastEndHealth();
-            setTheLastEndHealth(currentHealth - realDamage);
+            float currentHealth = getWorldAnchor();
+            float newHealth = currentHealth - realDamage;
+            setWorldAnchor(newHealth);
+
+            if (newHealth <= 0 && !isDying()) {
+                triggerDeath();
+            }
         }
-        //设置无敌帧
-        int hurtTime = getAllowHurtTime();
-        setAllowHurtTick(hurtTime);
-        //同步原版无敌帧
+
+        int hurtTime = getHurtResistTime();
+        setHurtResistTick(hurtTime);
         this.invulnerableTime = hurtTime;
     }
 
+    // 死亡相关覆写
     @Override
     public void die(@NotNull DamageSource damageSource) {
-        if (shouldLeave()) {
+        if (isDying()) {
             super.die(damageSource);
         }
     }
@@ -503,24 +365,24 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
 
     @Override
     public boolean isDeadOrDying() {
-        return shouldLeave();
+        return isDying();
     }
 
     @Override
     public boolean isAlive() {
-        return !shouldLeave();
+        return !isDying();
     }
 
     @Override
     public void kill() {
-        if (shouldLeave()) {
+        if (isDying()) {
             super.kill();
         }
     }
-    
+
     @Override
     public void remove(@NotNull RemovalReason reason) {
-        if (level() instanceof ServerLevel && !shouldLeave()) {
+        if (level() instanceof ServerLevel && !isDying()) {
             return;
         }
         super.remove(reason);
@@ -528,13 +390,43 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
 
     @Override
     public void setRemoved(@NotNull RemovalReason reason) {
-        if (level() instanceof ServerLevel && !shouldLeave()) {
+        if (level() instanceof ServerLevel && !isDying()) {
             return;
         }
         super.setRemoved(reason);
     }
 
-    //终焉种特性
+    // NBT
+    @Override
+    public void readAdditionalSaveData(@NotNull CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        if (tag.contains("AnimationState")) {
+            setAnimationState(tag.getInt("AnimationState"));
+        }
+        if (tag.contains("Level")) {
+            setTheLastEndLevel(tag.getInt("Level"));
+        }
+        if (tag.contains("AllThingsEnd")) {
+            setAllThingsEnd(tag.getBoolean("AllThingsEnd"));
+        }
+
+        if (!level().isClientSide) {
+            float maxHealth = (float) getAttributeValue(Attributes.MAX_HEALTH);
+            if (!EntityUtil.hasProtection(this)) {
+                EntityUtil.registerDefence(this, maxHealth);
+            }
+        }
+    }
+
+    @Override
+    public void addAdditionalSaveData(@NotNull CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        tag.putInt("AnimationState", getAnimationState());
+        tag.putInt("Level", getTheLastEndLevel());
+        tag.putBoolean("AllThingsEnd", isAllThingsEnd());
+    }
+
+    // 终焉种特性
     @Override
     public boolean removeWhenFarAway(double distanceToClosestPlayer) {
         return false;
@@ -586,7 +478,6 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
     public void setNoAi(boolean noAi) {
     }
 
-    //禁用繁殖
     @Override
     public boolean canBreed() {
         return false;

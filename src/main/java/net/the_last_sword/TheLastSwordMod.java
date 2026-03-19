@@ -76,8 +76,8 @@ public class TheLastSwordMod {
     private void initializeEcaProtection() {
         try {
             //添加黑名单关键词，防止 ECA 的阶段2扫描修改这些字段
-            EcaAPI.addHealthBlacklistKeyword("TRUE_HEALTH");
-            EcaAPI.addHealthBlacklistKeyword("TRUE_MAX_HEALTH");
+            EcaAPI.addHealthBlacklistKeyword("WORLD_ANCHOR");
+            EcaAPI.addHealthBlacklistKeyword("WORLD_ANCHOR_MAX");
             EcaAPI.addHealthBlacklistKeyword("HEAL_BAN_TIME");
             EcaAPI.addHealthBlacklistKeyword("IS_PROTECTED");
 

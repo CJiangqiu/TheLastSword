@@ -14,6 +14,10 @@ public class EntityTickListMixin {
 
     @Inject(method = "add", at = @At("HEAD"), cancellable = true)
     private void onEntityTickListAdd(Entity entity, CallbackInfo ci) {
+        if (entity == null) {
+            ci.cancel();
+            return;
+        }
         if (entity.level() instanceof ServerLevel level) {
             if (EntityUtil.isReviveBanned(level, entity.getType())) {
                 ci.cancel();

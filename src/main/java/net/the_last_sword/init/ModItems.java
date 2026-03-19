@@ -158,6 +158,9 @@ public class ModItems {
     public static final RegistryObject<Item> DRAGON_CRYSTAL_NECKLACE = CuriosItemsRegistry.registerDragonCrystalNecklace(ITEMS);
     public static final RegistryObject<Item> DRAGON_CRYSTAL_CROWN = CuriosItemsRegistry.registerDragonCrystalCrown(ITEMS);
     public static final RegistryObject<Item> WINGS_THAT_COVER_THE_WORLD = CuriosItemsRegistry.registerWingsThatCoverTheWorld(ITEMS);
+    public static final RegistryObject<Item> EXTREME_LIFE_SUPPORT_DEVICE = CuriosItemsRegistry.registerExtremeLifeSupportDevice(ITEMS);
+    public static final RegistryObject<Item> DIMENSION_EXPLORER = CuriosItemsRegistry.registerDimensionExplorer(ITEMS);
+    public static final RegistryObject<Item> THE_GIVERS_PAIN = CuriosItemsRegistry.registerTheGiversPain(ITEMS);
 
     //Cataclysm联动物品（条件注册）
     public static RegistryObject<Item> ANCIENT_REMNANT_MEDAL;

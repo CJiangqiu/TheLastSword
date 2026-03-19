@@ -19,28 +19,70 @@ import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
+import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
+import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.phys.Vec3;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
-import net.the_last_sword.entity.ai.TheLastEndAI;
-import net.the_last_sword.entity.ai.TheLastEndSwordWraithAI;
+import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
+import net.the_last_sword.entity.ai.*;
 import net.the_last_sword.init.ModEffects;
 import net.the_last_sword.util.EntityUtil;
+import net.the_last_sword.util.ParticleUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
-//终焉剑灵实体
+// 终焉剑灵实体
 public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
 
-    //纹理字段
+    // 技能状态常量
+    public static final int STATE_SWIFT_DASH = 3;
+    public static final int STATE_ENCHANT = 4;
+    public static final int STATE_DOUBLE_STRIKE = 5;
+    public static final int STATE_CROSS_SLASH = 6;
+    public static final int STATE_BLOCK = 7;
+    public static final int STATE_MOON_LIGHT_STRIKE = 8;
+    public static final int STATE_END_OF_ALL_THINGS = 9;
+
+    public static final Map<UUID, Boolean> FORCE_CROSS_SLASH = new ConcurrentHashMap<>();
+
     public static final EntityDataAccessor<String> TEXTURE =
             SynchedEntityData.defineId(TheLastEndSwordWraithEntity.class, EntityDataSerializers.STRING);
 
-    //技能目标列表
     public final List<LivingEntity> targetList = new ArrayList<>();
+
+    private static final String END_MARK_KEY = "THE_LAST_END";
+    public static final int END_MARK_THRESHOLD = 13;
+
+    //增加目标的终焉标记
+    public static void addEndMark(LivingEntity target) {
+        target.getPersistentData().putInt(END_MARK_KEY, getEndMark(target) + 1);
+    }
+
+    //获取目标的终焉标记数量
+    public static int getEndMark(LivingEntity target) {
+        return target.getPersistentData().getInt(END_MARK_KEY);
+    }
+
+    //减少目标的终焉标记
+    public static void reduceEndMark(LivingEntity target) {
+        int current = getEndMark(target);
+        if (current > 0) {
+            target.getPersistentData().putInt(END_MARK_KEY, current - 1);
+        }
+    }
 
     public TheLastEndSwordWraithEntity(EntityType<? extends TheLastEndSwordWraithEntity> type, Level world) {
         super(type, world);
@@ -55,7 +97,6 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
         this.entityData.define(TEXTURE, "the_last_end_sword_wraith");
     }
 
-    //属性
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes()
                 .add(Attributes.MOVEMENT_SPEED, 0.3)
@@ -72,26 +113,21 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
         int newLevel = getTheLastEndLevel();
 
         if (newLevel != oldLevel && !level().isClientSide) {
-            //根据等级更新属性
             updateAttributesByLevel(newLevel);
         }
     }
 
-    //根据等级和配置更新属性
     private void updateAttributesByLevel(int level) {
-        //计算生命值
         double healthPerLevel = (level <= 5)
                 ? TheLastSwordConfiguration.getSwordWraithHealthPerLevelSafely()
                 : TheLastSwordConfiguration.getSwordWraithHealthPerHighLevelSafely();
         double newMaxHealth = 200.0 + (level * healthPerLevel);
 
-        //计算攻击力
         double attackPerLevel = (level <= 5)
                 ? TheLastSwordConfiguration.getSwordWraithAttackPerLevelSafely()
                 : TheLastSwordConfiguration.getSwordWraithAttackPerHighLevelSafely();
         double newAttack = 20.0 + (level * attackPerLevel);
 
-        //应用属性
         var healthAttr = this.getAttribute(Attributes.MAX_HEALTH);
         if (healthAttr != null) {
             healthAttr.setBaseValue(newMaxHealth);
@@ -102,38 +138,43 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
             attackAttr.setBaseValue(newAttack);
         }
 
-        //同步更新真实生命值到最大值
-        setTheLastEndMaxHealth((float) newMaxHealth);
-        setTheLastEndHealth((float) newMaxHealth);
+        setWorldAnchorMax((float) newMaxHealth);
+        setWorldAnchor((float) newMaxHealth);
     }
 
     @Override
-    public void setAllThingsEnd(boolean enabled) {
-        boolean current = isAllThingsEnd();
-        super.setAllThingsEnd(enabled);
+    protected void registerGoals() {
+        super.registerGoals();
 
-        if (current != enabled && !level().isClientSide) {
-            if (enabled) {
-                //解锁万物终焉时的处理由AI负责
-            }
-        }
+        this.goalSelector.addGoal(1, new SwordWraithSwiftDashGoal(this));
+        this.goalSelector.addGoal(2, new SwordWraithCrossSlashGoal(this));
+        this.goalSelector.addGoal(3, new SwordWraithEnchantGoal(this));
+        this.goalSelector.addGoal(4, new SwordWraithDoubleStrikeGoal(this));
+        this.goalSelector.addGoal(5, new SwordWraithBlockGoal(this));
+        this.goalSelector.addGoal(6, new SwordWraithMoonLightStrikeGoal(this));
+        this.goalSelector.addGoal(7, new SwordWraithEndOfAllThingsGoal(this));
+
+        this.goalSelector.addGoal(8, new SwordWraithChaseTargetGoal(this));
+        this.goalSelector.addGoal(9, new SwordWraithFollowOwnerGoal(this));
+
+        this.goalSelector.addGoal(10, new FloatGoal(this));
+        this.goalSelector.addGoal(11, new LookAtPlayerGoal(this, Player.class, 8.0F));
+        this.goalSelector.addGoal(12, new RandomLookAroundGoal(this));
+
+        this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
+        this.targetSelector.addGoal(2, new SwordWraithOwnerHurtByTargetGoal(this));
+        this.targetSelector.addGoal(3, new SwordWraithOwnerHurtTargetGoal(this));
+        this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, Monster.class, true));
     }
 
-    //创建AI实例
-    @Override
-    public TheLastEndAI createAI() {
-        return new TheLastEndSwordWraithAI(this);
-    }
-
-    //动画名称
     @Override
     public String getIdleAnimationName() {
         return "idle";
     }
 
     @Override
-    public String getMovementAnimationName() {
-        return "idle";  //终焉剑灵没有移动动画，始终用idle
+    public String getWalkAnimationName() {
+        return "idle";
     }
 
     @Override
@@ -146,7 +187,20 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
         return "spawn";
     }
 
-    //纹理
+    @Override
+    public String getSkillAnimationName(int attackState) {
+        return switch (attackState) {
+            case STATE_SWIFT_DASH -> "swift_dash";
+            case STATE_ENCHANT -> "enchant";
+            case STATE_DOUBLE_STRIKE -> "double_strike";
+            case STATE_CROSS_SLASH -> "cross_slash";
+            case STATE_BLOCK -> "block";
+            case STATE_MOON_LIGHT_STRIKE -> "moon_light_strike";
+            case STATE_END_OF_ALL_THINGS -> "end_of_all_things";
+            default -> "";
+        };
+    }
+
     public void setTexture(String texture) {
         this.entityData.set(TEXTURE, texture);
     }
@@ -155,7 +209,6 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
         return this.entityData.get(TEXTURE);
     }
 
-    //声音
     @Override
     public SoundEvent getHurtSound(@NotNull DamageSource ds) {
         return SoundEvents.ENDER_DRAGON_HURT;
@@ -171,37 +224,31 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
         return MobType.UNDEFINED;
     }
 
-    //只允许虚空附魔效果，免疫其他所有效果
     @Override
     public boolean canBeAffected(@NotNull MobEffectInstance effect) {
-        if (effect.getEffect() == ModEffects.VOID_ENCHANTING.get()) {
-            return true;
-        }
-        return false;
+        return effect.getEffect() == ModEffects.VOID_ENCHANTING.get();
     }
 
-    //生成时初始化
     @Override
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor world, DifficultyInstance difficulty,
             MobSpawnType reason, @Nullable SpawnGroupData livingdata, @Nullable CompoundTag tag) {
         SpawnGroupData result = super.finalizeSpawn(world, difficulty, reason, livingdata, tag);
 
-        //仅在服务端初始化
         if (!level().isClientSide) {
-            //初始化等级（如果未设置）
             if (getTheLastEndLevel() <= 0) {
                 setTheLastEndLevel(1);
             }
 
-            //初始化血量
             float maxHealth = (float) getAttributeValue(Attributes.MAX_HEALTH);
-            setTheLastEndMaxHealth(maxHealth);
-            setTheLastEndHealth(maxHealth);
+            setWorldAnchorMax(maxHealth);
+            setWorldAnchor(maxHealth);
 
-            //提前注册防御系统（确保 IS_PROTECTED 和 HEALTH_LOCK_ENABLED 同步）
             if (!EntityUtil.hasProtection(this)) {
                 EntityUtil.registerDefence(this, maxHealth);
             }
+
+            // 剑灵直接进入IDLE状态
+            setAnimationState(STATE_IDLE);
         }
 
         return result;
@@ -216,16 +263,16 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
     public void tick() {
         super.tick();
 
+        AllThingsEndActiveEffect.handleTick(this);
+
         this.refreshDimensions();
     }
 
-    //死亡动画时长
     @Override
     public int getDeathAnimationDuration() {
-        return 100;  //100tick（5秒）
+        return 100;
     }
 
-    //NBT
     @Override
     public void readAdditionalSaveData(@NotNull CompoundTag compound) {
         super.readAdditionalSaveData(compound);
@@ -238,5 +285,94 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
     public void addAdditionalSaveData(@NotNull CompoundTag compound) {
         super.addAdditionalSaveData(compound);
         compound.putString("TEXTURE", this.getTexture());
+    }
+
+    //万物终焉持续效果
+    public static class AllThingsEndActiveEffect {
+        private static final Map<UUID, Integer> ACTIVE_EFFECTS = new ConcurrentHashMap<>();
+        private static final int DURATION = 260;  //13秒
+        private static final int SHRINK_START = 240;
+
+        public static void start(TheLastEndSwordWraithEntity wraith) {
+            ACTIVE_EFFECTS.put(wraith.getUUID(), 0);
+        }
+
+        public static void handleTick(TheLastEndSwordWraithEntity wraith) {
+            UUID id = wraith.getUUID();
+            Integer currentTick = ACTIVE_EFFECTS.get(id);
+
+            if (currentTick == null) {
+                return;
+            }
+
+            int newTick = currentTick + 1;
+
+            //每秒执行一次伤害+消耗标记
+            if (newTick % 20 == 0) {
+                executeAllThingsEndEffect(wraith);
+            }
+
+            if (newTick % 4 == 0) {
+                spawnAllThingsEndParticles(wraith, newTick);
+            }
+
+            if (newTick >= DURATION) {
+                end(wraith);
+            } else {
+                ACTIVE_EFFECTS.put(id, newTick);
+            }
+        }
+
+        public static void end(TheLastEndSwordWraithEntity wraith) {
+            ACTIVE_EFFECTS.remove(wraith.getUUID());
+            wraith.setAllThingsEnd(false);
+        }
+
+        private static void executeAllThingsEndEffect(TheLastEndSwordWraithEntity wraith) {
+            if (wraith.level().isClientSide) {
+                return;
+            }
+
+            double effectRange = TheLastSwordConfiguration.getSkillEndOfAllThingsRangeSafely();
+            List<LivingEntity> targets = EntityUtil.getTargetsInSphere(wraith, effectRange);
+
+            float attackDamage = (float) wraith.getAttributeValue(Attributes.ATTACK_DAMAGE);
+
+            for (LivingEntity target : targets) {
+                int markCount = getEndMark(target);
+                float maxHealthDamage = (float) ((markCount / 100.0 + 0.13) * target.getMaxHealth());
+                float totalDamage = attackDamage + maxHealthDamage;
+
+                target.invulnerableTime = 0;
+                AbsoluteDestructionDamageSource.applyAbsoluteDestructionIntelligently(target, wraith, totalDamage);
+
+                reduceEndMark(target);
+                clearPositiveEffects(target);
+            }
+        }
+
+        private static void clearPositiveEffects(LivingEntity target) {
+            var activeEffects = new ArrayList<>(target.getActiveEffects());
+            for (MobEffectInstance effect : activeEffects) {
+                if (effect.getEffect().isBeneficial()) {
+                    target.removeEffect(effect.getEffect());
+                }
+            }
+        }
+
+        private static void spawnAllThingsEndParticles(TheLastEndSwordWraithEntity wraith, int currentTick) {
+            double radius = TheLastSwordConfiguration.getSkillEndOfAllThingsRangeSafely();
+            Vec3 centerPos = wraith.position();
+
+            if (currentTick < SHRINK_START) {
+                ParticleUtil.spawnAllThingsEndCircles(wraith.level(), centerPos, radius);
+                ParticleUtil.spawnAllThingsEndCenterParticles(wraith.level(), centerPos, false);
+            } else {
+                int shrinkTick = currentTick - SHRINK_START;
+                double shrinkProgress = shrinkTick / 20.0;
+                ParticleUtil.spawnAllThingsEndShrinkingCircles(wraith.level(), centerPos, radius, shrinkProgress);
+                ParticleUtil.spawnAllThingsEndCenterParticles(wraith.level(), centerPos, true);
+            }
+        }
     }
 }

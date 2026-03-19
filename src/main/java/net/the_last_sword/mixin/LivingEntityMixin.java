@@ -1,6 +1,5 @@
 package net.the_last_sword.mixin;
 
-import net.eca.api.EcaAPI;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.damagesource.DamageSource;
@@ -30,9 +29,10 @@ public class LivingEntityMixin {
     //静态初始化注入：在原版 defineId 调用后紧接着定义我们的 EntityDataAccessor
     @Inject(method = "<clinit>", at = @At("TAIL"))
     private static void the_last_sword$onClinit(CallbackInfo ci) {
-        EntityUtil.TRUE_HEALTH = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.STRING);
-        EntityUtil.TRUE_MAX_HEALTH = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.STRING);
+        EntityUtil.WORLD_ANCHOR = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.STRING);
+        EntityUtil.WORLD_ANCHOR_MAX = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.STRING);
         EntityUtil.HEAL_BAN_TIME = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.INT);
+        EntityUtil.HEAL_BAN_VALUE = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.FLOAT);
         EntityUtil.IS_PROTECTED = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.BOOLEAN);
     }
 
@@ -40,9 +40,10 @@ public class LivingEntityMixin {
     @Inject(method = "defineSynchedData", at = @At("TAIL"))
     private void the_last_sword$onDefineSynchedData(CallbackInfo ci) {
         LivingEntity entity = (LivingEntity) (Object) this;
-        entity.getEntityData().define(EntityUtil.TRUE_HEALTH, "-1024.0");
-        entity.getEntityData().define(EntityUtil.TRUE_MAX_HEALTH, "-2048.0");
+        entity.getEntityData().define(EntityUtil.WORLD_ANCHOR, "-1024.0");
+        entity.getEntityData().define(EntityUtil.WORLD_ANCHOR_MAX, "-2048.0");
         entity.getEntityData().define(EntityUtil.HEAL_BAN_TIME, 0);
+        entity.getEntityData().define(EntityUtil.HEAL_BAN_VALUE, 0.0f);
         entity.getEntityData().define(EntityUtil.IS_PROTECTED, false);
     }
 
@@ -139,11 +140,29 @@ public class LivingEntityMixin {
 
         //防御系统tick逻辑
         if (EntityUtil.hasProtection(entity)) {
-            float realHealth = EntityUtil.getTrueHealth(entity);
+            float realHealth = EntityUtil.getWorldAnchor(entity);
             if (realHealth <= 0 ) {
                 EntityUtil.setProtection(entity, false);
             } else if (realHealth > 0) {
                 the_last_sword$handleDefenceProtection(entity);
+            }
+        }
+    }
+
+    //tick 结束时：禁疗系统强制设置血量（覆盖怪物的自定义恢复逻辑）
+    @Inject(method = "tick", at = @At("TAIL"))
+    private void the_last_sword$onTickEnd(CallbackInfo ci) {
+        LivingEntity entity = (LivingEntity) (Object) this;
+
+        if (entity.level().isClientSide) {
+            return;
+        }
+
+        //禁疗系统：每 tick 强制设置血量为目标值
+        if (EntityUtil.isHealBanned(entity)) {
+            double targetHealth = EntityUtil.getHealBanValue(entity);
+            if (targetHealth > 0) {
+                EntityUtil.theLastEndSetHealth(entity, (float) targetHealth);
             }
         }
     }
@@ -195,8 +214,8 @@ public class LivingEntityMixin {
 
         //扣除自定义血量
         if (realDamage > 0.0f) {
-            float currentHealth = EntityUtil.getTrueHealth(entity);
-            EntityUtil.setTrueHealth(entity, currentHealth - realDamage);
+            float currentHealth = EntityUtil.getWorldAnchor(entity);
+            EntityUtil.setWorldAnchor(entity, currentHealth - realDamage);
         }
 
         //取消原版扣血
@@ -220,10 +239,10 @@ public class LivingEntityMixin {
         //检查是否受保护
         if (EntityUtil.hasProtection(entity)) {
             if (healAmount > 0) {
-                float currentHealth = EntityUtil.getTrueHealth(entity);
+                float currentHealth = EntityUtil.getWorldAnchor(entity);
                 float maxHealth = (float) entity.getAttributeValue(Attributes.MAX_HEALTH);
                 float newHealth = Math.min(currentHealth + healAmount, maxHealth);
-                EntityUtil.setTrueHealth(entity, newHealth);
+                EntityUtil.setWorldAnchor(entity, newHealth);
             }
             ci.cancel();
         }
@@ -248,11 +267,11 @@ public class LivingEntityMixin {
 
         //检查是否受保护
         if (EntityUtil.hasProtection(entity)) {
-            float currentHealth = EntityUtil.getTrueHealth(entity);
+            float currentHealth = EntityUtil.getWorldAnchor(entity);
             if (health > currentHealth) {
                 float maxHealth = (float) entity.getAttributeValue(Attributes.MAX_HEALTH);
                 float newHealth = Math.min(health, maxHealth);
-                EntityUtil.setTrueHealth(entity, newHealth);
+                EntityUtil.setWorldAnchor(entity, newHealth);
             }
             ci.cancel();
         }
@@ -264,7 +283,7 @@ public class LivingEntityMixin {
 
         //防御系统返回真实血量（双端一致）
         if (EntityUtil.hasProtection(entity)) {
-            float trueHealth = EntityUtil.getTrueHealth(entity);
+            float trueHealth = EntityUtil.getWorldAnchor(entity);
             cir.setReturnValue(trueHealth);
         }
     }

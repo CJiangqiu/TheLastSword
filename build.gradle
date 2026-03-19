@@ -9,7 +9,10 @@ group   = project.maven_group
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 repositories {
-    maven { url = "https://maven.minecraftforge.net/" }
+    maven {
+        url = "https://maven.minecraftforge.net/"
+    }
+    maven { url = "https://api.modrinth.com/maven"; content { includeGroup "maven.modrinth" } }
     maven { url = "https://cursemaven.com"; content { includeGroup "curse.maven" } }
     maven { name = "Progwml6"; url = "https://dvs1.progwml6.com/files/maven/" }
     maven { name = "BlameJared"; url = "https://maven.blamejared.com/" }
@@ -45,7 +48,8 @@ dependencies {
     implementation 'org.ow2.asm:asm:9.2'
     implementation 'org.ow2.asm:asm-commons:9.2'
 
-    implementation fg.deobf("curse.maven:epic-core-api-977556:7416410")
+    implementation fg.deobf("maven.modrinth:epic-core-api:1.1.2-fix-dev")
+
     implementation fg.deobf("curse.maven:geckolib-388172:7025129")
     implementation fg.deobf("curse.maven:curios-309927:6418456")
 
@@ -56,6 +60,7 @@ dependencies {
     implementation fg.deobf("curse.maven:lionfish-api-1001614:5922047")
     implementation fg.deobf("curse.maven:touhou-little-maid-355044:6979039")
     implementation fg.deobf("curse.maven:farmers-delight-398521:6917255")
+    implementation fg.deobf("curse.maven:spark-361579:4738952")
 }
 
 mixin {

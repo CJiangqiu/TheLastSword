@@ -21,6 +21,7 @@ import net.eca.network.NetworkHandler;
 import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.item.DragonCrystalSoulStone;
+import net.the_last_sword.item.ISummonableItem;
 import net.the_last_sword.util.EntityUtil;
 import net.the_last_sword.util.TheLastSwordLogger;
 import net.the_last_sword.util.nbt.ItemLevelHelper;
@@ -140,7 +141,7 @@ public class WraithSummonManager {
 
         //7.5. 强制发送客户端删除包（确保客户端实体被正确清除）
         if (player instanceof ServerPlayer serverPlayer) {
-            NetworkHandler.sendToPlayer(new EcaClientRemovePacket(wraith.getId()), serverPlayer);
+            NetworkHandler.sendToPlayer(new EcaClientRemovePacket(wraith.getId(), List.of()), serverPlayer);
         }
 
         //8. 保存魂石到玩家数据（绑定保留，只更新魂石状态）
@@ -209,7 +210,7 @@ public class WraithSummonManager {
 
                 //发送客户端删除包
                 if (player instanceof ServerPlayer serverPlayer) {
-                    NetworkHandler.sendToPlayer(new EcaClientRemovePacket(wraith.getId()), serverPlayer);
+                    NetworkHandler.sendToPlayer(new EcaClientRemovePacket(wraith.getId(), List.of()), serverPlayer);
                 }
 
                 TheLastSwordLogger.info("[WraithSummon] Non-soul-stone wraith {} removed", wraitheUUID);
@@ -411,7 +412,7 @@ public class WraithSummonManager {
 
                 //2.5. 强制发送客户端删除包（确保客户端旧实体被正确清除）
                 if (player instanceof ServerPlayer serverPlayer) {
-                    NetworkHandler.sendToPlayer(new EcaClientRemovePacket(existingWraith.getId()), serverPlayer);
+                    NetworkHandler.sendToPlayer(new EcaClientRemovePacket(existingWraith.getId(), List.of()), serverPlayer);
                 }
 
                 break;
@@ -653,8 +654,8 @@ public class WraithSummonManager {
                 healthAttr.setBaseValue(newMaxHealth);
 
                 //同步真实生命值（必须用 newMaxHealth，因为 getMaxHealth 会返回旧值）
-                EntityUtil.setTrueHealth(entity, (float) newMaxHealth);
-                EntityUtil.setTrueMaxHealth(entity, (float) newMaxHealth);
+                EntityUtil.setWorldAnchor(entity, (float) newMaxHealth);
+                EntityUtil.setWorldAnchorMax(entity, (float) newMaxHealth);
 
                 entity.setHealth((float) newMaxHealth);
             }
@@ -678,8 +679,8 @@ public class WraithSummonManager {
                 healthAttr.setBaseValue(newMaxHealth);
 
                 //同步真实生命值（必须用 newMaxHealth，因为 getMaxHealth 会返回旧值）
-                EntityUtil.setTrueHealth(entity, (float) newMaxHealth);
-                EntityUtil.setTrueMaxHealth(entity, (float) newMaxHealth);
+                EntityUtil.setWorldAnchor(entity, (float) newMaxHealth);
+                EntityUtil.setWorldAnchorMax(entity, (float) newMaxHealth);
 
                 entity.setHealth((float) newMaxHealth);
             }
@@ -757,19 +758,12 @@ public class WraithSummonManager {
         if (player.isCreative()) {
             return;
         }
-        int cooldownTicks = getCooldownTicks(weaponStack);
-        player.getCooldowns().addCooldown(weaponStack.getItem(), cooldownTicks);
-    }
 
-    //获取冷却时间
-    private static int getCooldownTicks(ItemStack weaponStack) {
-        String itemId = ForgeRegistries.ITEMS.getKey(weaponStack.getItem()).toString();
-        if (itemId.contains("the_last_end_sword")) {
-            return TheLastSwordConfiguration.getTheLastSwordSummonCooldownSafely();
-        } else if (itemId.contains("dragon_sword") || itemId.contains("dragon_crystal_sword")) {
-            return TheLastSwordConfiguration.getDragonSwordSummonCooldownSafely();
+        //使用接口获取冷却时间
+        if (weaponStack.getItem() instanceof ISummonableItem summonable) {
+            int cooldownTicks = summonable.getSummonCooldownTicks();
+            player.getCooldowns().addCooldown(weaponStack.getItem(), cooldownTicks);
         }
-        return 1200;
     }
 
     // ============ 事件委托方法（由ServerEventHandler调用） ============
@@ -982,6 +976,10 @@ public class WraithSummonManager {
         double followRange = wraith.getAttributeValue(Attributes.FOLLOW_RANGE);
         for (LivingEntity entity : wraith.level().getEntitiesOfClass(LivingEntity.class,
                 wraith.getBoundingBox().inflate(followRange))) {
+            if (entity.getType().getCategory() != MobCategory.MONSTER) {
+                continue;
+            }
+
             if (entity != wraith && entity.isAlive() &&
                 isValidTarget(entity, wraith, owner) &&
                 EntityUtil.canAttack(wraith, entity)) {

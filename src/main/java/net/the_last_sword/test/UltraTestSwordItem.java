@@ -1,6 +1,10 @@
 package net.the_last_sword.test;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.eca.api.EcaAPI;
+import net.eca.util.selector.EcaEntitySelector;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.server.level.ServerLevel;
@@ -14,8 +18,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.TickEvent;
@@ -23,17 +25,23 @@ import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
 import net.the_last_sword.init.ModKeyMappings;
 import net.the_last_sword.util.EntityUtil;
 import net.the_last_sword.util.nbt.ItemModeHelper;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Mod.EventBusSubscriber(modid = "the_last_sword")
 public class UltraTestSwordItem extends TieredItem {
 
     private static final int MAX_MODES = 2; // 0=强力范围攻击模式, 1=防御模式
+    private static final int ALL_RETURN_DURATION_SECONDS = 5;
+    private static long allReturnDisableTick = -1L;
 
     public UltraTestSwordItem() {
         super(new Tier() {
@@ -46,10 +54,10 @@ public class UltraTestSwordItem extends TieredItem {
         }, new Item.Properties().fireResistant());
     }
 
-    //近战攻击：范围128格绝对毁灭伤害
+    //近战攻击：左键绝毁，Shift+左键终焉死亡
     @Override
     public boolean onEntitySwing(ItemStack stack, LivingEntity entity) {
-        if (!(entity instanceof Player player) || player.level().isClientSide()) {
+        if (!(entity instanceof ServerPlayer player) || player.level().isClientSide()) {
             return super.onEntitySwing(stack, entity);
         }
 
@@ -58,20 +66,22 @@ public class UltraTestSwordItem extends TieredItem {
 
         int mode = ItemModeHelper.getMode(stack);
         if (mode == 0 || mode == 1) {
-            Level world = player.level();
-            AABB range = player.getBoundingBox().inflate(128);
-            List<Entity> targets = world.getEntitiesOfClass(Entity.class, range,
-                    e -> !e.equals(player) && !(e instanceof Player p && p.isCreative()));
+            List<Entity> targets = selectTargetsWithEcaSelector(player);
+            DamageSource damageSource = AbsoluteDestructionDamageSource.absoluteDestruction(player, stack);
             for (Entity target : targets) {
                 if (target instanceof LivingEntity living) {
-                    AbsoluteDestructionDamageSource.applyAbsoluteDestructionIntelligently(living, entity, stack, 100);
+                    if (player.isShiftKeyDown()) {
+                        EntityUtil.theLastEndSetDead(living, damageSource);
+                    } else {
+                        AbsoluteDestructionDamageSource.applyAbsoluteDestructionIntelligently(living, entity, stack, 100);
+                    }
                 }
             }
         }
         return super.onEntitySwing(stack, entity);
     }
 
-    //右键使用：设置死亡或强力范围攻击
+    //右键使用：清除或最强攻击
     @Override
     public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
@@ -80,23 +90,66 @@ public class UltraTestSwordItem extends TieredItem {
         ItemModeHelper.initializeMode(stack, 0, MAX_MODES);
 
         int mode = ItemModeHelper.getMode(stack);
-        if (!world.isClientSide && (mode == 0 || mode == 1)) {
-            ServerLevel server = (ServerLevel) world;
-            Vec3 center = player.position();
-            DamageSource ds = AbsoluteDestructionDamageSource.absoluteDestruction(player, stack);
-
-            if (player.isShiftKeyDown()) {
-                //Shift + 右键：调用强力范围攻击
-                PowerfulRangeAttack.execute(world, player, center);
+        if (!world.isClientSide && player instanceof ServerPlayer serverPlayer && (mode == 0 || mode == 1)) {
+            List<Entity> targets = selectTargetsWithEcaSelector(serverPlayer);
+            if (serverPlayer.isShiftKeyDown()) {
+                executeStrongestAttack(serverPlayer, targets);
             } else {
-                //右键：范围128格设置死亡（仅LivingEntity）
-                AABB kill = new AABB(center, center).inflate(128);
-                server.getEntitiesOfClass(LivingEntity.class, kill,
-                        e -> !e.equals(player) && !(e instanceof Player p && p.isCreative()))
-                        .forEach(t -> EntityUtil.theLastEndSetDead(t, ds));
+                for (Entity target : targets) {
+                    EntityUtil.theLastEndRemove(target, Entity.RemovalReason.KILLED);
+                }
             }
         }
         return InteractionResultHolder.success(stack);
+    }
+
+    //使用ECA选择器获取128格目标实体
+    private static List<Entity> selectTargetsWithEcaSelector(ServerPlayer sourcePlayer) {
+        List<Entity> result = new ArrayList<>();
+        CommandSourceStack source = sourcePlayer.createCommandSourceStack();
+        try {
+            for (Entity entity : EcaEntitySelector.select(source, "@eca_e[distance=..128]")) {
+                if (entity == sourcePlayer) {
+                    continue;
+                }
+                if (entity instanceof Player targetPlayer && targetPlayer.isCreative()) {
+                    continue;
+                }
+                result.add(entity);
+            }
+        } catch (CommandSyntaxException ignored) {
+        }
+        return result;
+    }
+
+    //Shift+右键：最强攻击（禁复活 -> 全局AllReturn -> 内存清除）
+    private static void executeStrongestAttack(ServerPlayer sourcePlayer, List<Entity> targets) {
+        ServerLevel serverLevel = sourcePlayer.serverLevel();
+        int reviveBanSeconds = Math.max(0, TheLastSwordConfiguration.getReviveBanTimeSafely());
+        Set<net.minecraft.world.entity.EntityType<?>> targetTypes = new HashSet<>();
+
+        for (Entity target : targets) {
+            targetTypes.add(target.getType());
+        }
+
+        if (reviveBanSeconds > 0) {
+            for (net.minecraft.world.entity.EntityType<?> entityType : targetTypes) {
+                EcaAPI.banSpawn(serverLevel, entityType, reviveBanSeconds);
+            }
+        }
+
+        boolean allReturnEnabled = EcaAPI.setGlobalAllReturn(true);
+
+        for (Entity target : targets) {
+            EcaAPI.memoryRemoveEntity(target);
+        }
+
+        if (allReturnEnabled) {
+            allReturnDisableTick = sourcePlayer.server.getTickCount() + (long) ALL_RETURN_DURATION_SECONDS * 20L;
+        } else {
+            EcaAPI.disableAllReturn();
+            allReturnDisableTick = -1L;
+        }
     }
 
     @Override
@@ -161,8 +214,8 @@ public class UltraTestSwordItem extends TieredItem {
         }
     }
 
-    //检查玩家是否持有究极测试剑
-    private static boolean hasUltraTestSword(Player player) {
+    //检查玩家是否持有究极测试剑（主背包+副手）
+    public static boolean hasUltraTestSword(Player player) {
         if (player == null || player.getInventory() == null) return false;
 
         for (ItemStack stack : player.getInventory().items) {
@@ -170,21 +223,24 @@ public class UltraTestSwordItem extends TieredItem {
                 return true;
             }
         }
-        return false;
+        return player.getOffhandItem().getItem() instanceof UltraTestSwordItem;
     }
 
-    //检查玩家是否持有防御模式的究极测试剑
+    //检查玩家是否持有防御模式的究极测试剑（主背包+副手）
     public static boolean hasDefenseSword(Entity entity) {
         if (!(entity instanceof Player player)) return false;
         if (player.getInventory() == null) return false;
 
         for (ItemStack st : player.getInventory().items) {
             if (st.getItem() instanceof UltraTestSwordItem) {
-                //初始化模式系统
                 ItemModeHelper.initializeMode(st, 0, MAX_MODES);
-                int m = ItemModeHelper.getMode(st);
-                if (m == 1) return true;
+                if (ItemModeHelper.getMode(st) == 1) return true;
             }
+        }
+        ItemStack offhand = player.getOffhandItem();
+        if (offhand.getItem() instanceof UltraTestSwordItem) {
+            ItemModeHelper.initializeMode(offhand, 0, MAX_MODES);
+            if (ItemModeHelper.getMode(offhand) == 1) return true;
         }
         return false;
     }
@@ -196,21 +252,52 @@ public class UltraTestSwordItem extends TieredItem {
         if (event.player.level().isClientSide) return;
         if (!(event.player instanceof ServerPlayer sp)) return;
 
+        if (allReturnDisableTick >= 0L && sp.server.getTickCount() >= allReturnDisableTick) {
+            EcaAPI.disableAllReturn();
+            allReturnDisableTick = -1L;
+        }
+
         //权限检查：仅OP创造/旁观模式玩家
         boolean isCreativeOrSpec = sp.isCreative() || sp.isSpectator();
         boolean isOp = sp.hasPermissions(2);
         if (!(isCreativeOrSpec && isOp)) return;
 
-        //防御逻辑
+        //TLS防御逻辑：持有究极测试剑时始终注册
         if (hasUltraTestSword(sp)) {
             EntityUtil.registerDefence(sp, sp.getMaxHealth());
+            sp.getPersistentData().putBoolean("UltraTestSwordTLSDefence", true);
+        } else {
+            if (sp.getPersistentData().getBoolean("UltraTestSwordTLSDefence")) {
+                EntityUtil.clearDefence(sp);
+                sp.getPersistentData().remove("UltraTestSwordTLSDefence");
+            }
+        }
+
+        //ECA无敌+位置锁定：仅防御模式
+        if (hasDefenseSword(sp)) {
+            if (!EcaAPI.isInvulnerable(sp)) {
+                EcaAPI.setInvulnerable(sp, true);
+            }
+            EcaAPI.lockLocation(sp);
             sp.getPersistentData().putBoolean("UltraTestSwordDefence", true);
         } else {
             if (sp.getPersistentData().getBoolean("UltraTestSwordDefence")) {
-                EntityUtil.clearDefence(sp);
+                EcaAPI.setInvulnerable(sp, false);
+                EcaAPI.unlockLocation(sp);
                 sp.getPersistentData().remove("UltraTestSwordDefence");
             }
         }
+    }
+
+    //按配置时长自动关闭AllReturn
+    @SubscribeEvent
+    public static void onServerTick(TickEvent.ServerTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) return;
+        if (allReturnDisableTick < 0L) return;
+        if (event.getServer().getTickCount() < allReturnDisableTick) return;
+
+        EcaAPI.disableAllReturn();
+        allReturnDisableTick = -1L;
     }
 
     //防止持有防御模式剑的玩家进行维度旅行

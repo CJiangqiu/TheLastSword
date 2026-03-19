@@ -27,15 +27,14 @@ public class TheLastSwordConfiguration {
 
     // Dragon Sword | 龙之剑配置
     public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_SWORD_SUMMON_COOLDOWN;
-    public static ForgeConfigSpec.ConfigValue<Double> DRAGON_SWORD_SHIELD_MULTIPLIER;
+
+    // Dragon Soul Lantern | 龙魂灯配置
+    public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_SOUL_LANTERN_SUMMON_COOLDOWN;
 
     // The Last End Sword | 最终之剑配置
-    public static ForgeConfigSpec.ConfigValue<Double> THE_LAST_SWORD_ABSOLUTE_DESTRUCTION_MULTIPLIER;
-    public static ForgeConfigSpec.ConfigValue<Double> THE_LAST_SWORD_SHIELD_MULTIPLIER;
     public static ForgeConfigSpec.ConfigValue<Boolean> THE_LAST_SWORD_ALLOW_FLYING;
     public static ForgeConfigSpec.ConfigValue<Boolean> THE_LAST_SWORD_SUPER_DESTROY;
     public static ForgeConfigSpec.ConfigValue<Integer> THE_LAST_SWORD_MINING_RADIUS;
-    public static ForgeConfigSpec.ConfigValue<Integer> THE_LAST_SWORD_SUMMON_COOLDOWN;
 
     // Dragon Crystal Armor | 龙晶护甲配置
     public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_CRYSTAL_ARMOR_CRYSTAL_GUARD_REFRESH_INTERVAL;
@@ -59,7 +58,9 @@ public class TheLastSwordConfiguration {
 
     // The Last End Sword Wraith | 终焉剑灵配置
     public static ForgeConfigSpec.ConfigValue<Boolean> THE_LAST_END_SWORD_WRAITH_ENABLE_BATTLE_MUSIC;
-    public static ForgeConfigSpec.ConfigValue<Integer> THE_LAST_END_SWORD_WRAITH_COMBAT_TELEPORT_DISTANCE;
+
+    // Lost Wraith | 迷失战魂配置
+    public static ForgeConfigSpec.ConfigValue<Boolean> LOST_WRAITH_ENABLE_CUSTOM_BOSS_BAR;
 
     // The Last End Sword Wraith Skills | 终焉剑灵技能配置
     // Swift Dash | 突刺
@@ -67,31 +68,25 @@ public class TheLastSwordConfiguration {
     public static ForgeConfigSpec.ConfigValue<Double> SKILL_SWIFT_DASH_RANGE;
 
     // Double Strike | 双连击
-    public static ForgeConfigSpec.ConfigValue<Double> SKILL_DOUBLE_STRIKE_WEIGHT;
     public static ForgeConfigSpec.ConfigValue<Double> SKILL_DOUBLE_STRIKE_DAMAGE_MULTIPLIER;
     public static ForgeConfigSpec.ConfigValue<Double> SKILL_DOUBLE_STRIKE_RANGE;
 
     // Cross Slash | 十字切
-    public static ForgeConfigSpec.ConfigValue<Double> SKILL_CROSS_SLASH_WEIGHT;
     public static ForgeConfigSpec.ConfigValue<Double> SKILL_CROSS_SLASH_DAMAGE_MULTIPLIER;
     public static ForgeConfigSpec.ConfigValue<Double> SKILL_CROSS_SLASH_RANGE;
 
     // Block | 格挡
-    public static ForgeConfigSpec.ConfigValue<Double> SKILL_BLOCK_WEIGHT;
     public static ForgeConfigSpec.ConfigValue<Double> SKILL_BLOCK_DAMAGE_MULTIPLIER;
     public static ForgeConfigSpec.ConfigValue<Double> SKILL_BLOCK_RANGE;
 
     // Moon Light Strike | 月华
-    public static ForgeConfigSpec.ConfigValue<Double> SKILL_MOON_LIGHT_STRIKE_WEIGHT;
     public static ForgeConfigSpec.ConfigValue<Double> SKILL_MOON_LIGHT_STRIKE_DAMAGE_MULTIPLIER;
     public static ForgeConfigSpec.ConfigValue<Double> SKILL_MOON_LIGHT_STRIKE_RANGE;
 
     // Enchant | 虚空附魔
-    public static ForgeConfigSpec.ConfigValue<Double> SKILL_ENCHANT_WEIGHT;
     public static ForgeConfigSpec.ConfigValue<Integer> SKILL_ENCHANT_DURATION;
 
     // End of All Things | 万物终焉
-    public static ForgeConfigSpec.ConfigValue<Double> SKILL_END_OF_ALL_THINGS_WEIGHT;
     public static ForgeConfigSpec.ConfigValue<Double> SKILL_END_OF_ALL_THINGS_DAMAGE_MULTIPLIER;
     public static ForgeConfigSpec.ConfigValue<Double> SKILL_END_OF_ALL_THINGS_MAX_HEALTH_PERCENTAGE;
     public static ForgeConfigSpec.ConfigValue<Double> SKILL_END_OF_ALL_THINGS_RANGE;
@@ -101,7 +96,6 @@ public class TheLastSwordConfiguration {
     public static ForgeConfigSpec.ConfigValue<Double> SWORD_WRAITH_ATTACK_PER_LEVEL;
     public static ForgeConfigSpec.ConfigValue<Double> SWORD_WRAITH_HEALTH_PER_HIGH_LEVEL;
     public static ForgeConfigSpec.ConfigValue<Double> SWORD_WRAITH_ATTACK_PER_HIGH_LEVEL;
-    public static ForgeConfigSpec.ConfigValue<Boolean> SWORD_WRAITH_FRIENDLY_FIRE_PROTECTION;
     public static ForgeConfigSpec.ConfigValue<Boolean> SWORD_WRAITH_AS_THE_LAST_END_ENTITY;
     public static ForgeConfigSpec.ConfigValue<Boolean> SWORD_WRAITH_ABSOLUTE_DESTRUCTION_DAMAGE;
     public static ForgeConfigSpec.ConfigValue<Double> SWORD_WRAITH_ABSOLUTE_DESTRUCTION_MULTIPLIER_LOW;
@@ -111,8 +105,6 @@ public class TheLastSwordConfiguration {
     // ═══════════════════════════════════════════════════════════════════════════════════
     // Attack Configuration | 攻击系统配置
     // ═══════════════════════════════════════════════════════════════════════════════════
-
-    public static ForgeConfigSpec.ConfigValue<Boolean> ATTACK_ENABLE_RADICAL_LOGIC;
 
     // Absolute Destruction Damage | 绝对毁灭伤害配置
     public static ForgeConfigSpec.ConfigValue<Integer> ABSOLUTE_DESTRUCTION_HEAL_NEGATION_TIME;
@@ -184,20 +176,18 @@ public class TheLastSwordConfiguration {
         BUILDER.push("Dragon Sword");
         DRAGON_SWORD_SUMMON_COOLDOWN = BUILDER
             .comment("Cooldown time for Dragon Sword summoning mode in ticks (20 ticks = 1 second)")
+            .defineInRange("Summon Cooldown", 600, 0, Integer.MAX_VALUE);
+        BUILDER.pop();
+
+        // Dragon Soul Lantern Settings | 龙魂灯设置
+        BUILDER.push("Dragon Soul Lantern");
+        DRAGON_SOUL_LANTERN_SUMMON_COOLDOWN = BUILDER
+            .comment("Cooldown time for Dragon Soul Lantern summoning in ticks (20 ticks = 1 second)")
             .defineInRange("Summon Cooldown", 1200, 0, Integer.MAX_VALUE);
-        DRAGON_SWORD_SHIELD_MULTIPLIER = BUILDER
-            .comment("Multiplier for the absorption shield when recalling Dragon Sword Wraith")
-            .define("Shield Multiplier", 0.05);
         BUILDER.pop();
 
         // The Last End Sword Settings | 最终之剑设置
         BUILDER.push("The Last Sword");
-        THE_LAST_SWORD_ABSOLUTE_DESTRUCTION_MULTIPLIER = BUILDER
-            .comment("Multiplier for absolute destruction damage")
-            .define("Absolute Destruction Multiplier", 0.5);
-        THE_LAST_SWORD_SHIELD_MULTIPLIER = BUILDER
-            .comment("Multiplier for the absorption shield when recalling wraith")
-            .define("Shield Multiplier", 0.05);
         THE_LAST_SWORD_ALLOW_FLYING = BUILDER
             .comment("Allows players to fly when holding The Last Sword")
             .define("Allow Flying", true);
@@ -207,9 +197,6 @@ public class TheLastSwordConfiguration {
         THE_LAST_SWORD_MINING_RADIUS = BUILDER
             .comment("Mining radius for Powerful Mining Mode")
             .defineInRange("Mining Radius", 3, 1, 12);
-        THE_LAST_SWORD_SUMMON_COOLDOWN = BUILDER
-            .comment("Cooldown time for summoning mode in ticks (20 ticks = 1 second)")
-            .defineInRange("Summon Cooldown", 600, 0, Integer.MAX_VALUE);
         BUILDER.pop();
 
         BUILDER.pop(); // End Sword
@@ -274,6 +261,8 @@ public class TheLastSwordConfiguration {
             .defineInRange("Ender Crystal Range", 8, 2, 32);
         BUILDER.pop();
 
+        BUILDER.pop(); // End Armor
+
         // The Last End Scroll Configuration | 终焉卷轴配置
         BUILDER.push("The Last End Scroll");
         THE_LAST_END_SCROLL_ENABLE_PARTICLE_EFFECTS = BUILDER
@@ -281,7 +270,6 @@ public class TheLastSwordConfiguration {
             .define("Enable Particle Effects", true);
         BUILDER.pop();
 
-        BUILDER.pop(); // End Armor
         BUILDER.pop(); // End Item
 
         // ═══════════════════════════════════════════════════════════════════════════════
@@ -301,10 +289,19 @@ public class TheLastSwordConfiguration {
         THE_LAST_END_SWORD_WRAITH_ENABLE_BATTLE_MUSIC = BUILDER
             .comment("Enable battle music when The Last End Sword Wraith in battle")
             .define("Enable Spawn Music", true);
-        THE_LAST_END_SWORD_WRAITH_COMBAT_TELEPORT_DISTANCE = BUILDER
-            .comment("Force teleport to owner when combat distance exceeds this value (blocks)",
-                     "Set to 0 to disable this feature")
-            .defineInRange("Combat Teleport Distance", 64, 0, 256);
+
+        BUILDER.pop();
+
+        // Lost Wraith Settings | 迷失战魂设置
+        BUILDER.push("Lost Wraith");
+        LOST_WRAITH_ENABLE_CUSTOM_BOSS_BAR = BUILDER
+            .comment("Enable custom boss bar for Lost Wraith",
+                     "If disabled, vanilla purple boss bar will be used instead")
+            .define("Enable Custom Boss Bar", true);
+        BUILDER.pop();
+
+        // The Last End Sword Wraith Skills Configuration | 终焉剑灵技能配置
+        BUILDER.push("The Last End Sword Wraith Skills");
 
         // Skills Configuration | 技能配置
         BUILDER.push("Skills");
@@ -322,9 +319,6 @@ public class TheLastSwordConfiguration {
 
         // Double Strike | 双连击
         BUILDER.push("Double Strike");
-        SKILL_DOUBLE_STRIKE_WEIGHT = BUILDER
-            .comment("Skill selection weight (0.0 = disabled, 0.5 = ~50% probability when alone)")
-            .defineInRange("Weight", 0.2, 0.0, 1.0);
         SKILL_DOUBLE_STRIKE_DAMAGE_MULTIPLIER = BUILDER
             .comment("Damage multiplier (1.0 = 100% attack damage)")
             .defineInRange("Damage Multiplier", 1.0, 0.0, 10.0);
@@ -335,9 +329,7 @@ public class TheLastSwordConfiguration {
 
         // Cross Slash | 十字切
         BUILDER.push("Cross Slash");
-        SKILL_CROSS_SLASH_WEIGHT = BUILDER
-            .comment("Skill selection weight (0.0 = disabled, 0.5 = ~50% probability when alone)")
-            .defineInRange("Weight", 0.15, 0.0, 1.0);
+
         SKILL_CROSS_SLASH_DAMAGE_MULTIPLIER = BUILDER
             .comment("Damage multiplier (1.5 = 150% attack damage)")
             .defineInRange("Damage Multiplier", 1.5, 0.0, 10.0);
@@ -348,9 +340,6 @@ public class TheLastSwordConfiguration {
 
         // Block | 格挡
         BUILDER.push("Block");
-        SKILL_BLOCK_WEIGHT = BUILDER
-            .comment("Skill selection weight (0.0 = disabled, 0.5 = ~50% probability when alone)")
-            .defineInRange("Weight", 0.2, 0.0, 1.0);
         SKILL_BLOCK_DAMAGE_MULTIPLIER = BUILDER
             .comment("Damage multiplier for knockback strike (0.5 = 50% attack damage)")
             .defineInRange("Damage Multiplier", 0.5, 0.0, 10.0);
@@ -361,9 +350,7 @@ public class TheLastSwordConfiguration {
 
         // Moon Light Strike | 月华
         BUILDER.push("Moon Light Strike");
-        SKILL_MOON_LIGHT_STRIKE_WEIGHT = BUILDER
-            .comment("Skill selection weight (0.0 = disabled, 0.5 = ~50% probability when alone)")
-            .defineInRange("Weight", 0.15, 0.0, 1.0);
+
         SKILL_MOON_LIGHT_STRIKE_DAMAGE_MULTIPLIER = BUILDER
             .comment("Damage multiplier (1.5 = 150% attack damage)")
             .defineInRange("Damage Multiplier", 1.5, 0.0, 10.0);
@@ -374,9 +361,7 @@ public class TheLastSwordConfiguration {
 
         // Enchant | 虚空附魔
         BUILDER.push("Enchant");
-        SKILL_ENCHANT_WEIGHT = BUILDER
-            .comment("Skill selection weight (0.0 = disabled, 0.5 = ~50% probability when alone)")
-            .defineInRange("Weight", 0.25, 0.0, 1.0);
+
         SKILL_ENCHANT_DURATION = BUILDER
             .comment("Buff duration in ticks (600 ticks = 30 seconds)")
             .defineInRange("Duration", 600, 1, Integer.MAX_VALUE);
@@ -384,10 +369,7 @@ public class TheLastSwordConfiguration {
 
         // End of All Things | 万物终焉
         BUILDER.push("End of All Things");
-        SKILL_END_OF_ALL_THINGS_WEIGHT = BUILDER
-            .comment("Skill selection weight (0.0 = disabled, 0.5 = ~50% probability when alone)",
-                     "Only usable at level 13 when All Things End is not active")
-            .defineInRange("Weight", 0.05, 0.0, 1.0);
+
         SKILL_END_OF_ALL_THINGS_DAMAGE_MULTIPLIER = BUILDER
             .comment("Damage multiplier for periodic damage (1.0 = 100% attack damage per second)")
             .defineInRange("Damage Multiplier", 1.0, 0.0, 10.0);
@@ -417,9 +399,6 @@ public class TheLastSwordConfiguration {
         SWORD_WRAITH_ATTACK_PER_HIGH_LEVEL = BUILDER
             .comment("Attack damage increase per sword level (Level 6+)")
             .defineInRange("Attack Per High Level", 10.0, 0.0, Double.MAX_VALUE);
-        SWORD_WRAITH_FRIENDLY_FIRE_PROTECTION = BUILDER
-            .comment("Enable friendly fire protection for sword wraiths")
-            .define("Friendly Fire Protection", true);
         SWORD_WRAITH_AS_THE_LAST_END_ENTITY = BUILDER
             .comment("Treat sword wraiths as The Last End Entities")
             .define("Sword Wraith As End Entity", true);
@@ -444,9 +423,6 @@ public class TheLastSwordConfiguration {
         // ═══════════════════════════════════════════════════════════════════════════════
         BUILDER.push("Attack");
 
-        ATTACK_ENABLE_RADICAL_LOGIC = BUILDER
-            .comment("Enable radical logic for attack system, which increases attack processing strength but may cause performance overhead and mod conflicts")
-            .define("Enable Radical Logic", false);
 
         // Absolute Destruction Damage Settings | 绝对毁灭伤害设置
         BUILDER.push("Absolute Destruction Damage");
@@ -503,7 +479,7 @@ public class TheLastSwordConfiguration {
         BUILDER.push("Void Enchanting");
         BUFF_VOID_ENCHANTMENT_PARTICLE_EFFECTS = BUILDER
             .comment("Control whether to render particle effects")
-            .define("Particle Effects", false);
+            .define("Particle Effects", true);
         BUFF_VOID_ENCHANTMENT_DAMAGE_PERCENTAGE = BUILDER
             .comment("The percentage increase in damage by Buff")
             .define("Damage Percentage", 0.2);
@@ -635,22 +611,15 @@ public class TheLastSwordConfiguration {
 
     //龙之剑配置
     public static int getDragonSwordSummonCooldownSafely() {
-        return safeGet(DRAGON_SWORD_SUMMON_COOLDOWN, 1200);
+        return safeGet(DRAGON_SWORD_SUMMON_COOLDOWN, 600);
     }
 
-    public static double getDragonSwordShieldMultiplierSafely() {
-        return safeGet(DRAGON_SWORD_SHIELD_MULTIPLIER, 0.05);
+    //龙魂灯配置
+    public static int getDragonSoulLanternSummonCooldownSafely() {
+        return safeGet(DRAGON_SOUL_LANTERN_SUMMON_COOLDOWN, 1200);
     }
 
     //最终之剑配置
-    public static double getAbsoluteDestructionMultiplierSafely() {
-        return safeGet(THE_LAST_SWORD_ABSOLUTE_DESTRUCTION_MULTIPLIER, 0.5);
-    }
-
-    public static double getTheLastSwordShieldMultiplierSafely() {
-        return safeGet(THE_LAST_SWORD_SHIELD_MULTIPLIER, 0.05);
-    }
-
     public static boolean getAllowFlyingSafely() {
         return safeGet(THE_LAST_SWORD_ALLOW_FLYING, true);
     }
@@ -661,10 +630,6 @@ public class TheLastSwordConfiguration {
 
     public static int getMiningRadiusSafely() {
         return safeGet(THE_LAST_SWORD_MINING_RADIUS, 3);
-    }
-
-    public static int getTheLastSwordSummonCooldownSafely() {
-        return safeGet(THE_LAST_SWORD_SUMMON_COOLDOWN, 600);
     }
 
     //龙晶护甲配置
@@ -696,11 +661,6 @@ public class TheLastSwordConfiguration {
     //终焉卷轴配置
     public static boolean getTheLastEndScrollEnableParticleEffectsSafely() {
         return safeGet(THE_LAST_END_SCROLL_ENABLE_PARTICLE_EFFECTS, true);
-    }
-
-    //攻击系统配置
-    public static boolean getAttackEnableRadicalLogicSafely() {
-        return safeGet(ATTACK_ENABLE_RADICAL_LOGIC, false);
     }
 
     //防御系统配置
@@ -735,10 +695,6 @@ public class TheLastSwordConfiguration {
 
     public static double getSwordWraithAttackPerHighLevelSafely() {
         return safeGet(SWORD_WRAITH_ATTACK_PER_HIGH_LEVEL, 10.0);
-    }
-
-    public static boolean getSwordWraithFriendlyFireProtectionSafely() {
-        return safeGet(SWORD_WRAITH_FRIENDLY_FIRE_PROTECTION, true);
     }
 
     public static boolean getSwordWraithAsTheLastEndEntitySafely() {
@@ -784,7 +740,7 @@ public class TheLastSwordConfiguration {
 
     //Buff配置
     public static boolean getVoidEnchantmentParticleEffectsSafely() {
-        return safeGet(BUFF_VOID_ENCHANTMENT_PARTICLE_EFFECTS, false);
+        return safeGet(BUFF_VOID_ENCHANTMENT_PARTICLE_EFFECTS, true);
     }
 
     public static double getVoidEnchantmentDamagePercentageSafely() {
@@ -795,9 +751,9 @@ public class TheLastSwordConfiguration {
         return safeGet(BUFF_PHASING_BREAK_BLOCKS_ON_END, true);
     }
 
-    //终焉剑灵配置
-    public static int getWraithCombatTeleportDistanceSafely() {
-        return safeGet(THE_LAST_END_SWORD_WRAITH_COMBAT_TELEPORT_DISTANCE, 64);
+    //迷失战魂配置
+    public static boolean getLostWraithEnableCustomBossBarSafely() {
+        return safeGet(LOST_WRAITH_ENABLE_CUSTOM_BOSS_BAR, true);
     }
 
     //终焉剑灵技能配置
@@ -810,22 +766,12 @@ public class TheLastSwordConfiguration {
         return safeGet(SKILL_SWIFT_DASH_RANGE, 4.0);
     }
 
-    //双连击
-    public static double getSkillDoubleStrikeWeightSafely() {
-        return safeGet(SKILL_DOUBLE_STRIKE_WEIGHT, 0.2);
-    }
-
     public static double getSkillDoubleStrikeDamageMultiplierSafely() {
         return safeGet(SKILL_DOUBLE_STRIKE_DAMAGE_MULTIPLIER, 1.0);
     }
 
     public static double getSkillDoubleStrikeRangeSafely() {
         return safeGet(SKILL_DOUBLE_STRIKE_RANGE, 4.0);
-    }
-
-    //十字切
-    public static double getSkillCrossSlashWeightSafely() {
-        return safeGet(SKILL_CROSS_SLASH_WEIGHT, 0.15);
     }
 
     public static double getSkillCrossSlashDamageMultiplierSafely() {
@@ -836,22 +782,12 @@ public class TheLastSwordConfiguration {
         return safeGet(SKILL_CROSS_SLASH_RANGE, 6.0);
     }
 
-    //格挡
-    public static double getSkillBlockWeightSafely() {
-        return safeGet(SKILL_BLOCK_WEIGHT, 0.2);
-    }
-
     public static double getSkillBlockDamageMultiplierSafely() {
         return safeGet(SKILL_BLOCK_DAMAGE_MULTIPLIER, 0.5);
     }
 
     public static double getSkillBlockRangeSafely() {
         return safeGet(SKILL_BLOCK_RANGE, 5.0);
-    }
-
-    //月华
-    public static double getSkillMoonLightStrikeWeightSafely() {
-        return safeGet(SKILL_MOON_LIGHT_STRIKE_WEIGHT, 0.15);
     }
 
     public static double getSkillMoonLightStrikeDamageMultiplierSafely() {
@@ -862,18 +798,8 @@ public class TheLastSwordConfiguration {
         return safeGet(SKILL_MOON_LIGHT_STRIKE_RANGE, 6.0);
     }
 
-    //虚空附魔
-    public static double getSkillEnchantWeightSafely() {
-        return safeGet(SKILL_ENCHANT_WEIGHT, 0.25);
-    }
-
     public static int getSkillEnchantDurationSafely() {
         return safeGet(SKILL_ENCHANT_DURATION, 600);
-    }
-
-    //万物终焉
-    public static double getSkillEndOfAllThingsWeightSafely() {
-        return safeGet(SKILL_END_OF_ALL_THINGS_WEIGHT, 0.05);
     }
 
     public static double getSkillEndOfAllThingsDamageMultiplierSafely() {

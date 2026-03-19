@@ -59,8 +59,8 @@ public class DefenceCommand {
             String dimensionName = entity.level().dimension().location().toString();
 
             //获取真实生命值
-            float realHealth = EntityUtil.getTrueHealth(entity);
-            float realMaxHealth = EntityUtil.getTrueMaxHealth(entity);
+            float realHealth = EntityUtil.getWorldAnchor(entity);
+            float realMaxHealth = EntityUtil.getWorldAnchorMax(entity);
 
             final String displayInfo = String.format(
                 "  §7Entity: §f%s\n  §7UUID: §8%s\n  §7Dimension: §e%s\n  §7Real Health: §a%.1f§7/§a%.1f",

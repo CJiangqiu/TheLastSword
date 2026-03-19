@@ -905,7 +905,7 @@ public class TheLastEndScrollScreen extends Screen {
         };
 
         //在整个卷轴区域生成密集粒子（完整覆盖）
-        int particleCount = 1500; //增加粒子数量实现更密集覆盖
+        int particleCount = 500; //粒子数量
         for (int i = 0; i < particleCount; i++) {
             //随机位置（覆盖整个卷轴）
             float x = guiLeft + random.nextFloat() * GUI_WIDTH;
@@ -1044,8 +1044,8 @@ public class TheLastEndScrollScreen extends Screen {
         int buttonWidth = button.getWidth();
         int buttonHeight = button.getHeight();
 
-        //在按钮周围生成粒子（100个）
-        int particleCount = 100; //点击时的粒子数量
+        //在按钮周围生成粒子
+        int particleCount = 50;
         for (int i = 0; i < particleCount; i++) {
             //随机位置（在按钮周围区域，主要是按钮范围内）
             float x = buttonX + random.nextFloat() * buttonWidth;

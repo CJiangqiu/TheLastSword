@@ -4,8 +4,6 @@ import net.eca.api.EcaAPI;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.EntityDataSerializers;
-import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.damagesource.DamageSource;
@@ -17,6 +15,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.scores.Team;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.phys.AABB;
@@ -41,24 +40,27 @@ public class EntityUtil {
 
     // ==================== 实体数据定义（由 LivingEntityMixin 的 <clinit> 注入初始化） ====================
 
-    //真实生命值（编码：health - 1024）
-    public static EntityDataAccessor<String> TRUE_HEALTH;
+    //真实生命值——现世锚度（编码：anchor - 1024）
+    public static EntityDataAccessor<String> WORLD_ANCHOR;
 
-    //真实最大生命值（编码：maxHealth - 2048）
-    public static EntityDataAccessor<String> TRUE_MAX_HEALTH;
+    //现世锚度上限（编码：anchorMax - 2048）
+    public static EntityDataAccessor<String> WORLD_ANCHOR_MAX;
 
     //禁疗时间（tick）
     public static EntityDataAccessor<Integer> HEAL_BAN_TIME;
+
+    //禁疗记录值
+    public static EntityDataAccessor<Float> HEAL_BAN_VALUE;
 
     //防御保护状态
     public static EntityDataAccessor<Boolean> IS_PROTECTED;
 
     // ==================== 实体数据 API ====================
 
-    //获取真实生命值
-    public static float getTrueHealth(LivingEntity entity) {
+    //获取真实血量
+    public static float getWorldAnchor(LivingEntity entity) {
         if (entity == null) return 0.0f;
-        String encoded = entity.getEntityData().get(TRUE_HEALTH);
+        String encoded = entity.getEntityData().get(WORLD_ANCHOR);
         try {
             return Float.parseFloat(encoded) + 1024.0f;
         } catch (NumberFormatException e) {
@@ -66,16 +68,16 @@ public class EntityUtil {
         }
     }
 
-    //设置真实生命值
-    public static void setTrueHealth(LivingEntity entity, float health) {
+    //设置真实血量
+    public static void setWorldAnchor(LivingEntity entity, float anchor) {
         if (entity == null) return;
-        entity.getEntityData().set(TRUE_HEALTH, Float.toString(health - 1024.0f));
+        entity.getEntityData().set(WORLD_ANCHOR, Float.toString(anchor - 1024.0f));
     }
 
-    //获取真实最大生命值
-    public static float getTrueMaxHealth(LivingEntity entity) {
+    //获取最大真实血量上限
+    public static float getWorldAnchorMax(LivingEntity entity) {
         if (entity == null) return 0.0f;
-        String encoded = entity.getEntityData().get(TRUE_MAX_HEALTH);
+        String encoded = entity.getEntityData().get(WORLD_ANCHOR_MAX);
         try {
             return Float.parseFloat(encoded) + 2048.0f;
         } catch (NumberFormatException e) {
@@ -83,10 +85,10 @@ public class EntityUtil {
         }
     }
 
-    //设置真实最大生命值
-    public static void setTrueMaxHealth(LivingEntity entity, float maxHealth) {
+    //设置最大真实血量上限
+    public static void setWorldAnchorMax(LivingEntity entity, float maxAnchor) {
         if (entity == null) return;
-        entity.getEntityData().set(TRUE_MAX_HEALTH, Float.toString(maxHealth - 2048.0f));
+        entity.getEntityData().set(WORLD_ANCHOR_MAX, Float.toString(maxAnchor - 2048.0f));
     }
 
     //获取禁疗时间（tick）
@@ -111,32 +113,40 @@ public class EntityUtil {
         if (entity == null) return;
         int current = getHealBanTime(entity);
         if (current > 0) {
-            setHealBanTime(entity, current - 1);
+            int newTime = current - 1;
+            setHealBanTime(entity, newTime);
+            //禁疗结束时，解除 ECA 血量锁定
+            if (newTime == 0) {
+                setHealBanValue(entity, 0.0f);
+                EcaAPI.unlockHealth(entity);
+            }
         }
     }
 
     //清除禁疗状态
     public static void clearHealBan(LivingEntity entity) {
         setHealBanTime(entity, 0);
+        setHealBanValue(entity, 0.0f);
+        EcaAPI.unlockHealth(entity);
     }
 
-    //检查实体是否启用了真实生命值系统（真实生命值 > 0）
-    public static boolean hasTrueHealth(LivingEntity entity) {
-        return getTrueHealth(entity) > 0.0f;
+    //获取禁疗记录值
+    public static float getHealBanValue(LivingEntity entity) {
+        if (entity == null) return 0.0f;
+        return entity.getEntityData().get(HEAL_BAN_VALUE);
     }
 
-    //注册真实生命值（设置初始值）
-    public static void registerTrueHealth(LivingEntity entity, float maxHealth) {
+    //设置禁疗记录值
+    public static void setHealBanValue(LivingEntity entity, float value) {
         if (entity == null) return;
-        setTrueHealth(entity, maxHealth);
-        setTrueMaxHealth(entity, maxHealth);
+        entity.getEntityData().set(HEAL_BAN_VALUE, value);
     }
 
-    //清除真实生命值
-    public static void clearTrueHealth(LivingEntity entity) {
+    //清除真实血量
+    public static void clearWorldAnchor(LivingEntity entity) {
         if (entity == null) return;
-        setTrueHealth(entity, 0.0f);
-        setTrueMaxHealth(entity, 0.0f);
+        setWorldAnchor(entity, 0.0f);
+        setWorldAnchorMax(entity, 0.0f);
     }
 
     // ==================== 防御保护 API ====================
@@ -165,9 +175,9 @@ public class EntityUtil {
         //设置保护标志（TLS 主系统）
         setProtection(entity, true);
 
-        //设置真实生命值
-        setTrueHealth(entity, maxHealth);
-        setTrueMaxHealth(entity, maxHealth);
+        //设置现世锚度
+        setWorldAnchor(entity, maxHealth);
+        setWorldAnchorMax(entity, maxHealth);
     }
 
     //清除防御数据
@@ -177,8 +187,8 @@ public class EntityUtil {
         //清除保护标志（TLS 主系统）
         setProtection(entity, false);
 
-        //清除真实生命值
-        clearTrueHealth(entity);
+        //清除现世锚度
+        clearWorldAnchor(entity);
     }
 
     // ==================== 生命值模块 ====================
@@ -194,13 +204,7 @@ public class EntityUtil {
 
         try {
             // 同步更新你们的实体数据系统
-            setTrueHealth(entity, expectedHealth);
-
-            //玩家实体只执行基础修改
-            if (entity instanceof Player) {
-                return EcaAPI.setHealth(entity, expectedHealth);
-            }
-
+            setWorldAnchor(entity, expectedHealth);
             //调用 ECA API 的完整血量修改流程
             return EcaAPI.setHealth(entity, expectedHealth);
 
@@ -308,9 +312,21 @@ public class EntityUtil {
         EcaAPI.cleanupBossBar(entity);
     }
 
-    // ==================== 实体目标与队伍模块（The Last Sword 特有）====================
-    //综合判断是否可以攻击目标（只判断盟友关系）
+    // ==================== 实体目标与队伍模块====================
+    //综合判断是否可以攻击目标
     public static boolean canAttack(Entity attacker, Entity target) {
+        if (target == null) {
+            return false;
+        }
+        //原版队伍判断：同一队伍或友军队伍不攻击
+        if (attacker != null) {
+            Team attackerTeam = attacker.getTeam();
+            Team targetTeam = target.getTeam();
+            if (attackerTeam != null && targetTeam != null && attackerTeam.isAlliedTo(targetTeam)) {
+                return false;
+            }
+        }
+
         //创造模式和旁观模式玩家豁免
         if (target instanceof Player player && (player.isCreative() || player.isSpectator())) {
             return false;
@@ -540,8 +556,6 @@ public class EntityUtil {
 
         return validTargets;
     }
-
-    // ==================== 弓箭发射模块 ====================
 
     //发射附魔弓箭
     public static void shootArrow(LivingEntity shooter, LivingEntity target, ItemStack bow) {

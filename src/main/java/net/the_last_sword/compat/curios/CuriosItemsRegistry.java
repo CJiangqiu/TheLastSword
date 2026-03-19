@@ -27,5 +27,20 @@ public class CuriosItemsRegistry {
         return registry.register("wings_that_cover_the_world", WingsThatCoverTheWorld::new);
     }
 
+    //极限维生装置
+    public static RegistryObject<Item> registerExtremeLifeSupportDevice(DeferredRegister<Item> registry) {
+        return registry.register("extreme_life_support_device", ExtremeLifeSupportDevice::new);
+    }
+
+    //维度探索者
+    public static RegistryObject<Item> registerDimensionExplorer(DeferredRegister<Item> registry) {
+        return registry.register("dimension_explorer", DimensionExplorer::new);
+    }
+
+    //给予者的痛苦
+    public static RegistryObject<Item> registerTheGiversPain(DeferredRegister<Item> registry) {
+        return registry.register("the_givers_pain", TheGiversPain::new);
+    }
+
     private CuriosItemsRegistry() {}
 }

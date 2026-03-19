@@ -11,6 +11,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.eca.api.EcaAPI;
 import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.init.ModAttributes;
@@ -125,10 +126,12 @@ public class AbsoluteDestructionDamageSource extends DamageSource {
             }
         }
 
-        //步骤5: 设置禁疗状态
+        //步骤5: 设置禁疗状态（包含 ECA 血量锁定）
         int banTime = TheLastSwordConfiguration.getHealNegationTimeSafely();
         if (banTime > 0) {
             EntityUtil.setHealBanTime(entity, banTime);
+            EntityUtil.setHealBanValue(entity, expectedHealth);
+            EcaAPI.lockHealth(entity, expectedHealth);
         }
         return true;
     }

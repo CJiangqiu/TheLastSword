@@ -32,6 +32,9 @@ public class ModCreativeTabs {
                 output.accept(ModItems.DRAGON_CRYSTAL_NECKLACE.get());
                 output.accept(ModItems.DRAGON_CRYSTAL_CROWN.get());
                 output.accept(ModItems.WINGS_THAT_COVER_THE_WORLD.get());
+                output.accept(ModItems.EXTREME_LIFE_SUPPORT_DEVICE.get());
+                output.accept(ModItems.DIMENSION_EXPLORER.get());
+                output.accept(ModItems.THE_GIVERS_PAIN.get());
                 output.accept(ModItems.DRAGON_CRYSTAL_ARMOR_HELMET.get());
                 output.accept(ModItems.DRAGON_CRYSTAL_ARMOR_CHESTPLATE.get());
                 output.accept(ModItems.DRAGON_CRYSTAL_ARMOR_LEGGINGS.get());

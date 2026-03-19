@@ -6,6 +6,7 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
+import net.the_last_sword.configuration.TheLastSwordConfiguration;
 
 //虚空附魔效果
 //持有此效果的实体攻击其他实体时会造成额外的虚空伤害
@@ -26,7 +27,9 @@ public class VoidEnchantingEffect extends MobEffect {
     public void applyEffectTick(LivingEntity entity, int amplifier) {
         super.applyEffectTick(entity, amplifier);
 
-        if (!entity.level().isClientSide && entity.level() instanceof ServerLevel serverLevel) {
+        if (!entity.level().isClientSide
+            && entity.level() instanceof ServerLevel serverLevel
+            && TheLastSwordConfiguration.getVoidEnchantmentParticleEffectsSafely()) {
             spawnEnchantParticles(entity, serverLevel);
         }
     }

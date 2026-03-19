@@ -61,7 +61,7 @@ public class CombatMusicHandler {
         List<LostWraithEntity> nearbyLostWraiths = level.getEntitiesOfClass(
             LostWraithEntity.class,
             searchArea,
-            wraith -> wraith.isSpawned() && wraith.isAlive() && !wraith.shouldLeave()
+            LostWraithEntity::isReady
         );
         if (!nearbyLostWraiths.isEmpty()) {
             targetMusicType = "lost_wraith";
@@ -71,7 +71,7 @@ public class CombatMusicHandler {
         List<TheLastEndSwordWraithEntity> nearbySwordWraiths = level.getEntitiesOfClass(
             TheLastEndSwordWraithEntity.class,
             searchArea,
-            wraith -> wraith.isSpawned() && wraith.isAlive() && !wraith.shouldLeave()
+            TheLastEndSwordWraithEntity::isReady
         );
         if (!nearbySwordWraiths.isEmpty()) {
             targetMusicType = "wraith";

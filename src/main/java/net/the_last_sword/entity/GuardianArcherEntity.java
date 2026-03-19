@@ -11,25 +11,31 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
+import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
+import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.the_last_sword.entity.ai.GuardianArcherAI;
-import net.the_last_sword.entity.ai.TheLastEndAI;
+import net.the_last_sword.entity.ai.GuardianArcherMaintainDistanceGoal;
+import net.the_last_sword.entity.ai.GuardianAssistAllyTargetGoal;
+import net.the_last_sword.entity.ai.GuardianRangedAttackGoal;
 import org.jetbrains.annotations.Nullable;
 
-//封印尖塔守卫 - 弓箭手变种
+// 封印尖塔守卫 - 弓箭手变种
 public class GuardianArcherEntity extends GuardianOfSealedSpireEntity {
 
     public GuardianArcherEntity(EntityType<? extends GuardianArcherEntity> type, Level world) {
         super(type, world);
     }
 
-    //属性
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes()
-                .add(Attributes.MOVEMENT_SPEED, 0.30)  //基础0.25 + 0.05
-                .add(Attributes.MAX_HEALTH, 50)        //血量不变
+                .add(Attributes.MOVEMENT_SPEED, 0.30)
+                .add(Attributes.MAX_HEALTH, 50)
                 .add(Attributes.ARMOR, 0)
                 .add(Attributes.ATTACK_DAMAGE, 2)
                 .add(Attributes.FOLLOW_RANGE, 32);
@@ -40,10 +46,25 @@ public class GuardianArcherEntity extends GuardianOfSealedSpireEntity {
         return GuardianType.ARCHER;
     }
 
-    //创建弓箭手专属AI
     @Override
-    public TheLastEndAI createAI() {
-        return new GuardianArcherAI(this);
+    public String getSkillAnimationName(int attackState) {
+        if (attackState == STATE_ATTACK) {
+            return "shoot";
+        }
+        return super.getSkillAnimationName(attackState);
+    }
+
+    @Override
+    protected void registerGoals() {
+        this.goalSelector.addGoal(1, new GuardianRangedAttackGoal(this));
+        this.goalSelector.addGoal(2, new GuardianArcherMaintainDistanceGoal(this));
+        this.goalSelector.addGoal(5, new FloatGoal(this));
+        this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 8.0F));
+        this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
+
+        this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers(GuardianOfSealedSpireEntity.class));
+        this.targetSelector.addGoal(2, new GuardianAssistAllyTargetGoal(this));
+        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Player.class, true));
     }
 
     @Override
@@ -51,17 +72,16 @@ public class GuardianArcherEntity extends GuardianOfSealedSpireEntity {
             MobSpawnType reason, @Nullable SpawnGroupData livingdata, @Nullable CompoundTag tag) {
         SpawnGroupData result = super.finalizeSpawn(world, difficulty, reason, livingdata, tag);
 
-        //创建满附魔弓
         ItemStack bow = new ItemStack(Items.BOW);
-        bow.enchant(Enchantments.POWER_ARROWS, 5);      //力量V
-        bow.enchant(Enchantments.PUNCH_ARROWS, 2);      //冲击II
-        bow.enchant(Enchantments.INFINITY_ARROWS, 1);   //无限I
-        bow.enchant(Enchantments.FLAMING_ARROWS, 1);    //火矢I
-        bow.enchant(Enchantments.UNBREAKING, 3);        //耐久III
-        bow.enchant(Enchantments.MENDING, 1);           //经验修补I
+        bow.enchant(Enchantments.POWER_ARROWS, 5);
+        bow.enchant(Enchantments.PUNCH_ARROWS, 2);
+        bow.enchant(Enchantments.INFINITY_ARROWS, 1);
+        bow.enchant(Enchantments.FLAMING_ARROWS, 1);
+        bow.enchant(Enchantments.UNBREAKING, 3);
+        bow.enchant(Enchantments.MENDING, 1);
 
         this.setItemSlot(EquipmentSlot.MAINHAND, bow);
-        this.setDropChance(EquipmentSlot.MAINHAND, 2.0F);  //100%掉落（>1.0F保证掉落）
+        this.setDropChance(EquipmentSlot.MAINHAND, 2.0F);
 
         return result;
     }

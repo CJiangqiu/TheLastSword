@@ -20,6 +20,12 @@ import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
+import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
+import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
+import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
@@ -28,24 +34,29 @@ import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.the_last_sword.entity.ai.GuardianOfSealedSpireAI;
-import net.the_last_sword.entity.ai.TheLastEndAI;
+import net.the_last_sword.entity.ai.GuardianAssistAllyTargetGoal;
+import net.the_last_sword.entity.ai.GuardianChaseTargetGoal;
+import net.the_last_sword.entity.ai.GuardianMeleeAttackGoal;
+import net.the_last_sword.entity.ai.GuardianPickupWeaponGoal;
 import net.the_last_sword.init.ModEntities;
 import net.the_last_sword.util.EntityUtil;
+import java.util.function.Predicate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-//封印尖塔守卫
+// 封印尖塔守卫
 public class GuardianOfSealedSpireEntity extends TheLastEndEntity {
 
-    //守卫变种类型
+    // 技能状态常量
+    public static final int STATE_ATTACK = 3;
+
+    // 守卫变种类型
     public enum GuardianType {
-        SABER,      //剑士
-        ARCHER,     //弓箭手
-        BERSERKER   //狂战士
+        SABER,
+        ARCHER,
+        BERSERKER
     }
 
-    //守卫类型字段
     private static final EntityDataAccessor<Integer> GUARDIAN_TYPE =
             SynchedEntityData.defineId(GuardianOfSealedSpireEntity.class, EntityDataSerializers.INT);
 
@@ -59,40 +70,42 @@ public class GuardianOfSealedSpireEntity extends TheLastEndEntity {
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
-        this.entityData.define(GUARDIAN_TYPE, 0);  //默认剑士
+        this.entityData.define(GUARDIAN_TYPE, 0);
     }
 
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(1, new FloatGoal(this));
+
+        this.goalSelector.addGoal(1, new GuardianPickupWeaponGoal(this));
+        this.goalSelector.addGoal(2, new GuardianMeleeAttackGoal(this));
+        this.goalSelector.addGoal(3, new GuardianChaseTargetGoal(this));
+        this.goalSelector.addGoal(5, new FloatGoal(this));
+        this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 8.0F));
+        this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
+
+        this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers(GuardianOfSealedSpireEntity.class));
+        this.targetSelector.addGoal(2, new GuardianAssistAllyTargetGoal(this));
+        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Player.class, true));
+        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, LostWraithEntity.class, true));
     }
 
-    //获取守卫类型
     public GuardianType getGuardianType() {
         int typeId = this.entityData.get(GUARDIAN_TYPE);
         return GuardianType.values()[Math.min(typeId, GuardianType.values().length - 1)];
     }
 
-    //设置守卫类型
     public void setGuardianType(GuardianType type) {
         this.entityData.set(GUARDIAN_TYPE, type.ordinal());
     }
 
-    //创建AI实例
-    @Override
-    public TheLastEndAI createAI() {
-        return new GuardianOfSealedSpireAI(this);
-    }
-
-    //动画名称
     @Override
     public String getIdleAnimationName() {
         return "idle";
     }
 
     @Override
-    public String getMovementAnimationName() {
+    public String getWalkAnimationName() {
         return "walk";
     }
 
@@ -103,10 +116,17 @@ public class GuardianOfSealedSpireEntity extends TheLastEndEntity {
 
     @Override
     public String getSpawnAnimationName() {
-        return "spawn";  //守卫没有生成动画，但必须实现此方法
+        return "spawn";
     }
 
-    //属性
+    @Override
+    public String getSkillAnimationName(int attackState) {
+        if (attackState == STATE_ATTACK) {
+            return "attack";
+        }
+        return "";
+    }
+
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes()
                 .add(Attributes.MOVEMENT_SPEED, 0.25)
@@ -116,7 +136,6 @@ public class GuardianOfSealedSpireEntity extends TheLastEndEntity {
                 .add(Attributes.FOLLOW_RANGE, 32);
     }
 
-    //声音
     @Override
     public SoundEvent getAmbientSound() {
         return SoundEvents.SKELETON_AMBIENT;
@@ -137,52 +156,42 @@ public class GuardianOfSealedSpireEntity extends TheLastEndEntity {
         return MobType.UNDEFINED;
     }
 
-    //限伤值
     @Override
     protected float getDamageLimit() {
         return 10.0f;
     }
 
-    //无敌帧
     @Override
-    protected int getAllowHurtTime() {
+    protected int getHurtResistTime() {
         return 10;
     }
 
-    //生成时初始化（仅服务端执行）
     @Override
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor world, DifficultyInstance difficulty,
             MobSpawnType reason, @Nullable SpawnGroupData livingdata, @Nullable CompoundTag tag) {
         SpawnGroupData result = super.finalizeSpawn(world, difficulty, reason, livingdata, tag);
 
-        //仅在服务端初始化（客户端会通过同步获取数据）
         if (!level().isClientSide) {
-            //初始化血量
             float maxHealth = (float) getAttributeValue(Attributes.MAX_HEALTH);
-            setTheLastEndMaxHealth(maxHealth);
-            setTheLastEndHealth(maxHealth);
+            setWorldAnchorMax(maxHealth);
+            setWorldAnchor(maxHealth);
 
-            //提前注册防御系统（确保 IS_PROTECTED 和 HEALTH_LOCK_ENABLED 同步）
             if (!EntityUtil.hasProtection(this)) {
                 EntityUtil.registerDefence(this, maxHealth);
             }
 
-            //初始化等级为1（守卫固定1级）
             setTheLastEndLevel(1);
 
-            //守卫没有生成动画，直接标记为已生成
-            setSpawned(true);
+            // 守卫没有生成动画，直接进入IDLE状态
+            setAnimationState(STATE_IDLE);
 
-            //装备满附魔下界合金甲
             equipNetheriteArmor();
         }
 
         return result;
     }
 
-    //装备满附魔下界合金甲
     private void equipNetheriteArmor() {
-        //头盔：保护4 + 荆棘3 + 耐久3 + 经验修补 + 水下呼吸3 + 水下速掘 + 弹射物保护4
         ItemStack helmet = new ItemStack(Items.NETHERITE_HELMET);
         helmet.enchant(Enchantments.ALL_DAMAGE_PROTECTION, 4);
         helmet.enchant(Enchantments.THORNS, 3);
@@ -192,9 +201,8 @@ public class GuardianOfSealedSpireEntity extends TheLastEndEntity {
         helmet.enchant(Enchantments.AQUA_AFFINITY, 1);
         helmet.enchant(Enchantments.PROJECTILE_PROTECTION, 4);
         setItemSlot(EquipmentSlot.HEAD, helmet);
-        setDropChance(EquipmentSlot.HEAD, 2.0F);  //100%掉落（>1.0F保证掉落）
+        setDropChance(EquipmentSlot.HEAD, 2.0F);
 
-        //胸甲：保护4 + 荆棘3 + 耐久3 + 经验修补 + 爆炸保护4
         ItemStack chestplate = new ItemStack(Items.NETHERITE_CHESTPLATE);
         chestplate.enchant(Enchantments.ALL_DAMAGE_PROTECTION, 4);
         chestplate.enchant(Enchantments.THORNS, 3);
@@ -202,9 +210,8 @@ public class GuardianOfSealedSpireEntity extends TheLastEndEntity {
         chestplate.enchant(Enchantments.MENDING, 1);
         chestplate.enchant(Enchantments.BLAST_PROTECTION, 4);
         setItemSlot(EquipmentSlot.CHEST, chestplate);
-        setDropChance(EquipmentSlot.CHEST, 2.0F);  //100%掉落（>1.0F保证掉落）
+        setDropChance(EquipmentSlot.CHEST, 2.0F);
 
-        //护腿：保护4 + 荆棘3 + 耐久3 + 经验修补 + 火焰保护4 + 迅捷潜行3
         ItemStack leggings = new ItemStack(Items.NETHERITE_LEGGINGS);
         leggings.enchant(Enchantments.ALL_DAMAGE_PROTECTION, 4);
         leggings.enchant(Enchantments.THORNS, 3);
@@ -213,9 +220,8 @@ public class GuardianOfSealedSpireEntity extends TheLastEndEntity {
         leggings.enchant(Enchantments.FIRE_PROTECTION, 4);
         leggings.enchant(Enchantments.SWIFT_SNEAK, 3);
         setItemSlot(EquipmentSlot.LEGS, leggings);
-        setDropChance(EquipmentSlot.LEGS, 2.0F);  //100%掉落（>1.0F保证掉落）
+        setDropChance(EquipmentSlot.LEGS, 2.0F);
 
-        //靴子：保护4 + 荆棘3 + 耐久3 + 经验修补 + 深海探索者3 + 摔落保护4 + 灵魂疾行3
         ItemStack boots = new ItemStack(Items.NETHERITE_BOOTS);
         boots.enchant(Enchantments.ALL_DAMAGE_PROTECTION, 4);
         boots.enchant(Enchantments.THORNS, 3);
@@ -225,14 +231,14 @@ public class GuardianOfSealedSpireEntity extends TheLastEndEntity {
         boots.enchant(Enchantments.FALL_PROTECTION, 4);
         boots.enchant(Enchantments.SOUL_SPEED, 3);
         setItemSlot(EquipmentSlot.FEET, boots);
-        setDropChance(EquipmentSlot.FEET, 2.0F);  //100%掉落（>1.0F保证掉落）
+        setDropChance(EquipmentSlot.FEET, 2.0F);
     }
 
     @Override
     protected float getStandingEyeHeight(Pose pose, EntityDimensions dimensions) {
         return dimensions.height * 0.85f;
     }
-    //NBT
+
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
@@ -252,7 +258,6 @@ public class GuardianOfSealedSpireEntity extends TheLastEndEntity {
     public void tick() {
         super.tick();
 
-        //物品转换检测（每20tick检测一次）
         if (tickCount % 20 == 0) {
             checkAndTransform();
         }
@@ -260,9 +265,7 @@ public class GuardianOfSealedSpireEntity extends TheLastEndEntity {
         this.refreshDimensions();
     }
 
-    //检测主手物品并转换类型
     protected void checkAndTransform() {
-        //只有基础守卫可以转换，子类不能切换变种
         if (this.getClass() != GuardianOfSealedSpireEntity.class) {
             return;
         }
@@ -273,11 +276,9 @@ public class GuardianOfSealedSpireEntity extends TheLastEndEntity {
         GuardianType targetType = getTypeFromItem(mainhand);
         if (targetType == null || targetType == getGuardianType()) return;
 
-        //执行转换
         transformTo(targetType);
     }
 
-    //根据物品判断目标类型
     private GuardianType getTypeFromItem(ItemStack stack) {
         if (stack.getItem() instanceof SwordItem) {
             return GuardianType.SABER;
@@ -289,14 +290,11 @@ public class GuardianOfSealedSpireEntity extends TheLastEndEntity {
         return null;
     }
 
-    //转换为指定类型
     private void transformTo(GuardianType type) {
-        //只在服务端执行
         if (level().isClientSide) {
             return;
         }
 
-        //创建新实体
         GuardianOfSealedSpireEntity newEntity = null;
         switch (type) {
             case SABER:
@@ -314,31 +312,24 @@ public class GuardianOfSealedSpireEntity extends TheLastEndEntity {
             return;
         }
 
-        //复制位置和旋转
         newEntity.moveTo(getX(), getY(), getZ(), getYRot(), getXRot());
 
-        //调用 finalizeSpawn 初始化实体（满血 + 满附魔武器）
         if (level() instanceof ServerLevel serverLevel) {
             newEntity.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(blockPosition()),
                 MobSpawnType.CONVERSION, null, null);
         }
 
-        //复制目标
         if (getTarget() != null) {
             newEntity.setTarget(getTarget());
         }
 
-        //清除原实体的主手物品，避免掉落
         setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
 
-        //生成新实体
         level().addFreshEntity(newEntity);
 
-        //移除当前实体
         this.safeRemove();
     }
 
-    //友军伤害检测
     @Override
     public boolean hurt(@NotNull DamageSource source, float amount) {
         if (source.getEntity() instanceof GuardianOfSealedSpireEntity) {
@@ -346,5 +337,4 @@ public class GuardianOfSealedSpireEntity extends TheLastEndEntity {
         }
         return super.hurt(source, amount);
     }
-
 }

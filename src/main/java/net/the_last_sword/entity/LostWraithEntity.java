@@ -7,9 +7,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.BossEvent;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -26,25 +29,58 @@ import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
+import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
+import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.the_last_sword.entity.ai.LostWraithAI;
-import net.the_last_sword.entity.ai.TheLastEndAI;
+import net.the_last_sword.configuration.TheLastSwordConfiguration;
+import net.the_last_sword.entity.ai.LostWraithDragonFireBallGoal;
+import net.the_last_sword.entity.ai.LostWraithChaseTargetGoal;
+import net.the_last_sword.entity.ai.LostWraithEnchantGoal;
+import net.the_last_sword.entity.ai.LostWraithEndStrikeGoal;
+import net.the_last_sword.entity.ai.LostWraithPunchGoal;
+import net.the_last_sword.entity.ai.LostWraithPatienceGoal;
+import net.the_last_sword.entity.ai.LostWraithSummonLightningGoal;
 import net.the_last_sword.util.EntityUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
-//迷失战魂实体
+// 迷失战魂实体
 public class LostWraithEntity extends TheLastEndEntity {
 
-    //对话索引
+    // 技能状态常量
+    public static final int STATE_ENCHANT = 3;
+    public static final int STATE_PUNCH = 4;
+    public static final int STATE_DRAGON_FIREBALL = 5;
+    public static final int STATE_LIGHTNING = 6;
+    public static final int STATE_END_STRIKE = 7;
+
     private static final EntityDataAccessor<Integer> TALK_INDEX =
             SynchedEntityData.defineId(LostWraithEntity.class, EntityDataSerializers.INT);
+
+    // 生成动画计时
+    private int spawnTick = 0;
+
+    // 耐心机制
+    private int patienceTicks = 0;
+    private boolean forceEndStrike = false;
+
+    private final ServerBossEvent bossEvent = new ServerBossEvent(
+        Component.translatable("entity.the_last_sword.lost_wraith"),
+        BossEvent.BossBarColor.PURPLE,
+        BossEvent.BossBarOverlay.PROGRESS
+    );
 
     public LostWraithEntity(EntityType<? extends LostWraithEntity> type, Level world) {
         super(type, world);
@@ -56,16 +92,30 @@ public class LostWraithEntity extends TheLastEndEntity {
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
-        this.entityData.define(TALK_INDEX, 1);  //默认从第1句开始
+        this.entityData.define(TALK_INDEX, 1);
     }
 
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(1, new FloatGoal(this));
+
+        this.goalSelector.addGoal(0, new LostWraithPatienceGoal(this));
+        this.goalSelector.addGoal(1, new LostWraithEnchantGoal(this));
+        this.goalSelector.addGoal(2, new LostWraithEndStrikeGoal(this));
+        this.goalSelector.addGoal(3, new LostWraithPunchGoal(this));
+        this.goalSelector.addGoal(4, new LostWraithDragonFireBallGoal(this));
+        this.goalSelector.addGoal(5, new LostWraithSummonLightningGoal(this));
+        this.goalSelector.addGoal(6, new LostWraithChaseTargetGoal(this));
+        this.goalSelector.addGoal(7, new FloatGoal(this));
+        this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 8.0F));
+        this.goalSelector.addGoal(9, new RandomLookAroundGoal(this));
+
+        this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false,
+            entity -> entity instanceof Player player && !player.isCreative() && !player.isSpectator()));
+        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, GuardianOfSealedSpireEntity.class, true));
     }
 
-    //属性
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes()
                 .add(Attributes.MOVEMENT_SPEED, 0.3)
@@ -77,24 +127,17 @@ public class LostWraithEntity extends TheLastEndEntity {
 
     @Override
     public final void setTheLastEndLevel(int level) {
-        super.setTheLastEndLevel(1);  //固定1级
+        super.setTheLastEndLevel(1);
     }
 
-    //创建AI实例
-    @Override
-    public TheLastEndAI createAI() {
-        return new LostWraithAI(this);
-    }
-
-    //动画名称
     @Override
     public String getIdleAnimationName() {
         return "idle";
     }
 
     @Override
-    public String getMovementAnimationName() {
-        return "idle";  //迷失战魂没有移动动画，始终用idle
+    public String getWalkAnimationName() {
+        return "idle";
     }
 
     @Override
@@ -107,7 +150,23 @@ public class LostWraithEntity extends TheLastEndEntity {
         return "spawn";
     }
 
-    //声音
+    @Override
+    public String getWaitAnimationName() {
+        return "init";
+    }
+
+    @Override
+    public String getSkillAnimationName(int attackState) {
+        return switch (attackState) {
+            case STATE_ENCHANT -> "enchant";
+            case STATE_PUNCH -> "punch";
+            case STATE_DRAGON_FIREBALL -> "dragon_fire_ball";
+            case STATE_LIGHTNING -> "summon_lightning";
+            case STATE_END_STRIKE -> "end_strike";
+            default -> "";
+        };
+    }
+
     @Override
     public SoundEvent getAmbientSound() {
         return SoundEvents.WITHER_SKELETON_AMBIENT;
@@ -128,57 +187,46 @@ public class LostWraithEntity extends TheLastEndEntity {
         return MobType.UNDEFINED;
     }
 
-    //限伤值
     @Override
     protected float getDamageLimit() {
         return 10.0f;
     }
 
-    //无敌帧
     @Override
-    protected int getAllowHurtTime() {
+    protected int getHurtResistTime() {
         return 10;
     }
 
-    //伤害免疫
     @Override
     public boolean hurt(@NotNull DamageSource source, float amount) {
-        //未激活时免疫所有伤害
-        if (!isSpawned()) {
+        if (!isReady()) {
             return false;
         }
-        //免疫龙息伤害
         if (source.is(DamageTypes.DRAGON_BREATH)) {
             return false;
         }
-        //免疫掉落伤害
         if (source.is(DamageTypes.FALL)) {
             return false;
         }
         return super.hurt(source, amount);
     }
 
-    //生成时初始化
     @Override
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor world, DifficultyInstance difficulty,
             MobSpawnType reason, @Nullable SpawnGroupData livingdata, @Nullable CompoundTag tag) {
         SpawnGroupData result = super.finalizeSpawn(world, difficulty, reason, livingdata, tag);
 
-        //仅在服务端初始化
         if (!level().isClientSide) {
-            //初始化等级为1
             setTheLastEndLevel(1);
 
-            //标记为未激活
-            setSpawned(false);
-
-            //提前注册防御系统（确保 IS_PROTECTED 和 HEALTH_LOCK_ENABLED 同步）
             float maxHealth = (float) getAttributeValue(Attributes.MAX_HEALTH);
+            setWorldAnchorMax(maxHealth);
+            setWorldAnchor(maxHealth);
+
             if (!EntityUtil.hasProtection(this)) {
                 EntityUtil.registerDefence(this, maxHealth);
             }
 
-            //面向最近的玩家
             faceNearestPlayer();
         }
 
@@ -187,69 +235,104 @@ public class LostWraithEntity extends TheLastEndEntity {
 
     @Override
     protected float getStandingEyeHeight(@NotNull Pose pose, @NotNull EntityDimensions dimensions) {
-        return 3.0f;  //固定眼睛高度为3格
+        return 3.0f;
+    }
+
+    @Override
+    protected void onUnspawnedTick() {
+        // 等待激活状态，不执行任何逻辑
+    }
+
+    @Override
+    protected void onSpawningTick() {
+        spawnTick++;
+
+        if (spawnTick >= getSpawnAnimationDuration()) {
+            setAnimationState(STATE_IDLE);
+            spawnTick = 0;
+        }
+
+        this.refreshDimensions();
     }
 
     @Override
     public void tick() {
-        //未激活状态：保持 init 动画，不执行 AI
-        if (!isSpawned()) {
-            //正在播放生成动画
-            if (getSpawnTick() > 0) {
-                setSpawnTick(getSpawnTick() + 1);
-                setAnimation("spawn");
+        super.tick();
 
-                //生成动画播放完毕
-                if (getSpawnTick() >= getSpawnAnimationDuration()) {
-                    setSpawned(true);
-                    setSpawnTick(0);
-                    setAnimation(getIdleAnimationName());
-                }
-            } else {
-                //等待激活，保持 init 动画
-                setAnimation("init");
-            }
-            //不调用 super.tick()，禁用 AI
-            return;
+        if (isReady() && !isDying()) {
+            updateVanillaBossBar();
         }
 
-        super.tick();
         this.refreshDimensions();
     }
 
-    //生成动画时长（5.5秒）
-    @Override
-    protected int getSpawnAnimationDuration() {
-        return 110;
-    }
+    private void updateVanillaBossBar() {
+        if (level().isClientSide) {
+            return;
+        }
 
-    //死亡动画时长
-    @Override
-    public int getDeathAnimationDuration() {
-        return 50;  //50tick（2.5秒）
-    }
+        if (TheLastSwordConfiguration.getLostWraithEnableCustomBossBarSafely()) {
+            bossEvent.removeAllPlayers();
+            return;
+        }
 
-    //死亡开始时发送对话
-    @Override
-    protected void onDeathStart() {
-        sendDeathTalkToNearbyPlayers();
-    }
+        if (!isReady() || isDying()) {
+            bossEvent.removeAllPlayers();
+            return;
+        }
 
-    //激活迷失战魂
-    public void activate() {
-        if (!isSpawned() && getSpawnTick() == 0) {
-            setSpawnTick(1);  //开始计时
-            setAnimation("spawn");
+        float healthPercent = getWorldAnchorMax() > 0
+            ? Math.max(0, Math.min(1, getWorldAnchor() / getWorldAnchorMax()))
+            : 0;
+        bossEvent.setProgress(healthPercent);
+
+        List<ServerPlayer> nearbyPlayers = level().getEntitiesOfClass(
+            ServerPlayer.class,
+            getBoundingBox().inflate(64.0)
+        );
+
+        for (ServerPlayer player : nearbyPlayers) {
+            if (!bossEvent.getPlayers().contains(player)) {
+                bossEvent.addPlayer(player);
+            }
+        }
+
+        List<ServerPlayer> currentPlayers = new ArrayList<>(bossEvent.getPlayers());
+        for (ServerPlayer player : currentPlayers) {
+            if (!nearbyPlayers.contains(player) || player.isRemoved()) {
+                bossEvent.removePlayer(player);
+            }
         }
     }
 
-    //玩家交互
+    @Override
+    public int getSpawnAnimationDuration() {
+        return 110;
+    }
+
+    @Override
+    public int getDeathAnimationDuration() {
+        return 50;
+    }
+
+    @Override
+    protected void onDeathStart() {
+        sendDeathTalkToNearbyPlayers();
+        bossEvent.removeAllPlayers();
+    }
+
+    public void activate() {
+        if (getAnimationState() == STATE_UNSPAWNED) {
+            setAnimationState(STATE_SPAWNING);
+            spawnTick = 0;
+        }
+    }
+
     @Override
     public @NotNull InteractionResult mobInteract(@NotNull Player player, @NotNull InteractionHand hand) {
         ItemStack itemstack = player.getItemInHand(hand);
 
-        //龙蛋激活
-        if (itemstack.getItem() == Items.DRAGON_EGG && !isSpawned()) {
+        if (itemstack.getItem() == Items.DRAGON_EGG && !isReady()) {
             if (!level().isClientSide) {
                 activate();
 
@@ -267,8 +350,7 @@ public class LostWraithEntity extends TheLastEndEntity {
             return InteractionResult.sidedSuccess(level().isClientSide);
         }
 
-        //空手对话
-        if (itemstack.isEmpty() && !isSpawned()) {
+        if (itemstack.isEmpty() && !isReady()) {
             if (!level().isClientSide) {
                 sendNextTalk(player);
             }
@@ -278,39 +360,41 @@ public class LostWraithEntity extends TheLastEndEntity {
         return super.mobInteract(player, hand);
     }
 
-    //运动控制
     @Override
     public void setDeltaMovement(double x, double y, double z) {
-        //未激活或死亡动画期间不允许移动
-        if (!isSpawned() || shouldLeave()) {
+        if (isDying()) {
             return;
         }
-        super.setDeltaMovement(x, y, z);
+        if (getAnimationState() == STATE_SPAWNING) {
+            super.setDeltaMovement(x, y, z);
+            return;
+        }
+        if (isReady()) {
+            super.setDeltaMovement(x, y, z);
+            return;
+        }
     }
 
     @Override
     public boolean isPushable() {
-        return false;  //不允许被推动
+        return false;
     }
 
     @Override
     public void push(@NotNull Entity entity) {
-        //未激活时不允许被推动
-        if (!isSpawned()) {
+        if (!isReady()) {
             return;
         }
         super.push(entity);
     }
 
-    //对话系统
     private void sendDeathTalkToNearbyPlayers() {
         if (level().isClientSide) return;
 
         List<Player> nearbyPlayers = level().getEntitiesOfClass(Player.class,
                 getBoundingBox().inflate(32.0));
 
-        //按UUID去重
-        java.util.Map<java.util.UUID, Player> uniquePlayers = new java.util.HashMap<>();
+        Map<UUID, Player> uniquePlayers = new HashMap<>();
         for (Player p : nearbyPlayers) {
             uniquePlayers.putIfAbsent(p.getUUID(), p);
         }
@@ -342,19 +426,45 @@ public class LostWraithEntity extends TheLastEndEntity {
 
         player.sendSystemMessage(prefixedMessage);
 
-        //递增对话索引，最大为7（之后一直重复第7句）
         if (currentIndex < 7) {
             setTalkIndex(currentIndex + 1);
         }
     }
 
-    //对话索引
     public int getTalkIndex() {
         return this.entityData.get(TALK_INDEX);
     }
 
     public void setTalkIndex(int index) {
         this.entityData.set(TALK_INDEX, Math.max(1, Math.min(7, index)));
+    }
+
+    public int incrementPatienceTick() {
+        return ++patienceTicks;
+    }
+
+    public void resetPatience() {
+        patienceTicks = 0;
+    }
+
+    public void setForceEndStrike(boolean force) {
+        forceEndStrike = force;
+    }
+
+    public boolean isForceEndStrike() {
+        return forceEndStrike;
+    }
+
+    public void clearForceEndStrike() {
+        forceEndStrike = false;
+    }
+
+    public boolean consumeForceEndStrike() {
+        if (!forceEndStrike) {
+            return false;
+        }
+        forceEndStrike = false;
+        return true;
     }
 
     private void sendActivationTalk(Player player) {
@@ -369,7 +479,6 @@ public class LostWraithEntity extends TheLastEndEntity {
         player.sendSystemMessage(prefixedMessage);
     }
 
-    //粒子效果
     private void spawnActivationParticles() {
         if (level() instanceof ServerLevel serverLevel) {
             for (int i = 0; i < 20; i++) {
@@ -393,7 +502,6 @@ public class LostWraithEntity extends TheLastEndEntity {
         }
     }
 
-    //辅助方法
     private void faceNearestPlayer() {
         Player nearestPlayer = level().getNearestPlayer(this, 32.0);
         if (nearestPlayer != null) {
@@ -401,11 +509,10 @@ public class LostWraithEntity extends TheLastEndEntity {
         }
     }
 
-    //NBT
     @Override
     public void readAdditionalSaveData(@NotNull CompoundTag compound) {
         super.readAdditionalSaveData(compound);
-        setTheLastEndLevel(1);  //确保等级固定为1
+        setTheLastEndLevel(1);
         if (compound.contains("TalkIndex")) {
             setTalkIndex(compound.getInt("TalkIndex"));
         }
@@ -414,7 +521,6 @@ public class LostWraithEntity extends TheLastEndEntity {
     @Override
     public void addAdditionalSaveData(@NotNull CompoundTag compound) {
         super.addAdditionalSaveData(compound);
-        compound.putInt("LEVEL", 1);
         compound.putInt("TalkIndex", getTalkIndex());
     }
 }

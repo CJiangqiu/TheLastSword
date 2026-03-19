@@ -28,6 +28,7 @@ import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.eca.api.EcaAPI;
 import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.init.ModEffects;
 import net.the_last_sword.util.EntityUtil;
@@ -71,7 +72,9 @@ public class TestEntity extends PathfinderMob {
         xpReward = 100;
         setNoAi(false);
         setPersistenceRequired();
-        bossInfo.setName(getDisplayName());
+        if (bossInfo != null) {
+            bossInfo.setName(getDisplayName());
+        }
     }
 
     @Mod.EventBusSubscriber(modid = TheLastSwordMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
@@ -83,6 +86,7 @@ public class TestEntity extends PathfinderMob {
             if (e.getEntity() instanceof TestEntity te) {
                 //注册防御（如果还没有防御数据）
                 EntityUtil.registerDefence(te, te.getMaxHealth());
+                EcaAPI.lockLocation(te);
             }
         }
     }
@@ -113,15 +117,21 @@ public class TestEntity extends PathfinderMob {
 
     @Override public void startSeenByPlayer(ServerPlayer p) {
         super.startSeenByPlayer(p);
-        bossInfo.addPlayer(p);
+        if (bossInfo != null) {
+            bossInfo.addPlayer(p);
+        }
     }
     @Override public void stopSeenByPlayer(ServerPlayer p) {
         super.stopSeenByPlayer(p);
-        bossInfo.removePlayer(p);
+        if (bossInfo != null) {
+            bossInfo.removePlayer(p);
+        }
     }
     @Override public void customServerAiStep() {
         super.customServerAiStep();
-        bossInfo.setProgress(getHealth() / getMaxHealth());
+        if (bossInfo != null) {
+            bossInfo.setProgress(getHealth() / getMaxHealth());
+        }
     }
 
     /*──────────────── 每 tick 逻辑 ────────────────*/

@@ -7,7 +7,6 @@ import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.the_last_sword.TheLastSwordMod;
-import net.the_last_sword.client.layer.TestEntityTheLastEndLayer;
 import net.the_last_sword.test.TestEntity;
 
 //测试实体渲染器
@@ -31,8 +30,6 @@ public class TestEntityRenderer extends HumanoidMobRenderer<TestEntity, Humanoid
             context.getModelManager()
         ));
 
-        //添加 The Last End 发光层
-        this.addLayer(new TestEntityTheLastEndLayer(this));
     }
 
     @Override

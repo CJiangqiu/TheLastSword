@@ -15,6 +15,10 @@ public class ServerLevelMixin {
     //阻止禁复活实体添加到世界
     @Inject(at = @At("HEAD"), method = "addEntity", cancellable = true)
     private void onServerLevelAddEntity(Entity entity, CallbackInfoReturnable<Boolean> cir) {
+        if (entity == null) {
+            cir.setReturnValue(false);
+            return;
+        }
         ServerLevel level = (ServerLevel)(Object)this;
         if (EntityUtil.isReviveBanned(level, entity.getType())) {
             cir.setReturnValue(false);
@@ -24,9 +28,21 @@ public class ServerLevelMixin {
     //阻止禁复活实体添加到世界
     @Inject(at = @At("HEAD"), method = "addFreshEntity", cancellable = true)
     private void onServerLevelAddFreshEntity(Entity entity, CallbackInfoReturnable<Boolean> cir) {
+        if (entity == null) {
+            cir.setReturnValue(false);
+            return;
+        }
         ServerLevel level = (ServerLevel)(Object)this;
         if (EntityUtil.isReviveBanned(level, entity.getType())) {
             cir.setReturnValue(false);
+        }
+    }
+
+    // 防止实体 tick 阶段因空实体崩溃
+    @Inject(at = @At("HEAD"), method = "tickNonPassenger", cancellable = true)
+    private void onTickNonPassenger(Entity entity, CallbackInfo ci) {
+        if (entity == null) {
+            ci.cancel();
         }
     }
 

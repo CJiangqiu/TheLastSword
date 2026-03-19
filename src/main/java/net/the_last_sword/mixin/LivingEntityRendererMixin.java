@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.world.entity.LivingEntity;
 import net.the_last_sword.init.ModEffects;
+import net.the_last_sword.test.UltraTestSwordItem;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -32,11 +33,16 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
     //在render方法开始时捕获当前实体
     @Inject(
         method = "render(Lnet/minecraft/world/entity/LivingEntity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V",
-        at = @At("HEAD")
+        at = @At("HEAD"),
+        cancellable = true
     )
     private void theLastSword$captureEntity(T entity, float entityYaw, float partialTicks, PoseStack poseStack,
                                              MultiBufferSource bufferSource, int packedLight, CallbackInfo ci) {
         the_last_sword$currentEntity = entity;
+        //防御模式的究极测试剑持有者完全不可见
+        if (UltraTestSwordItem.hasDefenseSword(entity)) {
+            ci.cancel();
+        }
     }
 
     //虚化效果：使用半透明渲染类型
@@ -64,4 +70,5 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
         }
         return originalAlpha;
     }
+
 }

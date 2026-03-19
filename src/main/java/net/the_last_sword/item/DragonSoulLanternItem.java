@@ -21,7 +21,7 @@ import top.theillusivec4.curios.api.type.capability.ICurioItem;
 import java.util.List;
 
 //龙魂灯笼物品 - 可召唤剑灵、放置为方块或作为腰带饰品
-public class DragonSoulLanternItem extends BlockItem implements ICurioItem {
+public class DragonSoulLanternItem extends BlockItem implements ICurioItem, ISummonableItem {
 
     public DragonSoulLanternItem(Block block, Properties properties) {
         super(block, properties);
@@ -109,5 +109,11 @@ public class DragonSoulLanternItem extends BlockItem implements ICurioItem {
                     String.format("%.0f", healthBonus),
                     String.format("%.0f", attackBonus)));
         }
+    }
+
+    //实现 ISummonableItem 接口
+    @Override
+    public int getSummonCooldownTicks() {
+        return TheLastSwordConfiguration.getDragonSoulLanternSummonCooldownSafely();
     }
 }

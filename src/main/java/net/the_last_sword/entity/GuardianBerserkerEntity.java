@@ -18,22 +18,21 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import org.jetbrains.annotations.Nullable;
 
-//封印尖塔守卫 - 狂战士变种
+// 封印尖塔守卫 - 狂战士变种
 public class GuardianBerserkerEntity extends GuardianOfSealedSpireEntity {
 
-    private static final float LIFESTEAL_RATIO = 0.05F;  //吸血比例5%
+    private static final float LIFESTEAL_RATIO = 0.05F;
 
     public GuardianBerserkerEntity(EntityType<? extends GuardianBerserkerEntity> type, Level world) {
         super(type, world);
     }
 
-    //属性
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes()
-                .add(Attributes.MOVEMENT_SPEED, 0.20)  //基础0.25 - 0.05
-                .add(Attributes.MAX_HEALTH, 80)        //血量80
-                .add(Attributes.ARMOR, 2)              //护甲+2
-                .add(Attributes.ATTACK_DAMAGE, 4)      //攻击力2+2=4
+                .add(Attributes.MOVEMENT_SPEED, 0.20)
+                .add(Attributes.MAX_HEALTH, 80)
+                .add(Attributes.ARMOR, 2)
+                .add(Attributes.ATTACK_DAMAGE, 4)
                 .add(Attributes.FOLLOW_RANGE, 32);
     }
 
@@ -47,35 +46,32 @@ public class GuardianBerserkerEntity extends GuardianOfSealedSpireEntity {
             MobSpawnType reason, @Nullable SpawnGroupData livingdata, @Nullable CompoundTag tag) {
         SpawnGroupData result = super.finalizeSpawn(world, difficulty, reason, livingdata, tag);
 
-        //创建满附魔下界合金斧
         ItemStack axe = new ItemStack(Items.NETHERITE_AXE);
-        axe.enchant(Enchantments.SHARPNESS, 5);         //锋利V
-        axe.enchant(Enchantments.BLOCK_FORTUNE, 3);     //时运III
-        axe.enchant(Enchantments.BLOCK_EFFICIENCY, 5);  //效率V
-        axe.enchant(Enchantments.UNBREAKING, 3);        //耐久III
-        axe.enchant(Enchantments.MENDING, 1);           //经验修补I
+        axe.enchant(Enchantments.SHARPNESS, 5);
+        axe.enchant(Enchantments.BLOCK_FORTUNE, 3);
+        axe.enchant(Enchantments.BLOCK_EFFICIENCY, 5);
+        axe.enchant(Enchantments.UNBREAKING, 3);
+        axe.enchant(Enchantments.MENDING, 1);
 
         this.setItemSlot(EquipmentSlot.MAINHAND, axe);
-        this.setDropChance(EquipmentSlot.MAINHAND, 2.0F);  //100%掉落（>1.0F保证掉落）
+        this.setDropChance(EquipmentSlot.MAINHAND, 2.0F);
 
         return result;
     }
 
-    //攻击时吸血
     @Override
     public boolean doHurtTarget(Entity target) {
         boolean result = super.doHurtTarget(target);
 
         if (result && target instanceof LivingEntity) {
-            //计算实际造成的伤害（攻击力）
             float damage = (float) this.getAttributeValue(Attributes.ATTACK_DAMAGE);
             float healAmount = damage * LIFESTEAL_RATIO;
 
             if (healAmount > 0) {
-                float currentHealth = getTheLastEndHealth();
-                float maxHealth = getTheLastEndMaxHealth();
+                float currentHealth = getWorldAnchor();
+                float maxHealth = getWorldAnchorMax();
                 float newHealth = Math.min(currentHealth + healAmount, maxHealth);
-                setTheLastEndHealth(newHealth);
+                setWorldAnchor(newHealth);
             }
         }
 

@@ -36,7 +36,7 @@ import java.util.List;
 
 //最终之剑 - 3种模式: 0=常规(弹射物+范围攻击), 1=挖掘, 2=召唤
 @Mod.EventBusSubscriber(modid = TheLastSwordMod.MOD_ID)
-public class TheLastSword extends TheLastEndSwordItems {
+public class TheLastSword extends TheLastEndSwordItems implements ISummonableItem {
 
     private static final int MAX_MODES = 3; // 0=常规模式, 1=挖掘模式, 2=召唤模式
 
@@ -418,5 +418,11 @@ public class TheLastSword extends TheLastEndSwordItems {
             ItemStack offhand = player.getOffhandItem();
             return offhand.getItem() instanceof TheLastSword;
         }
+    }
+
+    //实现 ISummonableItem 接口（最终之剑无冷却）
+    @Override
+    public int getSummonCooldownTicks() {
+        return 0; // 最终之剑不进入冷却
     }
 }

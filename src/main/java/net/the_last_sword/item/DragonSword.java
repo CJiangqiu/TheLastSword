@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * 龙之剑 —— 普通模式（发射弹丸）/ 唤灵模式（召唤或收回剑灵）
  */
-public class DragonSword extends TheLastEndSwordItems {
+public class DragonSword extends TheLastEndSwordItems implements ISummonableItem {
 
     private static final int MAX_MODES = 2; // 0=普通模式, 1=唤灵模式
 
@@ -183,5 +183,11 @@ public class DragonSword extends TheLastEndSwordItems {
         //Lore提示
         list.add(Component.translatable("item_tooltip_lore.the_last_sword.dragon_sword")
             .withStyle(net.minecraft.ChatFormatting.GRAY));
+    }
+
+    //实现 ISummonableItem 接口
+    @Override
+    public int getSummonCooldownTicks() {
+        return TheLastSwordConfiguration.getDragonSwordSummonCooldownSafely();
     }
 }

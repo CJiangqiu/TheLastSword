@@ -19,6 +19,7 @@ import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -30,8 +31,8 @@ import top.theillusivec4.curios.api.CuriosApi;
 @Mod.EventBusSubscriber(modid = "the_last_sword", bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class CataclysmEventHandler {
 
-    @SubscribeEvent
-    public static void onLivingHurt(LivingHurtEvent event) {
+    @SubscribeEvent(priority = EventPriority.NORMAL)
+    public static void onLivingHurtHarbinger(LivingHurtEvent event) {
         if (!CompatCheck.isCataclysmLoaded()) {
             return;
         }
@@ -41,10 +42,22 @@ public class CataclysmEventHandler {
         }
 
         handleHarbingerMedalProjectileImmunity(event, player);
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public static void onLivingHurtAncientRemnant(LivingHurtEvent event) {
+        if (!CompatCheck.isCataclysmLoaded()) {
+            return;
+        }
+
+        if (!(event.getEntity() instanceof Player player)) {
+            return;
+        }
+
         handleAncientRemnantMedalCounterAttack(event, player);
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onCriticalHit(CriticalHitEvent event) {
         if (!CompatCheck.isCataclysmLoaded()) {
             return;
@@ -57,7 +70,7 @@ public class CataclysmEventHandler {
         handleEnderGuardianMedalVoidPunch(event.getEntity(), event.getTarget());
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onLivingAttack(LivingAttackEvent event) {
         if (!CompatCheck.isCataclysmLoaded()) {
             return;
@@ -73,7 +86,7 @@ public class CataclysmEventHandler {
         }
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onLivingDamage(LivingDamageEvent event) {
         if (!CompatCheck.isCataclysmLoaded()) {
             return;
@@ -354,7 +367,7 @@ public class CataclysmEventHandler {
     // ============ Boss掉落处理 ============
 
     //处理灾变Boss死亡时掉落对应奖章
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onLivingDeath(LivingDeathEvent event) {
         if (!CompatCheck.isCataclysmLoaded()) {
             return;

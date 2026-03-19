@@ -249,17 +249,11 @@ public class CataclysmMedals {
         //奖章的被动效果（在背包和饰品槽都会生效）
         protected void applyPassiveEffects(Player player, ItemStack stack) {
             //给予3级抗火效果
-            if (!player.hasEffect(MobEffects.FIRE_RESISTANCE) ||
-                    player.getEffect(MobEffects.FIRE_RESISTANCE).getAmplifier() < 2) {
-                player.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 60, 2, false, false));
-            }
+            player.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 60, 2, false, false));
 
             //如果玩家着火，给予1级生命回复效果
             if (player.isOnFire()) {
-                if (!player.hasEffect(MobEffects.REGENERATION) ||
-                        player.getEffect(MobEffects.REGENERATION).getAmplifier() < 0) {
-                    player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 60, 0, false, false));
-                }
+                player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 60, 0, false, false));
             }
         }
 
@@ -352,16 +346,10 @@ public class CataclysmMedals {
         //奖章的被动效果（在背包和饰品槽都会生效）
         protected void applyPassiveEffects(Player player, ItemStack stack) {
             //给予3级潮涌能量效果
-            if (!player.hasEffect(MobEffects.CONDUIT_POWER) ||
-                    player.getEffect(MobEffects.CONDUIT_POWER).getAmplifier() < 2) {
-                player.addEffect(new MobEffectInstance(MobEffects.CONDUIT_POWER, 60, 2, false, false));
-            }
+            player.addEffect(new MobEffectInstance(MobEffects.CONDUIT_POWER, 60, 2, false, false));
 
             //给予3级海豚的恩惠效果
-            if (!player.hasEffect(MobEffects.DOLPHINS_GRACE) ||
-                    player.getEffect(MobEffects.DOLPHINS_GRACE).getAmplifier() < 2) {
-                player.addEffect(new MobEffectInstance(MobEffects.DOLPHINS_GRACE, 60, 2, false, false));
-            }
+            player.addEffect(new MobEffectInstance(MobEffects.DOLPHINS_GRACE, 60, 2, false, false));
         }
 
         @Override

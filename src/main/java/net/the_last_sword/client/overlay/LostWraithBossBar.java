@@ -11,6 +11,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.entity.LostWraithEntity;
 
 import java.util.ArrayList;
@@ -45,8 +46,8 @@ public class LostWraithBossBar {
         public BossBarData(LostWraithEntity entity) {
             this.entity = entity;
             this.name = Component.translatable("entity.the_last_sword.lost_wraith").getString();
-            this.currentHealth = entity.getTheLastEndHealth();
-            this.maxHealth = entity.getTheLastEndMaxHealth();
+            this.currentHealth = entity.getWorldAnchor();
+            this.maxHealth = entity.getWorldAnchorMax();
         }
     }
 
@@ -58,6 +59,11 @@ public class LostWraithBossBar {
     }
 
     private static void renderBossBars(GuiGraphics guiGraphics) {
+        //如果配置禁用自定义血条，不渲染
+        if (!TheLastSwordConfiguration.getLostWraithEnableCustomBossBarSafely()) {
+            return;
+        }
+
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null) {
             return;
@@ -92,7 +98,7 @@ public class LostWraithBossBar {
         for (Entity entity : entities) {
             if (entity instanceof LostWraithEntity wraith) {
                 //只显示已激活且存活的迷失战魂
-                if (wraith.isAlive() && !wraith.isRemoved() && wraith.isSpawned() && !wraith.shouldLeave()) {
+                if (wraith.isReady() && !wraith.isRemoved()) {
                     bosses.add(new BossBarData(wraith));
                 }
             }

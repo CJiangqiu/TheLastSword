@@ -6,6 +6,7 @@
   "refmap": "mixins.the_last_sword.refmap.json",
   "client": [
     "DeathScreenMixin",
+    "GameRendererMixin",
     "ItemRendererMixin",
     "LevelRendererMixin",
     "LivingEntityRendererMixin",
