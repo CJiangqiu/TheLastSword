@@ -153,6 +153,11 @@ public class ModItems {
         TheLastEndSwordWraithLevel13SpawnEgg::new
     );
 
+    //女皇的逝去之影刷怪蛋（紫色 + 浅紫色）
+    public static final RegistryObject<Item> THE_PAST_SHADOW_OF_THE_QUEEN_SPAWN_EGG = ITEMS.register("the_past_shadow_of_the_queen_spawn_egg",
+        () -> new ForgeSpawnEggItem(ModEntities.THE_PAST_SHADOW_OF_THE_QUEEN, 0x800080, 0xDDA0DD, new Item.Properties())
+    );
+
     //Curios饰品（前置mod，直接注册）
     public static final RegistryObject<Item> DRAGON_CRYSTAL_RING = CuriosItemsRegistry.registerDragonCrystalRing(ITEMS);
     public static final RegistryObject<Item> DRAGON_CRYSTAL_NECKLACE = CuriosItemsRegistry.registerDragonCrystalNecklace(ITEMS);

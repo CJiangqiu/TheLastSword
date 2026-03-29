@@ -38,6 +38,11 @@ import java.util.Map;
 
 public class EntityUtil {
 
+    private static final String NBT_WORLD_ANCHOR = "tlsWorldAnchor";
+    private static final String NBT_WORLD_ANCHOR_MAX = "tlsWorldAnchorMax";
+    private static final String NBT_HEAL_BAN_TIME = "tlsHealBanTime";
+    private static final String NBT_IS_PROTECTED = "tlsIsProtected";
+
     // ==================== 实体数据定义（由 LivingEntityMixin 的 <clinit> 注入初始化） ====================
 
     //真实生命值——现世锚度（编码：anchor - 1024）
@@ -49,9 +54,6 @@ public class EntityUtil {
     //禁疗时间（tick）
     public static EntityDataAccessor<Integer> HEAL_BAN_TIME;
 
-    //禁疗记录值
-    public static EntityDataAccessor<Float> HEAL_BAN_VALUE;
-
     //防御保护状态
     public static EntityDataAccessor<Boolean> IS_PROTECTED;
 
@@ -60,7 +62,16 @@ public class EntityUtil {
     //获取真实血量
     public static float getWorldAnchor(LivingEntity entity) {
         if (entity == null) return 0.0f;
-        String encoded = entity.getEntityData().get(WORLD_ANCHOR);
+        String encoded = null;
+        if (WORLD_ANCHOR != null) {
+            try {
+                encoded = entity.getEntityData().get(WORLD_ANCHOR);
+            } catch (Exception ignored) {
+            }
+        }
+        if (encoded == null || encoded.isEmpty()) {
+            encoded = entity.getPersistentData().getString(NBT_WORLD_ANCHOR);
+        }
         try {
             return Float.parseFloat(encoded) + 1024.0f;
         } catch (NumberFormatException e) {
@@ -71,13 +82,30 @@ public class EntityUtil {
     //设置真实血量
     public static void setWorldAnchor(LivingEntity entity, float anchor) {
         if (entity == null) return;
-        entity.getEntityData().set(WORLD_ANCHOR, Float.toString(anchor - 1024.0f));
+        String encoded = Float.toString(anchor - 1024.0f);
+        if (WORLD_ANCHOR != null) {
+            try {
+                entity.getEntityData().set(WORLD_ANCHOR, encoded);
+                return;
+            } catch (Exception ignored) {
+            }
+        }
+        entity.getPersistentData().putString(NBT_WORLD_ANCHOR, encoded);
     }
 
     //获取最大真实血量上限
     public static float getWorldAnchorMax(LivingEntity entity) {
         if (entity == null) return 0.0f;
-        String encoded = entity.getEntityData().get(WORLD_ANCHOR_MAX);
+        String encoded = null;
+        if (WORLD_ANCHOR_MAX != null) {
+            try {
+                encoded = entity.getEntityData().get(WORLD_ANCHOR_MAX);
+            } catch (Exception ignored) {
+            }
+        }
+        if (encoded == null || encoded.isEmpty()) {
+            encoded = entity.getPersistentData().getString(NBT_WORLD_ANCHOR_MAX);
+        }
         try {
             return Float.parseFloat(encoded) + 2048.0f;
         } catch (NumberFormatException e) {
@@ -88,19 +116,41 @@ public class EntityUtil {
     //设置最大真实血量上限
     public static void setWorldAnchorMax(LivingEntity entity, float maxAnchor) {
         if (entity == null) return;
-        entity.getEntityData().set(WORLD_ANCHOR_MAX, Float.toString(maxAnchor - 2048.0f));
+        String encoded = Float.toString(maxAnchor - 2048.0f);
+        if (WORLD_ANCHOR_MAX != null) {
+            try {
+                entity.getEntityData().set(WORLD_ANCHOR_MAX, encoded);
+                return;
+            } catch (Exception ignored) {
+            }
+        }
+        entity.getPersistentData().putString(NBT_WORLD_ANCHOR_MAX, encoded);
     }
 
     //获取禁疗时间（tick）
     public static int getHealBanTime(LivingEntity entity) {
         if (entity == null) return 0;
-        return entity.getEntityData().get(HEAL_BAN_TIME);
+        if (HEAL_BAN_TIME != null) {
+            try {
+                return entity.getEntityData().get(HEAL_BAN_TIME);
+            } catch (Exception ignored) {
+            }
+        }
+        return entity.getPersistentData().getInt(NBT_HEAL_BAN_TIME);
     }
 
     //设置禁疗时间（tick）
     public static void setHealBanTime(LivingEntity entity, int ticks) {
         if (entity == null) return;
-        entity.getEntityData().set(HEAL_BAN_TIME, Math.max(0, ticks));
+        int safeTicks = Math.max(0, ticks);
+        if (HEAL_BAN_TIME != null) {
+            try {
+                entity.getEntityData().set(HEAL_BAN_TIME, safeTicks);
+                return;
+            } catch (Exception ignored) {
+            }
+        }
+        entity.getPersistentData().putInt(NBT_HEAL_BAN_TIME, safeTicks);
     }
 
     //检查是否处于禁疗状态
@@ -111,14 +161,16 @@ public class EntityUtil {
     //减少禁疗时间（每 tick 调用）
     public static void tickHealBanTime(LivingEntity entity) {
         if (entity == null) return;
+        if (entity.tickCount % 20 != 0) {
+            return;
+        }
         int current = getHealBanTime(entity);
         if (current > 0) {
             int newTime = current - 1;
             setHealBanTime(entity, newTime);
-            //禁疗结束时，解除 ECA 血量锁定
+            //禁疗结束时，解除 ECA 禁疗
             if (newTime == 0) {
-                setHealBanValue(entity, 0.0f);
-                EcaAPI.unlockHealth(entity);
+                EcaAPI.unbanHealing(entity);
             }
         }
     }
@@ -126,20 +178,7 @@ public class EntityUtil {
     //清除禁疗状态
     public static void clearHealBan(LivingEntity entity) {
         setHealBanTime(entity, 0);
-        setHealBanValue(entity, 0.0f);
-        EcaAPI.unlockHealth(entity);
-    }
-
-    //获取禁疗记录值
-    public static float getHealBanValue(LivingEntity entity) {
-        if (entity == null) return 0.0f;
-        return entity.getEntityData().get(HEAL_BAN_VALUE);
-    }
-
-    //设置禁疗记录值
-    public static void setHealBanValue(LivingEntity entity, float value) {
-        if (entity == null) return;
-        entity.getEntityData().set(HEAL_BAN_VALUE, value);
+        EcaAPI.unbanHealing(entity);
     }
 
     //清除真实血量
@@ -154,13 +193,26 @@ public class EntityUtil {
     //检查实体是否受到保护
     public static boolean hasProtection(LivingEntity entity) {
         if (entity == null) return false;
-        return entity.getEntityData().get(IS_PROTECTED);
+        if (IS_PROTECTED != null) {
+            try {
+                return entity.getEntityData().get(IS_PROTECTED);
+            } catch (Exception ignored) {
+            }
+        }
+        return entity.getPersistentData().getBoolean(NBT_IS_PROTECTED);
     }
 
     //设置实体的保护状态
     public static void setProtection(LivingEntity entity, boolean value) {
         if (entity == null) return;
-        entity.getEntityData().set(IS_PROTECTED, value);
+        if (IS_PROTECTED != null) {
+            try {
+                entity.getEntityData().set(IS_PROTECTED, value);
+                return;
+            } catch (Exception ignored) {
+            }
+        }
+        entity.getPersistentData().putBoolean(NBT_IS_PROTECTED, value);
     }
 
     //注册防御（如果没有保护才设置）
@@ -193,19 +245,17 @@ public class EntityUtil {
 
     // ==================== 生命值模块 ====================
 
-    //获取实体真实生命值（调用 ECA API）
+    //获取实体真实生命值
     public static float TheLastEndGetHealth(LivingEntity entity) {
         return EcaAPI.getHealth(entity);
     }
 
-    //设置实体生命值（调用 ECA API + The Last Sword 特有逻辑）
     public static boolean theLastEndSetHealth(LivingEntity entity, float expectedHealth) {
         if (entity == null) return false;
 
         try {
             // 同步更新你们的实体数据系统
             setWorldAnchor(entity, expectedHealth);
-            //调用 ECA API 的完整血量修改流程
             return EcaAPI.setHealth(entity, expectedHealth);
 
         } catch (Exception e) {
@@ -215,11 +265,11 @@ public class EntityUtil {
 
     // ==================== 死亡模块 ====================
 
-    //设置实体死亡状态（调用 ECA API + The Last Sword 特有扩展）
+    //设置实体死亡状态
     public static void theLastEndSetDead(LivingEntity entity, DamageSource damageSource) {
         if (entity == null || damageSource == null) return;
 
-        //添加实体类型到禁复活表（The Last Sword 特有，玩家除外）
+        //添加实体类型到禁复活表（玩家除外）
         if (!(entity instanceof Player) && entity.level() instanceof ServerLevel serverLevel) {
             int banTime = TheLastSwordConfiguration.getReviveBanTimeSafely();
             if (banTime > 0) {
@@ -227,26 +277,23 @@ public class EntityUtil {
             }
         }
 
-        //粒子效果（The Last Sword 特有）
+        //粒子效果
         if (!entity.level().isClientSide && TheLastSwordConfiguration.getDeathParticleEffectSafely()) {
             ParticleUtil.spawnDeathParticles(entity);
         }
 
-        //死亡消息（The Last Sword 特有）
+        //死亡消息
         if (TheLastSwordConfiguration.getDieMessageSafely()) {
             sendDeathMessage(entity, damageSource);
         }
-
-        //调用 ECA API 的完整死亡处理
-        EcaAPI.killEntity(entity, damageSource);
+        EcaAPI.kill(entity, damageSource);
     }
 
-    //复活实体（调用 ECA API）
     public static void theLastEndRevive(LivingEntity entity) {
-        EcaAPI.reviveEntity(entity);
+        EcaAPI.revive(entity);
     }
 
-    //发送死亡消息（The Last Sword 特有）
+    //发送死亡消息
     private static void sendDeathMessage(LivingEntity entity, DamageSource damageSource) {
         try {
             if (!entity.level().isClientSide && entity.level().getServer() != null) {
@@ -295,19 +342,16 @@ public class EntityUtil {
 
     // ==================== 传送模块 ====================
 
-    //传送实体到指定位置（调用 ECA API）
     public static boolean theLastEndTeleport(Entity entity, double x, double y, double z) {
-        return EcaAPI.teleportEntity(entity, x, y, z);
+        return EcaAPI.teleport(entity, x, y, z);
     }
 
     // ==================== 实体清除模块 ====================
 
-    //完整的实体清除方法（调用 ECA API）
     public static void theLastEndRemove(Entity entity, Entity.RemovalReason reason) {
-        EcaAPI.removeEntity(entity, reason);
+        EcaAPI.remove(entity, reason);
     }
 
-    //清除实体Boss血条（调用 ECA API）
     public static void cleanupBossBar(Entity entity) {
         EcaAPI.cleanupBossBar(entity);
     }

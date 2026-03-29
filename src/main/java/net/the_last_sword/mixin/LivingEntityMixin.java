@@ -1,13 +1,16 @@
 package net.the_last_sword.mixin;
 
+import net.eca.api.EcaAPI;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
@@ -32,7 +35,6 @@ public class LivingEntityMixin {
         EntityUtil.WORLD_ANCHOR = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.STRING);
         EntityUtil.WORLD_ANCHOR_MAX = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.STRING);
         EntityUtil.HEAL_BAN_TIME = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.INT);
-        EntityUtil.HEAL_BAN_VALUE = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.FLOAT);
         EntityUtil.IS_PROTECTED = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.BOOLEAN);
     }
 
@@ -43,7 +45,6 @@ public class LivingEntityMixin {
         entity.getEntityData().define(EntityUtil.WORLD_ANCHOR, "-1024.0");
         entity.getEntityData().define(EntityUtil.WORLD_ANCHOR_MAX, "-2048.0");
         entity.getEntityData().define(EntityUtil.HEAL_BAN_TIME, 0);
-        entity.getEntityData().define(EntityUtil.HEAL_BAN_VALUE, 0.0f);
         entity.getEntityData().define(EntityUtil.IS_PROTECTED, false);
     }
 
@@ -98,8 +99,6 @@ public class LivingEntityMixin {
     //防御系统的强化免疫系统
     @Unique
     private void the_last_sword$handleDefenceProtection(LivingEntity entity) {
-        if(TheLastSwordConfiguration.getDefenceEnableRadicalLogicSafely()){
-        }
         if (entity.isOnFire()) {
             entity.clearFire();
         }
@@ -149,22 +148,9 @@ public class LivingEntityMixin {
         }
     }
 
-    //tick 结束时：禁疗系统强制设置血量（覆盖怪物的自定义恢复逻辑）
+    //tick 结束时（ECA 禁疗已接管强制血量逻辑）
     @Inject(method = "tick", at = @At("TAIL"))
     private void the_last_sword$onTickEnd(CallbackInfo ci) {
-        LivingEntity entity = (LivingEntity) (Object) this;
-
-        if (entity.level().isClientSide) {
-            return;
-        }
-
-        //禁疗系统：每 tick 强制设置血量为目标值
-        if (EntityUtil.isHealBanned(entity)) {
-            double targetHealth = EntityUtil.getHealBanValue(entity);
-            if (targetHealth > 0) {
-                EntityUtil.theLastEndSetHealth(entity, (float) targetHealth);
-            }
-        }
     }
 
     @Inject(method = "tickDeath", at = @At("HEAD"), cancellable = true)
@@ -256,9 +242,9 @@ public class LivingEntityMixin {
             return;
         }
 
-        //禁疗状态下阻止提升血量
+        //禁疗状态下阻止提升血量（ECA 禁疗为主，此处兜底拦截原版 setHealth 回血）
         if (EntityUtil.isHealBanned(entity)) {
-            float currentHealth = entity.getHealth();
+            float currentHealth = EcaAPI.getHealth(entity);
             if (health > currentHealth) {
                 ci.cancel();
                 return;
@@ -301,4 +287,6 @@ public class LivingEntityMixin {
         LivingEntity entity = (LivingEntity) (Object) this;
         EntityUtil.clearHealBan(entity);
     }
+
+
 }

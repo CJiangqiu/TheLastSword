@@ -1,9 +1,6 @@
 package net.the_last_sword.entity.ai;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -23,7 +20,6 @@ import java.util.List;
 // 迷失战魂拳击技能Goal
 public class LostWraithPunchGoal extends Goal {
     private static final int ANIMATION_LENGTH = 30;
-    private static final int TELEPORT_TICK = 5;
     private static final int SOUND_TICK = 10;
     private static final int DAMAGE_TICK = 24;
     private static final double ATTACK_DISTANCE = 4.0;
@@ -74,10 +70,6 @@ public class LostWraithPunchGoal extends Goal {
 
         int relativeFrame = ANIMATION_LENGTH - animationTick;
 
-        if (relativeFrame == TELEPORT_TICK) {
-            teleportToTarget();
-        }
-
         if (relativeFrame == SOUND_TICK) {
             wraith.level().playSound(null,
                 wraith.getX(), wraith.getY(), wraith.getZ(),
@@ -112,67 +104,6 @@ public class LostWraithPunchGoal extends Goal {
     @Override
     public boolean requiresUpdateEveryTick() {
         return true;
-    }
-
-    private void teleportToTarget() {
-        LivingEntity target = wraith.getTarget();
-        if (target == null) return;
-
-        Vec3 teleportPos = findRandomPositionAroundTarget(target);
-        if (teleportPos == null) return;
-
-        Vec3 oldPosition = wraith.position();
-
-        if (wraith.level() instanceof ServerLevel serverLevel) {
-            spawnTeleportParticles(serverLevel, oldPosition);
-            wraith.level().playSound(null, BlockPos.containing(oldPosition),
-                SoundEvents.ENDERMAN_TELEPORT, wraith.getSoundSource(), 1.0F, 1.0F);
-        }
-
-        EntityUtil.theLastEndTeleport(wraith, teleportPos.x, teleportPos.y, teleportPos.z);
-        EntityUtil.faceTarget(wraith, target);
-
-        if (wraith.level() instanceof ServerLevel serverLevel) {
-            spawnTeleportParticles(serverLevel, teleportPos);
-            wraith.level().playSound(null, BlockPos.containing(teleportPos),
-                SoundEvents.ENDERMAN_TELEPORT, wraith.getSoundSource(), 1.0F, 1.0F);
-        }
-    }
-
-    private Vec3 findRandomPositionAroundTarget(LivingEntity target) {
-        Vec3 targetPos = target.position();
-        double angle = wraith.getRandom().nextDouble() * 2 * Math.PI;
-        double distance = 1.0;
-
-        double x = targetPos.x + Math.cos(angle) * distance;
-        double y = targetPos.y;
-        double z = targetPos.z + Math.sin(angle) * distance;
-
-        if (isSafeTeleportPosition(x, y, z)) {
-            return new Vec3(x, y, z);
-        }
-        return new Vec3(targetPos.x, targetPos.y, targetPos.z);
-    }
-
-    private boolean isSafeTeleportPosition(double x, double y, double z) {
-        BlockPos pos = BlockPos.containing(x, y, z);
-        BlockPos posAbove = pos.above();
-        return !wraith.level().getBlockState(pos).isSolid() &&
-               !wraith.level().getBlockState(posAbove).isSolid();
-    }
-
-    private void spawnTeleportParticles(ServerLevel serverLevel, Vec3 position) {
-        for (int i = 0; i < 32; i++) {
-            double d0 = serverLevel.random.nextGaussian() * 0.02D;
-            double d1 = serverLevel.random.nextGaussian() * 0.02D;
-            double d2 = serverLevel.random.nextGaussian() * 0.02D;
-
-            serverLevel.sendParticles(ParticleTypes.REVERSE_PORTAL,
-                position.x + (serverLevel.random.nextDouble() - 0.5D) * 2.0D,
-                position.y + serverLevel.random.nextDouble() * 2.0D,
-                position.z + (serverLevel.random.nextDouble() - 0.5D) * 2.0D,
-                1, d0, d1, d2, 0.1D);
-        }
     }
 
     private void executePunchDamage() {

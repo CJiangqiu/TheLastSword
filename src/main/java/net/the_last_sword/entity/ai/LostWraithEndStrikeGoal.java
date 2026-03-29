@@ -224,7 +224,7 @@ public class LostWraithEndStrikeGoal extends Goal {
                     Vec3 knockback = wraith.position().subtract(data.target.position()).normalize().scale(-0.3);
                     data.target.setDeltaMovement(data.target.getDeltaMovement().add(knockback));
                 } else {
-                    AbsoluteDestructionDamageSource.applyAbsoluteDestructionIntelligently(data.target, wraith, damage);
+                    AbsoluteDestructionDamageSource.applyAbsoluteDestruction(data.target, wraith, damage);
                 }
             }
         }

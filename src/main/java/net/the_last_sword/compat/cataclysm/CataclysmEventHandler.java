@@ -16,7 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ShieldItem;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -30,6 +30,8 @@ import top.theillusivec4.curios.api.CuriosApi;
 //处理灾变奖牌的特殊效果
 @Mod.EventBusSubscriber(modid = "the_last_sword", bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class CataclysmEventHandler {
+
+    private static final String MEDAL_DROPPED_TAG = "the_last_sword_cataclysm_medal_dropped";
 
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public static void onLivingHurtHarbinger(LivingHurtEvent event) {
@@ -366,10 +368,14 @@ public class CataclysmEventHandler {
 
     // ============ Boss掉落处理 ============
 
-    //处理灾变Boss死亡时掉落对应奖章
+    //处理灾变Boss掉落时掉落对应奖章
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void onLivingDeath(LivingDeathEvent event) {
+    public static void onLivingDrops(LivingDropsEvent event) {
         if (!CompatCheck.isCataclysmLoaded()) {
+            return;
+        }
+
+        if (event.getEntity().getPersistentData().getBoolean(MEDAL_DROPPED_TAG)) {
             return;
         }
 
@@ -392,7 +398,8 @@ public class CataclysmEventHandler {
             //向上飞起
             medalDrop.setDeltaMovement(medalDrop.getDeltaMovement().multiply(0.0, 1.5, 0.0));
 
-            event.getEntity().level().addFreshEntity(medalDrop);
+            event.getDrops().add(medalDrop);
+            event.getEntity().getPersistentData().putBoolean(MEDAL_DROPPED_TAG, true);
         }
     }
 

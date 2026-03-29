@@ -118,7 +118,6 @@ public class TheLastSwordConfiguration {
     // ═══════════════════════════════════════════════════════════════════════════════════
 
     public static ForgeConfigSpec.ConfigValue<Integer> JUSTIFIED_DEFENCE_RECOVERY_TICK;
-    public static ForgeConfigSpec.ConfigValue<Boolean> DEFENCE_ENABLE_RADICAL_LOGIC;
     public static ForgeConfigSpec.ConfigValue<Double> DEFENCE_CUSTOM_HEALTH_DAMAGE_REDUCTION;
     public static ForgeConfigSpec.ConfigValue<Double> DEFENCE_MAX_DAMAGE_PER_HIT;
 
@@ -454,10 +453,6 @@ public class TheLastSwordConfiguration {
             .comment("Recovery interval for Justified Defence Shield in ticks (100 ticks = 5 seconds)")
             .defineInRange("Justified Defence Recovery Tick", 100, 1, Integer.MAX_VALUE);
 
-        DEFENCE_ENABLE_RADICAL_LOGIC = BUILDER
-            .comment("Enable radical logic for defence system, which increases protection strength but may cause performance overhead and mod conflicts")
-            .define("Enable Radical Logic", false);
-
         DEFENCE_CUSTOM_HEALTH_DAMAGE_REDUCTION = BUILDER
             .comment("Maximum percentage of health that can be lost per hit for defence system")
             .defineInRange("Custom Health Damage Reduction", 0.05, 0.0, 1.0);
@@ -666,10 +661,6 @@ public class TheLastSwordConfiguration {
     //防御系统配置
     public static int getJustifiedDefenceRecoveryTickSafely() {
         return safeGet(JUSTIFIED_DEFENCE_RECOVERY_TICK, 100);
-    }
-
-    public static boolean getDefenceEnableRadicalLogicSafely() {
-        return safeGet(DEFENCE_ENABLE_RADICAL_LOGIC, false);
     }
 
     public static double getDefenceCustomHealthDamageReductionSafely() {

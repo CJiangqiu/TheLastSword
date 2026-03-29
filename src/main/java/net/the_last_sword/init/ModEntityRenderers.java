@@ -29,6 +29,7 @@ public class ModEntityRenderers {
         event.registerEntityRenderer(ModEntities.GUARDIAN_ARCHER.get(), GuardianOfSealedSpireRenderer::new);
         event.registerEntityRenderer(ModEntities.LOST_WRAITH.get(), LostWraithRenderer::new);
         event.registerEntityRenderer(ModEntities.THE_LAST_END_SWORD_WRAITH.get(), TheLastEndSwordWraithRenderer::new);
+        event.registerEntityRenderer(ModEntities.THE_PAST_SHADOW_OF_THE_QUEEN.get(), ThePastShadowOfTheQueenRenderer::new);
     }
 
     //注册 Model Layer 定义

@@ -84,8 +84,7 @@ public class TestEntity extends PathfinderMob {
         public static void TheLastSwordTestEntityOnJoin(EntityJoinLevelEvent e) {
             if (e.getLevel().isClientSide()) return;
             if (e.getEntity() instanceof TestEntity te) {
-                //注册防御（如果还没有防御数据）
-                EntityUtil.registerDefence(te, te.getMaxHealth());
+                EcaAPI.setInvulnerable(te, true);
                 EcaAPI.lockLocation(te);
             }
         }
@@ -143,14 +142,9 @@ public class TestEntity extends PathfinderMob {
 
         // 2. 每tick强力范围攻击
         if (!this.level().isClientSide) {
-            Vec3 center = this.position();
-            PowerfulRangeAttack.execute(this.level(), this, center);
+            PowerfulRangeAttack.execute(this);
         }
 
-        // 3. 每tick自带12秒虚化Buff（240 ticks）
-        if (!this.level().isClientSide) {
-            this.addEffect(new MobEffectInstance(ModEffects.PHASING.get(), 240, 0, false, false));
-        }
     }
 
     @Override
@@ -240,7 +234,7 @@ public class TestEntity extends PathfinderMob {
             }
         }
 
-        EntityUtil.clearDefence(this);
+        EcaAPI.setInvulnerable(this, false);
         EntityUtil.theLastEndRemove(this, RemovalReason.KILLED);
     }
 

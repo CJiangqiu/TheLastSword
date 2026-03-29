@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "the_last_sword:wound_of_time",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 128,
+    "separation": 64,
+    "salt": 1937462815
+  }
+}

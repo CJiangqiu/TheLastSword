@@ -4,8 +4,6 @@ import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.the_last_sword.configuration.TheLastSwordConfiguration;
-import net.the_last_sword.util.EntityQueryContext;
 import net.the_last_sword.util.EntityUtil;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -24,55 +22,33 @@ public abstract class InventoryMixin {
     @Final
     @Shadow public Player player;
 
-    /* ─────────── 高级方法拦截 ─────────── */
-
+    //拦截按条件清除物品（/clear等）
     @Inject(method = "clearOrCountMatchingItems",
             at = @At("HEAD"), cancellable = true)
     private void tls$blockClear(Predicate<ItemStack> predicate,
                                 int maxCount,
                                 Container container,
                                 CallbackInfoReturnable<Integer> cir) {
-        if (TheLastSwordConfiguration.getDefenceEnableRadicalLogicSafely()) {
-            if (EntityUtil.hasProtection(this.player)) {
-                cir.setReturnValue(0);
-            }
+        if (EntityUtil.hasProtection(this.player)) {
+            cir.setReturnValue(0);
         }
     }
 
+    //拦截清空背包
     @Inject(method = "clearContent",
             at = @At("HEAD"), cancellable = true)
     private void tls$blockClearContent(CallbackInfo ci) {
-        if (TheLastSwordConfiguration.getDefenceEnableRadicalLogicSafely()) {
-            if (EntityUtil.hasProtection(this.player)) {
-                ci.cancel();
-            }
+        if (EntityUtil.hasProtection(this.player)) {
+            ci.cancel();
         }
     }
 
-    /* ─────────── 底层方法拦截（使用调用栈判断）─────────── */
-
-    @Inject(method = "setItem",
+    //拦截按引用移除物品
+    @Inject(method = "removeItem(Lnet/minecraft/world/item/ItemStack;)V",
             at = @At("HEAD"), cancellable = true)
-    private void tls$blockSetItem(int slot, ItemStack stack, CallbackInfo ci) {
-        if (TheLastSwordConfiguration.getDefenceEnableRadicalLogicSafely()) {
-            if (EntityUtil.hasProtection(this.player)) {
-                //允许原版代码（GUI）和本mod自己的操作
-                if (!EntityQueryContext.isAllowedToAccessProtectedEntities()) {
-                    ci.cancel();
-                }
-            }
-        }
-    }
-
-    @Inject(method = "removeItemNoUpdate",
-            at = @At("HEAD"), cancellable = true)
-    private void tls$blockRemoveItemNoUpdate(int slot, CallbackInfoReturnable<ItemStack> cir) {
-        if (TheLastSwordConfiguration.getDefenceEnableRadicalLogicSafely()) {
-            if (EntityUtil.hasProtection(this.player)) {
-                if (!EntityQueryContext.isAllowedToAccessProtectedEntities()) {
-                    cir.setReturnValue(ItemStack.EMPTY);
-                }
-            }
+    private void tls$blockRemoveItemByReference(ItemStack stack, CallbackInfo ci) {
+        if (EntityUtil.hasProtection(this.player)) {
+            ci.cancel();
         }
     }
 }

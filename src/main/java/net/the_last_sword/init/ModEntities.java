@@ -22,6 +22,7 @@ import net.the_last_sword.entity.LostWraithEntity;
 import net.the_last_sword.entity.TheLastEndLightingEntity;
 import net.the_last_sword.entity.TheLastEndSwordProjectile;
 import net.the_last_sword.entity.TheLastEndSwordWraithEntity;
+import net.the_last_sword.entity.ThePastShadowOfTheQueenEntity;
 import net.the_last_sword.test.TestEntity;
 
 @Mod.EventBusSubscriber(modid = TheLastSwordMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
@@ -160,6 +161,17 @@ public class ModEntities {
                 .build("the_last_end_sword_wraith")
         );
 
+    //女皇的逝去之影
+    public static final RegistryObject<EntityType<ThePastShadowOfTheQueenEntity>> THE_PAST_SHADOW_OF_THE_QUEEN =
+        ENTITY_TYPES.register("the_past_shadow_of_the_queen",
+            () -> EntityType.Builder.of(ThePastShadowOfTheQueenEntity::new, MobCategory.MONSTER)
+                .sized(0.6f, 2.25f)
+                .clientTrackingRange(64)
+                .updateInterval(3)
+                .fireImmune()
+                .build("the_past_shadow_of_the_queen")
+        );
+
     public static void register(IEventBus eventBus) {
         ENTITY_TYPES.register(eventBus);
     }
@@ -174,5 +186,6 @@ public class ModEntities {
         event.put(GUARDIAN_ARCHER.get(), GuardianArcherEntity.createAttributes().build());
         event.put(LOST_WRAITH.get(), LostWraithEntity.createAttributes().build());
         event.put(THE_LAST_END_SWORD_WRAITH.get(), TheLastEndSwordWraithEntity.createAttributes().build());
+        event.put(THE_PAST_SHADOW_OF_THE_QUEEN.get(), ThePastShadowOfTheQueenEntity.createAttributes().build());
     }
 }

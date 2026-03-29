@@ -344,7 +344,7 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
                 float totalDamage = attackDamage + maxHealthDamage;
 
                 target.invulnerableTime = 0;
-                AbsoluteDestructionDamageSource.applyAbsoluteDestructionIntelligently(target, wraith, totalDamage);
+                AbsoluteDestructionDamageSource.applyAbsoluteDestruction(target, wraith, totalDamage);
 
                 reduceEndMark(target);
                 clearPositiveEffects(target);

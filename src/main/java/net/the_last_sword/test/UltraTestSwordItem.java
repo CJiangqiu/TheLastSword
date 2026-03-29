@@ -1,14 +1,13 @@
 package net.the_last_sword.test;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.eca.api.EcaAPI;
-import net.eca.util.selector.EcaEntitySelector;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
+import net.minecraft.network.protocol.game.ClientboundStopSoundPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.damagesource.DamageSource;
@@ -18,6 +17,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.TickEvent;
@@ -40,8 +40,6 @@ import java.util.Set;
 public class UltraTestSwordItem extends TieredItem {
 
     private static final int MAX_MODES = 2; // 0=强力范围攻击模式, 1=防御模式
-    private static final int ALL_RETURN_DURATION_SECONDS = 5;
-    private static long allReturnDisableTick = -1L;
 
     public UltraTestSwordItem() {
         super(new Tier() {
@@ -73,7 +71,7 @@ public class UltraTestSwordItem extends TieredItem {
                     if (player.isShiftKeyDown()) {
                         EntityUtil.theLastEndSetDead(living, damageSource);
                     } else {
-                        AbsoluteDestructionDamageSource.applyAbsoluteDestructionIntelligently(living, entity, stack, 100);
+                        AbsoluteDestructionDamageSource.applyAbsoluteDestruction(living,player,stack,100);
                     }
                 }
             }
@@ -91,10 +89,10 @@ public class UltraTestSwordItem extends TieredItem {
 
         int mode = ItemModeHelper.getMode(stack);
         if (!world.isClientSide && player instanceof ServerPlayer serverPlayer && (mode == 0 || mode == 1)) {
-            List<Entity> targets = selectTargetsWithEcaSelector(serverPlayer);
             if (serverPlayer.isShiftKeyDown()) {
-                executeStrongestAttack(serverPlayer, targets);
+                PowerfulRangeAttack.execute(serverPlayer);
             } else {
+                List<Entity> targets = selectTargetsWithEcaSelector(serverPlayer);
                 for (Entity target : targets) {
                     EntityUtil.theLastEndRemove(target, Entity.RemovalReason.KILLED);
                 }
@@ -106,50 +104,17 @@ public class UltraTestSwordItem extends TieredItem {
     //使用ECA选择器获取128格目标实体
     private static List<Entity> selectTargetsWithEcaSelector(ServerPlayer sourcePlayer) {
         List<Entity> result = new ArrayList<>();
-        CommandSourceStack source = sourcePlayer.createCommandSourceStack();
-        try {
-            for (Entity entity : EcaEntitySelector.select(source, "@eca_e[distance=..128]")) {
-                if (entity == sourcePlayer) {
-                    continue;
-                }
-                if (entity instanceof Player targetPlayer && targetPlayer.isCreative()) {
-                    continue;
-                }
-                result.add(entity);
+        AABB area = sourcePlayer.getBoundingBox().inflate(128);
+        for (Entity entity : EcaAPI.getEntities(sourcePlayer.level(), area)) {
+            if (entity == sourcePlayer) {
+                continue;
             }
-        } catch (CommandSyntaxException ignored) {
+            if (entity instanceof Player targetPlayer && targetPlayer.isCreative()) {
+                continue;
+            }
+            result.add(entity);
         }
         return result;
-    }
-
-    //Shift+右键：最强攻击（禁复活 -> 全局AllReturn -> 内存清除）
-    private static void executeStrongestAttack(ServerPlayer sourcePlayer, List<Entity> targets) {
-        ServerLevel serverLevel = sourcePlayer.serverLevel();
-        int reviveBanSeconds = Math.max(0, TheLastSwordConfiguration.getReviveBanTimeSafely());
-        Set<net.minecraft.world.entity.EntityType<?>> targetTypes = new HashSet<>();
-
-        for (Entity target : targets) {
-            targetTypes.add(target.getType());
-        }
-
-        if (reviveBanSeconds > 0) {
-            for (net.minecraft.world.entity.EntityType<?> entityType : targetTypes) {
-                EcaAPI.banSpawn(serverLevel, entityType, reviveBanSeconds);
-            }
-        }
-
-        boolean allReturnEnabled = EcaAPI.setGlobalAllReturn(true);
-
-        for (Entity target : targets) {
-            EcaAPI.memoryRemoveEntity(target);
-        }
-
-        if (allReturnEnabled) {
-            allReturnDisableTick = sourcePlayer.server.getTickCount() + (long) ALL_RETURN_DURATION_SECONDS * 20L;
-        } else {
-            EcaAPI.disableAllReturn();
-            allReturnDisableTick = -1L;
-        }
     }
 
     @Override
@@ -252,11 +217,6 @@ public class UltraTestSwordItem extends TieredItem {
         if (event.player.level().isClientSide) return;
         if (!(event.player instanceof ServerPlayer sp)) return;
 
-        if (allReturnDisableTick >= 0L && sp.server.getTickCount() >= allReturnDisableTick) {
-            EcaAPI.disableAllReturn();
-            allReturnDisableTick = -1L;
-        }
-
         //权限检查：仅OP创造/旁观模式玩家
         boolean isCreativeOrSpec = sp.isCreative() || sp.isSpectator();
         boolean isOp = sp.hasPermissions(2);
@@ -287,17 +247,6 @@ public class UltraTestSwordItem extends TieredItem {
                 sp.getPersistentData().remove("UltraTestSwordDefence");
             }
         }
-    }
-
-    //按配置时长自动关闭AllReturn
-    @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
-        if (allReturnDisableTick < 0L) return;
-        if (event.getServer().getTickCount() < allReturnDisableTick) return;
-
-        EcaAPI.disableAllReturn();
-        allReturnDisableTick = -1L;
     }
 
     //防止持有防御模式剑的玩家进行维度旅行

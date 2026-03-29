@@ -55,6 +55,7 @@ public class ModCreativeTabs {
                 output.accept(ModItems.LOST_WRAITH_SPAWN_EGG.get());
                 output.accept(ModItems.THE_LAST_END_SWORD_WRAITH_SPAWN_EGG.get());
                 output.accept(ModItems.THE_LAST_END_SWORD_WRAITH_LEVEL_13_SPAWN_EGG.get());
+                output.accept(ModItems.THE_PAST_SHADOW_OF_THE_QUEEN_SPAWN_EGG.get());
                 //测试物品
                 output.accept(ModItems.ULTRA_TEST_SWORD.get());
                 output.accept(ModItems.TEST_ENTITY_SPAWN_EGG.get());

@@ -1,5 +1,6 @@
 package net.the_last_sword.summon;
 
+import net.eca.network.ClientRemovePacket;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -16,7 +17,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.core.BlockPos;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.eca.network.EcaClientRemovePacket;
 import net.eca.network.NetworkHandler;
 import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
@@ -141,7 +141,7 @@ public class WraithSummonManager {
 
         //7.5. 强制发送客户端删除包（确保客户端实体被正确清除）
         if (player instanceof ServerPlayer serverPlayer) {
-            NetworkHandler.sendToPlayer(new EcaClientRemovePacket(wraith.getId(), List.of()), serverPlayer);
+            NetworkHandler.sendToPlayer(new ClientRemovePacket(wraith.getId(), List.of()), serverPlayer);
         }
 
         //8. 保存魂石到玩家数据（绑定保留，只更新魂石状态）
@@ -210,7 +210,7 @@ public class WraithSummonManager {
 
                 //发送客户端删除包
                 if (player instanceof ServerPlayer serverPlayer) {
-                    NetworkHandler.sendToPlayer(new EcaClientRemovePacket(wraith.getId(), List.of()), serverPlayer);
+                    NetworkHandler.sendToPlayer(new ClientRemovePacket(wraith.getId(), List.of()), serverPlayer);
                 }
 
                 TheLastSwordLogger.info("[WraithSummon] Non-soul-stone wraith {} removed", wraitheUUID);
@@ -412,7 +412,7 @@ public class WraithSummonManager {
 
                 //2.5. 强制发送客户端删除包（确保客户端旧实体被正确清除）
                 if (player instanceof ServerPlayer serverPlayer) {
-                    NetworkHandler.sendToPlayer(new EcaClientRemovePacket(existingWraith.getId(), List.of()), serverPlayer);
+                    NetworkHandler.sendToPlayer(new ClientRemovePacket(existingWraith.getId(), List.of()), serverPlayer);
                 }
 
                 break;
@@ -868,7 +868,7 @@ public class WraithSummonManager {
 
             //应用额外绝毁伤害
             if (absoluteDestructionDamage > 0) {
-                AbsoluteDestructionDamageSource.applyAbsoluteDestructionIntelligently(
+                AbsoluteDestructionDamageSource.applyAbsoluteDestruction(
                     target,
                     attacker,
                     absoluteDestructionDamage

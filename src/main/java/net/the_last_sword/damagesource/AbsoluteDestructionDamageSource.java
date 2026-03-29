@@ -88,18 +88,19 @@ public class AbsoluteDestructionDamageSource extends DamageSource {
 
     // ==================== 智能绝毁伤害应用API ====================
 
-    public static boolean applyAbsoluteDestructionIntelligently(LivingEntity entity, DamageSource damageSource, float damageAmount) {
-        //获取当前血量
-        float originalHealth = entity.getHealth();
+    public static boolean applyAbsoluteDestruction(LivingEntity entity, DamageSource damageSource, float damageAmount) {
 
-        //步骤1: 被肃正防御护盾抵挡
+        //被肃正防御护盾抵挡
         var justifiedDefenceAttribute = entity.getAttribute(ModAttributes.JUSTIFIED_DEFENCE.get());
         if (justifiedDefenceAttribute != null && justifiedDefenceAttribute.getValue() > 0) {
             justifiedDefenceAttribute.setBaseValue(justifiedDefenceAttribute.getValue() - 1.0D);
             return false;
         }
 
-        //步骤2: 异常血量斩杀
+
+
+        float originalHealth = entity.getHealth();
+        // 异常血量斩杀
         if (Float.isNaN(originalHealth) || Float.isInfinite(originalHealth) || originalHealth <= 0.0F) {
             if (TheLastSwordConfiguration.getEnableTheLastEndSetDeadSafely()) {
                 EntityUtil.theLastEndSetDead(entity, damageSource);
@@ -107,50 +108,50 @@ public class AbsoluteDestructionDamageSource extends DamageSource {
             }
         }
 
+
         float expectedHealth = originalHealth - damageAmount;
-        entity.invulnerableTime=0;
-        entity.hurt(damageSource, damageAmount);
 
-        //步骤3: 检查实际vs预期生命值
-        float actualHealth = entity.getHealth();
 
-        //步骤4: 如果不一致，设置生命值
-        if (actualHealth != expectedHealth) {
-            EntityUtil.theLastEndSetHealth(entity, expectedHealth);
-
-            if (expectedHealth <= 0) {
-                if (TheLastSwordConfiguration.getEnableTheLastEndSetDeadSafely()) {
-                    EntityUtil.theLastEndSetDead(entity, damageSource);
-                    return true;
-                }
+        //预期血量判定
+        if (expectedHealth <= 0) {
+            //预期血量≤0，直接终焉死亡
+            if (TheLastSwordConfiguration.getEnableTheLastEndSetDeadSafely()) {
+                EntityUtil.theLastEndSetDead(entity, damageSource);
             }
+            return true;
         }
 
-        //步骤5: 设置禁疗状态（包含 ECA 血量锁定）
+        entity.invulnerableTime=0;
+        entity.hurt(damageSource, damageAmount);
+        float actualHealth = entity.getHealth();
+        //预期血量>0但实际不一致，ECA校正血量
+        if (actualHealth != expectedHealth) {
+            EntityUtil.theLastEndSetHealth(entity, expectedHealth);
+        }
+        //禁疗
         int banTime = TheLastSwordConfiguration.getHealNegationTimeSafely();
         if (banTime > 0) {
             EntityUtil.setHealBanTime(entity, banTime);
-            EntityUtil.setHealBanValue(entity, expectedHealth);
-            EcaAPI.lockHealth(entity, expectedHealth);
+            EcaAPI.banHealing(entity, expectedHealth);
         }
         return true;
     }
 
-    public static boolean applyAbsoluteDestructionIntelligently(LivingEntity target, Entity attacker, ItemStack weapon, float damageAmount) {
+    public static boolean applyAbsoluteDestruction(LivingEntity target, Entity attacker, ItemStack weapon, float damageAmount) {
         //检查盟友关系（包含剑灵系统）
         if (!EntityUtil.canAttack(attacker, target)) {
             return false;
         }
         DamageSource damageSource = absoluteDestruction(attacker, weapon);
-        return applyAbsoluteDestructionIntelligently(target, damageSource, damageAmount);
+        return applyAbsoluteDestruction(target, damageSource, damageAmount);
     }
 
-    public static boolean applyAbsoluteDestructionIntelligently(LivingEntity target, Entity attacker, float damageAmount) {
+    public static boolean applyAbsoluteDestruction(LivingEntity target, Entity attacker, float damageAmount) {
         //检查盟友关系（包含剑灵系统）
         if (!EntityUtil.canAttack(attacker, target)) {
             return false;
         }
         DamageSource damageSource = absoluteDestruction(attacker);
-        return applyAbsoluteDestructionIntelligently(target, damageSource, damageAmount);
+        return applyAbsoluteDestruction(target, damageSource, damageAmount);
     }
 }

@@ -4,7 +4,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.phys.Vec3;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
 import net.the_last_sword.entity.TheLastEndSwordWraithEntity;
@@ -114,7 +113,7 @@ public class SwordWraithCrossSlashGoal extends Goal {
         float damage = (float) wraith.getAttributeValue(Attributes.ATTACK_DAMAGE) * damageMultiplier;
 
         target.invulnerableTime = 0;
-        AbsoluteDestructionDamageSource.applyAbsoluteDestructionIntelligently(target, wraith, damage);
+        AbsoluteDestructionDamageSource.applyAbsoluteDestruction(target, wraith, damage);
         TheLastEndSwordWraithEntity.addEndMark(target);
 
         //攻击范围内的其他敌人
@@ -122,7 +121,7 @@ public class SwordWraithCrossSlashGoal extends Goal {
         for (LivingEntity nearbyTarget : nearbyTargets) {
             if (!nearbyTarget.equals(target)) {
                 nearbyTarget.invulnerableTime = 0;
-                AbsoluteDestructionDamageSource.applyAbsoluteDestructionIntelligently(nearbyTarget, wraith, damage);
+                AbsoluteDestructionDamageSource.applyAbsoluteDestruction(nearbyTarget, wraith, damage);
                 TheLastEndSwordWraithEntity.addEndMark(nearbyTarget);
             }
         }

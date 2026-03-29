@@ -108,7 +108,7 @@ public class TheLastSword extends TheLastEndSwordItems implements ISummonableIte
                 target.invulnerableTime = 0;
                 if (mode == 0) {
                     //模式0：物理伤害 + 绝毁伤害
-                    AbsoluteDestructionDamageSource.applyAbsoluteDestructionIntelligently(target, attacker, stack, extraDamage);
+                    AbsoluteDestructionDamageSource.applyAbsoluteDestruction(target, attacker, stack, extraDamage);
                 } else if (mode == 1 || mode == 2) {
                     //模式1和2：物理伤害 + 虚空伤害
                     DamageSource voidDamageSource = new DamageSource(
@@ -213,7 +213,7 @@ public class TheLastSword extends TheLastEndSwordItems implements ISummonableIte
 
                 //再造成绝毁伤害
                 if (extraDamage > 0) {
-                    AbsoluteDestructionDamageSource.applyAbsoluteDestructionIntelligently(target, player, stack, extraDamage);
+                    AbsoluteDestructionDamageSource.applyAbsoluteDestruction(target, player, stack, extraDamage);
                 }
             }
         }

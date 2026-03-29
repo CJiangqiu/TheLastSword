@@ -274,7 +274,7 @@ public class GuardianOfSealedSpireEntity extends TheLastEndEntity {
         if (mainhand.isEmpty()) return;
 
         GuardianType targetType = getTypeFromItem(mainhand);
-        if (targetType == null || targetType == getGuardianType()) return;
+        if (targetType == null) return;
 
         transformTo(targetType);
     }

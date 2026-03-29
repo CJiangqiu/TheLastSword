@@ -12,9 +12,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.Shadow;
+import javax.annotation.Nullable;
 
 @Mixin(value = Entity.class, priority = 1024)
 public class EntityMixin {
+
+    @Shadow @Nullable private Entity.RemovalReason removalReason;
 
     @Inject(method = "kill", at = @At("HEAD"), cancellable = true)
     private void theLastSword$preventKill(CallbackInfo ci) {
@@ -80,6 +84,18 @@ public class EntityMixin {
             if (callback == EntityInLevelCallback.NULL) {
                 ci.cancel();
             }
+        }
+    }
+
+    //防止受保护实体因 removalReason 残留导致 tick 跳过、@e 选择器失效
+    @Inject(method = "isRemoved", at = @At("HEAD"), cancellable = true)
+    private void theLastSword$preventRemovedState(CallbackInfoReturnable<Boolean> cir) {
+        if (this.removalReason != null
+                && this.removalReason != Entity.RemovalReason.CHANGED_DIMENSION
+                && (Object) this instanceof LivingEntity living
+                && EntityUtil.hasProtection(living)) {
+            this.removalReason = null;
+            cir.setReturnValue(false);
         }
     }
 

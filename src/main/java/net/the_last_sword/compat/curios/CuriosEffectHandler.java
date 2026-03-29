@@ -94,7 +94,7 @@ public class CuriosEffectHandler {
 
         try {
             APPLYING_GIVERS_PAIN_DAMAGE.set(true);
-            AbsoluteDestructionDamageSource.applyAbsoluteDestructionIntelligently(target, attacker, absoluteDamage);
+            AbsoluteDestructionDamageSource.applyAbsoluteDestruction(target, attacker, absoluteDamage);
         } finally {
             APPLYING_GIVERS_PAIN_DAMAGE.set(false);
         }
