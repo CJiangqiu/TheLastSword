@@ -1,5 +1,6 @@
 package net.the_last_sword.entity.ai;
 
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -21,7 +22,7 @@ public class SwordWraithBlockGoal extends Goal {
 
     private static final int ANIMATION_LENGTH = 15;
     private static final double KNOCKBACK_STRENGTH = 0.4;
-    private static final int COOLDOWN = 60;
+    private static final int COOLDOWN = 200; // 10秒
 
     public SwordWraithBlockGoal(TheLastEndSwordWraithEntity wraith) {
         this.wraith = wraith;
@@ -30,6 +31,9 @@ public class SwordWraithBlockGoal extends Goal {
 
     @Override
     public boolean canUse() {
+        if (!wraith.canAct()) {
+            return false;
+        }
         if (wraith.getAnimationState() != TheLastEndSwordWraithEntity.STATE_IDLE) {
             return false;
         }
@@ -39,7 +43,7 @@ public class SwordWraithBlockGoal extends Goal {
             return false;
         }
 
-        if (wraith.distanceTo(target) > 6.0) {
+        if (wraith.distanceTo(target) > 4.0) {
             return false;
         }
 
@@ -56,9 +60,23 @@ public class SwordWraithBlockGoal extends Goal {
 
     @Override
     public void tick() {
-        animationTick--;
+        if (animationTick <= 0) {
+            return;
+        }
+
         applyKnockbackAndDamage();
         deflectProjectiles();
+
+        animationTick--;
+
+        LivingEntity target = wraith.getTarget();
+        if (target != null && target.isAlive()) {
+            wraith.getLookControl().setLookAt(target, 30.0F, 30.0F);
+        }
+
+        if (animationTick == 0) {
+            wraith.setAnimationState(TheLastEndSwordWraithEntity.STATE_IDLE);
+        }
     }
 
     @Override
@@ -68,7 +86,15 @@ public class SwordWraithBlockGoal extends Goal {
 
     @Override
     public void stop() {
-        wraith.setAnimationState(TheLastEndSwordWraithEntity.STATE_IDLE);
+        animationTick = 0;
+        if (wraith.getAnimationState() == TheLastEndSwordWraithEntity.STATE_BLOCK) {
+            wraith.setAnimationState(TheLastEndSwordWraithEntity.STATE_IDLE);
+        }
+    }
+
+    @Override
+    public boolean requiresUpdateEveryTick() {
+        return true;
     }
 
     //对前方半圆范围内的目标施加击退和伤害
@@ -89,7 +115,7 @@ public class SwordWraithBlockGoal extends Goal {
 
             target.invulnerableTime = 0;
             target.hurt(wraith.damageSources().mobAttack(wraith), damage);
-            TheLastEndSwordWraithEntity.addEndMark(target);
+            wraith.addEndMark();
         }
     }
 
@@ -99,7 +125,7 @@ public class SwordWraithBlockGoal extends Goal {
         AABB searchBox = wraith.getBoundingBox().inflate(range);
         Vec3 wraithLook = wraith.getLookAngle();
 
-        List<net.minecraft.world.entity.Entity> nearbyEntities = wraith.level().getEntities(wraith, searchBox);
+        List<Entity> nearbyEntities = wraith.level().getEntities(wraith, searchBox);
         for (net.minecraft.world.entity.Entity entity : nearbyEntities) {
             if (entity instanceof Projectile projectile) {
                 Vec3 toProjectile = new Vec3(

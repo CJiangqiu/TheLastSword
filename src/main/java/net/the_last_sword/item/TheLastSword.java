@@ -324,9 +324,17 @@ public class TheLastSword extends TheLastEndSwordItems implements ISummonableIte
             }
         }
 
-        //6. 被动技能：终焉之主
+        //6. 被动技能：终焉之主（动态计算限伤值）
         tooltip.add(Component.empty());
-        tooltip.add(Component.translatable("item_tooltip.the_last_sword.the_last_sword.passive"));
+        float damageLimit = (float) TheLastSwordConfiguration.getDefenceMaxDamagePerHitSafely();
+        Player localPlayer = net.minecraft.client.Minecraft.getInstance().player;
+        if (localPlayer != null) {
+            float maxHealth = localPlayer.getMaxHealth();
+            float ratio = (float) TheLastSwordConfiguration.getDefenceCustomHealthDamageReductionSafely();
+            damageLimit = Math.min(maxHealth * ratio, damageLimit);
+        }
+        tooltip.add(Component.translatable("item_tooltip.the_last_sword.the_last_sword.passive",
+                String.format("%.0f", damageLimit)));
 
         //7. 当前模式切换绑定按键
         tooltip.add(
@@ -389,6 +397,11 @@ public class TheLastSword extends TheLastEndSwordItems implements ISummonableIte
                     EntityUtil.clearDefence(player);
                     player.getPersistentData().remove("TheLastSwordDefence");
                 }
+            }
+
+            //免疫逻辑：清除火焰、冰冻和负面效果
+            if (hasSword) {
+                EntityUtil.applyImmunity(player);
             }
 
             //无冷却逻辑：持有最终之剑时，清除所有物品的冷却时间

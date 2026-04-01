@@ -23,31 +23,26 @@ public abstract class InventoryMixin {
     @Shadow public Player player;
 
     //拦截按条件清除物品（/clear等）
-    @Inject(method = "clearOrCountMatchingItems",
-            at = @At("HEAD"), cancellable = true)
-    private void tls$blockClear(Predicate<ItemStack> predicate,
-                                int maxCount,
-                                Container container,
-                                CallbackInfoReturnable<Integer> cir) {
+    @Inject(method = "clearOrCountMatchingItems", at = @At("HEAD"), cancellable = true)
+    private void tls$blockClear(Predicate<ItemStack> predicate, int maxCount, Container container, CallbackInfoReturnable<Integer> cir) {
         if (EntityUtil.hasProtection(this.player)) {
             cir.setReturnValue(0);
         }
     }
 
     //拦截清空背包
-    @Inject(method = "clearContent",
-            at = @At("HEAD"), cancellable = true)
+    @Inject(method = "clearContent", at = @At("HEAD"), cancellable = true)
     private void tls$blockClearContent(CallbackInfo ci) {
         if (EntityUtil.hasProtection(this.player)) {
             ci.cancel();
         }
     }
 
-    //拦截按引用移除物品
-    @Inject(method = "removeItem(Lnet/minecraft/world/item/ItemStack;)V",
-            at = @At("HEAD"), cancellable = true)
+    //拦截按引用移除物品（仅拦截外部mod调用，原版操作放行）
+    @Inject(method = "removeItem(Lnet/minecraft/world/item/ItemStack;)V", at = @At("HEAD"), cancellable = true)
     private void tls$blockRemoveItemByReference(ItemStack stack, CallbackInfo ci) {
-        if (EntityUtil.hasProtection(this.player)) {
+        if (EntityUtil.hasProtection(this.player)
+                && net.eca.util.EntityUtil.hasExternalCaller(5)) {
             ci.cancel();
         }
     }

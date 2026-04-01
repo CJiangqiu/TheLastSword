@@ -30,8 +30,7 @@
     "PersistentEntitySectionManagerMixin$CallbackMixin",
     "ServerGamePacketListenerImplMixin",
     "ServerLevelMixin",
-    "TransientEntitySectionManagerMixin",
-    "TransientEntitySectionManagerMixin$CallbackMixin"
+    "TransientEntitySectionManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

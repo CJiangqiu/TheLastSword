@@ -20,7 +20,7 @@ public class SwordWraithMoonLightStrikeGoal extends Goal {
     private static final int ANIMATION_LENGTH = 100;
     private static final int STRIKE_TICK = 5;
     private static final double LAUNCH_STRENGTH = 1.2;
-    private static final int COOLDOWN = 120;
+    private static final int COOLDOWN = 200; // 10秒
 
     public SwordWraithMoonLightStrikeGoal(TheLastEndSwordWraithEntity wraith) {
         this.wraith = wraith;
@@ -29,6 +29,9 @@ public class SwordWraithMoonLightStrikeGoal extends Goal {
 
     @Override
     public boolean canUse() {
+        if (!wraith.canAct()) {
+            return false;
+        }
         if (wraith.getAnimationState() != TheLastEndSwordWraithEntity.STATE_IDLE) {
             return false;
         }
@@ -55,10 +58,23 @@ public class SwordWraithMoonLightStrikeGoal extends Goal {
 
     @Override
     public void tick() {
-        animationTick--;
+        if (animationTick <= 0) {
+            return;
+        }
 
         if (animationTick == STRIKE_TICK) {
             executeMoonLightStrike();
+        }
+
+        animationTick--;
+
+        LivingEntity target = wraith.getTarget();
+        if (target != null && target.isAlive()) {
+            wraith.getLookControl().setLookAt(target, 30.0F, 30.0F);
+        }
+
+        if (animationTick == 0) {
+            wraith.setAnimationState(TheLastEndSwordWraithEntity.STATE_IDLE);
         }
     }
 
@@ -69,7 +85,15 @@ public class SwordWraithMoonLightStrikeGoal extends Goal {
 
     @Override
     public void stop() {
-        wraith.setAnimationState(TheLastEndSwordWraithEntity.STATE_IDLE);
+        animationTick = 0;
+        if (wraith.getAnimationState() == TheLastEndSwordWraithEntity.STATE_MOON_LIGHT_STRIKE) {
+            wraith.setAnimationState(TheLastEndSwordWraithEntity.STATE_IDLE);
+        }
+    }
+
+    @Override
+    public boolean requiresUpdateEveryTick() {
+        return true;
     }
 
     //执行月光打击
@@ -83,7 +107,7 @@ public class SwordWraithMoonLightStrikeGoal extends Goal {
             target.hurt(wraith.damageSources().mobAttack(wraith), damage);
             target.setDeltaMovement(target.getDeltaMovement().add(0, LAUNCH_STRENGTH, 0));
             target.playSound(SoundEvents.PLAYER_ATTACK_CRIT, 1.0F, 1.0F);
-            TheLastEndSwordWraithEntity.addEndMark(target);
+            wraith.addEndMark();
         }
     }
 }

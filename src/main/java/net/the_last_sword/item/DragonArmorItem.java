@@ -43,7 +43,6 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 
 /**
  * 龙之盔甲
- * 基于NBT等级系统 + Forge Energy + GeckoLib动画
  */
 public abstract class DragonArmorItem extends TheLastEndArmorItem implements GeoItem {
 
@@ -216,8 +215,10 @@ public abstract class DragonArmorItem extends TheLastEndArmorItem implements Geo
             case FEET -> list.add(Component.translatable("item_tooltip.the_last_sword.dragon_armor_boots"));
         }
 
-        // 全套效果描述
-        list.add(Component.translatable("item_tooltip.the_last_sword.dragon_armor_skill"));
+        // 龙魂觉醒被动描述（读取配置值）
+        int crystalRange = TheLastSwordConfiguration.getDragonArmorEnderCrystalRangeSafely();
+        int chargeRate = TheLastSwordConfiguration.getDragonArmorEnderCrystalChargeRateSafely();
+        list.add(Component.translatable("item_tooltip.the_last_sword.dragon_armor_skill", crystalRange, chargeRate));
         list.add(Component.translatable("item_tooltip_lore.the_last_sword.dragon_armor")
             .withStyle(net.minecraft.ChatFormatting.GRAY));
     }

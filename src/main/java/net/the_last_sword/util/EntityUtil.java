@@ -86,11 +86,17 @@ public class EntityUtil {
         if (WORLD_ANCHOR != null) {
             try {
                 entity.getEntityData().set(WORLD_ANCHOR, encoded);
+                syncHealthLock(entity, anchor);
                 return;
             } catch (Exception ignored) {
             }
         }
         entity.getPersistentData().putString(NBT_WORLD_ANCHOR, encoded);
+        syncHealthLock(entity, anchor);
+    }
+
+    //保护系统已通过Mixin完整控制血量流程，无需ECA锁血
+    private static void syncHealthLock(LivingEntity entity, float health) {
     }
 
     //获取最大真实血量上限
@@ -227,7 +233,7 @@ public class EntityUtil {
         //设置保护标志（TLS 主系统）
         setProtection(entity, true);
 
-        //设置现世锚度
+        //设置现世锚度（setWorldAnchor内部会自动同步ECA锁血）
         setWorldAnchor(entity, maxHealth);
         setWorldAnchorMax(entity, maxHealth);
     }
@@ -241,6 +247,33 @@ public class EntityUtil {
 
         //清除现世锚度
         clearWorldAnchor(entity);
+    }
+
+    //强化免疫：清除火焰、冰冻和非增益效果（不清除生命吸收）
+    public static void applyImmunity(LivingEntity entity) {
+        if (entity == null) return;
+
+        if (entity.isOnFire()) {
+            entity.clearFire();
+        }
+
+        if (entity.isFullyFrozen() || entity.getTicksFrozen() > 0) {
+            entity.setTicksFrozen(0);
+        }
+
+        java.util.Collection<net.minecraft.world.effect.MobEffectInstance> activeEffects = entity.getActiveEffects();
+        if (!activeEffects.isEmpty()) {
+            java.util.ArrayList<net.minecraft.world.effect.MobEffect> effectsToRemove = new java.util.ArrayList<>();
+            for (net.minecraft.world.effect.MobEffectInstance effectInstance : activeEffects) {
+                net.minecraft.world.effect.MobEffect effect = effectInstance.getEffect();
+                if (!effect.isBeneficial() && effect != net.minecraft.world.effect.MobEffects.ABSORPTION) {
+                    effectsToRemove.add(effect);
+                }
+            }
+            for (net.minecraft.world.effect.MobEffect effect : effectsToRemove) {
+                entity.removeEffect(effect);
+            }
+        }
     }
 
     // ==================== 生命值模块 ====================

@@ -15,6 +15,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.init.ModAttributes;
+import net.the_last_sword.summon.WraithSummonManager;
 import net.the_last_sword.util.EntityUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -54,6 +55,24 @@ public class LivingEntityMixin {
         return source instanceof AbsoluteDestructionDamageSource;
     }
 
+
+    //肃正防御存在时自动注册保护，消失时清除（不影响剑的保护）
+    @Unique
+    private void the_last_sword$handleJustifiedDefenceProtection(LivingEntity entity) {
+        AttributeInstance maxAttr = entity.getAttribute(ModAttributes.MAX_JUSTIFIED_DEFENCE.get());
+        if (maxAttr == null) return;
+
+        if (maxAttr.getValue() > 0) {
+            EntityUtil.registerDefence(entity, entity.getMaxHealth());
+            entity.getPersistentData().putBoolean("JustifiedDefenceProtection", true);
+        } else if (entity.getPersistentData().getBoolean("JustifiedDefenceProtection")) {
+            entity.getPersistentData().remove("JustifiedDefenceProtection");
+            // 只在没有其他保护来源时才清除
+            if (!entity.getPersistentData().getBoolean("TheLastSwordDefence")) {
+                EntityUtil.clearDefence(entity);
+            }
+        }
+    }
 
     //护盾自动回复系统（两层分支优化）
     @Unique
@@ -134,6 +153,9 @@ public class LivingEntityMixin {
 
         the_last_sword$handleShieldRegeneration(entity);
 
+        //肃正防御存在时自动注册保护
+        the_last_sword$handleJustifiedDefenceProtection(entity);
+
         //每 tick 更新禁疗计时器
         EntityUtil.tickHealBanTime(entity);
 
@@ -142,8 +164,6 @@ public class LivingEntityMixin {
             float realHealth = EntityUtil.getWorldAnchor(entity);
             if (realHealth <= 0 ) {
                 EntityUtil.setProtection(entity, false);
-            } else if (realHealth > 0) {
-                the_last_sword$handleDefenceProtection(entity);
             }
         }
     }
@@ -161,7 +181,7 @@ public class LivingEntityMixin {
         }
     }
 
-    //hurt：盟友判断
+    //hurt：盟友判断 + 剑灵绝毁附加
     @Inject(method = "hurt", at = @At("HEAD"), cancellable = true)
     private void onLivingEntityHurt(DamageSource damageSource, float damageAmount, CallbackInfoReturnable<Boolean> cir) {
         LivingEntity entity = (LivingEntity) (Object) this;
@@ -174,7 +194,14 @@ public class LivingEntityMixin {
         if (damageSource.getEntity() instanceof LivingEntity attacker) {
             if (!EntityUtil.canAttack(attacker, entity)) {
                 cir.setReturnValue(false);
+                return;
             }
+        }
+
+        //剑灵附加绝毁伤害（Mixin检测，绕过事件取消问题）
+        if (!the_last_sword$isAbsoluteDestructionDamage(damageSource)
+                && damageSource.getEntity() instanceof LivingEntity wraithAttacker) {
+            WraithSummonManager.handleWraithDamage(entity, wraithAttacker);
         }
     }
 

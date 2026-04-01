@@ -15,14 +15,16 @@ import net.the_last_sword.util.ParticleUtil;
 import java.util.EnumSet;
 import java.util.List;
 
-//双重打击技能Goal（基础攻击，无冷却）
+//双重打击技能Goal
 public class SwordWraithDoubleStrikeGoal extends Goal {
     private final TheLastEndSwordWraithEntity wraith;
     private int animationTick;
+    private long lastUseTime;
 
-    private static final int ANIMATION_LENGTH = 40;
-    private static final int FIRST_STRIKE_TICK = 30;
-    private static final int SECOND_STRIKE_TICK = 20;
+    private static final int ANIMATION_LENGTH = 27;
+    private static final int FIRST_STRIKE_TICK = 17;
+    private static final int SECOND_STRIKE_TICK = 7;
+    private static final int COOLDOWN = 100; // 5秒
 
     public SwordWraithDoubleStrikeGoal(TheLastEndSwordWraithEntity wraith) {
         this.wraith = wraith;
@@ -31,6 +33,9 @@ public class SwordWraithDoubleStrikeGoal extends Goal {
 
     @Override
     public boolean canUse() {
+        if (!wraith.canAct()) {
+            return false;
+        }
         if (wraith.getAnimationState() != TheLastEndSwordWraithEntity.STATE_IDLE) {
             return false;
         }
@@ -40,20 +45,25 @@ public class SwordWraithDoubleStrikeGoal extends Goal {
             return false;
         }
 
-        //距离≤4时触发（基础攻击）
-        return wraith.distanceTo(target) <= 4.0;
+        if (wraith.distanceTo(target) > 4.0) {
+            return false;
+        }
+        return wraith.level().getGameTime() - lastUseTime >= COOLDOWN;
     }
 
     @Override
     public void start() {
         animationTick = ANIMATION_LENGTH;
+        lastUseTime = wraith.level().getGameTime();
         wraith.setAnimationState(TheLastEndSwordWraithEntity.STATE_DOUBLE_STRIKE);
         wraith.getNavigation().stop();
     }
 
     @Override
     public void tick() {
-        animationTick--;
+        if (animationTick <= 0) {
+            return;
+        }
 
         if (animationTick == FIRST_STRIKE_TICK) {
             executeFirstStrike();
@@ -61,6 +71,17 @@ public class SwordWraithDoubleStrikeGoal extends Goal {
 
         if (animationTick == SECOND_STRIKE_TICK) {
             executeSecondStrike();
+        }
+
+        animationTick--;
+
+        LivingEntity target = wraith.getTarget();
+        if (target != null && target.isAlive()) {
+            wraith.getLookControl().setLookAt(target, 30.0F, 30.0F);
+        }
+
+        if (animationTick == 0) {
+            wraith.setAnimationState(TheLastEndSwordWraithEntity.STATE_IDLE);
         }
     }
 
@@ -71,7 +92,15 @@ public class SwordWraithDoubleStrikeGoal extends Goal {
 
     @Override
     public void stop() {
-        wraith.setAnimationState(TheLastEndSwordWraithEntity.STATE_IDLE);
+        animationTick = 0;
+        if (wraith.getAnimationState() == TheLastEndSwordWraithEntity.STATE_DOUBLE_STRIKE) {
+            wraith.setAnimationState(TheLastEndSwordWraithEntity.STATE_IDLE);
+        }
+    }
+
+    @Override
+    public boolean requiresUpdateEveryTick() {
+        return true;
     }
 
     //第一击：物理伤害
@@ -88,7 +117,7 @@ public class SwordWraithDoubleStrikeGoal extends Goal {
         for (LivingEntity target : targets) {
             target.invulnerableTime = 0;
             target.hurt(wraith.damageSources().mobAttack(wraith), damage);
-            TheLastEndSwordWraithEntity.addEndMark(target);
+            wraith.addEndMark();
         }
     }
 
@@ -111,7 +140,7 @@ public class SwordWraithDoubleStrikeGoal extends Goal {
                 wraith, wraith
             );
             target.hurt(magicDamage, damage);
-            TheLastEndSwordWraithEntity.addEndMark(target);
+            wraith.addEndMark();
         }
     }
 }

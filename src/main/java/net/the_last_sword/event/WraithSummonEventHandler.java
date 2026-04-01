@@ -2,16 +2,13 @@ package net.the_last_sword.event;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.the_last_sword.TheLastSwordMod;
-import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
 import net.the_last_sword.summon.WraithSummonManager;
 
 //剑灵召唤系统事件处理器
@@ -73,23 +70,4 @@ public class WraithSummonEventHandler {
         WraithSummonManager.handleLivingEntityTick(event.getEntity());
     }
 
-    //剑灵造成伤害时添加绝毁伤害
-    @SubscribeEvent
-    public static void onLivingHurt(LivingHurtEvent event) {
-        if (event.getEntity().level().isClientSide()) {
-            return;
-        }
-        //检查伤害源类型：如果已经是绝毁伤害，跳过
-        if (event.getSource() instanceof AbsoluteDestructionDamageSource) {
-            return;
-        }
-        //防止与虚空附魔形成递归：跳过虚空伤害
-        if (event.getSource().is(DamageTypes.FELL_OUT_OF_WORLD)) {
-            return;
-        }
-        //必须是生物造成的伤害
-        if (event.getSource().getEntity() instanceof LivingEntity attacker) {
-            WraithSummonManager.handleWraithDamage(event.getEntity(), attacker);
-        }
-    }
 }

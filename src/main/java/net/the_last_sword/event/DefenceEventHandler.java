@@ -8,6 +8,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -22,6 +23,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.the_last_sword.TheLastSwordMod;
+import net.the_last_sword.configuration.DefenceConfig;
 import net.the_last_sword.configuration.DefenceConfigData;
 import net.the_last_sword.configuration.DefenceConfigData.*;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
@@ -35,6 +37,19 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.the_last_sword.init.ModEffects;
 
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.phys.AABB;
+import net.the_last_sword.client.PerceptionScanData.ScanType;
+import net.the_last_sword.network.NetworkHandler;
+import net.the_last_sword.network.PerceptionScanPacket;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -44,6 +59,9 @@ public final class DefenceEventHandler {
 
     //水晶守护计时器
     private static final ConcurrentHashMap<UUID, Boolean> CRYSTAL_GUARD_TIMERS = new ConcurrentHashMap<>();
+
+    //感知扫描计时器（记录上次扫描的tick）
+    private static final ConcurrentHashMap<UUID, Long> PERCEPTION_SCAN_TIMERS = new ConcurrentHashMap<>();
 
     @Mod.EventBusSubscriber(modid = TheLastSwordMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
     public static class ModBusEvents {
@@ -101,18 +119,20 @@ public final class DefenceEventHandler {
             handleDragonArmorFlying(player);
             if (DragonArmorItem.isFullSet(player)) {
                 handleDragonArmorFullSetEffects(player);
+            } else if (player instanceof ServerPlayer sp) {
+                // 脱下龙套时清除感知扫描
+                if (PERCEPTION_SCAN_TIMERS.containsKey(player.getUUID())) {
+                    PERCEPTION_SCAN_TIMERS.remove(player.getUUID());
+                    NetworkHandler.sendToPlayer(new PerceptionScanPacket(Map.of(), 0), sp);
+                }
             }
         }
 
-        //龙之盔甲伤害减免
+        //龙之盔甲伤害减免（龙魂觉醒被动，全套固定生效）
         @SubscribeEvent(priority = EventPriority.HIGH)
         public static void onDragonArmorHurt(LivingHurtEvent event) {
             if (!(event.getEntity() instanceof Player player)) return;
             if (!DragonArmorItem.isFullSet(player)) return;
-
-            //检查伤害减免配置是否启用（从玩家同步的配置读取）
-            DefenceConfigData playerConfig = DefenceConfigPacket.getPlayerConfig(player.getUUID());
-            if (!playerConfig.armor.dragonArmor.fullSet.enableDamageReduction) return;
 
             DamageSource source = event.getSource();
 
@@ -162,9 +182,8 @@ public final class DefenceEventHandler {
                 return;
             }
 
-            //获取玩家配置
-            DefenceConfigData playerConfig = DefenceConfigPacket.getPlayerConfig(player.getUUID());
-            if (!playerConfig.armor.dragonArmor.chestplate.enableFlight) {
+            //客户端直接读本地配置（飞行速度是客户端行为）
+            if (!DefenceConfig.getDragonArmorChestplate().enableFlight) {
                 player.getAbilities().setFlyingSpeed(0.05f);
                 return;
             }
@@ -175,9 +194,21 @@ public final class DefenceEventHandler {
                     .orElse(false);
 
             //有电时应用配置速度，无电时恢复默认
-            float targetSpeed = hasEnergy ? playerConfig.armor.dragonArmor.flySpeed : 0.05f;
+            float targetSpeed = hasEnergy ? DefenceConfig.getAntiGravityModule().flySpeed : 0.05f;
             if (player.getAbilities().getFlyingSpeed() != targetSpeed) {
                 player.getAbilities().setFlyingSpeed(targetSpeed);
+            }
+
+            //飞行惯性控制：关闭时松开按键立即停止
+            if (player.getAbilities().flying && !DefenceConfig.getAntiGravityModule().enableInertia
+                    && player instanceof LocalPlayer localPlayer) {
+                boolean noInput = localPlayer.input.forwardImpulse == 0
+                    && localPlayer.input.leftImpulse == 0
+                    && !localPlayer.input.jumping
+                    && !localPlayer.input.shiftKeyDown;
+                if (noInput) {
+                    player.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+                }
             }
         }
     }
@@ -298,16 +329,20 @@ public final class DefenceEventHandler {
         }
 
         UUID id = player.getUUID();
-        int maxHealth = (int) player.getMaxHealth();
-        player.setAbsorptionAmount(maxHealth);
 
+        // 只在首次穿戴时给予护盾并启动定时器
         if (!CRYSTAL_GUARD_TIMERS.getOrDefault(id, false)) {
             CRYSTAL_GUARD_TIMERS.put(id, true);
+            int maxHealth = (int) player.getMaxHealth();
+            player.setAbsorptionAmount(maxHealth);
+
             int refreshInterval = TheLastSwordConfiguration.getCrystalGuardRefreshIntervalSafely();
 
             TheLastSwordMod.queueServerWork(refreshInterval, () -> {
+                CRYSTAL_GUARD_TIMERS.put(id, false);
                 if (DragonCrystalArmorItem.isFullSet(player)) {
                     int currentMaxHealth = (int) player.getMaxHealth();
+                    // 冷却结束时，护盾不满则刷新
                     if (player.getAbsorptionAmount() < currentMaxHealth) {
                         player.setAbsorptionAmount(currentMaxHealth);
                         Level level = player.level();
@@ -316,9 +351,8 @@ public final class DefenceEventHandler {
                             ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation("block.amethyst_block.chime")),
                             SoundSource.PLAYERS, 2, 1);
                     }
+                    // 重新启动下一轮定时器
                     applyCrystalGuard(player);
-                } else {
-                    CRYSTAL_GUARD_TIMERS.put(id, false);
                 }
             });
         }
@@ -341,6 +375,8 @@ public final class DefenceEventHandler {
         //获取玩家同步的配置
         DefenceConfigData playerConfig = DefenceConfigPacket.getPlayerConfig(player.getUUID());
         DragonArmorConfig config = playerConfig.armor.dragonArmor;
+        boolean enhancedBuff = config.lifeSupport.enhancedBuff;
+        int enhanceCost = net.the_last_sword.configuration.TheLastSwordConfiguration.getDragonArmorBuffEnhanceCostSafely();
 
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             if (slot.getType() != EquipmentSlot.Type.ARMOR) continue;
@@ -348,15 +384,25 @@ public final class DefenceEventHandler {
             ItemStack stack = player.getItemBySlot(slot);
             if (stack.isEmpty() || !(stack.getItem() instanceof DragonArmorItem)) continue;
 
-            //检查能量
-            boolean hasEnergy = stack.getCapability(ForgeCapabilities.ENERGY)
-                    .map(energy -> energy.getEnergyStored() > 0)
-                    .orElse(false);
+            //检查能量并决定是否增强
+            boolean enhanced = false;
+            if (enhancedBuff) {
+                boolean hasEnergy = stack.getCapability(ForgeCapabilities.ENERGY)
+                        .map(energy -> energy.getEnergyStored() > 0)
+                        .orElse(false);
+                if (hasEnergy) {
+                    enhanced = true;
+                    //增强Buff消耗该件装备的能量
+                    stack.getCapability(ForgeCapabilities.ENERGY).ifPresent(energy -> {
+                        energy.extractEnergy(enhanceCost, false);
+                    });
+                }
+            }
 
-            //基础等级3，有能量时+1变成4
-            int baseLevel = hasEnergy ? 4 : 3;
-            //速度和跳跃的基础等级是2，有能量时+1变成3
-            int speedJumpLevel = hasEnergy ? 3 : 2;
+            //基础等级3，增强时+1变成4
+            int baseLevel = enhanced ? 4 : 3;
+            //速度和跳跃的基础等级是2，增强时+1变成3
+            int speedJumpLevel = enhanced ? 3 : 2;
 
             switch (slot) {
                 case HEAD -> {
@@ -391,56 +437,100 @@ public final class DefenceEventHandler {
     private static void handleDragonArmorFullSetEffects(Player player) {
         //获取玩家同步的配置
         DefenceConfigData playerConfig = DefenceConfigPacket.getPlayerConfig(player.getUUID());
-        DragonArmorFullSetConfig config = playerConfig.armor.dragonArmor.fullSet;
+        LifeSupportModule lifeSupport = playerConfig.armor.dragonArmor.lifeSupport;
+        PhasingModule phasingModule = playerConfig.armor.dragonArmor.phasing;
 
-        int fullSetWithEnergy = 0;
-
-        //检查每件装备的能量并消耗
+        //检查全套是否都有电
+        boolean allHaveEnergy = true;
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             if (slot.getType() != EquipmentSlot.Type.ARMOR) continue;
-
             ItemStack stack = player.getItemBySlot(slot);
             if (stack.isEmpty() || !(stack.getItem() instanceof DragonArmorItem)) continue;
-
-            //检查能量
             boolean hasEnergy = stack.getCapability(ForgeCapabilities.ENERGY)
                     .map(energy -> energy.getEnergyStored() > 0)
                     .orElse(false);
-
-            if (hasEnergy) {
-                fullSetWithEnergy++;
+            if (!hasEnergy) {
+                allHaveEnergy = false;
+                break;
             }
+        }
 
-            //能量消耗：每件盔甲每刻消耗配置值
-            int costPerPiece = net.the_last_sword.configuration.TheLastSwordConfiguration.getDragonArmorEnergyCostPerPieceSafely();
+        //维生模块：饱和V（需要全套有电且配置开启）
+        if (allHaveEnergy && lifeSupport.enableSaturation) {
+            player.addEffect(new MobEffectInstance(MobEffects.SATURATION, 240, 4, false, false));
+            int saturationCost = net.the_last_sword.configuration.TheLastSwordConfiguration.getDragonArmorSaturationCostSafely();
+            drainAllArmorEnergy(player, saturationCost);
+        }
+
+        //维生模块：冰火不侵（需要全套有电且配置开启）
+        if (allHaveEnergy && lifeSupport.enableIceFireImmunity) {
+            player.setTicksFrozen(0);
+            player.clearFire();
+            int iceFireCost = net.the_last_sword.configuration.TheLastSwordConfiguration.getDragonArmorIceFireImmunityCostSafely();
+            drainAllArmorEnergy(player, iceFireCost);
+        }
+
+        //虚化模块（需要全套有电且模块开启）
+        if (allHaveEnergy && phasingModule.enabled) {
+            boolean activate = (phasingModule.activationMode == DefenceConfigData.PhasingActivationMode.ALWAYS)
+                || player.getAbilities().flying;
+            if (activate) {
+                player.addEffect(new MobEffectInstance(ModEffects.PHASING.get(), 240, 0, false, false));
+                int phasingCost = net.the_last_sword.configuration.TheLastSwordConfiguration.getDragonArmorPhasingCostSafely();
+                drainAllArmorEnergy(player, phasingCost);
+            }
+        }
+
+        //感知模块扫描
+        PerceptionModule perceptionModule = playerConfig.armor.dragonArmor.perception;
+        if (allHaveEnergy && perceptionModule.scanEntities && player instanceof ServerPlayer sp) {
+            performPerceptionScan(sp, perceptionModule);
+        }
+    }
+
+    //感知模块扫描
+    private static void performPerceptionScan(ServerPlayer player, PerceptionModule config) {
+        UUID id = player.getUUID();
+        long currentTick = player.level().getGameTime();
+        long intervalTicks = config.scanIntervalSeconds * 20L;
+        long lastScan = PERCEPTION_SCAN_TIMERS.getOrDefault(id, 0L);
+
+        if (currentTick - lastScan < intervalTicks) return;
+        PERCEPTION_SCAN_TIMERS.put(id, currentTick);
+
+        double range = TheLastSwordConfiguration.getPerceptionScanRangeSafely();
+        AABB scanBox = player.getBoundingBox().inflate(range);
+        List<LivingEntity> entities = player.level().getEntitiesOfClass(LivingEntity.class, scanBox,
+                e -> e != player && e.isAlive());
+
+        Map<Integer, ScanType> scanResult = new HashMap<>();
+        for (LivingEntity entity : entities) {
+            scanResult.put(entity.getId(), classifyEntity(entity));
+        }
+
+        int glowDuration = TheLastSwordConfiguration.getPerceptionGlowDurationSafely();
+        NetworkHandler.sendToPlayer(new PerceptionScanPacket(scanResult, glowDuration), player);
+    }
+
+    //判断实体类型
+    private static ScanType classifyEntity(LivingEntity entity) {
+        if (entity instanceof Animal || entity instanceof AbstractVillager) {
+            return ScanType.FRIENDLY;
+        }
+        if (entity instanceof Mob mob && mob.getType().getCategory() == MobCategory.MONSTER) {
+            return ScanType.HOSTILE;
+        }
+        return ScanType.NEUTRAL;
+    }
+
+    //全套每件扣电
+    private static void drainAllArmorEnergy(Player player, int costPerPiece) {
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            if (slot.getType() != EquipmentSlot.Type.ARMOR) continue;
+            ItemStack stack = player.getItemBySlot(slot);
+            if (stack.isEmpty() || !(stack.getItem() instanceof DragonArmorItem)) continue;
             stack.getCapability(ForgeCapabilities.ENERGY).ifPresent(energy -> {
                 energy.extractEnergy(costPerPiece, false);
-            });
-        }
-
-        //全套效果1：饱和V + 冰火不侵（需要4件都有能量）
-        if (fullSetWithEnergy == 4) {
-            if (config.enableSaturation) {
-                player.addEffect(new MobEffectInstance(MobEffects.SATURATION, 240, 4, false, false));
-            }
-            if (config.enableIceFireImmunity) {
-                //清除冻伤
-                player.setTicksFrozen(0);
-                //清除燃烧
-                player.clearFire();
-            }
-        }
-
-        //全套效果2：虚化（需要全套有电且处于飞行状态）
-        if (fullSetWithEnergy == 4 && player.getAbilities().flying && config.enablePhasing) {
-            //给予虚化效果
-            player.addEffect(new MobEffectInstance(ModEffects.PHASING.get(), 240, 0, false, false));
-
-            //虚化额外能量消耗：胸甲额外消耗配置值
-            int phasingCost = net.the_last_sword.configuration.TheLastSwordConfiguration.getDragonArmorPhasingEnergyCostSafely();
-            ItemStack chestplate = player.getItemBySlot(EquipmentSlot.CHEST);
-            chestplate.getCapability(ForgeCapabilities.ENERGY).ifPresent(energy -> {
-                energy.extractEnergy(phasingCost, false);
             });
         }
     }

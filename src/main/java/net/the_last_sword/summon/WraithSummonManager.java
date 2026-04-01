@@ -1,5 +1,6 @@
 package net.the_last_sword.summon;
 
+import net.eca.api.EcaAPI;
 import net.eca.network.ClientRemovePacket;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
@@ -13,6 +14,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.core.BlockPos;
@@ -22,6 +24,8 @@ import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.item.DragonCrystalSoulStone;
 import net.the_last_sword.item.ISummonableItem;
+import net.the_last_sword.entity.TheLastEndEntity;
+import net.the_last_sword.entity.TheLastEndSwordWraithEntity;
 import net.the_last_sword.util.EntityUtil;
 import net.the_last_sword.util.TheLastSwordLogger;
 import net.the_last_sword.util.nbt.ItemLevelHelper;
@@ -114,8 +118,16 @@ public class WraithSummonManager {
             return false;
         }
 
-        //3. 清除管理器记录（防御数据）
+        //3. 禁用强加载并清除管理器记录（防御数据）
+        if (wraith.level() instanceof ServerLevel sl) {
+            EcaAPI.setForceLoading(wraith, sl, false);
+        }
         EntityUtil.clearDefence(wraith);
+
+        //3.5. 强制结束万物终焉状态
+        if (wraith instanceof TheLastEndSwordWraithEntity swordWraith && swordWraith.isAllThingsEnd()) {
+            TheLastEndSwordWraithEntity.AllThingsEndActiveEffect.end(swordWraith);
+        }
 
         //4. 移除加成
         float healthBonus = nbt.getFloat("health_bonus");
@@ -205,6 +217,9 @@ public class WraithSummonManager {
                 }
             } else {
                 //非魂石剑灵：直接删除（不保存NBT）
+                if (wraith.level() instanceof ServerLevel sl) {
+                    EcaAPI.setForceLoading(wraith, sl, false);
+                }
                 EntityUtil.clearDefence(wraith);
                 EntityUtil.theLastEndRemove(wraith, Entity.RemovalReason.DISCARDED);
 
@@ -325,6 +340,14 @@ public class WraithSummonManager {
             return false;
         }
 
+        //4.5. 终焉种实体初始化
+        if (wraith instanceof TheLastEndEntity theLastEnd) {
+            float maxHealth = (float) wraith.getAttributeValue(Attributes.MAX_HEALTH);
+            theLastEnd.setWorldAnchorMax(maxHealth);
+            theLastEnd.setWorldAnchor(maxHealth);
+            theLastEnd.setAnimationState(TheLastEndEntity.STATE_SPAWNING);
+        }
+
         //5. 设置生命值为最大生命值（实体刚生成后立即设置满血）
         AttributeInstance maxHealthAttr = wraith.getAttribute(Attributes.MAX_HEALTH);
         if (maxHealthAttr != null) {
@@ -371,6 +394,11 @@ public class WraithSummonManager {
 
         //15. 注册防御等级
         registerWraithDefense(wraith, weaponStack);
+
+        //15.5. 启用强加载（防止剑灵因远离玩家导致区块卸载）
+        if (level instanceof ServerLevel serverLevel) {
+            EcaAPI.setForceLoading(wraith, serverLevel, true);
+        }
 
         //16. 添加到永久绑定表（只在首次召唤时添加）
         addBinding(player.getUUID(), wraitheUUID);
@@ -430,6 +458,14 @@ public class WraithSummonManager {
             return false;
         }
 
+        //4.5. 终焉种实体初始化
+        if (wraith instanceof TheLastEndEntity theLastEnd) {
+            float maxHealth = (float) wraith.getAttributeValue(Attributes.MAX_HEALTH);
+            theLastEnd.setWorldAnchorMax(maxHealth);
+            theLastEnd.setWorldAnchor(maxHealth);
+            theLastEnd.setAnimationState(TheLastEndEntity.STATE_SPAWNING);
+        }
+
         //5. 设置生命值为最大生命值（实体刚生成后立即设置满血）
         AttributeInstance maxHealthAttr = wraith.getAttribute(Attributes.MAX_HEALTH);
         if (maxHealthAttr != null) {
@@ -453,6 +489,11 @@ public class WraithSummonManager {
 
         //10. 注册防御等级
         registerWraithDefense(wraith, weaponStack);
+
+        //10.5. 启用强加载
+        if (level instanceof ServerLevel serverLevel) {
+            EcaAPI.setForceLoading(wraith, serverLevel, true);
+        }
 
         //11. 更新魂石加成记录
         nbt.putFloat("health_bonus", healthBonus);
@@ -593,7 +634,7 @@ public class WraithSummonManager {
                     return living;
                 }
             }
-        } else if (level instanceof net.minecraft.client.multiplayer.ClientLevel clientLevel) {
+        } else if (level instanceof ClientLevel clientLevel) {
             //客户端：遍历渲染中的实体
             for (Entity entity : clientLevel.entitiesForRendering()) {
                 if (entity instanceof LivingEntity living && entity.getUUID().equals(entityUUID)) {
@@ -770,6 +811,11 @@ public class WraithSummonManager {
 
     //实体离开世界：检测异常删除（被杀死等），只更新魂石状态
     public static void handleEntityLeaveLevel(Entity entity, Level level) {
+        //跳过仍然存活的实体（区块卸载、reSummon清理旧实体等临时状态）
+        if (entity instanceof LivingEntity living && living.getHealth() > 0) {
+            return;
+        }
+
         UUID wraitheUUID = entity.getUUID();
 
         //检查是否是剑灵（使用绑定表查询）
@@ -868,11 +914,7 @@ public class WraithSummonManager {
 
             //应用额外绝毁伤害
             if (absoluteDestructionDamage > 0) {
-                AbsoluteDestructionDamageSource.applyAbsoluteDestruction(
-                    target,
-                    attacker,
-                    absoluteDestructionDamage
-                );
+                AbsoluteDestructionDamageSource.applyAbsoluteDestruction(target, attacker, absoluteDestructionDamage);
             }
         } catch (Throwable t) {
             try {

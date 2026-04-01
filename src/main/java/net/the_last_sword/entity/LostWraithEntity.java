@@ -7,12 +7,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.server.level.ServerBossEvent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.BossEvent;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -38,7 +38,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.the_last_sword.configuration.TheLastSwordConfiguration;
+import net.eca.api.EcaAPI;
+import net.eca.network.EntityExtensionOverridePacket.MusicData;
+import net.eca.util.entity_extension.EntityExtensionManager;
 import net.the_last_sword.entity.ai.LostWraithDragonFireBallGoal;
 import net.the_last_sword.entity.ai.LostWraithChaseTargetGoal;
 import net.the_last_sword.entity.ai.LostWraithEnchantGoal;
@@ -50,7 +52,6 @@ import net.the_last_sword.util.EntityUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,12 +77,6 @@ public class LostWraithEntity extends TheLastEndEntity {
     private int patienceTicks = 0;
     private boolean forceEndStrike = false;
 
-    private final ServerBossEvent bossEvent = new ServerBossEvent(
-        Component.translatable("entity.the_last_sword.lost_wraith"),
-        BossEvent.BossBarColor.PURPLE,
-        BossEvent.BossBarOverlay.PROGRESS
-    );
-
     public LostWraithEntity(EntityType<? extends LostWraithEntity> type, Level world) {
         super(type, world);
         setMaxUpStep(0.6f);
@@ -101,14 +96,15 @@ public class LostWraithEntity extends TheLastEndEntity {
 
         this.goalSelector.addGoal(0, new LostWraithPatienceGoal(this));
         this.goalSelector.addGoal(1, new LostWraithEnchantGoal(this));
-        this.goalSelector.addGoal(2, new LostWraithEndStrikeGoal(this));
+        this.goalSelector.addGoal(2, new LostWraithEndStrikeGoal(this, true));
         this.goalSelector.addGoal(3, new LostWraithPunchGoal(this));
         this.goalSelector.addGoal(4, new LostWraithDragonFireBallGoal(this));
         this.goalSelector.addGoal(5, new LostWraithSummonLightningGoal(this));
-        this.goalSelector.addGoal(6, new LostWraithChaseTargetGoal(this));
-        this.goalSelector.addGoal(7, new FloatGoal(this));
-        this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 8.0F));
-        this.goalSelector.addGoal(9, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(6, new LostWraithEndStrikeGoal(this, false));
+        this.goalSelector.addGoal(7, new LostWraithChaseTargetGoal(this));
+        this.goalSelector.addGoal(8, new FloatGoal(this));
+        this.goalSelector.addGoal(9, new LookAtPlayerGoal(this, Player.class, 8.0F));
+        this.goalSelector.addGoal(10, new RandomLookAroundGoal(this));
 
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false,
@@ -258,51 +254,7 @@ public class LostWraithEntity extends TheLastEndEntity {
     @Override
     public void tick() {
         super.tick();
-
-        if (isReady() && !isDying()) {
-            updateVanillaBossBar();
-        }
-
         this.refreshDimensions();
-    }
-
-    private void updateVanillaBossBar() {
-        if (level().isClientSide) {
-            return;
-        }
-
-        if (TheLastSwordConfiguration.getLostWraithEnableCustomBossBarSafely()) {
-            bossEvent.removeAllPlayers();
-            return;
-        }
-
-        if (!isReady() || isDying()) {
-            bossEvent.removeAllPlayers();
-            return;
-        }
-
-        float healthPercent = getWorldAnchorMax() > 0
-            ? Math.max(0, Math.min(1, getWorldAnchor() / getWorldAnchorMax()))
-            : 0;
-        bossEvent.setProgress(healthPercent);
-
-        List<ServerPlayer> nearbyPlayers = level().getEntitiesOfClass(
-            ServerPlayer.class,
-            getBoundingBox().inflate(64.0)
-        );
-
-        for (ServerPlayer player : nearbyPlayers) {
-            if (!bossEvent.getPlayers().contains(player)) {
-                bossEvent.addPlayer(player);
-            }
-        }
-
-        List<ServerPlayer> currentPlayers = new ArrayList<>(bossEvent.getPlayers());
-        for (ServerPlayer player : currentPlayers) {
-            if (!nearbyPlayers.contains(player) || player.isRemoved()) {
-                bossEvent.removePlayer(player);
-            }
-        }
     }
 
     @Override
@@ -318,13 +270,35 @@ public class LostWraithEntity extends TheLastEndEntity {
     @Override
     protected void onDeathStart() {
         sendDeathTalkToNearbyPlayers();
-        bossEvent.removeAllPlayers();
+
+        if (level() instanceof ServerLevel serverLevel) {
+            EcaAPI.clearGlobalMusic(serverLevel);
+        }
     }
 
     public void activate() {
         if (getAnimationState() == STATE_UNSPAWNED) {
             setAnimationState(STATE_SPAWNING);
             spawnTick = 0;
+
+            if (level() instanceof ServerLevel serverLevel) {
+                // 触发ECA创建BossEvent
+                EntityExtensionManager.onEntityJoin(this, serverLevel);
+
+                // 为附近玩家补发追踪事件，使其能看到BossBar
+                for (ServerPlayer sp : serverLevel.getEntitiesOfClass(
+                        ServerPlayer.class, getBoundingBox().inflate(64.0))) {
+                    EntityExtensionManager.onStartTracking(sp, this);
+                }
+
+                // 通过ECA API播放战斗音乐
+                MusicData musicData = new MusicData(
+                    new ResourceLocation("the_last_sword", "lost_wraith"),
+                    SoundSource.MUSIC.ordinal(),
+                    1.0f, 1.0f, true, true
+                );
+                EcaAPI.setGlobalMusic(serverLevel, musicData);
+            }
         }
     }
 

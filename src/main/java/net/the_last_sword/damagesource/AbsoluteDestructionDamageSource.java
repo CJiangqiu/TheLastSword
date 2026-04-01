@@ -14,6 +14,7 @@ import net.minecraft.world.level.Level;
 import net.eca.api.EcaAPI;
 import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
+import net.the_last_sword.entity.TheLastEndEntity;
 import net.the_last_sword.init.ModAttributes;
 import net.the_last_sword.util.EntityUtil;
 
@@ -97,7 +98,17 @@ public class AbsoluteDestructionDamageSource extends DamageSource {
             return false;
         }
 
-
+        // 终焉种实体：直接修改世界锚度
+        if (entity instanceof TheLastEndEntity theLastEnd) {
+            float currentAnchor = theLastEnd.getWorldAnchor();
+            float newAnchor = currentAnchor - damageAmount;
+            entity.hurt(damageSource, 0.01f);
+            theLastEnd.setWorldAnchor(newAnchor);
+            if (newAnchor <= 0 && !theLastEnd.isDying()) {
+                theLastEnd.triggerDeath();
+            }
+            return true;
+        }
 
         float originalHealth = entity.getHealth();
         // 异常血量斩杀
@@ -108,9 +119,7 @@ public class AbsoluteDestructionDamageSource extends DamageSource {
             }
         }
 
-
         float expectedHealth = originalHealth - damageAmount;
-
 
         //预期血量判定
         if (expectedHealth <= 0) {
@@ -128,6 +137,7 @@ public class AbsoluteDestructionDamageSource extends DamageSource {
         if (actualHealth != expectedHealth) {
             EntityUtil.theLastEndSetHealth(entity, expectedHealth);
         }
+
         //禁疗
         int banTime = TheLastSwordConfiguration.getHealNegationTimeSafely();
         if (banTime > 0) {

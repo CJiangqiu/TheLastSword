@@ -25,16 +25,15 @@ public class SwordWraithEnchantGoal extends Goal {
 
     @Override
     public boolean canUse() {
+        if (!wraith.canAct()) {
+            return false;
+        }
         if (wraith.getAnimationState() != TheLastEndSwordWraithEntity.STATE_IDLE) {
             return false;
         }
 
         LivingEntity target = wraith.getTarget();
         if (target == null || !target.isAlive()) {
-            return false;
-        }
-
-        if (wraith.distanceTo(target) > 6.0) {
             return false;
         }
 
@@ -51,12 +50,25 @@ public class SwordWraithEnchantGoal extends Goal {
 
     @Override
     public void tick() {
-        animationTick--;
+        if (animationTick <= 0) {
+            return;
+        }
 
         if (animationTick == ENCHANT_TICK) {
             applyVoidEnchantment();
             wraith.level().playSound(null, wraith.blockPosition(),
                 SoundEvents.ENCHANTMENT_TABLE_USE, wraith.getSoundSource(), 1.0F, 1.0F);
+        }
+
+        animationTick--;
+
+        LivingEntity target = wraith.getTarget();
+        if (target != null && target.isAlive()) {
+            wraith.getLookControl().setLookAt(target, 30.0F, 30.0F);
+        }
+
+        if (animationTick == 0) {
+            wraith.setAnimationState(TheLastEndSwordWraithEntity.STATE_IDLE);
         }
     }
 
@@ -67,7 +79,15 @@ public class SwordWraithEnchantGoal extends Goal {
 
     @Override
     public void stop() {
-        wraith.setAnimationState(TheLastEndSwordWraithEntity.STATE_IDLE);
+        animationTick = 0;
+        if (wraith.getAnimationState() == TheLastEndSwordWraithEntity.STATE_ENCHANT) {
+            wraith.setAnimationState(TheLastEndSwordWraithEntity.STATE_IDLE);
+        }
+    }
+
+    @Override
+    public boolean requiresUpdateEveryTick() {
+        return true;
     }
 
     //应用虚空附魔效果

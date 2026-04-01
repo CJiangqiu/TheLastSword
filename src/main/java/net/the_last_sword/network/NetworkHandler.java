@@ -80,6 +80,20 @@ public class NetworkHandler {
                 .decoder(EnchantmentApplyPacket::decode)
                 .consumerMainThread(EnchantmentApplyPacket::handle)
                 .add();
+
+        //附魔台能量数据同步包
+        CHANNEL.messageBuilder(EnchantingTableDataPacket.class, id())
+                .encoder(EnchantingTableDataPacket::encode)
+                .decoder(EnchantingTableDataPacket::decode)
+                .consumerMainThread(EnchantingTableDataPacket::handle)
+                .add();
+
+        //感知扫描结果同步包
+        CHANNEL.messageBuilder(PerceptionScanPacket.class, id())
+                .encoder(PerceptionScanPacket::encode)
+                .decoder(PerceptionScanPacket::decode)
+                .consumerMainThread(PerceptionScanPacket::handle)
+                .add();
     }
 
     //发送到服务端

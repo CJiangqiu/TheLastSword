@@ -23,14 +23,10 @@ public class TheLastSwordConfigManager {
     public static void initializeConfig() {
         createDirectories();
 
-        if (!shouldExtractRecipes()) {
-            TheLastSwordLogger.info("Dragon crystal smithing recipes directory already exists and is not empty, skipping extraction");
-            return;
-        }
-
+        // 按文件级别补充：已有文件不覆盖，只补充缺失的新配方
         try {
             copyResourceDirectory("data/" + TheLastSwordMod.MOD_ID + "/dragon_crystal_smithing_recipes", RECIPES_DIR);
-            TheLastSwordLogger.info("Default dragon crystal smithing recipes extracted to {}", RECIPES_DIR);
+            TheLastSwordLogger.info("Dragon crystal smithing recipes synced to {}", RECIPES_DIR);
         } catch (Exception e) {
             TheLastSwordLogger.error("Failed to extract default recipes", e);
         }
@@ -44,20 +40,6 @@ public class TheLastSwordConfigManager {
     //获取防御配置文件路径
     public static Path getDefenceConfigFile() {
         return DEFENCE_CONFIG_FILE;
-    }
-
-    //检查是否应该提取配方文件
-    private static boolean shouldExtractRecipes() {
-        if (!Files.exists(RECIPES_DIR)) {
-            return true;
-        }
-
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(RECIPES_DIR, "*.json")) {
-            return !stream.iterator().hasNext();
-        } catch (IOException e) {
-            TheLastSwordLogger.error("Failed to check recipes directory", e);
-            return true;
-        }
     }
 
     //创建必要的目录

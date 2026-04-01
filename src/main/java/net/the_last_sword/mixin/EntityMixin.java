@@ -4,6 +4,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.entity.EntityInLevelCallback;
+import net.the_last_sword.client.PerceptionScanData;
 import net.the_last_sword.init.ModEffects;
 import net.the_last_sword.summon.WraithSummonManager;
 import net.the_last_sword.util.EntityUtil;
@@ -23,6 +24,7 @@ public class EntityMixin {
     @Inject(method = "kill", at = @At("HEAD"), cancellable = true)
     private void theLastSword$preventKill(CallbackInfo ci) {
         Entity self = (Entity) (Object) this;
+        if (self.level().isClientSide) return;
         if (self instanceof LivingEntity livingEntity) {
             if (EntityUtil.hasProtection(livingEntity)) {
                 ci.cancel();
@@ -33,6 +35,7 @@ public class EntityMixin {
     @Inject(method = "discard", at = @At("HEAD"), cancellable = true)
     private void theLastSword$preventDiscard(CallbackInfo ci) {
         Entity self = (Entity) (Object) this;
+        if (self.level().isClientSide) return;
         if (self instanceof LivingEntity livingEntity) {
             if (EntityUtil.hasProtection(livingEntity)) {
                 ci.cancel();
@@ -42,30 +45,20 @@ public class EntityMixin {
 
     @Inject(method = "remove", at = @At("HEAD"), cancellable = true)
     private void theLastSword$preventRemove(Entity.RemovalReason reason, CallbackInfo ci) {
-        //维度切换时不阻止移除
-        if (reason == Entity.RemovalReason.CHANGED_DIMENSION) {
-            return;
-        }
         Entity self = (Entity) (Object) this;
-        if (!(self instanceof LivingEntity living)) {
-            return;
-        }
-        if (EntityUtil.hasProtection(living)) {
+        if (self.level().isClientSide) return;
+        if (reason == Entity.RemovalReason.CHANGED_DIMENSION) return;
+        if (self instanceof LivingEntity living && EntityUtil.hasProtection(living)) {
             ci.cancel();
         }
     }
 
     @Inject(method = "setRemoved", at = @At("HEAD"), cancellable = true)
     private void theLastSword$preventSetRemoved(Entity.RemovalReason reason, CallbackInfo ci) {
-        //维度切换时不阻止移除
-        if (reason == Entity.RemovalReason.CHANGED_DIMENSION) {
-            return;
-        }
         Entity self = (Entity) (Object) this;
-        if (!(self instanceof LivingEntity living)) {
-            return;
-        }
-        if (EntityUtil.hasProtection(living)) {
+        if (self.level().isClientSide) return;
+        if (reason == Entity.RemovalReason.CHANGED_DIMENSION) return;
+        if (self instanceof LivingEntity living && EntityUtil.hasProtection(living)) {
             ci.cancel();
         }
     }
@@ -73,26 +66,23 @@ public class EntityMixin {
     @Inject(method = "setLevelCallback", at = @At("HEAD"), cancellable = true)
     private void theLastSword$preventSetLevelCallback(EntityInLevelCallback callback, CallbackInfo ci) {
         Entity self = (Entity) (Object) this;
-        //维度切换时不阻止（检查实体的移除原因）
-        if (self.getRemovalReason() == Entity.RemovalReason.CHANGED_DIMENSION) {
-            return;
-        }
-        if (!(self instanceof LivingEntity living)) {
-            return;
-        }
-        if (EntityUtil.hasProtection(living)) {
+        if (self.level().isClientSide) return;
+        Entity.RemovalReason reason = self.getRemovalReason();
+        if (reason == Entity.RemovalReason.CHANGED_DIMENSION) return;
+        if (self instanceof LivingEntity living && EntityUtil.hasProtection(living)) {
             if (callback == EntityInLevelCallback.NULL) {
                 ci.cancel();
             }
         }
     }
 
-    //防止受保护实体因 removalReason 残留导致 tick 跳过、@e 选择器失效
+    //防止受保护实体因 removalReason 残留导致 tick 跳过、@e 选择器失效（仅服务端）
     @Inject(method = "isRemoved", at = @At("HEAD"), cancellable = true)
     private void theLastSword$preventRemovedState(CallbackInfoReturnable<Boolean> cir) {
         if (this.removalReason != null
                 && this.removalReason != Entity.RemovalReason.CHANGED_DIMENSION
                 && (Object) this instanceof LivingEntity living
+                && !living.level().isClientSide
                 && EntityUtil.hasProtection(living)) {
             this.removalReason = null;
             cir.setReturnValue(false);
@@ -147,6 +137,24 @@ public class EntityMixin {
                     return;
                 }
             }
+        }
+    }
+
+    //感知模块：客户端强制发光
+    @Inject(method = "isCurrentlyGlowing", at = @At("HEAD"), cancellable = true)
+    private void theLastSword$perceptionGlowing(CallbackInfoReturnable<Boolean> cir) {
+        Entity self = (Entity) (Object) this;
+        if (self.level().isClientSide() && PerceptionScanData.isScanned(self.getId())) {
+            cir.setReturnValue(true);
+        }
+    }
+
+    //感知模块：客户端自定义描边颜色
+    @Inject(method = "getTeamColor", at = @At("HEAD"), cancellable = true)
+    private void theLastSword$perceptionTeamColor(CallbackInfoReturnable<Integer> cir) {
+        Entity self = (Entity) (Object) this;
+        if (self.level().isClientSide() && PerceptionScanData.isScanned(self.getId())) {
+            cir.setReturnValue(PerceptionScanData.getColor(self.getId()));
         }
     }
 }

@@ -9,6 +9,7 @@ import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
 import net.the_last_sword.entity.TheLastEndSwordWraithEntity;
 import net.the_last_sword.util.EntityUtil;
 import net.the_last_sword.util.ParticleUtil;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -23,7 +24,7 @@ public class SwordWraithCrossSlashGoal extends Goal {
     private static final int ANVIL_SOUND_TICK = 65;
     private static final int FIRST_SLASH_TICK = 25;
     private static final int SECOND_SLASH_TICK = 5;
-    private static final int COOLDOWN = 100;
+    private static final int COOLDOWN = 200; // 10秒
 
     public SwordWraithCrossSlashGoal(TheLastEndSwordWraithEntity wraith) {
         this.wraith = wraith;
@@ -32,6 +33,9 @@ public class SwordWraithCrossSlashGoal extends Goal {
 
     @Override
     public boolean canUse() {
+        if (!wraith.canAct()) {
+            return false;
+        }
         if (wraith.getAnimationState() != TheLastEndSwordWraithEntity.STATE_IDLE) {
             return false;
         }
@@ -47,10 +51,7 @@ public class SwordWraithCrossSlashGoal extends Goal {
             return true;
         }
 
-        //常规触发：距离≤6 + 冷却结束
-        if (wraith.distanceTo(target) > 6.0) {
-            return false;
-        }
+        //常规触发：无距离限制 + 冷却结束
         return wraith.level().getGameTime() - lastUseTime >= COOLDOWN;
     }
 
@@ -64,7 +65,9 @@ public class SwordWraithCrossSlashGoal extends Goal {
 
     @Override
     public void tick() {
-        animationTick--;
+        if (animationTick <= 0) {
+            return;
+        }
 
         if (animationTick == ANVIL_SOUND_TICK) {
             wraith.level().playSound(null, wraith.blockPosition(),
@@ -78,6 +81,17 @@ public class SwordWraithCrossSlashGoal extends Goal {
         if (animationTick == SECOND_SLASH_TICK) {
             executeSlash();
         }
+
+        animationTick--;
+
+        LivingEntity target = wraith.getTarget();
+        if (target != null && target.isAlive()) {
+            wraith.getLookControl().setLookAt(target, 30.0F, 30.0F);
+        }
+
+        if (animationTick == 0) {
+            wraith.setAnimationState(TheLastEndSwordWraithEntity.STATE_IDLE);
+        }
     }
 
     @Override
@@ -87,7 +101,15 @@ public class SwordWraithCrossSlashGoal extends Goal {
 
     @Override
     public void stop() {
-        wraith.setAnimationState(TheLastEndSwordWraithEntity.STATE_IDLE);
+        animationTick = 0;
+        if (wraith.getAnimationState() == TheLastEndSwordWraithEntity.STATE_CROSS_SLASH) {
+            wraith.setAnimationState(TheLastEndSwordWraithEntity.STATE_IDLE);
+        }
+    }
+
+    @Override
+    public boolean requiresUpdateEveryTick() {
+        return true;
     }
 
     //执行十字切攻击：传送到目标并攻击
@@ -97,15 +119,20 @@ public class SwordWraithCrossSlashGoal extends Goal {
             return;
         }
 
-        //传送到目标位置
+        //传送到目标周围
+        double angle = wraith.getRandom().nextDouble() * 2 * Math.PI;
+        double offsetX = Math.cos(angle) * 1.0;
+        double offsetZ = Math.sin(angle) * 1.0;
+
         wraith.level().playSound(null, wraith.getX(), wraith.getY(), wraith.getZ(),
             SoundEvents.ENDERMAN_TELEPORT, wraith.getSoundSource(), 1.0F, 1.0F);
         ParticleUtil.spawnCrossSlashTeleportParticles(wraith.level(), wraith.position(), wraith.getBbHeight());
 
-        EntityUtil.theLastEndTeleport(wraith, target.getX(), target.getY(), target.getZ());
+        Vec3 teleportPos = new Vec3(target.getX() + offsetX, target.getY(), target.getZ() + offsetZ);
+        EntityUtil.theLastEndTeleport(wraith, teleportPos.x, teleportPos.y, teleportPos.z);
         EntityUtil.faceTarget(wraith, target);
 
-        ParticleUtil.spawnCrossSlashTeleportParticles(wraith.level(), target.position(), wraith.getBbHeight());
+        ParticleUtil.spawnCrossSlashTeleportParticles(wraith.level(), teleportPos, wraith.getBbHeight());
 
         //攻击主目标
         double attackRange = TheLastSwordConfiguration.getSkillCrossSlashRangeSafely();
@@ -114,7 +141,7 @@ public class SwordWraithCrossSlashGoal extends Goal {
 
         target.invulnerableTime = 0;
         AbsoluteDestructionDamageSource.applyAbsoluteDestruction(target, wraith, damage);
-        TheLastEndSwordWraithEntity.addEndMark(target);
+        wraith.addEndMark();
 
         //攻击范围内的其他敌人
         List<LivingEntity> nearbyTargets = EntityUtil.getTargetsInHemisphere(wraith, attackRange);
@@ -122,7 +149,7 @@ public class SwordWraithCrossSlashGoal extends Goal {
             if (!nearbyTarget.equals(target)) {
                 nearbyTarget.invulnerableTime = 0;
                 AbsoluteDestructionDamageSource.applyAbsoluteDestruction(nearbyTarget, wraith, damage);
-                TheLastEndSwordWraithEntity.addEndMark(nearbyTarget);
+                wraith.addEndMark();
             }
         }
     }

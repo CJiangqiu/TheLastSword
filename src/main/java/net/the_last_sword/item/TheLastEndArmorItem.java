@@ -13,6 +13,7 @@ import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.the_last_sword.init.ModKeyMappings;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.init.ModAttributes;
 import net.the_last_sword.util.nbt.ItemLevelHelper;
@@ -145,6 +146,11 @@ public abstract class TheLastEndArmorItem extends ArmorItem {
 
         //子类特定的tooltip
         appendSpecificTooltip(itemstack, level, list, flag);
+
+        //按键提示：打开防御配置
+        list.add(Component.translatable("item_tooltip.the_last_sword.open_defence_config_key")
+                .append(" ")
+                .append(ModKeyMappings.OPEN_DEFENCE_CONFIG.getKey().getDisplayName().getString()));
     }
 
     //掉落物保护 - 不会被任何伤害摧毁

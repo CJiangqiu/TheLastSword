@@ -41,10 +41,14 @@ public class TheLastSwordConfiguration {
 
     // Dragon Armor | 龙之甲配置
     public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_ARMOR_ENERGY_PER_LEVEL;
-    public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_ARMOR_ENERGY_COST_PER_PIECE;
-    public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_ARMOR_PHASING_ENERGY_COST;
+    public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_ARMOR_BUFF_ENHANCE_COST;
+    public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_ARMOR_SATURATION_COST;
+    public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_ARMOR_ICE_FIRE_IMMUNITY_COST;
+    public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_ARMOR_PHASING_COST;
     public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_ARMOR_ENDER_CRYSTAL_CHARGE_RATE;
     public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_ARMOR_ENDER_CRYSTAL_RANGE;
+    public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_ARMOR_PERCEPTION_GLOW_DURATION;
+    public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_ARMOR_PERCEPTION_SCAN_RANGE;
 
     // The Last End Scroll Configuration | 终焉卷轴配置
     public static ForgeConfigSpec.ConfigValue<Boolean> THE_LAST_END_SCROLL_ENABLE_PARTICLE_EFFECTS;
@@ -234,8 +238,8 @@ public class TheLastSwordConfiguration {
         // Dragon Crystal Armor Settings | 龙晶护甲设置
         BUILDER.push("Dragon Crystal Armor");
         DRAGON_CRYSTAL_ARMOR_CRYSTAL_GUARD_REFRESH_INTERVAL = BUILDER
-            .comment("Crystal Guard refresh interval in ticks (1200 ticks = 60 seconds)")
-            .define("Crystal Guard Refresh Interval", 1200);
+            .comment("Crystal Guard refresh interval in ticks.")
+            .define("Crystal Guard Refresh Interval", 600);
         BUILDER.pop();
 
         // Dragon Armor Settings | 龙之甲设置
@@ -244,12 +248,18 @@ public class TheLastSwordConfiguration {
             .comment("Energy capacity increase per level (FE)",
                      "Total capacity = Base (1,048,576) + Level × This value")
             .defineInRange("Energy Per Level", 102400, 0, Integer.MAX_VALUE);
-        DRAGON_ARMOR_ENERGY_COST_PER_PIECE = BUILDER
-            .comment("Energy consumption per armor piece per tick (1 tick = 1/20 second)")
-            .defineInRange("Energy Cost Per Piece", 1024, 0, Integer.MAX_VALUE);
-        DRAGON_ARMOR_PHASING_ENERGY_COST = BUILDER
-            .comment("Additional energy consumption per tick when in Phasing state (flying)")
-            .defineInRange("Phasing Energy Cost", 1024, 0, Integer.MAX_VALUE);
+        DRAGON_ARMOR_BUFF_ENHANCE_COST = BUILDER
+            .comment("Energy cost per piece per tick for buff level enhancement (Life Support Module)")
+            .defineInRange("Buff Enhance Cost Per Piece", 2, 0, Integer.MAX_VALUE);
+        DRAGON_ARMOR_SATURATION_COST = BUILDER
+            .comment("Energy cost per piece per tick for Saturation effect (Life Support Module, full set)")
+            .defineInRange("Saturation Cost Per Piece", 2, 0, Integer.MAX_VALUE);
+        DRAGON_ARMOR_ICE_FIRE_IMMUNITY_COST = BUILDER
+            .comment("Energy cost per piece per tick for Ice/Fire Immunity (Life Support Module, full set)")
+            .defineInRange("Ice Fire Immunity Cost Per Piece", 2, 0, Integer.MAX_VALUE);
+        DRAGON_ARMOR_PHASING_COST = BUILDER
+            .comment("Energy cost per piece per tick for Phasing effect (Phasing Module, full set)")
+            .defineInRange("Phasing Cost Per Piece", 20, 0, Integer.MAX_VALUE);
         DRAGON_ARMOR_ENDER_CRYSTAL_CHARGE_RATE = BUILDER
             .comment("Energy charge rate from End Crystals per tick (FE)",
                      "End Crystals will charge all items with energy capability")
@@ -258,6 +268,14 @@ public class TheLastSwordConfiguration {
             .comment("Detection range for End Crystal charging (blocks)",
                      "Players within this range wearing Dragon Armor will be charged")
             .defineInRange("Ender Crystal Range", 8, 2, 32);
+        DRAGON_ARMOR_PERCEPTION_GLOW_DURATION = BUILDER
+            .comment("Perception scan glow duration in seconds",
+                     "How long scanned entities remain highlighted")
+            .defineInRange("Perception Glow Duration", 10, 1, 120);
+        DRAGON_ARMOR_PERCEPTION_SCAN_RANGE = BUILDER
+            .comment("Perception scan range in blocks",
+                     "Maximum range for scanning nearby entities")
+            .defineInRange("Perception Scan Range", 32, 2, 64);
         BUILDER.pop();
 
         BUILDER.pop(); // End Armor
@@ -629,7 +647,7 @@ public class TheLastSwordConfiguration {
 
     //龙晶护甲配置
     public static int getCrystalGuardRefreshIntervalSafely() {
-        return safeGet(DRAGON_CRYSTAL_ARMOR_CRYSTAL_GUARD_REFRESH_INTERVAL, 1200);
+        return safeGet(DRAGON_CRYSTAL_ARMOR_CRYSTAL_GUARD_REFRESH_INTERVAL, 600);
     }
 
     //龙之甲配置
@@ -637,12 +655,20 @@ public class TheLastSwordConfiguration {
         return safeGet(DRAGON_ARMOR_ENERGY_PER_LEVEL, 102400);
     }
 
-    public static int getDragonArmorEnergyCostPerPieceSafely() {
-        return safeGet(DRAGON_ARMOR_ENERGY_COST_PER_PIECE, 1024);
+    public static int getDragonArmorBuffEnhanceCostSafely() {
+        return safeGet(DRAGON_ARMOR_BUFF_ENHANCE_COST, 2);
     }
 
-    public static int getDragonArmorPhasingEnergyCostSafely() {
-        return safeGet(DRAGON_ARMOR_PHASING_ENERGY_COST, 1024);
+    public static int getDragonArmorSaturationCostSafely() {
+        return safeGet(DRAGON_ARMOR_SATURATION_COST, 2);
+    }
+
+    public static int getDragonArmorIceFireImmunityCostSafely() {
+        return safeGet(DRAGON_ARMOR_ICE_FIRE_IMMUNITY_COST, 2);
+    }
+
+    public static int getDragonArmorPhasingCostSafely() {
+        return safeGet(DRAGON_ARMOR_PHASING_COST, 20);
     }
 
     public static int getDragonArmorEnderCrystalChargeRateSafely() {
@@ -651,6 +677,14 @@ public class TheLastSwordConfiguration {
 
     public static int getDragonArmorEnderCrystalRangeSafely() {
         return safeGet(DRAGON_ARMOR_ENDER_CRYSTAL_RANGE, 8);
+    }
+
+    public static int getPerceptionGlowDurationSafely() {
+        return safeGet(DRAGON_ARMOR_PERCEPTION_GLOW_DURATION, 10);
+    }
+
+    public static int getPerceptionScanRangeSafely() {
+        return safeGet(DRAGON_ARMOR_PERCEPTION_SCAN_RANGE, 32);
     }
 
     //终焉卷轴配置

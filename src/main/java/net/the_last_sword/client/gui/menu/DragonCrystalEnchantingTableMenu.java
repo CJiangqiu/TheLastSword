@@ -5,19 +5,15 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.ContainerLevelAccess;
-import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.SlotItemHandler;
-import net.the_last_sword.block.entity.DragonCrystalEnchantingTableBlockEntity;
 import net.the_last_sword.init.ModMenus;
 
 import java.util.HashMap;
@@ -35,7 +31,11 @@ public class DragonCrystalEnchantingTableMenu extends AbstractContainerMenu impl
     private final Map<Integer, Slot> customSlots = new HashMap<>();
     private boolean bound = false;
     private BlockEntity boundBlockEntity = null;
-    private final ContainerData data;
+
+    // 客户端能量数据（通过自定义网络包同步）
+    private int clientEnergy = 0;
+    private int clientMaxEnergy = 0;
+    private int clientTotalPowerTime = 0;
 
     public DragonCrystalEnchantingTableMenu(int id, Inventory inv, FriendlyByteBuf extraData) {
         super(ModMenus.DRAGON_CRYSTAL_ENCHANTING_TABLE.get(), id);
@@ -58,33 +58,6 @@ public class DragonCrystalEnchantingTableMenu extends AbstractContainerMenu impl
                     this.bound = true;
                 });
         }
-
-        // 能量数据和总发电时间同步（只有服务端直接读取BlockEntity，客户端通过网络同步）
-        if (!world.isClientSide() && boundBlockEntity instanceof DragonCrystalEnchantingTableBlockEntity be) {
-            this.data = new ContainerData() {
-                @Override
-                public int get(int index) {
-                    return switch (index) {
-                        case 0 -> be.getEnergyStorage().getEnergyStored();
-                        case 1 -> be.getTotalPowerTime();
-                        case 2 -> be.getEnergyStorage().getMaxEnergyStored();
-                        default -> 0;
-                    };
-                }
-
-                @Override
-                public void set(int index, int value) {
-                }
-
-                @Override
-                public int getCount() {
-                    return 3;
-                }
-            };
-        } else {
-            this.data = new SimpleContainerData(3);
-        }
-        this.addDataSlots(this.data);
 
         // 添加2个输入槽位
         this.customSlots.put(0, this.addSlot(new SlotItemHandler(internal, 0, 21, 43) {
@@ -229,14 +202,26 @@ public class DragonCrystalEnchantingTableMenu extends AbstractContainerMenu impl
     }
 
     public int getEnergy() {
-        return this.data.get(0);
+        return clientEnergy;
     }
 
     public int getMaxEnergy() {
-        return this.data.get(2);
+        return clientMaxEnergy;
     }
 
     public int getTotalPowerTime() {
-        return this.data.get(1);
+        return clientTotalPowerTime;
+    }
+
+    public void setClientEnergy(int value) {
+        this.clientEnergy = value;
+    }
+
+    public void setClientMaxEnergy(int value) {
+        this.clientMaxEnergy = value;
+    }
+
+    public void setClientTotalPowerTime(int value) {
+        this.clientTotalPowerTime = value;
     }
 }

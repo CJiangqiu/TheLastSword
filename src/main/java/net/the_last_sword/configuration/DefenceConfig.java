@@ -126,23 +126,21 @@ public class DefenceConfig {
         return data.armor.dragonArmor.boots;
     }
 
-    public static DefenceConfigData.DragonArmorFullSetConfig getDragonArmorFullSet() {
-        return data.armor.dragonArmor.fullSet;
+    // ==================== 龙之甲模块 API ====================
+
+    public static DefenceConfigData.LifeSupportModule getLifeSupportModule() {
+        return data.armor.dragonArmor.lifeSupport;
     }
 
-    public static boolean isDragonArmorHudEnabled() {
-        return data.armor.dragonArmor.enableHud;
+    public static DefenceConfigData.PhasingModule getPhasingModule() {
+        return data.armor.dragonArmor.phasing;
     }
 
-    public static void setDragonArmorHudEnabled(boolean enabled) {
-        data.armor.dragonArmor.enableHud = enabled;
+    public static DefenceConfigData.AntiGravityModule getAntiGravityModule() {
+        return data.armor.dragonArmor.antiGravity;
     }
 
-    public static float getDragonArmorFlySpeed() {
-        return data.armor.dragonArmor.flySpeed;
-    }
-
-    public static void setDragonArmorFlySpeed(float speed) {
-        data.armor.dragonArmor.flySpeed = speed;
+    public static DefenceConfigData.PerceptionModule getPerceptionModule() {
+        return data.armor.dragonArmor.perception;
     }
 }

@@ -10,6 +10,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
@@ -119,7 +120,7 @@ public class CataclysmEventHandler {
     }
 
     //处理末影守卫奖章的虚空重拳效果
-    private static void handleEnderGuardianMedalVoidPunch(Player attacker, net.minecraft.world.entity.Entity target) {
+    private static void handleEnderGuardianMedalVoidPunch(Player attacker, Entity target) {
         if (!hasMedalInAnySlot(attacker, CataclysmMedals.EnderGuardianMedal.class) ||
                 !(target instanceof LivingEntity livingTarget)) {
             return;

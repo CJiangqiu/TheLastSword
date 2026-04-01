@@ -10,9 +10,12 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.the_last_sword.entity.TheLastEndEntity;
 import net.the_last_sword.entity.TheLastEndSwordWraithEntity;
 import net.the_last_sword.init.ModEntities;
+import net.the_last_sword.util.EntityUtil;
 import org.jetbrains.annotations.NotNull;
 
 //13级终焉剑灵生成蛋
@@ -55,6 +58,15 @@ public class TheLastEndSwordWraithLevel13SpawnEgg extends Item {
 
                 //设置等级为13
                 wraith.setTheLastEndLevel(13);
+
+                //终焉种初始化：世界锚、防御注册、生成动画
+                float maxHealth = (float) wraith.getAttributeValue(Attributes.MAX_HEALTH);
+                wraith.setWorldAnchorMax(maxHealth);
+                wraith.setWorldAnchor(maxHealth);
+                if (!EntityUtil.hasProtection(wraith)) {
+                    EntityUtil.registerDefence(wraith, maxHealth);
+                }
+                wraith.setAnimationState(TheLastEndEntity.STATE_SPAWNING);
 
                 //设置朝向玩家
                 if (context.getPlayer() != null) {

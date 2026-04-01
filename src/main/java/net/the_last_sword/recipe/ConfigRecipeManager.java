@@ -10,12 +10,12 @@ import net.the_last_sword.configuration.TheLastSwordConfigManager;
 import net.the_last_sword.util.TheLastSwordLogger;
 
 import java.io.IOException;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * 配方配置管理器
@@ -41,11 +41,15 @@ public class ConfigRecipeManager {
             return;
         }
 
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(recipesDir, "*.json")) {
+        try (Stream<Path> stream = Files.walk(recipesDir)) {
             int count = 0;
-            for (Path recipePath : stream) {
+            List<Path> jsonFiles = stream
+                    .filter(Files::isRegularFile)
+                    .filter(p -> p.toString().endsWith(".json"))
+                    .toList();
+            for (Path recipePath : jsonFiles) {
                 try {
-                    loadRecipeFile(recipePath);
+                    loadRecipeFile(recipesDir, recipePath);
                     count++;
                 } catch (Exception e) {
                     TheLastSwordLogger.error("Failed to load recipe from file: {}", recipePath, e);
@@ -61,14 +65,15 @@ public class ConfigRecipeManager {
     /**
      * 从文件加载单个配方
      */
-    private static void loadRecipeFile(Path recipePath) throws IOException {
-        String fileName = recipePath.getFileName().toString();
-        String recipeId = fileName.replace(".json", "");
+    private static void loadRecipeFile(Path baseDir, Path recipePath) throws IOException {
+        // 用相对路径生成唯一ID，支持嵌套文件夹
+        String relativePath = baseDir.relativize(recipePath).toString()
+                .replace('\\', '/').replace(".json", "");
 
         String content = Files.readString(recipePath);
         JsonObject json = GSON.fromJson(content, JsonObject.class);
 
-        ResourceLocation id = new ResourceLocation(TheLastSwordMod.MOD_ID, "config/" + recipeId);
+        ResourceLocation id = new ResourceLocation(TheLastSwordMod.MOD_ID, "config/" + relativePath);
         DragonCrystalSmithingSerializer serializer = new DragonCrystalSmithingSerializer();
         DragonCrystalSmithingRecipe recipe = serializer.fromJson(id, json);
 

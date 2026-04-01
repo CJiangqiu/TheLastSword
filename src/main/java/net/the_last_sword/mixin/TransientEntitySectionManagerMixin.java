@@ -25,24 +25,4 @@ public class TransientEntitySectionManagerMixin {
             }
         }
     }
-
-    @Mixin(TransientEntitySectionManager.Callback.class)
-    public static class CallbackMixin {
-        @Final
-        @Shadow
-        private EntityAccess entity;
-
-        @Inject(method = "onRemove", at = @At("HEAD"), cancellable = true)
-        private void onCallbackOnRemove(Entity.RemovalReason reason, CallbackInfo ci) {
-            //维度切换时不阻止移除（否则会导致重复UUID）
-            if (reason == Entity.RemovalReason.CHANGED_DIMENSION) {
-                return;
-            }
-            if (this.entity instanceof LivingEntity living) {
-                if (EntityUtil.hasProtection(living)) {
-                    ci.cancel();
-                }
-            }
-        }
-    }
 }

@@ -26,7 +26,7 @@ public class ArmorPieceConfigScreen extends Screen {
     }
 
     public enum ArmorSlot {
-        HELMET, CHESTPLATE, LEGGINGS, BOOTS, FULL_SET
+        HELMET, CHESTPLATE, LEGGINGS, BOOTS, FULL_SET // FULL_SET仅龙水晶盔甲使用
     }
 
     public ArmorPieceConfigScreen(Screen parent, Component title, ArmorType armorType, ArmorSlot armorSlot) {
@@ -162,18 +162,7 @@ public class ArmorPieceConfigScreen extends Screen {
                     v -> config.boots.enableFireResistance = v);
             }
             case FULL_SET -> {
-                addCheckbox("gui.the_last_sword.config.saturation",
-                    config.fullSet.enableSaturation, startY,
-                    v -> config.fullSet.enableSaturation = v);
-                addCheckbox("gui.the_last_sword.config.ice_fire_immunity",
-                    config.fullSet.enableIceFireImmunity, startY + checkboxHeight,
-                    v -> config.fullSet.enableIceFireImmunity = v);
-                addCheckbox("gui.the_last_sword.config.phasing",
-                    config.fullSet.enablePhasing, startY + checkboxHeight * 2,
-                    v -> config.fullSet.enablePhasing = v);
-                addCheckbox("gui.the_last_sword.config.damage_reduction",
-                    config.fullSet.enableDamageReduction, startY + checkboxHeight * 3,
-                    v -> config.fullSet.enableDamageReduction = v);
+                // 龙之甲的全套配置已迁移至模块系统
             }
         }
     }

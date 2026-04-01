@@ -34,7 +34,7 @@ public class DragonArmorOverlay {
         if (!DragonArmorItem.isFullSet(player)) return;
 
         //检查配置是否启用 HUD
-        if (!DefenceConfig.isDragonArmorHudEnabled()) return;
+        if (!DefenceConfig.getPerceptionModule().enableHud) return;
 
         //渲染叠加层
         renderOverlay(event.getGuiGraphics(), mc);

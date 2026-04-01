@@ -26,13 +26,17 @@ public class LostWraithEndStrikeGoal extends Goal {
     private static final int PULL_START_TICK = 30;
     private static final int PULL_END_TICK = 70;
     private static final int DAMAGE_TICK = 70;
+    private static final int NORMAL_COOLDOWN_TICKS = 600;
 
     private final LostWraithEntity wraith;
+    private final boolean punishmentMode;
     private int animationTick;
+    private int cooldown;
     private final List<TargetPositionData> pullTargets = new ArrayList<>();
 
-    public LostWraithEndStrikeGoal(LostWraithEntity wraith) {
+    public LostWraithEndStrikeGoal(LostWraithEntity wraith, boolean punishmentMode) {
         this.wraith = wraith;
+        this.punishmentMode = punishmentMode;
         setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
     }
 
@@ -48,7 +52,17 @@ public class LostWraithEndStrikeGoal extends Goal {
         if (target == null || !target.isAlive()) {
             return false;
         }
-        return wraith.consumeForceEndStrike();
+        if (punishmentMode) {
+            return wraith.consumeForceEndStrike();
+        }
+        if (wraith.isForceEndStrike()) {
+            return false;
+        }
+        if (cooldown > 0) {
+            cooldown--;
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -103,6 +117,9 @@ public class LostWraithEndStrikeGoal extends Goal {
 
         if (animationTick == 0) {
             wraith.setAnimationState(LostWraithEntity.STATE_IDLE);
+            if (!punishmentMode) {
+                cooldown = NORMAL_COOLDOWN_TICKS;
+            }
         }
     }
 

@@ -14,7 +14,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
-import net.the_last_sword.entity.LostWraithEntity;
 import net.the_last_sword.entity.TheLastEndSwordWraithEntity;
 import net.the_last_sword.init.ModSounds;
 
@@ -57,17 +56,7 @@ public class CombatMusicHandler {
         AABB searchArea = player.getBoundingBox().inflate(64.0);
         String targetMusicType = null;
 
-        //检测迷失战魂
-        List<LostWraithEntity> nearbyLostWraiths = level.getEntitiesOfClass(
-            LostWraithEntity.class,
-            searchArea,
-            LostWraithEntity::isReady
-        );
-        if (!nearbyLostWraiths.isEmpty()) {
-            targetMusicType = "lost_wraith";
-        }
-
-        //检测终焉剑灵（后检测，会覆盖迷失战魂）
+        //检测终焉剑���
         List<TheLastEndSwordWraithEntity> nearbySwordWraiths = level.getEntitiesOfClass(
             TheLastEndSwordWraithEntity.class,
             searchArea,
@@ -105,9 +94,6 @@ public class CombatMusicHandler {
         switch (musicType) {
             case "wraith":
                 musicEvent = ModSounds.THE_LAST_END_SWORD_WRAITH.get();
-                break;
-            case "lost_wraith":
-                musicEvent = ModSounds.LOST_WRAITH.get();
                 break;
             default:
                 return;

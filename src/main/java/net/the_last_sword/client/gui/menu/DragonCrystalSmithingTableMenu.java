@@ -15,6 +15,7 @@ import net.the_last_sword.init.ModBlocks;
 import net.the_last_sword.init.ModItems;
 import net.the_last_sword.init.ModMenus;
 import net.the_last_sword.init.ModRecipes;
+import net.the_last_sword.item.IDragonSmithingTemplate;
 import net.the_last_sword.recipe.ConfigRecipeManager;
 import net.the_last_sword.recipe.DragonCrystalSmithingRecipe;
 
@@ -49,7 +50,7 @@ public class DragonCrystalSmithingTableMenu extends AbstractContainerMenu {
         this.addSlot(new Slot(container, 0, 48, 40) {
             @Override
             public boolean mayPlace(ItemStack stack) {
-                return !stack.isEmpty() && stack.getItem() instanceof net.the_last_sword.item.IDragonSmithingTemplate;
+                return !stack.isEmpty() && stack.getItem() instanceof IDragonSmithingTemplate;
             }
 
             @Override
@@ -171,6 +172,8 @@ public class DragonCrystalSmithingTableMenu extends AbstractContainerMenu {
     @Override
     public void removed(Player player) {
         super.removed(player);
+        // 清空输出槽预览物品（未实际消耗材料，不应掉落）
+        this.container.setItem(3, ItemStack.EMPTY);
         this.access.execute((level, pos) -> {
             this.clearContainer(player, this.container);
         });

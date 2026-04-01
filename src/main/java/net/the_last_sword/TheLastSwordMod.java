@@ -1,9 +1,16 @@
 package net.the_last_sword;
 
 import net.eca.api.EcaAPI;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.PathPackResources;
+import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.server.packs.repository.PackSource;
+import net.minecraftforge.event.AddPackFindersEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
@@ -57,6 +64,9 @@ public class TheLastSwordMod {
         ModCreativeTabs.register(modEventBus);
         ModSounds.SOUNDS.register(modEventBus);
 
+        //注册内置资源包
+        modEventBus.addListener(this::addPackFinders);
+
         //注册网络包
         NetworkHandler.register();
 
@@ -84,6 +94,28 @@ public class TheLastSwordMod {
             TheLastSwordLogger.info("ECA API protection initialized - TLS entity data fields are now protected");
         } catch (Exception e) {
             TheLastSwordLogger.error("Failed to initialize ECA API protection", e);
+        }
+    }
+
+    //注册内置资源包
+    private void addPackFinders(AddPackFindersEvent event) {
+        if (event.getPackType() == PackType.CLIENT_RESOURCES) {
+            var resourcePath = ModList.get().getModFileById(MOD_ID).getFile()
+                    .findResource("resourcepacks", "The Last Sword Classical Texture Pack");
+            event.addRepositorySource(consumer -> {
+                var pack = Pack.readMetaAndCreate(
+                        MOD_ID + ":classical_texture",
+                        Component.literal("The Last Sword Classical Texture Pack"),
+                        false,
+                        path -> new PathPackResources(path, resourcePath, false),
+                        PackType.CLIENT_RESOURCES,
+                        Pack.Position.TOP,
+                        PackSource.BUILT_IN
+                );
+                if (pack != null) {
+                    consumer.accept(pack);
+                }
+            });
         }
     }
 

@@ -7,6 +7,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -27,6 +28,8 @@ import net.minecraftforge.items.wrapper.SidedInvWrapper;
 import net.the_last_sword.client.gui.menu.DragonCrystalEnchantingTableMenu;
 import net.the_last_sword.init.ModBlockEntities;
 import net.the_last_sword.init.ModItems;
+import net.the_last_sword.network.EnchantingTableDataPacket;
+import net.the_last_sword.network.NetworkHandler;
 import software.bernie.geckolib.animatable.GeoBlockEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.AnimatableManager;
@@ -220,28 +223,25 @@ public class DragonCrystalEnchantingTableBlockEntity extends RandomizableContain
             blockEntity.totalPowerTime--;
             changed = true;
 
-            int remainingEnergy = ENERGY_PER_TICK;
+            // 发电存入方块自身
+            blockEntity.energyStorage.receiveEnergy(ENERGY_PER_TICK, false);
+        }
 
-            // 优先给绿色槽位物品充能
-            ItemStack chargeSlot = blockEntity.getItem(1);
-            if (!chargeSlot.isEmpty()) {
-                var energyCap = chargeSlot.getCapability(ForgeCapabilities.ENERGY);
-                if (energyCap.isPresent()) {
-                    var itemEnergy = energyCap.orElse(null);
-                    if (itemEnergy != null) {
-                        int canReceive = itemEnergy.getMaxEnergyStored() - itemEnergy.getEnergyStored();
-                        int toCharge = Math.min(remainingEnergy, canReceive);
-                        if (toCharge > 0) {
-                            itemEnergy.receiveEnergy(toCharge, false);
-                            remainingEnergy -= toCharge;
-                        }
+        // 给充电槽位物品充能（只要方块有储能即可）
+        ItemStack chargeSlot = blockEntity.getItem(1);
+        if (!chargeSlot.isEmpty() && blockEntity.energyStorage.getEnergyStored() > 0) {
+            var energyCap = chargeSlot.getCapability(ForgeCapabilities.ENERGY);
+            if (energyCap.isPresent()) {
+                var itemEnergy = energyCap.orElse(null);
+                if (itemEnergy != null) {
+                    int canReceive = itemEnergy.getMaxEnergyStored() - itemEnergy.getEnergyStored();
+                    int toCharge = Math.min(blockEntity.energyStorage.getEnergyStored(), canReceive);
+                    if (toCharge > 0) {
+                        itemEnergy.receiveEnergy(toCharge, false);
+                        blockEntity.energyStorage.extractEnergy(toCharge, false);
+                        changed = true;
                     }
                 }
-            }
-
-            // 剩余能量存储到方块自身
-            if (remainingEnergy > 0) {
-                blockEntity.energyStorage.receiveEnergy(remainingEnergy, false);
             }
         }
 
@@ -277,5 +277,18 @@ public class DragonCrystalEnchantingTableBlockEntity extends RandomizableContain
             blockEntity.setChanged();
         }
 
+        // 同步能量数据给打开GUI的玩家
+        for (var player : level.players()) {
+            if (player instanceof ServerPlayer sp
+                    && sp.containerMenu instanceof DragonCrystalEnchantingTableMenu menu
+                    && menu.x == pos.getX() && menu.y == pos.getY() && menu.z == pos.getZ()) {
+                NetworkHandler.sendToPlayer(new EnchantingTableDataPacket(
+                        menu.containerId,
+                        blockEntity.energyStorage.getEnergyStored(),
+                        blockEntity.energyStorage.getMaxEnergyStored(),
+                        blockEntity.totalPowerTime
+                ), sp);
+            }
+        }
     }
 }

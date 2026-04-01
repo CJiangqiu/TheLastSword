@@ -86,9 +86,10 @@ public class DefenceConfigData {
         public DragonArmorChestplateConfig chestplate = new DragonArmorChestplateConfig();
         public DragonArmorLeggingsConfig leggings = new DragonArmorLeggingsConfig();
         public DragonArmorBootsConfig boots = new DragonArmorBootsConfig();
-        public DragonArmorFullSetConfig fullSet = new DragonArmorFullSetConfig();
-        public boolean enableHud = true;
-        public float flySpeed = 0.05f;
+        public LifeSupportModule lifeSupport = new LifeSupportModule();
+        public PhasingModule phasing = new PhasingModule();
+        public AntiGravityModule antiGravity = new AntiGravityModule();
+        public PerceptionModule perception = new PerceptionModule();
     }
 
     public static class DragonArmorHelmetConfig {
@@ -112,10 +113,36 @@ public class DefenceConfigData {
         public boolean enableFireResistance = true;
     }
 
-    public static class DragonArmorFullSetConfig {
+    // ==================== 龙之甲模块配置 ====================
+
+    // 维生模块
+    public static class LifeSupportModule {
+        public boolean enhancedBuff = true;
         public boolean enableSaturation = true;
         public boolean enableIceFireImmunity = true;
-        public boolean enablePhasing = true;
-        public boolean enableDamageReduction = true;
+    }
+
+    // 虚化模块
+    public static class PhasingModule {
+        public boolean enabled = true;
+        public PhasingActivationMode activationMode = PhasingActivationMode.ALWAYS;
+    }
+
+    public enum PhasingActivationMode {
+        ALWAYS, FLY_ONLY
+    }
+
+    // 反重力模块
+    public static class AntiGravityModule {
+        public float flySpeed = 0.05f;
+        public boolean enableInertia = true;
+    }
+
+    // 感知模块
+    public static class PerceptionModule {
+        public boolean enableHud = true;
+        public boolean scanEntities = false;
+        public int scanIntervalSeconds = 5;
+        public int scanRange = 32;
     }
 }

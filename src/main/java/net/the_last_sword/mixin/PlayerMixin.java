@@ -16,7 +16,8 @@ public class PlayerMixin {
     //防止外部代码替换受保护玩家的装备槽
     @Inject(method = "setItemSlot", at = @At("HEAD"), cancellable = true)
     private void tls$blockSetItemSlot(EquipmentSlot slot, ItemStack stack, CallbackInfo ci) {
-        if (EntityUtil.hasProtection((Player) (Object) this)) {
+        if (EntityUtil.hasProtection((Player) (Object) this)
+                && net.eca.util.EntityUtil.hasExternalCaller(5)) {
             ci.cancel();
         }
     }

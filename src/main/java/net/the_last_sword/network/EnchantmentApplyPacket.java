@@ -16,10 +16,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-// 附魔应用网络包
+// 附魔应用网络包（支持增加和减少附魔）
 public class EnchantmentApplyPacket {
 
+    private static final int XP_PER_LEVEL_REMOVED = 10;
+
     private final BlockPos pos;
+    // 值为目标等级，0表示移除
     private final Map<ResourceLocation, Integer> enchantments;
 
     public EnchantmentApplyPacket(BlockPos pos, Map<ResourceLocation, Integer> enchantments) {
@@ -56,45 +59,62 @@ public class EnchantmentApplyPacket {
             BlockEntity be = player.level().getBlockEntity(msg.pos);
             if (!(be instanceof DragonCrystalEnchantingTableBlockEntity enchantingTable)) return;
 
-            // 验证玩家距离
             if (player.distanceToSqr(msg.pos.getX() + 0.5, msg.pos.getY() + 0.5, msg.pos.getZ() + 0.5) > 64) return;
 
             ItemStack stack = enchantingTable.getItem(1);
             if (stack.isEmpty()) return;
 
-            // 转换附魔ID为Enchantment对象，同时计算累加后的等级
-            Map<Enchantment, Integer> enchantmentAddLevels = new HashMap<>();
+            Map<Enchantment, Integer> existingEnchants = EnchantmentHelper.getEnchantments(stack);
+
+            // 分别计算增加消耗和减少返还
+            long totalEnergyCost = 0;
+            int totalXpReturn = 0;
+            Map<Enchantment, Integer> targetLevels = new HashMap<>();
+
             for (var entry : msg.enchantments.entrySet()) {
                 Enchantment ench = ForgeRegistries.ENCHANTMENTS.getValue(entry.getKey());
-                if (ench != null) {
-                    enchantmentAddLevels.put(ench, entry.getValue());
+                if (ench == null) continue;
+
+                int currentLevel = existingEnchants.getOrDefault(ench, 0);
+                int targetLevel = Math.max(0, Math.min(255, entry.getValue()));
+
+                if (targetLevel == currentLevel) continue;
+
+                int diff = targetLevel - currentLevel;
+                if (diff > 0) {
+                    totalEnergyCost += 10240L * diff;
+                } else {
+                    totalXpReturn += XP_PER_LEVEL_REMOVED * (-diff);
                 }
+                targetLevels.put(ench, targetLevel);
             }
 
-            if (enchantmentAddLevels.isEmpty()) return;
+            if (targetLevels.isEmpty()) return;
 
-            // 计算总消耗：10240 * 增加的等级
-            long totalCost = 0;
-            for (int addLevel : enchantmentAddLevels.values()) {
-                totalCost += 10240L * addLevel;
-            }
-
-            // 检查电量
+            // 检查电量是否足够
             long currentEnergy = enchantingTable.getEnergyStorage().getEnergyStored();
-            if (totalCost > currentEnergy) return;
+            if (totalEnergyCost > currentEnergy) return;
 
             // 消耗电量
-            int toExtract = (int) Math.min(totalCost, Integer.MAX_VALUE);
-            enchantingTable.extractEnergy(toExtract);
+            if (totalEnergyCost > 0) {
+                int toExtract = (int) Math.min(totalEnergyCost, Integer.MAX_VALUE);
+                enchantingTable.extractEnergy(toExtract);
+            }
 
-            // 应用附魔（累加模式，上限255）
-            Map<Enchantment, Integer> existingEnchants = EnchantmentHelper.getEnchantments(stack);
-            for (var entry : enchantmentAddLevels.entrySet()) {
-                int currentLevel = existingEnchants.getOrDefault(entry.getKey(), 0);
-                int newLevel = Math.min(255, currentLevel + entry.getValue());
-                existingEnchants.put(entry.getKey(), newLevel);
+            // 应用附魔变更
+            for (var entry : targetLevels.entrySet()) {
+                if (entry.getValue() == 0) {
+                    existingEnchants.remove(entry.getKey());
+                } else {
+                    existingEnchants.put(entry.getKey(), entry.getValue());
+                }
             }
             EnchantmentHelper.setEnchantments(existingEnchants, stack);
+
+            // 返还经验
+            if (totalXpReturn > 0) {
+                player.giveExperiencePoints(totalXpReturn);
+            }
 
             enchantingTable.setChanged();
         });

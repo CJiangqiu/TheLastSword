@@ -98,30 +98,15 @@ public class DragonArmorConfigScreen extends Screen {
             }
         ).bounds(startX + (buttonSize + spacing) * 3, startY, buttonSize, buttonSize).build());
 
-        //全套效果配置按钮
+        //模块设置按钮
         this.addRenderableWidget(Button.builder(
-            Component.translatable("gui.the_last_sword.armor_config.full_set_effects"),
+            Component.translatable("gui.the_last_sword.dragon_armor_config.module_settings"),
             button -> {
                 if (this.minecraft != null) {
-                    this.minecraft.setScreen(new ArmorPieceConfigScreen(
-                        this,
-                        Component.translatable("gui.the_last_sword.dragon_armor_config.full_set"),
-                        ArmorPieceConfigScreen.ArmorType.DRAGON,
-                        ArmorPieceConfigScreen.ArmorSlot.FULL_SET
-                    ));
+                    this.minecraft.setScreen(new DragonArmorModuleConfigScreen(this));
                 }
             }
         ).bounds(this.width / 2 - 100, startY + 60, 200, 20).build());
-
-        //全局设置按钮（HUD、飞行速度等）
-        this.addRenderableWidget(Button.builder(
-            Component.translatable("gui.the_last_sword.dragon_armor_config.global_settings"),
-            button -> {
-                if (this.minecraft != null) {
-                    this.minecraft.setScreen(new DragonArmorGlobalConfigScreen(this));
-                }
-            }
-        ).bounds(this.width / 2 - 100, startY + 90, 200, 20).build());
 
         //返回按钮
         this.addRenderableWidget(Button.builder(
@@ -131,7 +116,7 @@ public class DragonArmorConfigScreen extends Screen {
                     this.minecraft.setScreen(parent);
                 }
             }
-        ).bounds(this.width / 2 - 100, startY + 120, 200, 20).build());
+        ).bounds(this.width / 2 - 100, startY + 90, 200, 20).build());
     }
 
     @Override
