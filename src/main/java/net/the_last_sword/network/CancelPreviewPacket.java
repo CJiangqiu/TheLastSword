@@ -24,8 +24,9 @@ public class CancelPreviewPacket {
         ctx.get().enqueueWork(() -> {
             ServerPlayer player = ctx.get().getSender();
             if (player != null) {
-                //尝试取消玩家的挖掘预览
+                //尝试取消玩家的挖掘预览和竞技场预览
                 net.the_last_sword.event.ServerEventHandler.cancelMiningPreview(player);
+                net.the_last_sword.event.ServerEventHandler.cancelArenaPreview(player);
             }
         });
         ctx.get().setPacketHandled(true);

@@ -21,7 +21,7 @@ public class ModEntityRenderers {
         event.registerEntityRenderer(ModEntities.DRAGON_SWORD_PROJECTILE.get(), ThrownItemRenderer::new);
         event.registerEntityRenderer(ModEntities.DRAGON_LIGHTING.get(), DragonLightingRenderer::new);
         event.registerEntityRenderer(ModEntities.THE_LAST_END_LIGHTING.get(), TheLastEndLightingRenderer::new);
-        event.registerEntityRenderer(ModEntities.THE_LAST_END_SWORD_PROJECTILE.get(), ThrownItemRenderer::new);
+        event.registerEntityRenderer(ModEntities.THE_LAST_END_SWORD_PROJECTILE.get(), TheLastEndSwordProjectileRenderer::new);
         event.registerEntityRenderer(ModEntities.TEST_ENTITY.get(), TestEntityRenderer::new);
         event.registerEntityRenderer(ModEntities.GUARDIAN_OF_SEALED_SPIRE.get(), GuardianOfSealedSpireRenderer::new);
         event.registerEntityRenderer(ModEntities.GUARDIAN_SABER.get(), GuardianOfSealedSpireRenderer::new);

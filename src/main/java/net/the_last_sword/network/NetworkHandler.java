@@ -94,6 +94,13 @@ public class NetworkHandler {
                 .decoder(PerceptionScanPacket::decode)
                 .consumerMainThread(PerceptionScanPacket::handle)
                 .add();
+
+        //竞技场预览包
+        CHANNEL.messageBuilder(ArenaPreviewPacket.class, id())
+                .encoder(ArenaPreviewPacket::encode)
+                .decoder(ArenaPreviewPacket::decode)
+                .consumerMainThread(ArenaPreviewPacket::handle)
+                .add();
     }
 
     //发送到服务端

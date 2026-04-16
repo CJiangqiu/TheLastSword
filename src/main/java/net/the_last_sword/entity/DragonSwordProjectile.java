@@ -56,7 +56,7 @@ public class DragonSwordProjectile extends TheLastEndSwordItemsProjectile {
     //造成基础物理伤害（通用物理伤害类型）
     @Override
     protected void applyBaseDamage(LivingEntity target) {
-        float basePhysicalDamage = 200f; // 龙之剑弹射物的基础物理伤害
+        float basePhysicalDamage = 200f + enchantBonusDamage;
         DamageSource projectileDamageSource = new DamageSource(
             this.level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE)
                 .getHolderOrThrow(DamageTypes.GENERIC),
@@ -115,6 +115,8 @@ public class DragonSwordProjectile extends TheLastEndSwordItemsProjectile {
         Vec3 viewVector = entity.getViewVector(1.0F);
         projectile.shoot(viewVector.x, viewVector.y, viewVector.z, 4f, 0);
         projectile.setSilent(true);
+        //应用武器附魔
+        projectile.applyWeaponEnchantments(entity.getMainHandItem());
 
         world.addFreshEntity(projectile);
         world.playSound(

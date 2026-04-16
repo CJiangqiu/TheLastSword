@@ -22,10 +22,11 @@ public class ClearPreviewPacket {
     //处理
     public static void handle(ClearPreviewPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
-            //客户端接收：清除预览方块
+            //客户端接收：清除预览
             Minecraft minecraft = Minecraft.getInstance();
             if (minecraft.level != null) {
                 net.the_last_sword.event.ClientEventHandler.clearMiningPreview();
+                net.the_last_sword.event.ClientEventHandler.clearArenaPreview();
             }
         });
         ctx.get().setPacketHandled(true);

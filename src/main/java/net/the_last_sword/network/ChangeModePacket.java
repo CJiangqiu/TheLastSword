@@ -103,8 +103,8 @@ public class ChangeModePacket {
         if (stack.getItem() instanceof UltraTestSwordItem) {
             return switch (mode) {
                 case 0 -> "item_tooltip.the_last_sword.powerful_range_attack_mode";
-                case 1 -> "item_tooltip.the_last_sword.defense_mode";
-                default -> "item_tooltip.the_last_sword.normal_mode";
+                case 1 -> "item_tooltip.the_last_sword.mob_battle_mode";
+                default -> "item_tooltip.the_last_sword.powerful_range_attack_mode";
             };
         }
 

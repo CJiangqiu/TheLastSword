@@ -35,6 +35,7 @@ import net.the_last_sword.configuration.DefenceConfig;
 import net.the_last_sword.network.DefenceConfigPacket;
 import net.the_last_sword.init.ModKeyMappings;
 import net.the_last_sword.item.TheLastSword;
+import net.the_last_sword.test.UltraTestSwordItem;
 import net.the_last_sword.network.CancelPreviewPacket;
 import net.the_last_sword.network.ChangeModePacket;
 import net.the_last_sword.network.NetworkHandler;
@@ -82,6 +83,34 @@ public class ClientEventHandler {
                     .setWriteMaskState(RenderStateShard.COLOR_WRITE)
                     .createCompositeState(false)
     );
+
+    //========== 竞技场预览相关 ==========
+    private static BlockPos arenaPreviewMin = null;
+    private static BlockPos arenaPreviewMax = null;
+    private static long arenaPreviewUpdateTime = 0;
+
+    //设置竞技场预览（由网络包调用）
+    public static void setArenaPreview(BlockPos minPos, BlockPos maxPos) {
+        arenaPreviewMin = minPos;
+        arenaPreviewMax = maxPos;
+        arenaPreviewUpdateTime = System.currentTimeMillis();
+    }
+
+    //清除竞技场预览
+    public static void clearArenaPreview() {
+        arenaPreviewMin = null;
+        arenaPreviewMax = null;
+    }
+
+    //检查是否有活动的竞技场预览
+    public static boolean hasActiveArenaPreview() {
+        if (arenaPreviewMin == null) return false;
+        if (System.currentTimeMillis() - arenaPreviewUpdateTime > 10000) {
+            clearArenaPreview();
+            return false;
+        }
+        return true;
+    }
 
     //========== 挖掘预览相关 ==========
     private static final Set<BlockPos> miningPreviewBlocks = new HashSet<>();
@@ -155,25 +184,26 @@ public class ClientEventHandler {
 
         //检测左键按下
         if (event.getButton() == GLFW.GLFW_MOUSE_BUTTON_LEFT && event.getAction() == GLFW.GLFW_PRESS) {
-            //检查玩家是否持有最终之剑且处于强力挖掘模式
             ItemStack mainHand = minecraft.player.getMainHandItem();
-            if (!(mainHand.getItem() instanceof TheLastSword)) {
-                return;
+
+            //最终之剑强力挖掘模式：左键取消预览
+            if (mainHand.getItem() instanceof TheLastSword) {
+                int mode = ItemModeHelper.getMode(mainHand);
+                if (mode == 1 && hasActiveMiningPreview()) {
+                    NetworkHandler.sendToServer(new CancelPreviewPacket());
+                    event.setCanceled(true);
+                    return;
+                }
             }
 
-            //检查是否在强力挖掘模式
-            int mode = ItemModeHelper.getMode(mainHand);
-            if (mode != 1) {
-                return; //不是强力挖掘模式
-            }
-
-            //检查是否有活动的预览
-            if (hasActiveMiningPreview()) {
-                //发送取消预览包到服务端
-                NetworkHandler.sendToServer(new CancelPreviewPacket());
-
-                //阻止这次左键事件继续传播，避免触发攻击
-                event.setCanceled(true);
+            //究极测试剑斗兽模式：左键取消预览
+            if (mainHand.getItem() instanceof UltraTestSwordItem) {
+                int mode = ItemModeHelper.getMode(mainHand);
+                if (mode == 1 && hasActiveArenaPreview()) {
+                    NetworkHandler.sendToServer(new CancelPreviewPacket());
+                    clearArenaPreview();
+                    event.setCanceled(true);
+                }
             }
         }
     }
@@ -226,11 +256,19 @@ public class ClientEventHandler {
 
         //渲染挖掘预览
         if (!miningPreviewBlocks.isEmpty()) {
-            //检查预览是否过期
             if (System.currentTimeMillis() - miningPreviewUpdateTime > 10000) {
                 clearMiningPreview();
             } else {
                 renderMiningPreview(event.getPoseStack(), event.getCamera());
+            }
+        }
+
+        //渲染竞技场预览
+        if (arenaPreviewMin != null) {
+            if (System.currentTimeMillis() - arenaPreviewUpdateTime > 10000) {
+                clearArenaPreview();
+            } else {
+                renderArenaPreview(event.getPoseStack(), event.getCamera());
             }
         }
 
@@ -390,6 +428,52 @@ public class ClientEventHandler {
                                 float red, float green, float blue, float alpha) {
         buffer.vertex(matrix, x1, y1, z1).color(red, green, blue, alpha).normal(1, 0, 0).endVertex();
         buffer.vertex(matrix, x2, y2, z2).color(red, green, blue, alpha).normal(1, 0, 0).endVertex();
+    }
+
+    //========== 竞技场预览渲染方法 ==========
+
+    //渲染竞技场预览方框
+    private static void renderArenaPreview(PoseStack poseStack, Camera camera) {
+        Vec3 cameraPos = camera.getPosition();
+        poseStack.pushPose();
+        poseStack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
+
+        BufferBuilder bufferBuilder = new BufferBuilder(256);
+        MultiBufferSource.BufferSource immediateBufferSource = MultiBufferSource.immediate(bufferBuilder);
+        VertexConsumer buffer = immediateBufferSource.getBuffer(RenderType.lines());
+
+        //绿色闪烁效果（与挖掘预览一致）
+        float time = (System.currentTimeMillis() % 2000) / 2000.0f;
+        float alpha = 0.5f + 0.3f * (float) Math.sin(time * Math.PI * 2);
+        Matrix4f matrix = poseStack.last().pose();
+
+        float x1 = arenaPreviewMin.getX();
+        float y1 = arenaPreviewMin.getY();
+        float z1 = arenaPreviewMin.getZ();
+        float x2 = arenaPreviewMax.getX() + 1.0f;
+        float y2 = arenaPreviewMax.getY() + 1.0f;
+        float z2 = arenaPreviewMax.getZ() + 1.0f;
+
+        //底面
+        addLine(buffer, matrix, x1, y1, z1, x2, y1, z1, 0.0f, 1.0f, 0.0f, alpha);
+        addLine(buffer, matrix, x2, y1, z1, x2, y1, z2, 0.0f, 1.0f, 0.0f, alpha);
+        addLine(buffer, matrix, x2, y1, z2, x1, y1, z2, 0.0f, 1.0f, 0.0f, alpha);
+        addLine(buffer, matrix, x1, y1, z2, x1, y1, z1, 0.0f, 1.0f, 0.0f, alpha);
+
+        //顶面
+        addLine(buffer, matrix, x1, y2, z1, x2, y2, z1, 0.0f, 1.0f, 0.0f, alpha);
+        addLine(buffer, matrix, x2, y2, z1, x2, y2, z2, 0.0f, 1.0f, 0.0f, alpha);
+        addLine(buffer, matrix, x2, y2, z2, x1, y2, z2, 0.0f, 1.0f, 0.0f, alpha);
+        addLine(buffer, matrix, x1, y2, z2, x1, y2, z1, 0.0f, 1.0f, 0.0f, alpha);
+
+        //竖直边
+        addLine(buffer, matrix, x1, y1, z1, x1, y2, z1, 0.0f, 1.0f, 0.0f, alpha);
+        addLine(buffer, matrix, x2, y1, z1, x2, y2, z1, 0.0f, 1.0f, 0.0f, alpha);
+        addLine(buffer, matrix, x2, y1, z2, x2, y2, z2, 0.0f, 1.0f, 0.0f, alpha);
+        addLine(buffer, matrix, x1, y1, z2, x1, y2, z2, 0.0f, 1.0f, 0.0f, alpha);
+
+        immediateBufferSource.endBatch();
+        poseStack.popPose();
     }
 
     //========== 龙魂灯笼范围渲染方法 ==========

@@ -65,7 +65,7 @@ public class DragonCrystalSwordProjectile extends TheLastEndSwordItemsProjectile
             this,
             this.getOwner()
         );
-        target.hurt(projectileDamageSource, (float) this.baseDamage);
+        target.hurt(projectileDamageSource, (float) this.baseDamage + enchantBonusDamage);
     }
 
     //造成额外魔法伤害
@@ -118,6 +118,8 @@ public class DragonCrystalSwordProjectile extends TheLastEndSwordItemsProjectile
         projectile.shoot(viewVector.x, viewVector.y, viewVector.z, 3f, 0);
         projectile.setSilent(true);
         projectile.baseDamage = damage;
+        //应用武器附魔
+        projectile.applyWeaponEnchantments(entity.getMainHandItem());
 
         world.addFreshEntity(projectile);
         world.playSound(

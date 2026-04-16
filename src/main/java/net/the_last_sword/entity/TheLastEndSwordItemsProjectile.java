@@ -14,6 +14,8 @@ import net.minecraft.world.entity.projectile.ItemSupplier;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -23,13 +25,15 @@ import net.the_last_sword.util.EntityUtil;
 
 import java.util.UUID;
 
-/**
- * 最终之剑系列弹射物的抽象基类
- * 统一处理：友军检查、基础伤害、无敌时间清除、击中地面移除
- */
+//最终之剑系列弹射物的抽象基类
 public abstract class TheLastEndSwordItemsProjectile extends ThrowableProjectile implements ItemSupplier {
     protected final UUID shooterUUID;
     protected boolean hasHitGround = false;
+
+    //附魔加成字段
+    protected float enchantBonusDamage = 0;
+    protected int enchantKnockback = 0;
+    protected boolean enchantFlame = false;
 
     public TheLastEndSwordItemsProjectile(EntityType<? extends TheLastEndSwordItemsProjectile> type, Level world) {
         super(type, world);
@@ -50,40 +54,62 @@ public abstract class TheLastEndSwordItemsProjectile extends ThrowableProjectile
         return NetworkHooks.getEntitySpawningPacket(this);
     }
 
-    /**
-     * 击中实体时的统一处理流程
-     */
+    //读取武器上的远程附魔并应用到弹射物
+    public void applyWeaponEnchantments(ItemStack weapon) {
+        int power = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.POWER_ARROWS, weapon);
+        if (power > 0) {
+            this.enchantBonusDamage = (float) (power * 0.5 + 0.5);
+        }
+        int punch = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.PUNCH_ARROWS, weapon);
+        if (punch > 0) {
+            this.enchantKnockback = punch;
+        }
+        if (EnchantmentHelper.getItemEnchantmentLevel(Enchantments.FLAMING_ARROWS, weapon) > 0) {
+            this.enchantFlame = true;
+        }
+    }
+
+    //击中实体时的统一处理流程
     @Override
     protected void onHitEntity(EntityHitResult entityHitResult) {
         Entity target = entityHitResult.getEntity();
 
-        //检查射手是否存在
         Entity shooter = this.getOwner();
         if (shooter == null) {
             return;
         }
 
-        //检查是否可以攻击目标
         if (!EntityUtil.canAttack(shooter, target)) {
             return;
         }
 
         if (target instanceof LivingEntity livingTarget) {
-            //1. 造成基础物理伤害（由子类实现具体伤害值和类型）
+            //1. 造成基础物理伤害
             applyBaseDamage(livingTarget);
 
-            //2. 清除无敌时间，让额外伤害能生效
+            //2. 清除无敌时间
             livingTarget.invulnerableTime = 0;
 
-            //3. 造成额外伤害（由子类实现）
+            //3. 造成额外伤害
             applyExtraDamage(livingTarget);
 
-            //4. 生成视觉效果（由子类实现）
+            //4. 附魔效果：击退
+            if (enchantKnockback > 0) {
+                Vec3 knockbackDir = this.getDeltaMovement().normalize().scale(enchantKnockback * 0.6);
+                if (knockbackDir.lengthSqr() > 0) {
+                    livingTarget.push(knockbackDir.x, 0.1, knockbackDir.z);
+                }
+            }
+
+            //5. 附魔效果：火矢
+            if (enchantFlame) {
+                livingTarget.setSecondsOnFire(5);
+            }
+
+            //6. 生成视觉效果
             applyVisualEffect(livingTarget);
         } else if (target instanceof EndCrystal endCrystal) {
-            //末影水晶特殊处理：直接掉落物品，不爆炸
             if (!endCrystal.level().isClientSide) {
-                //生成末影水晶物品掉落
                 ItemStack crystalItem = new ItemStack(Items.END_CRYSTAL);
                 ItemEntity itemEntity = new ItemEntity(
                     endCrystal.level(),
@@ -93,33 +119,23 @@ public abstract class TheLastEndSwordItemsProjectile extends ThrowableProjectile
                     crystalItem
                 );
                 endCrystal.level().addFreshEntity(itemEntity);
-                //移除末影水晶实体
                 endCrystal.discard();
             }
         }
     }
 
-    /**
-     * 造成基础物理伤害
-     */
+    //造成基础物理伤害
     protected abstract void applyBaseDamage(LivingEntity target);
 
-    /**
-     * 造成额外伤害
-     */
+    //造成额外伤害
     protected abstract void applyExtraDamage(LivingEntity target);
 
-    /**
-     * 生成视觉效果
-     */
+    //生成视觉效果
     protected abstract void applyVisualEffect(LivingEntity target);
 
-    /**
-     * 击中方块时：生成视觉效果，然后标记已击中地面
-     */
+    //击中方块时：生成视觉效果，然后标记已击中地面
     @Override
     protected void onHitBlock(BlockHitResult blockHitResult) {
-        //生成闪电视觉效果
         if (this.level() instanceof ServerLevel serverLevel) {
             LightningBolt lightning = EntityType.LIGHTNING_BOLT.create(serverLevel);
             if (lightning != null) {
@@ -132,9 +148,6 @@ public abstract class TheLastEndSwordItemsProjectile extends ThrowableProjectile
         this.hasHitGround = true;
     }
 
-    /**
-     * 每tick检查是否已击中地面，如果是则移除弹射物
-     */
     @Override
     public void tick() {
         super.tick();

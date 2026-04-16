@@ -29,6 +29,7 @@ import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
 import net.the_last_sword.init.ModKeyMappings;
 import net.the_last_sword.util.EntityUtil;
+import net.the_last_sword.event.ServerEventHandler;
 import net.the_last_sword.util.nbt.ItemModeHelper;
 
 import java.util.ArrayList;
@@ -39,7 +40,7 @@ import java.util.Set;
 @Mod.EventBusSubscriber(modid = "the_last_sword")
 public class UltraTestSwordItem extends TieredItem {
 
-    private static final int MAX_MODES = 2; // 0=强力范围攻击模式, 1=防御模式
+    private static final int MAX_MODES = 2; // 0=强力范围攻击模式, 1=斗兽模式
 
     public UltraTestSwordItem() {
         super(new Tier() {
@@ -62,17 +63,15 @@ public class UltraTestSwordItem extends TieredItem {
         //初始化模式系统
         ItemModeHelper.initializeMode(stack, 0, MAX_MODES);
 
-        int mode = ItemModeHelper.getMode(stack);
-        if (mode == 0 || mode == 1) {
-            List<Entity> targets = selectTargetsWithEcaSelector(player);
-            DamageSource damageSource = AbsoluteDestructionDamageSource.absoluteDestruction(player, stack);
-            for (Entity target : targets) {
-                if (target instanceof LivingEntity living) {
-                    if (player.isShiftKeyDown()) {
-                        EntityUtil.theLastEndSetDead(living, damageSource);
-                    } else {
-                        AbsoluteDestructionDamageSource.applyAbsoluteDestruction(living,player,stack,100);
-                    }
+        // 两种模式下左键攻击逻辑相同（斗兽模式的左键取消预览由客户端onMouseInput处理）
+        List<Entity> targets = selectTargetsWithEcaSelector(player);
+        DamageSource damageSource = AbsoluteDestructionDamageSource.absoluteDestruction(player, stack);
+        for (Entity target : targets) {
+            if (target instanceof LivingEntity living) {
+                if (player.isShiftKeyDown()) {
+                    EntityUtil.theLastEndSetDead(living, damageSource);
+                } else {
+                    AbsoluteDestructionDamageSource.applyAbsoluteDestruction(living, player, stack, 100);
                 }
             }
         }
@@ -83,19 +82,23 @@ public class UltraTestSwordItem extends TieredItem {
     @Override
     public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
-
         //初始化模式系统
         ItemModeHelper.initializeMode(stack, 0, MAX_MODES);
 
         int mode = ItemModeHelper.getMode(stack);
-        if (!world.isClientSide && player instanceof ServerPlayer serverPlayer && (mode == 0 || mode == 1)) {
-            if (serverPlayer.isShiftKeyDown()) {
-                PowerfulRangeAttack.execute(serverPlayer);
-            } else {
-                List<Entity> targets = selectTargetsWithEcaSelector(serverPlayer);
-                for (Entity target : targets) {
-                    EntityUtil.theLastEndRemove(target, Entity.RemovalReason.KILLED);
+        if (!world.isClientSide && player instanceof ServerPlayer serverPlayer) {
+            if (mode == 0) {
+                if (serverPlayer.isShiftKeyDown()) {
+                    PowerfulRangeAttack.execute(serverPlayer);
+                } else {
+                    List<Entity> targets = selectTargetsWithEcaSelector(serverPlayer);
+                    for (Entity target : targets) {
+                        EntityUtil.theLastEndRemove(target, Entity.RemovalReason.KILLED);
+                    }
                 }
+            } else if (mode == 1) {
+                //斗兽模式：右键预览/放置竞技场
+                ServerEventHandler.performArenaPlacement(serverPlayer, world);
             }
         }
         return InteractionResultHolder.success(stack);
@@ -127,7 +130,7 @@ public class UltraTestSwordItem extends TieredItem {
         int mode = ItemModeHelper.getMode(stack);
         String modeKey = (mode == 0)
                 ? "item_tooltip.the_last_sword.powerful_range_attack_mode"
-                : "item_tooltip.the_last_sword.defense_mode";
+                : "item_tooltip.the_last_sword.mob_battle_mode";
         tooltip.add(
                 Component.translatable("item_tooltip.the_last_sword.mode")
                         .append(" ")
@@ -139,7 +142,7 @@ public class UltraTestSwordItem extends TieredItem {
         } else {
             String descrKey = (mode == 0)
                     ? "item_tooltip.the_last_sword.powerful_range_attack_mode_descr"
-                    : "item_tooltip.the_last_sword.defense_mode_descr";
+                    : "item_tooltip.the_last_sword.mob_battle_mode_descr";
             tooltip.add(
                     Component.translatable(descrKey)
                             .withStyle(style -> style.withColor(TextColor.fromRgb(0xAAAAAA)))
