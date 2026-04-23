@@ -11,6 +11,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.entity.LostWraithEntity;
 import net.the_last_sword.util.EntityUtil;
 
@@ -22,7 +23,6 @@ public class LostWraithPunchGoal extends Goal {
     private static final int ANIMATION_LENGTH = 30;
     private static final int SOUND_TICK = 10;
     private static final int DAMAGE_TICK = 24;
-    private static final double ATTACK_DISTANCE = 4.0;
 
     private final LostWraithEntity wraith;
     private int animationTick;
@@ -47,7 +47,7 @@ public class LostWraithPunchGoal extends Goal {
         if (wraith.isForceEndStrike()) {
             return false;
         }
-        return wraith.distanceTo(target) <= ATTACK_DISTANCE;
+        return wraith.distanceTo(target) <= TheLastSwordConfiguration.getLostWraithPunchAttackDistanceSafely();
     }
 
     @Override
@@ -116,8 +116,10 @@ public class LostWraithPunchGoal extends Goal {
                 .getHolderOrThrow(DamageTypes.GENERIC),
             wraith, wraith);
 
-        for (int i = 1; i <= 4; i++) {
-            for (int j = -1; j <= 1; j++) {
+        int forwardSteps = TheLastSwordConfiguration.getLostWraithPunchForwardStepsSafely();
+        int sideHalfWidth = TheLastSwordConfiguration.getLostWraithPunchSideHalfWidthSafely();
+        for (int i = 1; i <= forwardSteps; i++) {
+            for (int j = -sideHalfWidth; j <= sideHalfWidth; j++) {
                 Vec3 right = forward.cross(new Vec3(0, 1, 0)).normalize();
                 Vec3 checkPos = pos.add(forward.scale(i)).add(right.scale(j));
 

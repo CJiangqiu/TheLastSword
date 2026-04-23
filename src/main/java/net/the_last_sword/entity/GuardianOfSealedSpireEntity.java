@@ -34,6 +34,7 @@ import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.entity.ai.GuardianAssistAllyTargetGoal;
 import net.the_last_sword.entity.ai.GuardianChaseTargetGoal;
 import net.the_last_sword.entity.ai.GuardianMeleeAttackGoal;
@@ -158,12 +159,12 @@ public class GuardianOfSealedSpireEntity extends TheLastEndEntity {
 
     @Override
     protected float getDamageLimit() {
-        return 10.0f;
+        return (float) TheLastSwordConfiguration.getGuardianDamageLimitSafely();
     }
 
     @Override
     protected int getHurtResistTime() {
-        return 10;
+        return TheLastSwordConfiguration.getGuardianHurtResistTimeSafely();
     }
 
     @Override

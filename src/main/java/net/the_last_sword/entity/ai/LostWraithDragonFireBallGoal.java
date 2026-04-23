@@ -6,6 +6,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.projectile.DragonFireball;
 import net.minecraft.world.phys.Vec3;
+import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.entity.LostWraithEntity;
 import net.the_last_sword.util.EntityUtil;
 
@@ -15,8 +16,6 @@ import java.util.EnumSet;
 public class LostWraithDragonFireBallGoal extends Goal {
     private static final int ANIMATION_LENGTH = 60;
     private static final int FIRE_TICK = 40;
-    private static final double MIN_DISTANCE = 4.0;
-    private static final int COOLDOWN_TICKS = 100;
 
     private final LostWraithEntity wraith;
     private int animationTick;
@@ -46,7 +45,7 @@ public class LostWraithDragonFireBallGoal extends Goal {
         if (wraith.isForceEndStrike()) {
             return false;
         }
-        return wraith.distanceTo(target) > MIN_DISTANCE;
+        return wraith.distanceTo(target) > TheLastSwordConfiguration.getLostWraithDragonFireballMinDistanceSafely();
     }
 
     @Override
@@ -82,7 +81,7 @@ public class LostWraithDragonFireBallGoal extends Goal {
 
         if (animationTick == 0) {
             wraith.setAnimationState(LostWraithEntity.STATE_IDLE);
-            cooldown = COOLDOWN_TICKS;
+            cooldown = TheLastSwordConfiguration.getLostWraithDragonFireballCooldownSafely();
         }
     }
 

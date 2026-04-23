@@ -10,6 +10,7 @@ import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.compat.CompatCheck;
 import net.the_last_sword.compat.cataclysm.CataclysmItemsRegistry;
 import net.the_last_sword.compat.curios.CuriosItemsRegistry;
+import net.the_last_sword.compat.lucky_block.TheLastEndLuckyBlockDisplayItem;
 import net.the_last_sword.item.*;
 import net.the_last_sword.test.UltraTestSwordItem;
 import net.minecraft.world.item.Rarity;
@@ -48,6 +49,9 @@ public class ModItems {
                 .fireResistant()
         )
     );
+
+    //终焉幸运方块（幸运方块本体 mod 加载时才注册, 见 registerConditionalItems）
+    public static RegistryObject<Item> THE_LAST_END_LUCKY_BLOCK;
 
     public static final RegistryObject<Item> DRAGON_CRYSTAL_SWORD = ITEMS.register("dragon_crystal_sword",
         DragonCrystalSword::new
@@ -196,6 +200,16 @@ public class ModItems {
             THE_HARBINGER_MEDAL = CataclysmItemsRegistry.registerTheHarbingerMedal(ITEMS);
             THE_LEVIATHAN_MEDAL = CataclysmItemsRegistry.registerTheLeviathanMedal(ITEMS);
             SCYLLA_MEDAL = CataclysmItemsRegistry.registerScyllaMedal(ITEMS);
+        }
+        //幸运方块联动
+        if (CompatCheck.isLuckyBlockLoaded()) {
+            THE_LAST_END_LUCKY_BLOCK = ITEMS.register("the_last_end_lucky_block",
+                () -> new TheLastEndLuckyBlockDisplayItem(
+                    ModBlocks.THE_LAST_END_LUCKY_BLOCK.get(),
+                    new Item.Properties()
+                        .rarity(Rarity.RARE)
+                )
+            );
         }
     }
 }

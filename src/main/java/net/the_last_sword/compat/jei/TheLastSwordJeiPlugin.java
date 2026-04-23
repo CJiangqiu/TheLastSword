@@ -2,15 +2,22 @@ package net.the_last_sword.compat.jei;
 
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
+import mezz.jei.api.ingredients.subtypes.IIngredientSubtypeInterpreter;
+import mezz.jei.api.ingredients.subtypes.UidContext;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
+import mezz.jei.api.registration.IRecipeTransferRegistration;
+import mezz.jei.api.registration.ISubtypeRegistration;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.the_last_sword.TheLastSwordMod;
+import net.the_last_sword.client.gui.menu.DragonCrystalSmithingTableMenu;
 import net.the_last_sword.init.ModItems;
+import net.the_last_sword.init.ModMenus;
 import net.the_last_sword.recipe.ConfigRecipeManager;
 import net.the_last_sword.recipe.DragonCrystalSmithingRecipe;
+import net.the_last_sword.util.nbt.ItemLevelHelper;
 
 import java.util.List;
 
@@ -23,6 +30,20 @@ public class TheLastSwordJeiPlugin implements IModPlugin {
     @Override
     public ResourceLocation getPluginUid() {
         return PLUGIN_UID;
+    }
+
+    //给本mod所有物品挂等级subtype判定器: 转移匹配(Ingredient context)按level区分; 配方查找(Recipe context)不区分, 保证查升级链能看到全部等级
+    @Override
+    public void registerItemSubtypes(ISubtypeRegistration registration) {
+        IIngredientSubtypeInterpreter<ItemStack> levelInterpreter = (stack, context) -> {
+            if (context == UidContext.Recipe) {
+                return IIngredientSubtypeInterpreter.NONE;
+            }
+            return "lvl:" + ItemLevelHelper.getLevel(stack);
+        };
+        ModItems.ITEMS.getEntries().forEach(ro ->
+            registration.registerSubtypeInterpreter(ro.get(), levelInterpreter)
+        );
     }
 
     @Override
@@ -46,6 +67,18 @@ public class TheLastSwordJeiPlugin implements IModPlugin {
         registration.addRecipeCatalyst(
             new ItemStack(ModItems.DRAGON_CRYSTAL_SMITHING_TABLE.get()),
             DragonCrystalSmithingCategory.RECIPE_TYPE
+        );
+    }
+
+    //JEI配方一键填充: 配方槽 0-2(模板/基础/附加), 背包槽 4-39(27主+9快捷); 基础handler按NBT等价判断, Level标签会参与匹配, 所以等级不符会被拒
+    @Override
+    public void registerRecipeTransferHandlers(IRecipeTransferRegistration registration) {
+        registration.addRecipeTransferHandler(
+            DragonCrystalSmithingTableMenu.class,
+            ModMenus.DRAGON_CRYSTAL_SMITHING_TABLE.get(),
+            DragonCrystalSmithingCategory.RECIPE_TYPE,
+            0, 3,
+            4, 36
         );
     }
 }

@@ -9,6 +9,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.entity.DragonLightingEntity;
 import net.the_last_sword.entity.LostWraithEntity;
 import net.the_last_sword.init.ModEntities;
@@ -22,8 +23,6 @@ public class LostWraithSummonLightningGoal extends Goal {
     private static final int ANIMATION_LENGTH = 60;
     private static final int MARK_TICK = 25;
     private static final int LIGHTNING_TICK = 40;
-    private static final double MIN_DISTANCE = 4.0;
-    private static final int COOLDOWN_TICKS = 80;
 
     private final LostWraithEntity wraith;
     private int animationTick;
@@ -54,7 +53,7 @@ public class LostWraithSummonLightningGoal extends Goal {
         if (wraith.isForceEndStrike()) {
             return false;
         }
-        return wraith.distanceTo(target) > MIN_DISTANCE;
+        return wraith.distanceTo(target) > TheLastSwordConfiguration.getLostWraithLightningMinDistanceSafely();
     }
 
     @Override
@@ -95,7 +94,7 @@ public class LostWraithSummonLightningGoal extends Goal {
 
         if (animationTick == 0) {
             wraith.setAnimationState(LostWraithEntity.STATE_IDLE);
-            cooldown = COOLDOWN_TICKS;
+            cooldown = TheLastSwordConfiguration.getLostWraithLightningCooldownSafely();
         }
     }
 
@@ -131,13 +130,15 @@ public class LostWraithSummonLightningGoal extends Goal {
         lightning.moveTo(targetPos.x, targetPos.y, targetPos.z);
         serverLevel.addFreshEntity(lightning);
 
-        AABB area = new AABB(targetPos.subtract(3, 3, 3), targetPos.add(3, 3, 3));
+        double aoeRadius = TheLastSwordConfiguration.getLostWraithLightningAoeRadiusSafely();
+        AABB area = new AABB(targetPos.subtract(aoeRadius, aoeRadius, aoeRadius), targetPos.add(aoeRadius, aoeRadius, aoeRadius));
         List<LivingEntity> targets = wraith.level().getEntitiesOfClass(
             LivingEntity.class, area,
             entity1 -> EntityUtil.canAttack(wraith, entity1)
         );
 
-        float damage = (float) wraith.getAttributeValue(Attributes.ATTACK_DAMAGE) * 2.0f;
+        float damage = (float) wraith.getAttributeValue(Attributes.ATTACK_DAMAGE)
+            * (float) TheLastSwordConfiguration.getLostWraithLightningDamageMultiplierSafely();
         DamageSource damageSource = new DamageSource(
             wraith.level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE)
                 .getHolderOrThrow(DamageTypes.LIGHTNING_BOLT),

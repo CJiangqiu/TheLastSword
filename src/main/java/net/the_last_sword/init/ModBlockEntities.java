@@ -8,6 +8,8 @@ import net.minecraftforge.registries.RegistryObject;
 import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.block.entity.DragonCrystalEnchantingTableBlockEntity;
 import net.the_last_sword.block.entity.DragonCrystalSmithingTableBlockEntity;
+import net.the_last_sword.compat.CompatCheck;
+import net.the_last_sword.compat.lucky_block.TheLastEndLuckyBlockEntity;
 
 public class ModBlockEntities {
 
@@ -30,7 +32,22 @@ public class ModBlockEntities {
             ).build(null)
         );
 
+    //幸运方块联动（仅在 lucky 本体 mod 加载时注册）
+    public static RegistryObject<BlockEntityType<TheLastEndLuckyBlockEntity>> THE_LAST_END_LUCKY_BLOCK;
+
     public static void register(IEventBus eventBus) {
+        registerConditionalBlockEntities();
         BLOCK_ENTITIES.register(eventBus);
+    }
+
+    private static void registerConditionalBlockEntities() {
+        if (CompatCheck.isLuckyBlockLoaded()) {
+            THE_LAST_END_LUCKY_BLOCK = BLOCK_ENTITIES.register("the_last_end_lucky_block",
+                () -> BlockEntityType.Builder.of(
+                    TheLastEndLuckyBlockEntity::new,
+                    ModBlocks.THE_LAST_END_LUCKY_BLOCK.get()
+                ).build(null)
+            );
+        }
     }
 }

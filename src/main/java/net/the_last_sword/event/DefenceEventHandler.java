@@ -77,19 +77,7 @@ public final class DefenceEventHandler {
 
     @Mod.EventBusSubscriber(modid = TheLastSwordMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
     public static class ForgeBusEvents {
-        //护盾伤害保护
-        @SubscribeEvent(priority = EventPriority.HIGHEST)
-        public static void onLivingHurt(LivingHurtEvent event) {
-            LivingEntity entity = event.getEntity();
-            if (entity.level().isClientSide()) return;
-
-            double currentShield = DefenceEventHandler.getShieldValue(entity);
-            if (currentShield > 0) {
-                DefenceEventHandler.triggerShieldProtection(entity, event);
-            }
-        }
-
-        //护盾死亡保护
+        //护盾死亡保护 (兜底非 actuallyHurt 路径: entity.kill()/setHealth(0)/直接 die 等, 代价 -2)
         @SubscribeEvent(priority = EventPriority.HIGHEST)
         public static void onLivingDeath(LivingDeathEvent event) {
             LivingEntity entity = event.getEntity();
@@ -97,7 +85,7 @@ public final class DefenceEventHandler {
 
             double currentShield = DefenceEventHandler.getShieldValue(entity);
             if (currentShield > 0) {
-                DefenceEventHandler.triggerShieldProtection(entity, event);
+                DefenceEventHandler.triggerShieldProtection(entity, event, 2);
             }
         }
 
@@ -213,45 +201,12 @@ public final class DefenceEventHandler {
         }
     }
 
-    //自动回复护盾值
-    public static void autoRegenerate(LivingEntity entity) {
-        AttributeInstance maxA = entity.getAttribute(ModAttributes.MAX_JUSTIFIED_DEFENCE.get());
-        AttributeInstance curA = entity.getAttribute(ModAttributes.JUSTIFIED_DEFENCE.get());
-        if (maxA == null || curA == null) return;
-
-        double max = maxA.getValue();
-        double cur = curA.getValue();
-        int interval = TheLastSwordConfiguration.getJustifiedDefenceRecoveryTickSafely();
-
-        //TODO: 临时护盾检测（等待WraithSummonManager实现）
-        boolean hasTemporaryShield = false;
-        //if (entity instanceof Player player) {
-        //    hasTemporaryShield = WraithSummonManager.hasTemporaryShield(player);
-        //}
-
-        if (max <= 0.001) {
-            if (cur > 0.001 && !hasTemporaryShield) {
-                curA.setBaseValue(0.0);
-            }
-            return;
-        }
-
-        if (cur > max) {
-            if (!hasTemporaryShield) {
-                curA.setBaseValue(max);
-            }
-        } else if (interval > 0 && entity.tickCount % interval == 0 && cur < max) {
-            double newValue = Math.min(cur + 1, max);
-            curA.setBaseValue(newValue);
-        }
-    }
-
-    //护盾保护触发：取消伤害/死亡，设置满血，护盾-1
-    private static void triggerShieldProtection(LivingEntity entity, Event event) {
+    //护盾保护触发：取消事件，设置满血，按 cost 扣除护盾
+    private static void triggerShieldProtection(LivingEntity entity, Event event, int cost) {
         event.setCanceled(true);
         EntityUtil.theLastEndSetHealth(entity, entity.getMaxHealth());
         double currentShield = getShieldValue(entity);
-        setShieldValue(entity, currentShield - 1);
+        setShieldValue(entity, Math.max(0, currentShield - cost));
     }
 
     //获取护盾值

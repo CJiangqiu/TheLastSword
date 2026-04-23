@@ -45,11 +45,14 @@ public abstract class TheLastEndSwordItems extends SwordItem {
         }
     }
 
-    //获取破坏方块的速度
+    //获取破坏方块的速度（根据配置决定当前模式是否可以挖掘）
     @Override
     public float getDestroySpeed(ItemStack itemstack, BlockState blockstate) {
-        return destroySpeed;
+        return canMineInCurrentMode(itemstack) ? destroySpeed : 0f;
     }
+
+    //当前模式是否允许挖掘（子类实现）
+    protected abstract boolean canMineInCurrentMode(ItemStack stack);
 
     //支持所有工具的默认动作（可以当作剑、镐、斧、锄、铲使用）
     @Override

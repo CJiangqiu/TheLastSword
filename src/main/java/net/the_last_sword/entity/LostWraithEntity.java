@@ -41,6 +41,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.eca.api.EcaAPI;
 import net.eca.network.EntityExtensionOverridePacket.MusicData;
 import net.eca.util.entity_extension.EntityExtensionManager;
+import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.entity.ai.LostWraithDragonFireBallGoal;
 import net.the_last_sword.entity.ai.LostWraithChaseTargetGoal;
 import net.the_last_sword.entity.ai.LostWraithEnchantGoal;
@@ -185,12 +186,12 @@ public class LostWraithEntity extends TheLastEndEntity {
 
     @Override
     protected float getDamageLimit() {
-        return 10.0f;
+        return (float) TheLastSwordConfiguration.getLostWraithDamageLimitSafely();
     }
 
     @Override
     protected int getHurtResistTime() {
-        return 10;
+        return TheLastSwordConfiguration.getLostWraithHurtResistTimeSafely();
     }
 
     @Override

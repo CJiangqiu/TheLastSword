@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -19,6 +20,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.the_last_sword.client.gui.menu.DragonCrystalEnchantingTableMenu;
+import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.network.EnchantmentApplyPacket;
 import net.the_last_sword.network.NetworkHandler;
 import org.joml.Matrix4f;
@@ -40,21 +42,31 @@ public class DragonCrystalEnchantingTableScreen extends AbstractContainerScreen<
 
     // 附魔系统
     private final List<EnchantmentOption> enchantmentOptions = new ArrayList<>();
+    private final List<EnchantmentOption> filteredOptions = new ArrayList<>();
     private int scrollOffset = 0;
-    private static final int VISIBLE_ROWS = 7;
+    private static final int VISIBLE_ROWS = 6;
     private static final int ROW_HEIGHT = 22;
     private static final int LIST_X = 295;
-    private static final int LIST_Y = 15;
+    private static final int SEARCH_BOX_HEIGHT = 16;
+    private static final int SEARCH_BOX_MARGIN = 4;
+    private static final int LIST_Y_BASE = 15;
+    private static final int LIST_Y_OFFSET = SEARCH_BOX_HEIGHT + SEARCH_BOX_MARGIN;
     private static final int LIST_WIDTH = 115;
     private static final int MAX_LEVEL = 255;
     private static final int SLIDER_WIDTH = 50;
     private static final int SLIDER_HEIGHT = 14;
-
-    // 经验返还系数
-    private static final int XP_PER_LEVEL_REMOVED = 10;
+    private static final int LEVEL_INPUT_WIDTH = 24;
+    private static final int LEVEL_INPUT_HEIGHT = 12;
 
     // 拖拽状态
     private EnchantmentOption draggingOption = null;
+
+    // 搜索框
+    private EditBox searchBox;
+
+    // 等级输入框
+    private EditBox levelEditBox;
+    private EnchantmentOption editingOption = null;
 
     private Button applyButton;
     private ItemStack lastSlotItem = ItemStack.EMPTY;
@@ -73,6 +85,27 @@ public class DragonCrystalEnchantingTableScreen extends AbstractContainerScreen<
     @Override
     public void init() {
         super.init();
+
+        // 搜索框
+        searchBox = new EditBox(this.font, this.leftPos + LIST_X, this.topPos + LIST_Y_BASE, LIST_WIDTH - 4, SEARCH_BOX_HEIGHT,
+                Component.translatable("gui.the_last_sword.dragon_crystal_enchanting_table.search"));
+        searchBox.setMaxLength(50);
+        searchBox.setBordered(true);
+        searchBox.setTextColor(0xFFFFFF);
+        searchBox.setResponder(text -> {
+            scrollOffset = 0;
+            updateFilteredList();
+        });
+        this.addRenderableWidget(searchBox);
+
+        // 等级输入框（初始隐藏）
+        levelEditBox = new EditBox(this.font, 0, 0, LEVEL_INPUT_WIDTH, LEVEL_INPUT_HEIGHT, Component.empty());
+        levelEditBox.setMaxLength(3);
+        levelEditBox.setBordered(false);
+        levelEditBox.setTextColor(0xFFFFFF);
+        levelEditBox.setVisible(false);
+        levelEditBox.setFilter(s -> s.isEmpty() || s.matches("\\d{0,3}"));
+        this.addRenderableWidget(levelEditBox);
 
         applyButton = Button.builder(
                 Component.translatable("gui.the_last_sword.dragon_crystal_enchanting_table.enchant"),
@@ -100,14 +133,17 @@ public class DragonCrystalEnchantingTableScreen extends AbstractContainerScreen<
     private void updateEnchantmentList() {
         enchantmentOptions.clear();
         scrollOffset = 0;
+        commitLevelEdit();
 
         ItemStack stack = this.menu.getSlot(1).getItem();
-        if (stack.isEmpty()) return;
+        if (stack.isEmpty()) {
+            filteredOptions.clear();
+            return;
+        }
 
         Map<Enchantment, Integer> existingEnchants = EnchantmentHelper.getEnchantments(stack);
 
         for (Enchantment ench : ForgeRegistries.ENCHANTMENTS) {
-            // 只显示物品兼容的附魔 + 物品已有的附魔
             if (ench.canEnchant(stack) || existingEnchants.containsKey(ench)) {
                 int currentLevel = existingEnchants.getOrDefault(ench, 0);
                 enchantmentOptions.add(new EnchantmentOption(ench, currentLevel, currentLevel));
@@ -115,12 +151,30 @@ public class DragonCrystalEnchantingTableScreen extends AbstractContainerScreen<
         }
 
         enchantmentOptions.sort((a, b) -> {
-            // 已有附魔排在前面
             if (a.originalLevel > 0 && b.originalLevel == 0) return -1;
             if (a.originalLevel == 0 && b.originalLevel > 0) return 1;
             return a.enchantment.getFullname(1).getString()
                     .compareTo(b.enchantment.getFullname(1).getString());
         });
+
+        updateFilteredList();
+    }
+
+    // 根据搜索框内容过滤附魔列表
+    private void updateFilteredList() {
+        filteredOptions.clear();
+        String query = searchBox != null ? searchBox.getValue().trim().toLowerCase() : "";
+
+        for (EnchantmentOption opt : enchantmentOptions) {
+            if (query.isEmpty()) {
+                filteredOptions.add(opt);
+            } else {
+                String name = opt.enchantment.getFullname(1).getString().toLowerCase();
+                if (name.contains(query)) {
+                    filteredOptions.add(opt);
+                }
+            }
+        }
     }
 
     // 更新按钮状态
@@ -141,7 +195,7 @@ public class DragonCrystalEnchantingTableScreen extends AbstractContainerScreen<
         for (EnchantmentOption opt : enchantmentOptions) {
             int diff = opt.level - opt.originalLevel;
             if (diff > 0) {
-                total += 10240L * diff;
+                total += (long) TheLastSwordConfiguration.getEnchantingTableEnchantEnergyCostSafely() * diff;
             }
         }
         return total;
@@ -153,7 +207,7 @@ public class DragonCrystalEnchantingTableScreen extends AbstractContainerScreen<
         for (EnchantmentOption opt : enchantmentOptions) {
             int diff = opt.originalLevel - opt.level;
             if (diff > 0) {
-                total += XP_PER_LEVEL_REMOVED * diff;
+                total += TheLastSwordConfiguration.getEnchantingTableRemoveXpReturnSafely() * diff;
             }
         }
         return total;
@@ -174,12 +228,13 @@ public class DragonCrystalEnchantingTableScreen extends AbstractContainerScreen<
 
     // 应用附魔变更
     private void applyEnchantments() {
+        commitLevelEdit();
+
         Map<ResourceLocation, Integer> enchantChanges = new HashMap<>();
         for (EnchantmentOption opt : enchantmentOptions) {
             if (opt.level != opt.originalLevel) {
                 ResourceLocation id = ForgeRegistries.ENCHANTMENTS.getKey(opt.enchantment);
                 if (id != null) {
-                    // 发送目标等级（服务端计算差值）
                     enchantChanges.put(id, opt.level);
                 }
             }
@@ -191,6 +246,41 @@ public class DragonCrystalEnchantingTableScreen extends AbstractContainerScreen<
                     enchantChanges
             ));
         }
+    }
+
+    // 提交等级输入框的值
+    private void commitLevelEdit() {
+        if (editingOption == null) return;
+
+        String text = levelEditBox.getValue().trim();
+        if (!text.isEmpty()) {
+            try {
+                int val = Integer.parseInt(text);
+                editingOption.level = Math.max(0, Math.min(MAX_LEVEL, val));
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        editingOption = null;
+        levelEditBox.setVisible(false);
+        levelEditBox.setFocused(false);
+    }
+
+    // 开始编辑某个附魔的等级
+    private void startLevelEdit(EnchantmentOption opt, int editX, int editY) {
+        commitLevelEdit();
+        editingOption = opt;
+        levelEditBox.setX(editX);
+        levelEditBox.setY(editY);
+        levelEditBox.setVisible(true);
+        levelEditBox.setValue(String.valueOf(opt.level));
+        levelEditBox.setFocused(true);
+        levelEditBox.moveCursorToEnd();
+        this.setFocused(levelEditBox);
+    }
+
+    // 获取列表实际起始Y坐标
+    private int getListY() {
+        return this.topPos + LIST_Y_BASE + LIST_Y_OFFSET;
     }
 
     @Override
@@ -224,12 +314,12 @@ public class DragonCrystalEnchantingTableScreen extends AbstractContainerScreen<
     // 渲染附魔列表
     private void renderEnchantmentList(GuiGraphics guiGraphics, int mouseX, int mouseY) {
         int listX = this.leftPos + LIST_X;
-        int listY = this.topPos + LIST_Y;
+        int listY = getListY();
 
         guiGraphics.fill(listX, listY, listX + LIST_WIDTH, listY + VISIBLE_ROWS * ROW_HEIGHT, 0x80000000);
 
-        for (int i = 0; i < VISIBLE_ROWS && i + scrollOffset < enchantmentOptions.size(); i++) {
-            EnchantmentOption opt = enchantmentOptions.get(i + scrollOffset);
+        for (int i = 0; i < VISIBLE_ROWS && i + scrollOffset < filteredOptions.size(); i++) {
+            EnchantmentOption opt = filteredOptions.get(i + scrollOffset);
             int rowY = listY + i * ROW_HEIGHT;
 
             boolean hovered = mouseX >= listX && mouseX < listX + LIST_WIDTH
@@ -262,16 +352,28 @@ public class DragonCrystalEnchantingTableScreen extends AbstractContainerScreen<
             guiGraphics.drawString(this.font, enchName, listX + 4, rowY + 7, nameColor, false);
 
             // 滑块
-            int sliderX = listX + LIST_WIDTH - SLIDER_WIDTH - 4;
+            int sliderX = listX + LIST_WIDTH - SLIDER_WIDTH - LEVEL_INPUT_WIDTH - 8;
             int sliderY = rowY + 4;
             renderLevelSlider(guiGraphics, sliderX, sliderY, opt, mouseX, mouseY);
+
+            // 等级输入区域（非编辑状态显示文本，编辑状态由EditBox渲染）
+            int inputX = listX + LIST_WIDTH - LEVEL_INPUT_WIDTH - 4;
+            int inputY = rowY + 5;
+            if (editingOption != opt) {
+                guiGraphics.fill(inputX, inputY, inputX + LEVEL_INPUT_WIDTH, inputY + LEVEL_INPUT_HEIGHT, 0xFF303030);
+                guiGraphics.fill(inputX + 1, inputY + 1, inputX + LEVEL_INPUT_WIDTH - 1, inputY + LEVEL_INPUT_HEIGHT - 1, 0xFF1A1A1A);
+                String levelText = String.valueOf(opt.level);
+                int textWidth = this.font.width(levelText);
+                int textColor = opt.level != opt.originalLevel ? 0x55FF55 : 0xCCCCCC;
+                guiGraphics.drawString(this.font, levelText, inputX + (LEVEL_INPUT_WIDTH - textWidth) / 2, inputY + 2, textColor, false);
+            }
         }
 
         // 滚动条
-        if (enchantmentOptions.size() > VISIBLE_ROWS) {
+        if (filteredOptions.size() > VISIBLE_ROWS) {
             int scrollBarHeight = VISIBLE_ROWS * ROW_HEIGHT;
-            int thumbHeight = Math.max(20, scrollBarHeight * VISIBLE_ROWS / enchantmentOptions.size());
-            int maxScroll = enchantmentOptions.size() - VISIBLE_ROWS;
+            int thumbHeight = Math.max(20, scrollBarHeight * VISIBLE_ROWS / filteredOptions.size());
+            int maxScroll = filteredOptions.size() - VISIBLE_ROWS;
             int thumbY = listY + (scrollBarHeight - thumbHeight) * scrollOffset / maxScroll;
 
             guiGraphics.fill(listX + LIST_WIDTH - 3, listY, listX + LIST_WIDTH, listY + scrollBarHeight, 0x40000000);
@@ -304,11 +406,6 @@ public class DragonCrystalEnchantingTableScreen extends AbstractContainerScreen<
         boolean sliderHovered = mouseX >= x && mouseX < x + SLIDER_WIDTH && mouseY >= y && mouseY < y + SLIDER_HEIGHT;
         int handleColor = sliderHovered || draggingOption == opt ? 0xFFFFFFFF : 0xFFCCCCCC;
         guiGraphics.fill(handleX, y, handleX + 4, y + SLIDER_HEIGHT, handleColor);
-
-        // 等级文本
-        String levelText = String.valueOf(opt.level);
-        int textWidth = this.font.width(levelText);
-        guiGraphics.drawString(this.font, levelText, x + (SLIDER_WIDTH - textWidth) / 2, y + 3, 0xFFFFFF, true);
     }
 
     // 渲染消耗信息
@@ -336,12 +433,12 @@ public class DragonCrystalEnchantingTableScreen extends AbstractContainerScreen<
     // 渲染附魔项悬停提示
     private void renderEnchantmentTooltips(GuiGraphics guiGraphics, int mouseX, int mouseY) {
         int listX = this.leftPos + LIST_X;
-        int listY = this.topPos + LIST_Y;
+        int listY = getListY();
 
-        for (int i = 0; i < VISIBLE_ROWS && i + scrollOffset < enchantmentOptions.size(); i++) {
+        for (int i = 0; i < VISIBLE_ROWS && i + scrollOffset < filteredOptions.size(); i++) {
             int rowY = listY + i * ROW_HEIGHT;
             if (mouseX >= listX && mouseX < listX + LIST_WIDTH && mouseY >= rowY && mouseY < rowY + ROW_HEIGHT) {
-                EnchantmentOption opt = enchantmentOptions.get(i + scrollOffset);
+                EnchantmentOption opt = filteredOptions.get(i + scrollOffset);
                 List<Component> tooltip = new ArrayList<>();
 
                 tooltip.add(opt.enchantment.getFullname(Math.max(1, opt.level)));
@@ -353,13 +450,13 @@ public class DragonCrystalEnchantingTableScreen extends AbstractContainerScreen<
 
                 int diff = opt.level - opt.originalLevel;
                 if (diff > 0) {
-                    long enchCost = 10240L * diff;
+                    long enchCost = (long) TheLastSwordConfiguration.getEnchantingTableEnchantEnergyCostSafely() * diff;
                     tooltip.add(Component.literal("Lv." + opt.originalLevel + " → Lv." + opt.level)
                             .withStyle(style -> style.withColor(0x00FF00)));
                     tooltip.add(Component.translatable("gui.the_last_sword.dragon_crystal_enchanting_table.enchant_cost", formatCost(enchCost))
                             .withStyle(style -> style.withColor(0xAAAAAA)));
                 } else if (diff < 0) {
-                    int xp = XP_PER_LEVEL_REMOVED * (-diff);
+                    int xp = TheLastSwordConfiguration.getEnchantingTableRemoveXpReturnSafely() * (-diff);
                     String target = opt.level == 0
                             ? Component.translatable("gui.the_last_sword.dragon_crystal_enchanting_table.remove").getString()
                             : "Lv." + opt.level;
@@ -401,19 +498,47 @@ public class DragonCrystalEnchantingTableScreen extends AbstractContainerScreen<
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        // 搜索框点击
+        if (searchBox != null && searchBox.isMouseOver(mouseX, mouseY)) {
+            this.setFocused(searchBox);
+            searchBox.setFocused(true);
+            if (editingOption != null) {
+                commitLevelEdit();
+            }
+            return searchBox.mouseClicked(mouseX, mouseY, button);
+        }
+
+        // 等级输入框点击
+        if (levelEditBox != null && levelEditBox.isVisible() && levelEditBox.isMouseOver(mouseX, mouseY)) {
+            this.setFocused(levelEditBox);
+            levelEditBox.setFocused(true);
+            return levelEditBox.mouseClicked(mouseX, mouseY, button);
+        }
+
         int listX = this.leftPos + LIST_X;
-        int listY = this.topPos + LIST_Y;
+        int listY = getListY();
 
         if (mouseX >= listX && mouseX < listX + LIST_WIDTH) {
-            for (int i = 0; i < VISIBLE_ROWS && i + scrollOffset < enchantmentOptions.size(); i++) {
+            for (int i = 0; i < VISIBLE_ROWS && i + scrollOffset < filteredOptions.size(); i++) {
                 int rowY = listY + i * ROW_HEIGHT;
                 if (mouseY >= rowY && mouseY < rowY + ROW_HEIGHT) {
-                    EnchantmentOption opt = enchantmentOptions.get(i + scrollOffset);
+                    EnchantmentOption opt = filteredOptions.get(i + scrollOffset);
 
-                    int sliderX = listX + LIST_WIDTH - SLIDER_WIDTH - 4;
+                    // 等级输入区域点击
+                    int inputX = listX + LIST_WIDTH - LEVEL_INPUT_WIDTH - 4;
+                    int inputY = rowY + 5;
+                    if (mouseX >= inputX && mouseX < inputX + LEVEL_INPUT_WIDTH
+                            && mouseY >= inputY && mouseY < inputY + LEVEL_INPUT_HEIGHT) {
+                        startLevelEdit(opt, inputX, inputY);
+                        return true;
+                    }
+
+                    // 滑块区域点击
+                    int sliderX = listX + LIST_WIDTH - SLIDER_WIDTH - LEVEL_INPUT_WIDTH - 8;
                     int sliderY = rowY + 4;
                     if (mouseX >= sliderX && mouseX < sliderX + SLIDER_WIDTH
                             && mouseY >= sliderY && mouseY < sliderY + SLIDER_HEIGHT) {
+                        commitLevelEdit();
                         draggingOption = opt;
                         updateSliderValue(opt, mouseX, sliderX);
                         return true;
@@ -423,6 +548,11 @@ public class DragonCrystalEnchantingTableScreen extends AbstractContainerScreen<
             }
         }
 
+        // 点击列表外区域，提交编辑
+        if (editingOption != null) {
+            commitLevelEdit();
+        }
+
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
@@ -430,7 +560,7 @@ public class DragonCrystalEnchantingTableScreen extends AbstractContainerScreen<
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
         if (draggingOption != null) {
             int listX = this.leftPos + LIST_X;
-            int sliderX = listX + LIST_WIDTH - SLIDER_WIDTH - 4;
+            int sliderX = listX + LIST_WIDTH - SLIDER_WIDTH - LEVEL_INPUT_WIDTH - 8;
             updateSliderValue(draggingOption, mouseX, sliderX);
             return true;
         }
@@ -453,12 +583,16 @@ public class DragonCrystalEnchantingTableScreen extends AbstractContainerScreen<
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
         int listX = this.leftPos + LIST_X;
-        int listY = this.topPos + LIST_Y;
+        int listY = getListY();
         int listHeight = VISIBLE_ROWS * ROW_HEIGHT;
 
         if (mouseX >= listX && mouseX < listX + LIST_WIDTH && mouseY >= listY && mouseY < listY + listHeight) {
-            int maxScroll = Math.max(0, enchantmentOptions.size() - VISIBLE_ROWS);
+            int maxScroll = Math.max(0, filteredOptions.size() - VISIBLE_ROWS);
             scrollOffset = Math.max(0, Math.min(maxScroll, scrollOffset - (int) delta));
+            // 滚动时关闭编辑框
+            if (editingOption != null) {
+                commitLevelEdit();
+            }
             return true;
         }
 
@@ -471,7 +605,33 @@ public class DragonCrystalEnchantingTableScreen extends AbstractContainerScreen<
             this.minecraft.player.closeContainer();
             return true;
         }
+
+        // 等级输入框回车确认
+        if (editingOption != null && levelEditBox.isFocused()) {
+            if (key == 257 || key == 335) {
+                commitLevelEdit();
+                return true;
+            }
+            return levelEditBox.keyPressed(key, b, c);
+        }
+
+        // 搜索框获得焦点时拦截按键
+        if (searchBox != null && searchBox.isFocused()) {
+            return searchBox.keyPressed(key, b, c);
+        }
+
         return super.keyPressed(key, b, c);
+    }
+
+    @Override
+    public boolean charTyped(char ch, int modifiers) {
+        if (editingOption != null && levelEditBox.isFocused()) {
+            return levelEditBox.charTyped(ch, modifiers);
+        }
+        if (searchBox != null && searchBox.isFocused()) {
+            return searchBox.charTyped(ch, modifiers);
+        }
+        return super.charTyped(ch, modifiers);
     }
 
     @Override

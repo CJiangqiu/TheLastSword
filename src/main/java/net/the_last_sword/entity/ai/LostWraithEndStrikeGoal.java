@@ -9,6 +9,7 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
 import net.the_last_sword.entity.LostWraithEntity;
 import net.the_last_sword.init.ModSounds;
@@ -26,7 +27,6 @@ public class LostWraithEndStrikeGoal extends Goal {
     private static final int PULL_START_TICK = 30;
     private static final int PULL_END_TICK = 70;
     private static final int DAMAGE_TICK = 70;
-    private static final int NORMAL_COOLDOWN_TICKS = 600;
 
     private final LostWraithEntity wraith;
     private final boolean punishmentMode;
@@ -118,7 +118,7 @@ public class LostWraithEndStrikeGoal extends Goal {
         if (animationTick == 0) {
             wraith.setAnimationState(LostWraithEntity.STATE_IDLE);
             if (!punishmentMode) {
-                cooldown = NORMAL_COOLDOWN_TICKS;
+                cooldown = TheLastSwordConfiguration.getLostWraithEndStrikeCooldownSafely();
             }
         }
     }
@@ -202,7 +202,8 @@ public class LostWraithEndStrikeGoal extends Goal {
         Vec3 forward = wraith.getLookAngle();
         Vec3 centerPos = wraith.position().add(forward.scale(2));
 
-        AABB area = new AABB(centerPos.subtract(2, 2, 2), centerPos.add(2, 2, 2));
+        double pullRadius = TheLastSwordConfiguration.getLostWraithEndStrikePullRadiusSafely();
+        AABB area = new AABB(centerPos.subtract(pullRadius, pullRadius, pullRadius), centerPos.add(pullRadius, pullRadius, pullRadius));
         List<LivingEntity> targets = wraith.level().getEntitiesOfClass(
             LivingEntity.class, area,
             entity1 -> EntityUtil.canAttack(wraith, entity1)
@@ -225,7 +226,7 @@ public class LostWraithEndStrikeGoal extends Goal {
 
     private void dealDamage() {
         float lostHealth = wraith.getWorldAnchorMax() - wraith.getWorldAnchor();
-        float damage = lostHealth * 0.1f;
+        float damage = lostHealth * (float) TheLastSwordConfiguration.getLostWraithEndStrikeDamageMultiplierSafely();
 
         for (TargetPositionData data : pullTargets) {
             if (data.target.isAlive()) {
@@ -235,7 +236,8 @@ public class LostWraithEndStrikeGoal extends Goal {
                         1.0F, 0.8F + data.target.level().random.nextFloat() * 0.4F);
 
                     if (data.target instanceof Player player) {
-                        player.getCooldowns().addCooldown(data.target.getUseItem().getItem(), 260);
+                        player.getCooldowns().addCooldown(data.target.getUseItem().getItem(),
+                            TheLastSwordConfiguration.getLostWraithEndStrikeShieldCooldownSafely());
                     }
 
                     Vec3 knockback = wraith.position().subtract(data.target.position()).normalize().scale(-0.3);

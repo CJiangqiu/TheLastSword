@@ -130,7 +130,7 @@ public class DragonSword extends TheLastEndSwordItems implements ISummonableItem
         if (mode == 0) {
             //普通模式：发射弹射物
             if (!world.isClientSide) {
-                DragonSwordProjectile.shoot(world, player, player.getRandom(), player.getUUID());
+                DragonSwordProjectile.shoot(world, player, player.getRandom(), player.getUUID(), this.getBasePhysicalDamage());
             }
         } else {
             //唤灵模式：召唤或唤回剑灵
@@ -183,6 +183,13 @@ public class DragonSword extends TheLastEndSwordItems implements ISummonableItem
         //Lore提示
         list.add(Component.translatable("item_tooltip_lore.the_last_sword.dragon_sword")
             .withStyle(net.minecraft.ChatFormatting.GRAY));
+    }
+
+    @Override
+    protected boolean canMineInCurrentMode(ItemStack stack) {
+        int mode = ItemModeHelper.getMode(stack);
+        if (mode == 0) return TheLastSwordConfiguration.getDragonSwordNormalModeCanMineSafely();
+        return TheLastSwordConfiguration.getDragonSwordSummonModeCanMineSafely();
     }
 
     //实现 ISummonableItem 接口

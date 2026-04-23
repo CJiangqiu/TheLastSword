@@ -30,6 +30,7 @@ import net.the_last_sword.init.ModSounds;
 import net.the_last_sword.network.NetworkHandler;
 import net.the_last_sword.util.TheLastSwordLogger;
 import net.the_last_sword.event.ClientEventHandler;
+import net.the_last_sword.compat.apotheosis.ApotheosisCompat;
 
 import java.util.PriorityQueue;
 
@@ -66,6 +67,9 @@ public class TheLastSwordMod {
 
         //注册内置资源包
         modEventBus.addListener(this::addPackFinders);
+
+        //神化mod（Apotheosis）兼容：通过IMC声明剑类类别
+        modEventBus.register(new ApotheosisCompat());
 
         //注册网络包
         NetworkHandler.register();

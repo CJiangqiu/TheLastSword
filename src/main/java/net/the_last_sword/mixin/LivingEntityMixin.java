@@ -1,6 +1,5 @@
 package net.the_last_sword.mixin;
 
-import net.eca.api.EcaAPI;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.damagesource.DamageSource;
@@ -53,6 +52,15 @@ public class LivingEntityMixin {
     @Unique
     private boolean the_last_sword$isAbsoluteDestructionDamage(DamageSource source) {
         return source instanceof AbsoluteDestructionDamageSource;
+    }
+
+    //肃正防御护盾消费: 存在护盾则扣除指定代价, 返回是否成功消费
+    @Unique
+    private boolean the_last_sword$consumeShield(LivingEntity entity, int cost) {
+        AttributeInstance shieldAttr = entity.getAttribute(ModAttributes.JUSTIFIED_DEFENCE.get());
+        if (shieldAttr == null || shieldAttr.getValue() <= 0) return false;
+        shieldAttr.setBaseValue(Math.max(0.0, shieldAttr.getValue() - cost));
+        return true;
     }
 
 
@@ -181,7 +189,7 @@ public class LivingEntityMixin {
         }
     }
 
-    //hurt：盟友判断 + 剑灵绝毁附加
+    //hurt：盟友判断 + 护盾吸收 + 剑灵绝毁附加
     @Inject(method = "hurt", at = @At("HEAD"), cancellable = true)
     private void onLivingEntityHurt(DamageSource damageSource, float damageAmount, CallbackInfoReturnable<Boolean> cir) {
         LivingEntity entity = (LivingEntity) (Object) this;
@@ -198,6 +206,12 @@ public class LivingEntityMixin {
             }
         }
 
+        //肃正防御护盾优先吸收（受伤 -1, 彻底无敌式抵挡）
+        if (the_last_sword$consumeShield(entity, 1)) {
+            cir.setReturnValue(false);
+            return;
+        }
+
         //剑灵附加绝毁伤害（Mixin检测，绕过事件取消问题）
         if (!the_last_sword$isAbsoluteDestructionDamage(damageSource)
                 && damageSource.getEntity() instanceof LivingEntity wraithAttacker) {
@@ -205,12 +219,18 @@ public class LivingEntityMixin {
         }
     }
 
-    //actuallyHurt：限伤逻辑
+    //actuallyHurt：护盾吸收 + 限伤逻辑
     @Inject(method = "actuallyHurt", at = @At("HEAD"), cancellable = true)
     private void onLivingEntityActuallyHurt(DamageSource damageSource, float damageAmount, CallbackInfo ci) {
         LivingEntity entity = (LivingEntity) (Object) this;
 
         if (entity.level().isClientSide) {
+            return;
+        }
+
+        //肃正防御护盾优先吸收 (兜底直接调 actuallyHurt 绕过 hurt 的路径)
+        if (the_last_sword$consumeShield(entity, 1)) {
+            ci.cancel();
             return;
         }
 
@@ -243,12 +263,6 @@ public class LivingEntityMixin {
             return;
         }
 
-        //禁疗状态下禁止回血
-        if (EntityUtil.isHealBanned(entity)) {
-            ci.cancel();
-            return;
-        }
-
         //检查是否受保护
         if (EntityUtil.hasProtection(entity)) {
             if (healAmount > 0) {
@@ -267,15 +281,6 @@ public class LivingEntityMixin {
 
         if (entity.level().isClientSide) {
             return;
-        }
-
-        //禁疗状态下阻止提升血量（ECA 禁疗为主，此处兜底拦截原版 setHealth 回血）
-        if (EntityUtil.isHealBanned(entity)) {
-            float currentHealth = EcaAPI.getHealth(entity);
-            if (health > currentHealth) {
-                ci.cancel();
-                return;
-            }
         }
 
         //检查是否受保护
@@ -304,6 +309,14 @@ public class LivingEntityMixin {
     @Inject(method = "die", at = @At("HEAD"), cancellable = true)
     private void onLivingEntityDie(DamageSource damageSource, CallbackInfo ci) {
         LivingEntity entity = (LivingEntity) (Object) this;
+
+        //肃正防御兜底：死亡时仍有护盾则消耗一层并恢复满血
+        if (the_last_sword$consumeShield(entity, 1)) {
+            EntityUtil.theLastEndSetHealth(entity, entity.getMaxHealth());
+            ci.cancel();
+            return;
+        }
+
         if (EntityUtil.hasProtection(entity)) {
             ci.cancel();
         }

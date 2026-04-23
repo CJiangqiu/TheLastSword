@@ -89,7 +89,7 @@ public class TheLastEndSwordProjectile extends TheLastEndSwordItemsProjectile {
 
         //AOE伤害逻辑（每tick检测，以立方体形式）
         if (!this.hasHitGround && !this.level().isClientSide()) {
-            double radius = 2.5;
+            double radius = TheLastSwordConfiguration.getTheLastEndSwordProjectileAoeRadiusSafely();
             AABB damageBox = new AABB(
                     this.getX() - radius, this.getY() - radius, this.getZ() - radius,
                     this.getX() + radius, this.getY() + radius, this.getZ() + radius
@@ -111,7 +111,7 @@ public class TheLastEndSwordProjectile extends TheLastEndSwordItemsProjectile {
             double cx = this.getX();
             double cy = this.getY();
             double cz = this.getZ();
-            double r = 2.5;
+            double r = TheLastSwordConfiguration.getTheLastEndSwordProjectileAoeRadiusSafely();
             double offsetY = (Math.random() * 2 * r) - r;
             double offsetZ = (Math.random() * 2 * r) - r;
             this.level().addParticle(ParticleTypes.PORTAL, cx + r, cy + offsetY, cz + offsetZ, 0, 0, 0);
@@ -138,58 +138,35 @@ public class TheLastEndSwordProjectile extends TheLastEndSwordItemsProjectile {
         }
     }
 
-    //查找发射者手中的最终之剑
-    private ItemStack findWeapon() {
-        if (this.getOwner() instanceof Player player) {
-            ItemStack mainHand = player.getMainHandItem();
-            if (mainHand.getItem() instanceof TheLastSword) return mainHand;
-            ItemStack offHand = player.getOffhandItem();
-            if (offHand.getItem() instanceof TheLastSword) return offHand;
-        }
-        return ItemStack.EMPTY;
-    }
-
-    //造成基础物理伤害
+    //造成基础物理伤害（使用发射时快照）
     @Override
-    protected void applyBaseDamage(LivingEntity target) {
-        if (this.getOwner() instanceof LivingEntity owner) {
-            ItemStack weapon = findWeapon();
-            if (!weapon.isEmpty() && weapon.getItem() instanceof TheLastSword theLastSword) {
-                float basePhysicalDamage = theLastSword.getBasePhysicalDamage() + enchantBonusDamage;
-                if (basePhysicalDamage > 0) {
-                    DamageSource source = new DamageSource(
-                        owner.getCommandSenderWorld().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE)
-                            .getHolderOrThrow(DamageTypes.GENERIC),
-                        this, owner
-                    );
-                    target.hurt(source, basePhysicalDamage);
-                }
-            }
+    protected void applyBaseDamage(Entity target) {
+        if (this.getOwner() instanceof LivingEntity owner && snapshotBaseDamage > 0) {
+            DamageSource source = new DamageSource(
+                owner.getCommandSenderWorld().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE)
+                    .getHolderOrThrow(DamageTypes.GENERIC),
+                this, owner
+            );
+            target.hurt(source, snapshotBaseDamage);
         }
     }
 
-    //造成绝毁伤害
+    //造成绝毁伤害（使用发射时快照）
     @Override
-    protected void applyExtraDamage(LivingEntity target) {
-        if (this.getOwner() instanceof LivingEntity owner) {
-            ItemStack weapon = findWeapon();
-            if (!weapon.isEmpty()) {
-                int level = ItemLevelHelper.getLevel(weapon);
-                double increaseValue = TheLastSwordConfiguration.getIncreaseValueSafely();
-                double increaseValueHighLevel = TheLastSwordConfiguration.getIncreaseValueHighLevelSafely();
-                double extraDamage = (level < 6 ? increaseValue : increaseValueHighLevel) * level;
-                if (extraDamage > 0) {
-                    AbsoluteDestructionDamageSource.applyAbsoluteDestruction(target, owner, weapon, (float) extraDamage);
-                }
-            } else {
-                target.hurt(target.damageSources().magic(), 10.0F);
-            }
+    protected void applyExtraDamage(Entity target) {
+        if (!(this.getOwner() instanceof LivingEntity owner) || snapshotExtraDamage <= 0) return;
+        if (target instanceof LivingEntity living) {
+            AbsoluteDestructionDamageSource.applyAbsoluteDestruction(living, owner, snapshotExtraDamage);
+        } else {
+            //非 LivingEntity（如末影龙部件）：由目标自身的 hurt 方法转发到父实体处理
+            DamageSource source = AbsoluteDestructionDamageSource.absoluteDestruction(owner);
+            target.hurt(source, snapshotExtraDamage);
         }
     }
 
     //生成末地传送门闪电特效
     @Override
-    protected void applyVisualEffect(LivingEntity target) {
+    protected void applyVisualEffect(Entity target) {
         if (this.level() instanceof ServerLevel serverLevel) {
             TheLastEndLightingEntity lightning = new TheLastEndLightingEntity(ModEntities.THE_LAST_END_LIGHTING.get(), serverLevel);
             lightning.moveTo(Vec3.atBottomCenterOf(BlockPos.containing(this.getX(), this.getY(), this.getZ())));
@@ -216,14 +193,31 @@ public class TheLastEndSwordProjectile extends TheLastEndSwordItemsProjectile {
         return shoot(world, entity, source, 2.5f, 1024, 3);
     }
 
+    //计算并设置伤害快照
+    private static void applySnapshot(TheLastEndSwordProjectile projectile, LivingEntity shooter) {
+        ItemStack weapon = shooter.getMainHandItem();
+        if (!(weapon.getItem() instanceof TheLastSword)) {
+            weapon = shooter instanceof Player player ? player.getOffhandItem() : ItemStack.EMPTY;
+            if (!(weapon.getItem() instanceof TheLastSword)) return;
+        }
+        TheLastSword theLastSword = (TheLastSword) weapon.getItem();
+        projectile.applyWeaponEnchantments(weapon);
+        float baseDamage = theLastSword.getBasePhysicalDamage() + projectile.enchantBonusDamage;
+        int level = ItemLevelHelper.getLevel(weapon);
+        double configValue = (level < 6)
+                ? TheLastSwordConfiguration.getIncreaseValueSafely()
+                : TheLastSwordConfiguration.getIncreaseValueHighLevelSafely();
+        float extraDamage = (float) (level * configValue
+                * TheLastSwordConfiguration.getTheLastEndSwordProjectileExtraDamageMultiplierSafely());
+        projectile.setSnapshotDamage(baseDamage, extraDamage);
+    }
+
     public static TheLastEndSwordProjectile shoot(Level world, LivingEntity shooter, RandomSource random, float power, double damage, int knockback) {
         float adjustedSpeed = (power * 2) - 1;
         TheLastEndSwordProjectile projectile = new TheLastEndSwordProjectile(ModEntities.THE_LAST_END_SWORD_PROJECTILE.get(), shooter, world, shooter.getUUID());
         projectile.shoot(shooter.getViewVector(1).x, shooter.getViewVector(1).y, shooter.getViewVector(1).z, adjustedSpeed, 0);
         projectile.setSilent(true);
-        //应用武器附魔
-        ItemStack weapon = shooter.getMainHandItem();
-        projectile.applyWeaponEnchantments(weapon);
+        applySnapshot(projectile, shooter);
         world.addFreshEntity(projectile);
         world.playSound(null, shooter.getX(), shooter.getY(), shooter.getZ(),
                 ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation("entity.ender_dragon.shoot")),
@@ -239,9 +233,7 @@ public class TheLastEndSwordProjectile extends TheLastEndSwordItemsProjectile {
         double dz = target.getZ() - shooter.getZ();
         projectile.shoot(dx, dy - projectile.getY() + Math.hypot(dx, dz) * 0.2F, dz, 5f, 12.0F);
         projectile.setSilent(true);
-        //应用武器附魔
-        ItemStack weapon = shooter.getMainHandItem();
-        projectile.applyWeaponEnchantments(weapon);
+        applySnapshot(projectile, shooter);
         shooter.level().addFreshEntity(projectile);
         shooter.level().playSound(null, shooter.getX(), shooter.getY(), shooter.getZ(),
                 ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation("entity.ender_dragon.shoot")),

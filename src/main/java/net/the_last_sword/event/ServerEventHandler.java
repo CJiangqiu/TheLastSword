@@ -11,6 +11,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
@@ -26,6 +27,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -38,6 +40,8 @@ import net.the_last_sword.init.ModItems;
 import net.the_last_sword.item.DragonCrystalSoulStone;
 import net.the_last_sword.item.TheLastEndArmorItem;
 import net.the_last_sword.item.TheLastEndSwordItems;
+import net.the_last_sword.item.TheLastSword;
+import net.the_last_sword.util.nbt.ItemModeHelper;
 import net.the_last_sword.network.ArenaPreviewPacket;
 import net.the_last_sword.network.ClearPreviewPacket;
 import net.the_last_sword.network.NetworkHandler;
@@ -54,8 +58,6 @@ import java.util.Optional;
 public class ServerEventHandler {
 
     //========== 龙魂灯灵魂收集系统 ==========
-    private static final double LANTERN_RANGE_PLACED = 16.0;  //放置模式范围
-    private static final double LANTERN_RANGE_EQUIPPED = 8.0; //佩戴模式范围
 
     //实体死亡时检查龙魂灯笼范围并存储到魂石
     @SubscribeEvent
@@ -73,9 +75,10 @@ public class ServerEventHandler {
 
         //优先检查佩戴模式：玩家装备龙魂灯在腰带槽位
         boolean hasEquippedLantern = CuriosEffectHandler.hasCurioEquipped(player, ModItems.DRAGON_SOUL_LANTERN.get());
-        boolean inEquippedRange = player.blockPosition().distSqr(deathPos) <= LANTERN_RANGE_EQUIPPED * LANTERN_RANGE_EQUIPPED;
+        double equippedRange = TheLastSwordConfiguration.getDragonSoulLanternRangeEquippedSafely();
+        boolean inEquippedRange = player.blockPosition().distSqr(deathPos) <= equippedRange * equippedRange;
 
-        //检查放置模式：16格范围内有激活的龙魂灯方块
+        //检查放置模式：配置范围内有激活的龙魂灯方块
         boolean hasPlacedLantern = hasNearbyDragonSoulLantern(level, deathPos);
 
         //两种模式都不满足，不收集灵魂
@@ -114,14 +117,16 @@ public class ServerEventHandler {
 
     //检查附近是否有激活的龙魂灯笼（底部必须有黑曜石或哭泣的黑曜石）
     private static boolean hasNearbyDragonSoulLantern(Level level, BlockPos center) {
-        int range = (int) Math.ceil(LANTERN_RANGE_PLACED);
+        double rangeConfig = TheLastSwordConfiguration.getDragonSoulLanternRangePlacedSafely();
+        int range = (int) Math.ceil(rangeConfig);
+        double rangeSqr = rangeConfig * rangeConfig;
 
         for (int x = -range; x <= range; x++) {
             for (int y = -range; y <= range; y++) {
                 for (int z = -range; z <= range; z++) {
                     BlockPos checkPos = center.offset(x, y, z);
 
-                    if (center.distSqr(checkPos) <= LANTERN_RANGE_PLACED * LANTERN_RANGE_PLACED) {
+                    if (center.distSqr(checkPos) <= rangeSqr) {
                         if (level.getBlockState(checkPos).getBlock() == ModBlocks.DRAGON_SOUL_LANTERN.get()) {
                             if (isLanternActivated(level, checkPos)) {
                                 return true;
@@ -277,14 +282,37 @@ public class ServerEventHandler {
 
         for (BlockPos pos : preview.blocksToDestroy) {
             BlockState state = world.getBlockState(pos);
+            if (state.isAir()) continue;
 
             if (superDestroy) {
-                //超级破坏模式：破坏所有方块并掉落物品
-                world.destroyBlock(pos, true, player);
+                if (state.getDestroySpeed(world, pos) < 0) {
+                    //不可破坏方块：手动掉落方块物品后移除
+                    Block.popResource(world, pos, new ItemStack(state.getBlock()));
+                    world.removeBlock(pos, false);
+                } else {
+                    world.destroyBlock(pos, true, player);
+                }
             } else if (state.getDestroySpeed(world, pos) >= 0) {
-                //普通模式：只破坏可破坏的方块
                 world.destroyBlock(pos, true, player);
             }
+        }
+    }
+
+    //左键挖掘不可破坏方块时手动掉落物品
+    @SubscribeEvent
+    public static void onBlockBreak(BlockEvent.BreakEvent event) {
+        if (event.getPlayer().level().isClientSide) return;
+
+        BlockState state = event.getState();
+        if (state.getDestroySpeed(event.getLevel(), event.getPos()) >= 0) return;
+
+        ItemStack held = event.getPlayer().getMainHandItem();
+        if (!(held.getItem() instanceof TheLastSword)) return;
+        if (ItemModeHelper.getMode(held) != 1) return;
+        if (!TheLastSwordConfiguration.getSuperDestroySafely()) return;
+
+        if (event.getLevel() instanceof Level level) {
+            Block.popResource(level, event.getPos(), new ItemStack(state.getBlock()));
         }
     }
 

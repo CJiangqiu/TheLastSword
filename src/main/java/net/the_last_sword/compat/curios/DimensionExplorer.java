@@ -11,6 +11,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import org.jetbrains.annotations.Nullable;
 import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.type.capability.ICurioItem;
@@ -42,7 +43,17 @@ public class DimensionExplorer extends Item implements ICurioItem {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, level, tooltip, flag);
-        tooltip.add(Component.translatable("item_tooltip.the_last_sword.dimension_explorer"));
+        int jumpLevel = TheLastSwordConfiguration.getCuriosDimensionExplorerJumpAmplifierSafely() + 1;
+        int hasteLevel = TheLastSwordConfiguration.getCuriosDimensionExplorerHasteAmplifierSafely() + 1;
+        String emergencyHealth = String.format("%.1f",
+            TheLastSwordConfiguration.getCuriosDimensionExplorerEmergencyHealHealthSafely());
+        int emergencyFood = TheLastSwordConfiguration.getCuriosDimensionExplorerEmergencyFoodLevelSafely();
+        String effectSeconds = String.format("%.1f",
+            TheLastSwordConfiguration.getCuriosDimensionExplorerEffectDurationSafely() / 20.0);
+        String cooldownSeconds = String.format("%.1f",
+            TheLastSwordConfiguration.getCuriosDimensionExplorerCooldownSafely() / 20.0);
+        tooltip.add(Component.translatable("item_tooltip.the_last_sword.dimension_explorer",
+            jumpLevel, emergencyHealth, emergencyFood, hasteLevel, effectSeconds, cooldownSeconds));
         tooltip.add(Component.translatable("item_tooltip_lore.the_last_sword.dimension_explorer")
             .withStyle(net.minecraft.ChatFormatting.GRAY));
     }

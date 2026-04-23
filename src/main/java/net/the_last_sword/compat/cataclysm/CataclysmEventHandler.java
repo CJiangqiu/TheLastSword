@@ -15,8 +15,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ShieldItem;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
@@ -73,32 +71,38 @@ public class CataclysmEventHandler {
         handleEnderGuardianMedalVoidPunch(event.getEntity(), event.getTarget());
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void onLivingAttack(LivingAttackEvent event) {
+    //伤害加成（乘法）：焰魔×1.5、灵骸×负面效果数
+    @SubscribeEvent(priority = EventPriority.HIGH, receiveCanceled = true)
+    public static void onLivingHurtCataclysmDamageBonus(LivingHurtEvent event) {
         if (!CompatCheck.isCataclysmLoaded()) {
             return;
         }
 
-        if (event.getSource().getEntity() instanceof Player attacker) {
-            LivingEntity targetEntity = event.getEntity();
-            handleIgnisMedalBattleWill(attacker, targetEntity);
-            handleNetheriteMonstrosityMedalPowerCell(attacker, targetEntity);
-            handleLeviathanMedalAbyssalRoar(attacker, targetEntity);
-            handleMaledictusMedalCurse(attacker, targetEntity);
-            handleScyllaMedalStorm(attacker, targetEntity);
+        if (!(event.getSource().getEntity() instanceof Player attacker)) {
+            return;
         }
+
+        handleIgnisMedalDamageBonus(event, attacker);
+        handleMaledictusMedalDamageBonus(event, attacker);
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void onLivingDamage(LivingDamageEvent event) {
+    //状态效果附加：焰魔战意、巨兽点燃缓慢、利维坦深渊烧灼、灵骸虚弱、斯库拉潮湿+落雷
+    @SubscribeEvent(priority = EventPriority.LOW, receiveCanceled = true)
+    public static void onLivingHurtCataclysmEffects(LivingHurtEvent event) {
         if (!CompatCheck.isCataclysmLoaded()) {
             return;
         }
 
-        if (event.getSource().getEntity() instanceof Player attacker) {
-            handleIgnisMedalDamageBonus(event, attacker);
-            handleMaledictusMedalDamageBonus(event, attacker);
+        if (!(event.getSource().getEntity() instanceof Player attacker)) {
+            return;
         }
+
+        LivingEntity target = event.getEntity();
+        handleIgnisMedalBattleWill(attacker, target);
+        handleNetheriteMonstrosityMedalPowerCell(attacker, target);
+        handleLeviathanMedalAbyssalRoar(attacker, target);
+        handleMaledictusMedalCurse(attacker, target);
+        handleScyllaMedalStorm(attacker, target);
     }
 
     //处理先驱者奖章的弹射物免疫效果
@@ -305,7 +309,7 @@ public class CataclysmEventHandler {
     }
 
     //处理咒翼灵骸奖章的伤害加成
-    private static void handleMaledictusMedalDamageBonus(LivingDamageEvent event, Player attacker) {
+    private static void handleMaledictusMedalDamageBonus(LivingHurtEvent event, Player attacker) {
         if (!hasMedalInAnySlot(attacker, CataclysmMedals.MaledictusMedal.class)) {
             return;
         }
@@ -324,7 +328,7 @@ public class CataclysmEventHandler {
     }
 
     //处理焰魔奖章的伤害加成效果
-    private static void handleIgnisMedalDamageBonus(LivingDamageEvent event, Player attacker) {
+    private static void handleIgnisMedalDamageBonus(LivingHurtEvent event, Player attacker) {
         if (!hasMedalInAnySlot(attacker, CataclysmMedals.IgnisMedal.class)) {
             return;
         }

@@ -35,6 +35,10 @@ public abstract class TheLastEndSwordItemsProjectile extends ThrowableProjectile
     protected int enchantKnockback = 0;
     protected boolean enchantFlame = false;
 
+    //发射时伤害快照
+    protected float snapshotBaseDamage = 0;
+    protected float snapshotExtraDamage = 0;
+
     public TheLastEndSwordItemsProjectile(EntityType<? extends TheLastEndSwordItemsProjectile> type, Level world) {
         super(type, world);
         this.shooterUUID = null;
@@ -83,32 +87,8 @@ public abstract class TheLastEndSwordItemsProjectile extends ThrowableProjectile
             return;
         }
 
-        if (target instanceof LivingEntity livingTarget) {
-            //1. 造成基础物理伤害
-            applyBaseDamage(livingTarget);
-
-            //2. 清除无敌时间
-            livingTarget.invulnerableTime = 0;
-
-            //3. 造成额外伤害
-            applyExtraDamage(livingTarget);
-
-            //4. 附魔效果：击退
-            if (enchantKnockback > 0) {
-                Vec3 knockbackDir = this.getDeltaMovement().normalize().scale(enchantKnockback * 0.6);
-                if (knockbackDir.lengthSqr() > 0) {
-                    livingTarget.push(knockbackDir.x, 0.1, knockbackDir.z);
-                }
-            }
-
-            //5. 附魔效果：火矢
-            if (enchantFlame) {
-                livingTarget.setSecondsOnFire(5);
-            }
-
-            //6. 生成视觉效果
-            applyVisualEffect(livingTarget);
-        } else if (target instanceof EndCrystal endCrystal) {
+        //末影水晶特殊处理：转换为掉落物，不造成爆炸
+        if (target instanceof EndCrystal endCrystal) {
             if (!endCrystal.level().isClientSide) {
                 ItemStack crystalItem = new ItemStack(Items.END_CRYSTAL);
                 ItemEntity itemEntity = new ItemEntity(
@@ -121,17 +101,51 @@ public abstract class TheLastEndSwordItemsProjectile extends ThrowableProjectile
                 endCrystal.level().addFreshEntity(itemEntity);
                 endCrystal.discard();
             }
+            return;
         }
+
+        //1. 造成基础物理伤害
+        applyBaseDamage(target);
+
+        //2. 清除无敌时间（仅 LivingEntity 有此字段；末影龙部件等由其自身 hurt 转发处理）
+        if (target instanceof LivingEntity livingTarget) {
+            livingTarget.invulnerableTime = 0;
+        }
+
+        //3. 造成额外伤害
+        applyExtraDamage(target);
+
+        //4. 附魔效果：击退
+        if (enchantKnockback > 0) {
+            Vec3 knockbackDir = this.getDeltaMovement().normalize().scale(enchantKnockback * 0.6);
+            if (knockbackDir.lengthSqr() > 0) {
+                target.push(knockbackDir.x, 0.1, knockbackDir.z);
+            }
+        }
+
+        //5. 附魔效果：火矢
+        if (enchantFlame) {
+            target.setSecondsOnFire(5);
+        }
+
+        //6. 生成视觉效果
+        applyVisualEffect(target);
     }
 
-    //造成基础物理伤害
-    protected abstract void applyBaseDamage(LivingEntity target);
+    //设置发射时伤害快照
+    public void setSnapshotDamage(float baseDamage, float extraDamage) {
+        this.snapshotBaseDamage = baseDamage;
+        this.snapshotExtraDamage = extraDamage;
+    }
+
+    //造成基础物理伤害（target 可能是 LivingEntity 或末影龙部件等 Entity 子类）
+    protected abstract void applyBaseDamage(Entity target);
 
     //造成额外伤害
-    protected abstract void applyExtraDamage(LivingEntity target);
+    protected abstract void applyExtraDamage(Entity target);
 
     //生成视觉效果
-    protected abstract void applyVisualEffect(LivingEntity target);
+    protected abstract void applyVisualEffect(Entity target);
 
     //击中方块时：生成视觉效果，然后标记已击中地面
     @Override

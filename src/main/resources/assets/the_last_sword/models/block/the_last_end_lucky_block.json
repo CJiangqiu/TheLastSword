@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "the_last_sword:block/the_last_end_lucky_block"
+  }
+}

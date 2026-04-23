@@ -2,13 +2,11 @@ package net.the_last_sword.entity.ai;
 
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.entity.LostWraithEntity;
 
 // 迷失战魂耐心机制Goal
 public class LostWraithPatienceGoal extends Goal {
-    private static final double PATIENCE_DISTANCE = 4.0;
-    private static final int MAX_PATIENCE_TICKS = 240;
-
     private final LostWraithEntity wraith;
 
     public LostWraithPatienceGoal(LostWraithEntity wraith) {
@@ -40,9 +38,9 @@ public class LostWraithPatienceGoal extends Goal {
         }
 
         double distance = wraith.distanceTo(target);
-        if (distance > PATIENCE_DISTANCE) {
+        if (distance > TheLastSwordConfiguration.getLostWraithPatienceTriggerDistanceSafely()) {
             int patienceTick = wraith.incrementPatienceTick();
-            if (patienceTick >= MAX_PATIENCE_TICKS) {
+            if (patienceTick >= TheLastSwordConfiguration.getLostWraithPatienceTimeoutSafely()) {
                 wraith.setForceEndStrike(true);
                 wraith.resetPatience();
             }

@@ -14,23 +14,16 @@
   ],
   "mixins": [
     "BlockBehaviourMixin",
-    "ChunkMapMixin",
-    "ClassInstanceMultiMapMixin",
     "ConnectionMixin",
     "EndCrystalMixin",
-    "EntityLookupMixin",
     "EntityMixin",
-    "EntitySectionMixin",
-    "EntityTickListMixin",
     "InventoryMixin",
     "LivingEntityMixin",
     "MobMixin",
     "PlayerMixin",
     "PersistentEntitySectionManagerMixin",
     "PersistentEntitySectionManagerMixin$CallbackMixin",
-    "ServerGamePacketListenerImplMixin",
-    "ServerLevelMixin",
-    "TransientEntitySectionManagerMixin"
+    "ServerGamePacketListenerImplMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -5,14 +5,13 @@ import java.util.List;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.target.TargetGoal;
 import net.minecraft.world.entity.player.Player;
+import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.entity.GuardianOfSealedSpireEntity;
 import net.the_last_sword.entity.LostWraithEntity;
 import net.the_last_sword.util.EntityUtil;
 
 // 守卫协同锁定目标Goal
 public class GuardianAssistAllyTargetGoal extends TargetGoal {
-    private static final double MAX_SEARCH_DISTANCE = 32.0;
-
     private final GuardianOfSealedSpireEntity guardian;
     private LivingEntity allyTarget;
 
@@ -39,9 +38,10 @@ public class GuardianAssistAllyTargetGoal extends TargetGoal {
     }
 
     private LivingEntity findAllyTarget() {
+        double maxSearchDistance = TheLastSwordConfiguration.getGuardianAssistAllyMaxSearchDistanceSafely();
         List<GuardianOfSealedSpireEntity> nearbyGuardians = guardian.level().getEntitiesOfClass(
             GuardianOfSealedSpireEntity.class,
-            guardian.getBoundingBox().inflate(MAX_SEARCH_DISTANCE),
+            guardian.getBoundingBox().inflate(maxSearchDistance),
             ally -> ally != guardian && ally.isAlive() && !ally.isDying() && ally.getTarget() != null
         );
 
@@ -54,7 +54,7 @@ public class GuardianAssistAllyTargetGoal extends TargetGoal {
                 continue;
             }
             double distance = guardian.distanceTo(target);
-            if (distance <= MAX_SEARCH_DISTANCE && distance < nearestDistance) {
+            if (distance <= maxSearchDistance && distance < nearestDistance) {
                 nearestDistance = distance;
                 nearestTarget = target;
             }

@@ -46,6 +46,7 @@ public class ConfigRecipeManager {
             List<Path> jsonFiles = stream
                     .filter(Files::isRegularFile)
                     .filter(p -> p.toString().endsWith(".json"))
+                    .filter(p -> !p.getFileName().toString().endsWith(".disabled.json"))
                     .toList();
             for (Path recipePath : jsonFiles) {
                 try {

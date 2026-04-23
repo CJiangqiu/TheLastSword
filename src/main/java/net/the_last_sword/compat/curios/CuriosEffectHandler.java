@@ -1,5 +1,6 @@
 package net.the_last_sword.compat.curios;
 
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -13,7 +14,6 @@ import net.minecraft.world.food.FoodData;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
@@ -21,6 +21,7 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.the_last_sword.compat.CompatCheck;
+import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
 import net.the_last_sword.init.ModEffects;
 import net.the_last_sword.init.ModItems;
@@ -39,11 +40,10 @@ public class CuriosEffectHandler {
     private static final ThreadLocal<Boolean> CONVERTING_DAMAGE = ThreadLocal.withInitial(() -> false);
     //防止给予者的痛苦追加绝毁伤害递归
     private static final ThreadLocal<Boolean> APPLYING_GIVERS_PAIN_DAMAGE = ThreadLocal.withInitial(() -> false);
-    private static final int GIVERS_PAIN_EFFECT_DURATION = 120;
-    private static final int GIVERS_PAIN_EFFECT_AMPLIFIER = 0;
 
-    @SubscribeEvent(priority = EventPriority.HIGH)
-    public static void onLivingDamageDragonCrystalRing(LivingDamageEvent event) {
+    //龙水晶指环伤害加成（×1.5）
+    @SubscribeEvent(priority = EventPriority.HIGH, receiveCanceled = true)
+    public static void onLivingHurtDragonCrystalRing(LivingHurtEvent event) {
         if (!CompatCheck.isCuriosLoaded()) {
             return;
         }
@@ -55,8 +55,9 @@ public class CuriosEffectHandler {
         handleDragonCrystalRingDamageBonus(event, attacker);
     }
 
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void onLivingDamageGiversPain(LivingDamageEvent event) {
+    //给予者的痛苦：随机共享负面效果 + 绝毁伤害（最后附加）
+    @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = true)
+    public static void onLivingHurtGiversPain(LivingHurtEvent event) {
         if (!CompatCheck.isCuriosLoaded()) {
             return;
         }
@@ -70,7 +71,7 @@ public class CuriosEffectHandler {
     }
 
     //处理给予者的痛苦：随机共享负面效果 + 绝对毁灭伤害
-    private static void handleGiversPainAttack(LivingDamageEvent event, Player attacker, LivingEntity target) {
+    private static void handleGiversPainAttack(LivingHurtEvent event, Player attacker, LivingEntity target) {
         if (!hasCurioEquipped(attacker, ModItems.THE_GIVERS_PAIN.get())) {
             return;
         }
@@ -87,7 +88,11 @@ public class CuriosEffectHandler {
         float attackDamage = (float) attacker.getAttributeValue(Attributes.ATTACK_DAMAGE);
         float attackerLostHealth = Math.max(0.0f, attacker.getMaxHealth() - attacker.getHealth());
         float targetLostHealth = Math.max(0.0f, target.getMaxHealth() - target.getHealth());
-        float absoluteDamage = attackDamage + attackerLostHealth + targetLostHealth;
+        float absoluteDamage = (float) (
+              attackDamage * TheLastSwordConfiguration.getCuriosGiversPainAttackDamageMultiplierSafely()
+            + attackerLostHealth * TheLastSwordConfiguration.getCuriosGiversPainAttackerLostHealthMultiplierSafely()
+            + targetLostHealth * TheLastSwordConfiguration.getCuriosGiversPainTargetLostHealthMultiplierSafely()
+        );
         if (absoluteDamage <= 0.0f) {
             return;
         }
@@ -107,6 +112,10 @@ public class CuriosEffectHandler {
             if (effect == null) {
                 continue;
             }
+            ResourceLocation effectId = ForgeRegistries.MOB_EFFECTS.getKey(effect);
+            if (effectId == null || !"minecraft".equals(effectId.getNamespace())) {
+                continue;
+            }
             if (effect.getCategory() != MobEffectCategory.HARMFUL || effect.isInstantenous()) {
                 continue;
             }
@@ -122,8 +131,8 @@ public class CuriosEffectHandler {
             availableEffects.get(attacker.getRandom().nextInt(availableEffects.size()));
         MobEffectInstance instance = new MobEffectInstance(
             selectedEffect,
-            GIVERS_PAIN_EFFECT_DURATION,
-            GIVERS_PAIN_EFFECT_AMPLIFIER,
+            TheLastSwordConfiguration.getCuriosGiversPainEffectDurationSafely(),
+            TheLastSwordConfiguration.getCuriosGiversPainEffectAmplifierSafely(),
             false,
             true,
             true
@@ -148,9 +157,12 @@ public class CuriosEffectHandler {
             return;
         }
 
-        //计算暴击加成：20% + 幸运值×20%
+        //计算暴击加成：base + 幸运值×perLuck
         double luck = player.getAttributeValue(Attributes.LUCK);
-        float bonusMultiplier = (float) (0.2 + luck * 0.2);
+        float bonusMultiplier = (float) (
+            TheLastSwordConfiguration.getCuriosDragonCrystalNecklaceCritChanceBaseSafely()
+          + luck * TheLastSwordConfiguration.getCuriosDragonCrystalNecklaceCritChancePerLuckSafely()
+        );
 
         //在原有暴击倍率基础上增加
         float newModifier = event.getDamageModifier() + bonusMultiplier;
@@ -204,7 +216,8 @@ public class CuriosEffectHandler {
 
         //检查是否是虚空伤害（掉出世界）
         if (isOutOfWorldDamage(event.getSource())) {
-            event.setAmount(event.getAmount() * 0.1f);
+            float reduction = (float) TheLastSwordConfiguration.getCuriosWingsVoidDamageReductionSafely();
+            event.setAmount(event.getAmount() * reduction);
         }
     }
 
@@ -214,13 +227,14 @@ public class CuriosEffectHandler {
     }
 
     //处理龙水晶指环的伤害加成（+50%伤害）
-    private static void handleDragonCrystalRingDamageBonus(LivingDamageEvent event, Player attacker) {
+    private static void handleDragonCrystalRingDamageBonus(LivingHurtEvent event, Player attacker) {
         if (!hasCurioEquipped(attacker, ModItems.DRAGON_CRYSTAL_RING.get())) {
             return;
         }
 
         float originalDamage = event.getAmount();
-        event.setAmount(originalDamage * 1.5f);
+        float multiplier = (float) TheLastSwordConfiguration.getCuriosDragonCrystalRingDamageMultiplierSafely();
+        event.setAmount(originalDamage * multiplier);
     }
 
     //处理龙水晶项链的概率免疫伤害
@@ -229,9 +243,13 @@ public class CuriosEffectHandler {
             return;
         }
 
-        //计算免疫概率：20% + 幸运值×20%，最高90%
+        //计算免疫概率：base + 幸运值×perLuck，最高 max
         double luck = player.getAttributeValue(Attributes.LUCK);
-        double totalChance = Math.min(0.9, 0.2 + luck * 0.2);
+        double totalChance = Math.min(
+            TheLastSwordConfiguration.getCuriosDragonCrystalNecklaceImmunityChanceMaxSafely(),
+            TheLastSwordConfiguration.getCuriosDragonCrystalNecklaceImmunityChanceBaseSafely()
+              + luck * TheLastSwordConfiguration.getCuriosDragonCrystalNecklaceImmunityChancePerLuckSafely()
+        );
 
         if (player.getRandom().nextDouble() < totalChance) {
             event.setCanceled(true);
@@ -242,6 +260,11 @@ public class CuriosEffectHandler {
     private static void handleDragonCrystalCrownVoidConversion(LivingHurtEvent event, Player player) {
         //防止递归
         if (CONVERTING_DAMAGE.get()) {
+            return;
+        }
+
+        //配置开关：虚空转换未启用时跳过
+        if (!TheLastSwordConfiguration.getCuriosDragonCrystalCrownVoidConversionEnabledSafely()) {
             return;
         }
 
@@ -268,9 +291,6 @@ public class CuriosEffectHandler {
             CONVERTING_DAMAGE.set(false);
         }
     }
-
-    private static final int DIMENSION_EXPLORER_COOLDOWN = 600;  //30秒
-    private static final int DIMENSION_EXPLORER_EFFECT_DURATION = 260;  //13秒
 
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
@@ -301,20 +321,23 @@ public class CuriosEffectHandler {
 
         float maxHealth = player.getMaxHealth();
         float lostHealth = maxHealth - player.getHealth();
-        int bonusLevel = (int) (lostHealth / (maxHealth * 0.2f));
+        float thresholdRatio = (float) TheLastSwordConfiguration.getCuriosExtremeLifeSupportTierThresholdSafely();
+        int bonusLevel = (int) (lostHealth / (maxHealth * thresholdRatio));
+        int duration = TheLastSwordConfiguration.getCuriosExtremeLifeSupportEffectDurationSafely();
 
-        player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 60, bonusLevel, false, false, true));
-        player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 60, bonusLevel, false, false, true));
-        player.addEffect(new MobEffectInstance(MobEffects.SATURATION, 60, 0, false, false, true));
+        player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, duration, bonusLevel, false, false, true));
+        player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, bonusLevel, false, false, true));
+        player.addEffect(new MobEffectInstance(MobEffects.SATURATION, duration, 0, false, false, true));
     }
 
-    //维度探索者：跳跃提升II
+    //维度探索者：跳跃提升
     private static void handleDimensionExplorerTick(Player player) {
         if (!hasCurioEquipped(player, ModItems.DIMENSION_EXPLORER.get())) {
             return;
         }
 
-        player.addEffect(new MobEffectInstance(MobEffects.JUMP, 60, 1, false, false, true));
+        int jumpAmplifier = TheLastSwordConfiguration.getCuriosDimensionExplorerJumpAmplifierSafely();
+        player.addEffect(new MobEffectInstance(MobEffects.JUMP, 60, jumpAmplifier, false, false, true));
     }
 
     //维度探索者：死亡保护
@@ -338,22 +361,28 @@ public class CuriosEffectHandler {
             return;
         }
 
+        int effectDuration = TheLastSwordConfiguration.getCuriosDimensionExplorerEffectDurationSafely();
+        int cooldown = TheLastSwordConfiguration.getCuriosDimensionExplorerCooldownSafely();
+        int hasteAmplifier = TheLastSwordConfiguration.getCuriosDimensionExplorerHasteAmplifierSafely();
+        float emergencyHealth = (float) TheLastSwordConfiguration.getCuriosDimensionExplorerEmergencyHealHealthSafely();
+        int emergencyFoodLevel = TheLastSwordConfiguration.getCuriosDimensionExplorerEmergencyFoodLevelSafely();
+
         //阻止死亡
         event.setCanceled(true);
-        player.setHealth(1.0F);
+        player.setHealth(emergencyHealth);
 
-        //饱食度设为1
+        //饱食度设为配置值
         FoodData foodData = player.getFoodData();
-        foodData.setFoodLevel(1);
+        foodData.setFoodLevel(emergencyFoodLevel);
 
-        //虚化13秒
-        player.addEffect(new MobEffectInstance(ModEffects.PHASING.get(), DIMENSION_EXPLORER_EFFECT_DURATION, 0, false, true, true));
+        //虚化
+        player.addEffect(new MobEffectInstance(ModEffects.PHASING.get(), effectDuration, 0, false, true, true));
 
-        //急迫III 13秒
-        player.addEffect(new MobEffectInstance(MobEffects.DIG_SPEED, DIMENSION_EXPLORER_EFFECT_DURATION, 2, false, true, true));
+        //急迫
+        player.addEffect(new MobEffectInstance(MobEffects.DIG_SPEED, effectDuration, hasteAmplifier, false, true, true));
 
-        //进入冷却30秒
-        player.getCooldowns().addCooldown(ModItems.DIMENSION_EXPLORER.get(), DIMENSION_EXPLORER_COOLDOWN);
+        //进入冷却
+        player.getCooldowns().addCooldown(ModItems.DIMENSION_EXPLORER.get(), cooldown);
     }
 
     //检查玩家是否装备了指定的Curios饰品

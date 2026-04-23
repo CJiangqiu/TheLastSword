@@ -2,6 +2,7 @@ package net.the_last_sword.command;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import net.eca.api.EcaAPI;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -105,7 +106,7 @@ public class AttackCommand {
         source.sendSuccess(() -> Component.literal("§e--- Revive Ban Records ---"), false);
 
         ServerLevel level = source.getLevel();
-        Map<EntityType<?>, Integer> reviveBanTypes = EntityUtil.getAllReviveBans(level);
+        Map<EntityType<?>, Integer> reviveBanTypes = EcaAPI.getAllSpawnBans(level);
 
         if (reviveBanTypes.isEmpty()) {
             source.sendSuccess(() -> Component.literal("§7No revive ban records found."), false);

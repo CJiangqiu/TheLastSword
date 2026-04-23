@@ -11,6 +11,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import org.jetbrains.annotations.Nullable;
 import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.type.capability.ICurioItem;
@@ -60,7 +61,11 @@ public class DragonCrystalCrown extends Item implements ICurioItem {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, level, tooltip, flag);
-        tooltip.add(Component.translatable("item_tooltip.the_last_sword.dragon_crystal_crown"));
+        //根据虚空转换开关显示不同提示
+        String key = TheLastSwordConfiguration.getCuriosDragonCrystalCrownVoidConversionEnabledSafely()
+            ? "item_tooltip.the_last_sword.dragon_crystal_crown.enabled"
+            : "item_tooltip.the_last_sword.dragon_crystal_crown.disabled";
+        tooltip.add(Component.translatable(key));
         tooltip.add(Component.translatable("item_tooltip_lore.the_last_sword.dragon_crystal_crown")
             .withStyle(net.minecraft.ChatFormatting.GRAY));
     }

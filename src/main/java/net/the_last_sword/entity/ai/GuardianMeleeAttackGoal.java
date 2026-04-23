@@ -4,6 +4,7 @@ import java.util.EnumSet;
 
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.entity.GuardianOfSealedSpireEntity;
 import net.the_last_sword.util.EntityUtil;
 
@@ -11,7 +12,6 @@ import net.the_last_sword.util.EntityUtil;
 public class GuardianMeleeAttackGoal extends Goal {
     private static final int ANIMATION_LENGTH = 25;
     private static final int DAMAGE_TICK = 15;
-    private static final double ATTACK_RANGE = 3.0;
 
     private final GuardianOfSealedSpireEntity guardian;
     private int animationTick;
@@ -31,7 +31,7 @@ public class GuardianMeleeAttackGoal extends Goal {
         if (target == null || !target.isAlive()) {
             return false;
         }
-        return guardian.distanceTo(target) <= ATTACK_RANGE;
+        return guardian.distanceTo(target) <= TheLastSwordConfiguration.getGuardianMeleeAttackRangeSafely();
     }
 
     @Override
@@ -74,7 +74,7 @@ public class GuardianMeleeAttackGoal extends Goal {
 
         // 动画结束时检查是否继续攻击
         if (animationTick == 0) {
-            if (target != null && target.isAlive() && guardian.distanceTo(target) <= ATTACK_RANGE) {
+            if (target != null && target.isAlive() && guardian.distanceTo(target) <= TheLastSwordConfiguration.getGuardianMeleeAttackRangeSafely()) {
                 // 目标仍在范围内，继续攻击
                 animationTick = ANIMATION_LENGTH;
                 damaged = false;
@@ -107,7 +107,7 @@ public class GuardianMeleeAttackGoal extends Goal {
         }
 
         double distance = guardian.distanceTo(target);
-        if (distance > ATTACK_RANGE) {
+        if (distance > TheLastSwordConfiguration.getGuardianMeleeAttackRangeSafely()) {
             return;
         }
 

@@ -11,6 +11,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.the_last_sword.block.entity.DragonCrystalEnchantingTableBlockEntity;
+import net.the_last_sword.configuration.TheLastSwordConfiguration;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,7 +20,6 @@ import java.util.function.Supplier;
 // 附魔应用网络包（支持增加和减少附魔）
 public class EnchantmentApplyPacket {
 
-    private static final int XP_PER_LEVEL_REMOVED = 10;
 
     private final BlockPos pos;
     // 值为目标等级，0表示移除
@@ -82,9 +82,9 @@ public class EnchantmentApplyPacket {
 
                 int diff = targetLevel - currentLevel;
                 if (diff > 0) {
-                    totalEnergyCost += 10240L * diff;
+                    totalEnergyCost += (long) TheLastSwordConfiguration.getEnchantingTableEnchantEnergyCostSafely() * diff;
                 } else {
-                    totalXpReturn += XP_PER_LEVEL_REMOVED * (-diff);
+                    totalXpReturn += TheLastSwordConfiguration.getEnchantingTableRemoveXpReturnSafely() * (-diff);
                 }
                 targetLevels.put(ench, targetLevel);
             }

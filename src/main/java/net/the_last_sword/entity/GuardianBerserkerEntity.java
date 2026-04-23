@@ -16,12 +16,11 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import org.jetbrains.annotations.Nullable;
 
 // 封印尖塔守卫 - 狂战士变种
 public class GuardianBerserkerEntity extends GuardianOfSealedSpireEntity {
-
-    private static final float LIFESTEAL_RATIO = 0.05F;
 
     public GuardianBerserkerEntity(EntityType<? extends GuardianBerserkerEntity> type, Level world) {
         super(type, world);
@@ -65,7 +64,7 @@ public class GuardianBerserkerEntity extends GuardianOfSealedSpireEntity {
 
         if (result && target instanceof LivingEntity) {
             float damage = (float) this.getAttributeValue(Attributes.ATTACK_DAMAGE);
-            float healAmount = damage * LIFESTEAL_RATIO;
+            float healAmount = damage * (float) TheLastSwordConfiguration.getGuardianBerserkerLifestealRatioSafely();
 
             if (healAmount > 0) {
                 float currentHealth = getWorldAnchor();

@@ -20,6 +20,10 @@ This mod introduces a JSON-driven crafting system, allowing you complete freedom
 
 **About customization:** You can find JSON recipe files under `config/the_last_sword/dragon_crystal_smithing_recipes/`. These files allow you to modify the `template` and `addition` fields freely, corresponding to the 1st and 3rd input slots of the Dragon Crystal Smithing Table.
 
+**Nested folder support:** You can organize recipe files into subfolders for better management, e.g. `dragon_crystal_smithing_recipes/sword/`, `dragon_crystal_smithing_recipes/armor/`. All `.json` files in nested directories will be loaded automatically.
+
+**Disabling recipes:** To disable a recipe without deleting it, simply rename the file extension to `.disabled.json` (e.g. `recipe.json` → `recipe.disabled.json`). Files ending with `.disabled.json` will be skipped during loading. This is especially useful for modpack makers who want to disable default recipes via scripts.
+
 **Example recipe format:**
 ```json
 {
@@ -165,6 +169,10 @@ We have discovered that Dragon Crystals possess a unique attraction to souls. No
 
 If you believe yourself strong enough, you may journey to the Sealed Spire in the End and free a knight who has been sealed away. After granting them peace, you will be able to summon a powerful and loyal knight—the Last End Sword Wraith—who will clear the obstacles on your path to reforging The Last Sword (though it is not invincible, of course).
 
+## Stronger Ender Dragon
+
+When you participate in slaying the Ender Dragon in the End, you will receive additional Dragon Eggs as a reward—even if you've already defeated it before. However, each time the Ender Dragon is reborn, it returns with greater strength. Its health, armor, and attack power will increase with each challenge, and its level will be displayed above its name. How far can you go?
+
 ***
 
 # Dependencies and Compatibility
@@ -207,6 +215,10 @@ Mods with added compatibility content:
 本模组引入了 JSON 驱动的合成系统，允许你完全自由地自定义每个等级的剑和盔甲的配方。该系统完全兼容 JEI。此外，还提供了大量可配置选项，让你可以自定义最终之剑的各种数值和功能。
 
 **关于自定义：** 你可以在 `config/the_last_sword/dragon_crystal_smithing_recipes/` 下找到 JSON 配方文件。这些文件允许你自由修改 `template` 和 `addition` 字段，分别对应龙晶锻造台的第 1 和第 3 个输入槽。
+
+**嵌套文件夹支持：** 你可以将配方文件组织到子文件夹中以便管理，例如 `dragon_crystal_smithing_recipes/sword/`、`dragon_crystal_smithing_recipes/armor/`。所有嵌套目录中的 `.json` 文件都会被自动加载。
+
+**禁用配方：** 要禁用某个配方而不删除文件，只需将文件扩展名改为 `.disabled.json`（例如 `recipe.json` → `recipe.disabled.json`）。以 `.disabled.json` 结尾的文件在加载时会被跳过。这对于整合包作者通过脚本禁用默认配方非常方便。
 
 **配方格式示例：**
 ```json
@@ -352,6 +364,10 @@ Mods with added compatibility content:
 我们发现龙晶对灵魂有着独特的吸引力。现在，你可以制作龙晶魂石和龙魂灯，通过击杀实体将其灵魂绑定到魂石中，使其成为你的剑灵。使用龙魂灯或其他拥有召唤模式的物品，你可以召唤对应的剑灵为你而战！这些实体会根据你武器的等级获得不同程度的强化。剑灵之间通常不会互相伤害，但某些模组的攻击实现方式可能导致友军误伤同伴或主人。
 
 如果你相信自己足够强大，可以前往末地的封印尖塔，解放一位被封印已久的骑士。在给予他们安息之后，你将能够召唤一位强大而忠诚的骑士——终焉剑灵——为你扫清重铸最终之剑路上的障碍（当然，它并非无敌）。
+
+## 更强的末影龙
+
+当你参与击杀末地的末影龙时，将会获得额外的龙蛋奖励——即使你已经战胜过它。然而，每次末影龙重生时都会带着更强的力量归来，它的生命值、护甲和攻击力都会随挑战次数提升，并在名称上显示等级。你能走多远？
 
 ***
 

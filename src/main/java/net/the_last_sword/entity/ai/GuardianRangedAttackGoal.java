@@ -3,6 +3,7 @@ package net.the_last_sword.entity.ai;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.item.ItemStack;
+import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.entity.GuardianArcherEntity;
 import net.the_last_sword.entity.GuardianOfSealedSpireEntity;
 import net.the_last_sword.util.EntityUtil;
@@ -13,8 +14,6 @@ import java.util.EnumSet;
 public class GuardianRangedAttackGoal extends Goal {
     private static final int ANIMATION_LENGTH = 30;
     private static final int FIRE_TICK = 22;
-    private static final double MIN_DISTANCE = 4.0;
-    private static final double MAX_DISTANCE = 16.0;
 
     private final GuardianArcherEntity archer;
     private int animationTick;
@@ -35,7 +34,8 @@ public class GuardianRangedAttackGoal extends Goal {
             return false;
         }
         double distance = archer.distanceTo(target);
-        return distance >= MIN_DISTANCE && distance <= MAX_DISTANCE;
+        return distance >= TheLastSwordConfiguration.getGuardianArcherRangedMinDistanceSafely()
+            && distance <= TheLastSwordConfiguration.getGuardianArcherRangedMaxDistanceSafely();
     }
 
     @Override

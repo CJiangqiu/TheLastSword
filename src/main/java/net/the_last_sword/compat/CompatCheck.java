@@ -11,6 +11,8 @@ public class CompatCheck {
     private static Boolean touhouLittleMaidLoaded = null;
     private static Boolean jadeLoaded = null;
     private static Boolean tlsuvLoaded = null;
+    private static Boolean apotheosisLoaded = null;
+    private static Boolean luckyBlockLoaded = null;
 
     public static boolean isJeiLoaded() {
         if (jeiLoaded == null) {
@@ -40,12 +42,35 @@ public class CompatCheck {
         return touhouLittleMaidLoaded;
     }
 
+    public static boolean isJadeLoaded() {
+        if (jadeLoaded == null) {
+            jadeLoaded = ModList.get().isLoaded("jade");
+        }
+        return jadeLoaded;
+    }
+
     //检测"最终之剑：虚空之下"附属mod
     public static boolean isTLSUVLoaded() {
         if (tlsuvLoaded == null) {
             tlsuvLoaded = ModList.get().isLoaded("tlsuv");
         }
         return tlsuvLoaded;
+    }
+
+    //检测神化mod（Apotheosis）
+    public static boolean isApotheosisLoaded() {
+        if (apotheosisLoaded == null) {
+            apotheosisLoaded = ModList.get().isLoaded("apotheosis");
+        }
+        return apotheosisLoaded;
+    }
+
+    //检测幸运方块本体 mod (Alex Socha 的 Lucky Block)
+    public static boolean isLuckyBlockLoaded() {
+        if (luckyBlockLoaded == null) {
+            luckyBlockLoaded = ModList.get().isLoaded("lucky");
+        }
+        return luckyBlockLoaded;
     }
 
 }

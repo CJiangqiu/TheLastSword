@@ -71,6 +71,19 @@ public class ModCreativeTabs {
                     output.accept(ModItems.THE_LEVIATHAN_MEDAL.get());
                     output.accept(ModItems.SCYLLA_MEDAL.get());
                 }
+
+                //LuckyBlock联动方块: 基础(luck=0) / 极幸运(+100) / 极不幸(-100) 三个变种; 仅在 lucky 本体 mod 加载时显示
+                if (ModItems.THE_LAST_END_LUCKY_BLOCK != null) {
+                    output.accept(ModItems.THE_LAST_END_LUCKY_BLOCK.get());
+
+                    ItemStack luckyVariant = new ItemStack(ModItems.THE_LAST_END_LUCKY_BLOCK.get());
+                    luckyVariant.getOrCreateTag().putInt("Luck", 100);
+                    output.accept(luckyVariant);
+
+                    ItemStack unluckyVariant = new ItemStack(ModItems.THE_LAST_END_LUCKY_BLOCK.get());
+                    unluckyVariant.getOrCreateTag().putInt("Luck", -100);
+                    output.accept(unluckyVariant);
+                }
             })
             .build()
     );

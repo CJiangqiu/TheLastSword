@@ -100,9 +100,9 @@ public class TheLastSword extends TheLastEndSwordItems implements ISummonableIte
             double configValue = (level < 6)
                     ? TheLastSwordConfiguration.getIncreaseValueSafely()
                     : TheLastSwordConfiguration.getIncreaseValueHighLevelSafely();
-            //计算额外伤害：基础伤害 + 敌人13%最大生命值
+            //计算额外伤害：基础伤害 + 敌人百分比最大生命值
             float baseDamage = (float) (level * configValue);
-            float percentageDamage = target.getMaxHealth() * 0.13f;
+            float percentageDamage = target.getMaxHealth() * (float) TheLastSwordConfiguration.getTheLastSwordPercentageDamageSafely();
             float extraDamage = baseDamage + percentageDamage;
             if (extraDamage > 0) {
                 target.invulnerableTime = 0;
@@ -202,9 +202,9 @@ public class TheLastSword extends TheLastEndSwordItems implements ISummonableIte
                 double configValue = (level < 6)
                         ? TheLastSwordConfiguration.getIncreaseValueSafely()
                         : TheLastSwordConfiguration.getIncreaseValueHighLevelSafely();
-                //计算额外伤害：基础伤害 + 敌人13%最大生命值
+                //计算额外伤害：基础伤害 + 敌人百分比最大生命值
                 float baseDamage = (float) (level * configValue);
-                float percentageDamage = target.getMaxHealth() * 0.13f;
+                float percentageDamage = target.getMaxHealth() * (float) TheLastSwordConfiguration.getTheLastSwordPercentageDamageSafely();
                 float extraDamage = baseDamage + percentageDamage;
 
                 //先造成物理伤害
@@ -333,8 +333,10 @@ public class TheLastSword extends TheLastEndSwordItems implements ISummonableIte
             float ratio = (float) TheLastSwordConfiguration.getDefenceCustomHealthDamageReductionSafely();
             damageLimit = Math.min(maxHealth * ratio, damageLimit);
         }
+        String percentageDamageStr = String.format("%.0f",
+                TheLastSwordConfiguration.getTheLastSwordPercentageDamageSafely() * 100);
         tooltip.add(Component.translatable("item_tooltip.the_last_sword.the_last_sword.passive",
-                String.format("%.0f", damageLimit)));
+                percentageDamageStr, String.format("%.0f", damageLimit)));
 
         //7. 当前模式切换绑定按键
         tooltip.add(
@@ -346,6 +348,14 @@ public class TheLastSword extends TheLastEndSwordItems implements ISummonableIte
         //8. Lore提示
         tooltip.add(Component.translatable("item_tooltip_lore.the_last_sword.the_last_sword")
             .withStyle(net.minecraft.ChatFormatting.GRAY));
+    }
+
+    @Override
+    protected boolean canMineInCurrentMode(ItemStack stack) {
+        int mode = ItemModeHelper.getMode(stack);
+        if (mode == 0) return TheLastSwordConfiguration.getTheLastSwordNormalModeCanMineSafely();
+        if (mode == 1) return true;
+        return TheLastSwordConfiguration.getTheLastSwordSummonModeCanMineSafely();
     }
 
     //获取模式翻译键

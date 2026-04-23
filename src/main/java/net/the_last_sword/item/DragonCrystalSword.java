@@ -145,4 +145,9 @@ public class DragonCrystalSword extends TheLastEndSwordItems {
         list.add(Component.translatable("item_tooltip_lore.the_last_sword.dragon_crystal_sword")
             .withStyle(net.minecraft.ChatFormatting.GRAY));
     }
+
+    @Override
+    protected boolean canMineInCurrentMode(ItemStack stack) {
+        return TheLastSwordConfiguration.getDragonCrystalSwordCanMineSafely();
+    }
 }

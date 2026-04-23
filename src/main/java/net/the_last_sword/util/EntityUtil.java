@@ -1,10 +1,8 @@
 package net.the_last_sword.util;
 
 import net.eca.api.EcaAPI;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -17,7 +15,6 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.scores.Team;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.item.BowItem;
@@ -26,13 +23,10 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.summon.WraithSummonManager;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -302,11 +296,11 @@ public class EntityUtil {
     public static void theLastEndSetDead(LivingEntity entity, DamageSource damageSource) {
         if (entity == null || damageSource == null) return;
 
-        //添加实体类型到禁复活表（玩家除外）
+        //添加实体类型到 ECA 禁生成表（玩家除外）
         if (!(entity instanceof Player) && entity.level() instanceof ServerLevel serverLevel) {
             int banTime = TheLastSwordConfiguration.getReviveBanTimeSafely();
             if (banTime > 0) {
-                addReviveBan(serverLevel, entity.getType(), banTime);
+                EcaAPI.banSpawn(serverLevel, entity.getType(), banTime);
             }
         }
 
@@ -690,163 +684,4 @@ public class EntityUtil {
         }
     }
 
-    // ==================== 禁复活模块（世界级别） ====================
-
-    //添加实体类型禁复活
-    public static void addReviveBan(ServerLevel level, EntityType<?> type, int timeInSeconds) {
-        if (level == null || type == null || timeInSeconds <= 0) return;
-        ReviveBanData.get(level).addBan(type, timeInSeconds);
-    }
-
-    //检查实体类型是否被禁复活
-    public static boolean isReviveBanned(ServerLevel level, EntityType<?> type) {
-        if (level == null || type == null) return false;
-        return ReviveBanData.get(level).isBanned(type);
-    }
-
-    //获取禁复活剩余时间
-    public static int getReviveBanTime(ServerLevel level, EntityType<?> type) {
-        if (level == null || type == null) return 0;
-        return ReviveBanData.get(level).getBanTime(type);
-    }
-
-    //每秒 tick 更新所有禁复活倒计时
-    public static void tickReviveBans(ServerLevel level) {
-        if (level == null) return;
-        ReviveBanData.get(level).tick();
-    }
-
-    //清除指定类型的禁复活
-    public static void clearReviveBan(ServerLevel level, EntityType<?> type) {
-        if (level == null || type == null) return;
-        ReviveBanData.get(level).clearBan(type);
-    }
-
-    //获取所有禁复活类型（用于调试/显示）
-    public static Map<EntityType<?>, Integer> getAllReviveBans(ServerLevel level) {
-        if (level == null) return Map.of();
-        return ReviveBanData.get(level).getAllBans();
-    }
-
-    // ==================== 禁复活数据持久化（内部类） ====================
-
-    //世界级别禁复活数据存储
-    static class ReviveBanData extends SavedData {
-
-        private static final String DATA_NAME = "the_last_sword_revive_bans";
-
-        //EntityType 的 ResourceLocation -> 剩余时间（秒）
-        private final Map<ResourceLocation, Integer> bans = new HashMap<>();
-
-        private ReviveBanData() {}
-
-        //获取或创建实例
-        static ReviveBanData get(ServerLevel level) {
-            return level.getDataStorage().computeIfAbsent(
-                ReviveBanData::load,
-                ReviveBanData::new,
-                DATA_NAME
-            );
-        }
-
-        //从 NBT 加载
-        private static ReviveBanData load(CompoundTag tag) {
-            ReviveBanData data = new ReviveBanData();
-
-            if (tag.contains("Bans")) {
-                CompoundTag bansTag = tag.getCompound("Bans");
-                for (String key : bansTag.getAllKeys()) {
-                    ResourceLocation typeId = ResourceLocation.tryParse(key);
-                    if (typeId != null) {
-                        data.bans.put(typeId, bansTag.getInt(key));
-                    }
-                }
-            }
-
-            return data;
-        }
-
-        @Override
-        public CompoundTag save(CompoundTag tag) {
-            CompoundTag bansTag = new CompoundTag();
-
-            for (Map.Entry<ResourceLocation, Integer> entry : bans.entrySet()) {
-                bansTag.putInt(entry.getKey().toString(), entry.getValue());
-            }
-
-            tag.put("Bans", bansTag);
-            return tag;
-        }
-
-        //添加禁复活
-        void addBan(EntityType<?> type, int timeInSeconds) {
-            ResourceLocation typeId = ForgeRegistries.ENTITY_TYPES.getKey(type);
-            if (typeId != null) {
-                bans.put(typeId, timeInSeconds);
-                setDirty();
-            }
-        }
-
-        //检查是否被禁复活
-        boolean isBanned(EntityType<?> type) {
-            ResourceLocation typeId = ForgeRegistries.ENTITY_TYPES.getKey(type);
-            if (typeId == null) return false;
-            Integer time = bans.get(typeId);
-            return time != null && time > 0;
-        }
-
-        //获取剩余时间
-        int getBanTime(EntityType<?> type) {
-            ResourceLocation typeId = ForgeRegistries.ENTITY_TYPES.getKey(type);
-            if (typeId == null) return 0;
-            return bans.getOrDefault(typeId, 0);
-        }
-
-        //清除禁复活
-        void clearBan(EntityType<?> type) {
-            ResourceLocation typeId = ForgeRegistries.ENTITY_TYPES.getKey(type);
-            if (typeId != null && bans.remove(typeId) != null) {
-                setDirty();
-            }
-        }
-
-        //获取所有禁复活
-        Map<EntityType<?>, Integer> getAllBans() {
-            Map<EntityType<?>, Integer> result = new HashMap<>();
-
-            for (Map.Entry<ResourceLocation, Integer> entry : bans.entrySet()) {
-                EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(entry.getKey());
-                if (type != null) {
-                    result.put(type, entry.getValue());
-                }
-            }
-
-            return result;
-        }
-
-        //每秒 tick 更新倒计时
-        void tick() {
-            if (bans.isEmpty()) return;
-
-            boolean changed = false;
-            Iterator<Map.Entry<ResourceLocation, Integer>> iterator = bans.entrySet().iterator();
-
-            while (iterator.hasNext()) {
-                Map.Entry<ResourceLocation, Integer> entry = iterator.next();
-                int newTime = entry.getValue() - 1;
-
-                if (newTime <= 0) {
-                    iterator.remove();
-                    changed = true;
-                } else {
-                    entry.setValue(newTime);
-                    changed = true;
-                }
-            }
-
-            if (changed) {
-                setDirty();
-            }
-        }
-    }
 }

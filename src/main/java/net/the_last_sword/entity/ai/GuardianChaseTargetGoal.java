@@ -4,11 +4,11 @@ import java.util.EnumSet;
 
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.entity.GuardianOfSealedSpireEntity;
 
 // 守卫追击目标Goal
 public class GuardianChaseTargetGoal extends Goal {
-    private static final double APPROACH_DISTANCE = 2.5;
     private static final int REPATH_TICKS = 10;
 
     private final GuardianOfSealedSpireEntity guardian;
@@ -31,7 +31,7 @@ public class GuardianChaseTargetGoal extends Goal {
         if (target == null || !target.isAlive()) {
             return false;
         }
-        return guardian.distanceTo(target) > APPROACH_DISTANCE;
+        return guardian.distanceTo(target) > TheLastSwordConfiguration.getGuardianChaseApproachDistanceSafely();
     }
 
     @Override
@@ -46,7 +46,7 @@ public class GuardianChaseTargetGoal extends Goal {
         if (target == null || !target.isAlive()) {
             return false;
         }
-        return guardian.distanceTo(target) > APPROACH_DISTANCE;
+        return guardian.distanceTo(target) > TheLastSwordConfiguration.getGuardianChaseApproachDistanceSafely();
     }
 
     @Override

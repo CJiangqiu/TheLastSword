@@ -5,6 +5,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.entity.LostWraithEntity;
 import net.the_last_sword.init.ModEffects;
 
@@ -87,7 +88,9 @@ public class LostWraithEnchantGoal extends Goal {
     private void applyEnchantment() {
         MobEffectInstance voidEnchant = new MobEffectInstance(
             ModEffects.VOID_ENCHANTING.get(),
-            1200, 0, false, false
+            TheLastSwordConfiguration.getLostWraithEnchantDurationSafely(),
+            TheLastSwordConfiguration.getLostWraithEnchantAmplifierSafely(),
+            false, false
         );
         wraith.addEffect(voidEnchant);
 

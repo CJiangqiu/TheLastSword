@@ -8,9 +8,9 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
@@ -21,7 +21,6 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.init.ModEntities;
 import net.the_last_sword.init.ModItems;
-import net.the_last_sword.item.DragonSword;
 import net.the_last_sword.util.nbt.ItemLevelHelper;
 import net.minecraftforge.network.PlayMessages;
 
@@ -53,48 +52,35 @@ public class DragonSwordProjectile extends TheLastEndSwordItemsProjectile {
         return PROJECTILE_ITEM;
     }
 
-    //造成基础物理伤害（通用物理伤害类型）
+    //造成基础物理伤害（使用发射时快照）
     @Override
-    protected void applyBaseDamage(LivingEntity target) {
-        float basePhysicalDamage = 200f + enchantBonusDamage;
-        DamageSource projectileDamageSource = new DamageSource(
-            this.level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE)
-                .getHolderOrThrow(DamageTypes.GENERIC),
-            this,
-            this.getOwner()
-        );
-        target.hurt(projectileDamageSource, basePhysicalDamage);
+    protected void applyBaseDamage(Entity target) {
+        if (this.getOwner() instanceof LivingEntity owner && snapshotBaseDamage > 0) {
+            DamageSource projectileDamageSource = new DamageSource(
+                this.level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE)
+                    .getHolderOrThrow(DamageTypes.GENERIC),
+                this, owner
+            );
+            target.hurt(projectileDamageSource, snapshotBaseDamage);
+        }
     }
 
-    //造成额外龙息伤害
+    //造成额外龙息伤害（使用发射时快照）
     @Override
-    protected void applyExtraDamage(LivingEntity target) {
-        if (this.getOwner() instanceof Player player) {
-            ItemStack mainHandItem = player.getMainHandItem();
-            if (mainHandItem.getItem() instanceof DragonSword) {
-                int level = ItemLevelHelper.getLevel(mainHandItem);
-
-                double configValue = (level < 6)
-                        ? TheLastSwordConfiguration.getIncreaseValueSafely()
-                        : TheLastSwordConfiguration.getIncreaseValueHighLevelSafely();
-                float extraDamage = (float) (level * configValue);
-
-                if (extraDamage > 0) {
-                    DamageSource dragonBreathDamageSource = new DamageSource(
-                        this.level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE)
-                            .getHolderOrThrow(DamageTypes.DRAGON_BREATH),
-                        this,
-                        this.getOwner()
-                    );
-                    target.hurt(dragonBreathDamageSource, extraDamage);
-                }
-            }
+    protected void applyExtraDamage(Entity target) {
+        if (this.getOwner() instanceof LivingEntity owner && snapshotExtraDamage > 0) {
+            DamageSource dragonBreathDamageSource = new DamageSource(
+                this.level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE)
+                    .getHolderOrThrow(DamageTypes.DRAGON_BREATH),
+                this, owner
+            );
+            target.hurt(dragonBreathDamageSource, snapshotExtraDamage);
         }
     }
 
     //生成龙之闪电视觉效果
     @Override
-    protected void applyVisualEffect(LivingEntity target) {
+    protected void applyVisualEffect(Entity target) {
         if (this.level() instanceof ServerLevel serverLevel) {
             DragonLightingEntity lightning = new DragonLightingEntity(ModEntities.DRAGON_LIGHTING.get(), serverLevel);
             lightning.moveTo(Vec3.atBottomCenterOf(BlockPos.containing(this.getX(), this.getY(), this.getZ())));
@@ -104,7 +90,7 @@ public class DragonSwordProjectile extends TheLastEndSwordItemsProjectile {
     }
 
     //发射弹射物的静态方法
-    public static DragonSwordProjectile shoot(Level world, LivingEntity entity, RandomSource random, UUID shooterUUID) {
+    public static DragonSwordProjectile shoot(Level world, LivingEntity entity, RandomSource random, UUID shooterUUID, float damage) {
         DragonSwordProjectile projectile = new DragonSwordProjectile(
                 ModEntities.DRAGON_SWORD_PROJECTILE.get(),
                 entity,
@@ -115,8 +101,18 @@ public class DragonSwordProjectile extends TheLastEndSwordItemsProjectile {
         Vec3 viewVector = entity.getViewVector(1.0F);
         projectile.shoot(viewVector.x, viewVector.y, viewVector.z, 4f, 0);
         projectile.setSilent(true);
-        //应用武器附魔
-        projectile.applyWeaponEnchantments(entity.getMainHandItem());
+
+        //发射时计算伤害快照
+        ItemStack weapon = entity.getMainHandItem();
+        projectile.applyWeaponEnchantments(weapon);
+        float baseDamage = damage + projectile.enchantBonusDamage;
+        int level = ItemLevelHelper.getLevel(weapon);
+        double configValue = (level < 6)
+                ? TheLastSwordConfiguration.getIncreaseValueSafely()
+                : TheLastSwordConfiguration.getIncreaseValueHighLevelSafely();
+        float extraDamage = (float) (level * configValue
+                * TheLastSwordConfiguration.getDragonSwordProjectileExtraDamageMultiplierSafely());
+        projectile.setSnapshotDamage(baseDamage, extraDamage);
 
         world.addFreshEntity(projectile);
         world.playSound(

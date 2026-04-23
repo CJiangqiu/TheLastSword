@@ -9,6 +9,8 @@ import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.block.DragonCrystalEnchantingTableBlock;
 import net.the_last_sword.block.DragonCrystalSmithingTableBlock;
 import net.the_last_sword.block.DragonSoulLanternBlock;
+import net.the_last_sword.compat.CompatCheck;
+import net.the_last_sword.compat.lucky_block.TheLastEndLuckyBlock;
 
 public class ModBlocks {
 
@@ -27,7 +29,17 @@ public class ModBlocks {
         DragonCrystalEnchantingTableBlock::new
     );
 
+    //幸运方块联动（仅在 lucky 本体 mod 加载时注册）
+    public static RegistryObject<Block> THE_LAST_END_LUCKY_BLOCK;
+
     public static void register(IEventBus eventBus) {
+        registerConditionalBlocks();
         BLOCKS.register(eventBus);
+    }
+
+    private static void registerConditionalBlocks() {
+        if (CompatCheck.isLuckyBlockLoaded()) {
+            THE_LAST_END_LUCKY_BLOCK = BLOCKS.register("the_last_end_lucky_block", TheLastEndLuckyBlock::new);
+        }
     }
 }

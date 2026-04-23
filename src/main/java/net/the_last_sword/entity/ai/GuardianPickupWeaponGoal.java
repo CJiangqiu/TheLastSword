@@ -10,13 +10,12 @@ import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SwordItem;
+import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.entity.GuardianOfSealedSpireEntity;
 
 //守卫拾取武器Goal
 public class GuardianPickupWeaponGoal extends Goal {
-    private static final double ITEM_PICKUP_DISTANCE = 8.0;
     private static final double ITEM_REACH_DISTANCE = 1.5;
-    private static final int SCAN_INTERVAL_TICKS = 20;
 
     private final GuardianOfSealedSpireEntity guardian;
     private ItemEntity targetItem;
@@ -39,7 +38,7 @@ public class GuardianPickupWeaponGoal extends Goal {
         }
 
         targetItem = findNearbyValidItem();
-        scanCooldown = SCAN_INTERVAL_TICKS;
+        scanCooldown = TheLastSwordConfiguration.getGuardianPickupScanIntervalSafely();
         return targetItem != null;
     }
 
@@ -67,7 +66,7 @@ public class GuardianPickupWeaponGoal extends Goal {
         if (targetItem == null || !targetItem.isAlive()) {
             if (scanCooldown <= 0) {
                 targetItem = findNearbyValidItem();
-                scanCooldown = SCAN_INTERVAL_TICKS;
+                scanCooldown = TheLastSwordConfiguration.getGuardianPickupScanIntervalSafely();
             }
             return;
         }
@@ -96,7 +95,7 @@ public class GuardianPickupWeaponGoal extends Goal {
     private ItemEntity findNearbyValidItem() {
         List<ItemEntity> nearbyItems = guardian.level().getEntitiesOfClass(
             ItemEntity.class,
-            guardian.getBoundingBox().inflate(ITEM_PICKUP_DISTANCE),
+            guardian.getBoundingBox().inflate(TheLastSwordConfiguration.getGuardianPickupDistanceSafely()),
             item -> item.isAlive() && isValidWeaponItem(item.getItem())
         );
 

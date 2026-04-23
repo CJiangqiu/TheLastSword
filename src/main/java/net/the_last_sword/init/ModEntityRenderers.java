@@ -10,6 +10,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.client.model.WingsThatCoverTheWorldModel;
 import net.the_last_sword.client.renderer.*;
+import net.the_last_sword.compat.lucky_block.TheLastEndLuckyBlockRenderer;
 
 //实体渲染器注册
 @Mod.EventBusSubscriber(modid = TheLastSwordMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
@@ -44,6 +45,10 @@ public class ModEntityRenderers {
         event.enqueueWork(() -> {
             BlockEntityRenderers.register(ModBlockEntities.DRAGON_CRYSTAL_ENCHANTING_TABLE.get(),
                 context -> new DragonCrystalEnchantingTableRenderer());
+            if (ModBlockEntities.THE_LAST_END_LUCKY_BLOCK != null) {
+                BlockEntityRenderers.register(ModBlockEntities.THE_LAST_END_LUCKY_BLOCK.get(),
+                    context -> new TheLastEndLuckyBlockRenderer());
+            }
         });
     }
 }

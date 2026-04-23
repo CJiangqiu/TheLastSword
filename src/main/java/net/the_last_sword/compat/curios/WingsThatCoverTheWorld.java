@@ -10,6 +10,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import net.the_last_sword.client.renderer.WingsThatCoverTheWorldRenderer;
+import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import org.jetbrains.annotations.Nullable;
 import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.client.ICurioRenderer;
@@ -53,7 +54,10 @@ public class WingsThatCoverTheWorld extends Item implements ICurioItem {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, level, tooltip, flag);
-        tooltip.add(Component.translatable("item_tooltip.the_last_sword.wings_that_cover_the_world"));
+        double reduction = TheLastSwordConfiguration.getCuriosWingsVoidDamageReductionSafely();
+        //显示减免百分比：例如 multiplier=0.1 -> 减免 90%
+        String reductionPercent = String.format("-%.0f", (1.0 - reduction) * 100);
+        tooltip.add(Component.translatable("item_tooltip.the_last_sword.wings_that_cover_the_world", reductionPercent));
         tooltip.add(Component.translatable("item_tooltip_lore.the_last_sword.wings_that_cover_the_world")
             .withStyle(net.minecraft.ChatFormatting.GRAY));
     }

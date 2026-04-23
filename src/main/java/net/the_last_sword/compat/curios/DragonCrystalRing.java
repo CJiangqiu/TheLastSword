@@ -10,6 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.init.ModAttributes;
 import org.jetbrains.annotations.Nullable;
 import top.theillusivec4.curios.api.SlotContext;
@@ -42,7 +43,9 @@ public class DragonCrystalRing extends Item implements ICurioItem {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, level, tooltip, flag);
-        tooltip.add(Component.translatable("item_tooltip.the_last_sword.dragon_crystal_ring"));
+        double multiplier = TheLastSwordConfiguration.getCuriosDragonCrystalRingDamageMultiplierSafely();
+        String bonusPercent = String.format("%+.0f", (multiplier - 1.0) * 100);
+        tooltip.add(Component.translatable("item_tooltip.the_last_sword.dragon_crystal_ring", bonusPercent));
         tooltip.add(Component.translatable("item_tooltip_lore.the_last_sword.dragon_crystal_ring")
             .withStyle(net.minecraft.ChatFormatting.GRAY));
     }

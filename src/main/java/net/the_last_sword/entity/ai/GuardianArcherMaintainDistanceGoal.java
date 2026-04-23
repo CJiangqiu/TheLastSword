@@ -5,13 +5,12 @@ import java.util.EnumSet;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.phys.Vec3;
+import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.entity.GuardianArcherEntity;
 import net.the_last_sword.entity.GuardianOfSealedSpireEntity;
 
 //弓箭守卫距离控制Goal
 public class GuardianArcherMaintainDistanceGoal extends Goal {
-    private static final double MIN_DISTANCE = 4.0;
-    private static final double MAX_DISTANCE = 16.0;
     private static final int REPATH_TICKS = 10;
 
     private final GuardianArcherEntity archer;
@@ -31,7 +30,8 @@ public class GuardianArcherMaintainDistanceGoal extends Goal {
             return false;
         }
         double distance = archer.distanceTo(target);
-        return distance < MIN_DISTANCE || distance > MAX_DISTANCE;
+        return distance < TheLastSwordConfiguration.getGuardianArcherMaintainMinDistanceSafely()
+            || distance > TheLastSwordConfiguration.getGuardianArcherMaintainMaxDistanceSafely();
     }
 
     @Override
@@ -44,7 +44,8 @@ public class GuardianArcherMaintainDistanceGoal extends Goal {
             return false;
         }
         double distance = archer.distanceTo(target);
-        return distance < MIN_DISTANCE || distance > MAX_DISTANCE;
+        return distance < TheLastSwordConfiguration.getGuardianArcherMaintainMinDistanceSafely()
+            || distance > TheLastSwordConfiguration.getGuardianArcherMaintainMaxDistanceSafely();
     }
 
     @Override
@@ -57,9 +58,9 @@ public class GuardianArcherMaintainDistanceGoal extends Goal {
         archer.getLookControl().setLookAt(target, 30.0F, 30.0F);
 
         double distance = archer.distanceTo(target);
-        if (distance < MIN_DISTANCE) {
+        if (distance < TheLastSwordConfiguration.getGuardianArcherMaintainMinDistanceSafely()) {
             retreatFrom(target);
-        } else if (distance > MAX_DISTANCE) {
+        } else if (distance > TheLastSwordConfiguration.getGuardianArcherMaintainMaxDistanceSafely()) {
             approachTarget(target);
         } else {
             archer.getNavigation().stop();

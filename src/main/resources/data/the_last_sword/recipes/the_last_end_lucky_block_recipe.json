@@ -1,0 +1,35 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "lucky"
+        }
+      ],
+      "recipe": {
+        "type": "minecraft:crafting_shaped",
+        "pattern": [
+          "OCO",
+          "CLC",
+          "OCO"
+        ],
+        "key": {
+          "O": {
+            "item": "minecraft:obsidian"
+          },
+          "C": {
+            "item": "the_last_sword:dragon_crystal"
+          },
+          "L": {
+            "item": "lucky:lucky_block"
+          }
+        },
+        "result": {
+          "item": "the_last_sword:the_last_end_lucky_block"
+        }
+      }
+    }
+  ]
+}

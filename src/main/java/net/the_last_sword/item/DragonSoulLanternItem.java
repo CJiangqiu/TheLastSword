@@ -105,9 +105,15 @@ public class DragonSoulLanternItem extends BlockItem implements ICurioItem, ISum
             float healthBonus = itemLevel * healthPerLevel;
             float attackBonus = itemLevel * attackPerLevel;
 
+            String placedRange = String.format("%.0f",
+                    TheLastSwordConfiguration.getDragonSoulLanternRangePlacedSafely());
+            String equippedRange = String.format("%.0f",
+                    TheLastSwordConfiguration.getDragonSoulLanternRangeEquippedSafely());
             tooltip.add(Component.translatable("item_tooltip.the_last_sword.dragon_soul_lantern_descr",
                     String.format("%.0f", healthBonus),
-                    String.format("%.0f", attackBonus)));
+                    String.format("%.0f", attackBonus),
+                    placedRange,
+                    equippedRange));
         }
     }
 
