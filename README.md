@@ -190,7 +190,9 @@ This mod requires 3 essential dependency mods:
 Mods with added compatibility content:
 
 - [JEI](https://www.curseforge.com/minecraft/mc-mods/jei)
+- [Jade](https://www.curseforge.com/minecraft/mc-mods/jade)
 - [L_Ender's Cataclysm](https://www.curseforge.com/minecraft/mc-mods/lendercataclysm)
+- [Lucky Block](https://www.curseforge.com/minecraft/mc-mods/lucky-block)
 
 ---
 
@@ -386,4 +388,6 @@ Mods with added compatibility content:
 已添加兼容内容的模组：
 
 - [JEI](https://www.curseforge.com/minecraft/mc-mods/jei)
+- [Jade](https://www.curseforge.com/minecraft/mc-mods/jade)
 - [L_Ender's Cataclysm](https://www.curseforge.com/minecraft/mc-mods/lendercataclysm)
+- [Lucky Block](https://www.curseforge.com/minecraft/mc-mods/lucky-block)

@@ -91,6 +91,12 @@ public class AbsoluteDestructionDamageSource extends DamageSource {
 
     public static boolean applyAbsoluteDestruction(LivingEntity entity, DamageSource damageSource, float damageAmount) {
 
+        //盟友关系兜底：attacker 非空时走 canAttack，环境伤害（attacker 为空）放行
+        Entity attacker = damageSource.getEntity();
+        if (attacker != null && !EntityUtil.canAttack(attacker, entity)) {
+            return false;
+        }
+
         //被肃正防御护盾抵挡
         var justifiedDefenceAttribute = entity.getAttribute(ModAttributes.JUSTIFIED_DEFENCE.get());
         if (justifiedDefenceAttribute != null && justifiedDefenceAttribute.getValue() > 0) {
@@ -115,19 +121,20 @@ public class AbsoluteDestructionDamageSource extends DamageSource {
         if (Float.isNaN(originalHealth) || Float.isInfinite(originalHealth) || originalHealth <= 0.0F) {
             if (TheLastSwordConfiguration.getEnableTheLastEndSetDeadSafely()) {
                 EntityUtil.theLastEndSetDead(entity, damageSource);
-                return true;
+            } else {
+                EntityUtil.theLastEndSetHealth(entity, 0);
             }
+            return true;
         }
 
         float expectedHealth = originalHealth - damageAmount;
 
         //预期血量判定
         if (expectedHealth <= 0) {
-            //预期血量≤0，直接终焉死亡
             if (TheLastSwordConfiguration.getEnableTheLastEndSetDeadSafely()) {
                 EntityUtil.theLastEndSetDead(entity, damageSource);
+                return true;
             }
-            return true;
         }
 
         entity.invulnerableTime=0;

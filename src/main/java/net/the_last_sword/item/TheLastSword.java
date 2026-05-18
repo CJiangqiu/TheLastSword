@@ -72,7 +72,7 @@ public class TheLastSword extends TheLastEndSwordItems implements ISummonableIte
             public Ingredient getRepairIngredient() {
                 return Ingredient.of(new ItemStack(Items.DRAGON_EGG)); //修复材料
             }
-        }, 3, -2.4f, new Item.Properties().fireResistant().rarity(Rarity.EPIC), 1024f, 200);
+        }, 3, 2.4f, new Item.Properties().fireResistant().rarity(Rarity.EPIC), 1024f, 200);
     }
 
     @Override

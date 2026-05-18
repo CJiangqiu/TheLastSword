@@ -21,6 +21,7 @@
     "LivingEntityMixin",
     "MobMixin",
     "PlayerMixin",
+    "ServerPlayerMixin",
     "PersistentEntitySectionManagerMixin",
     "PersistentEntitySectionManagerMixin$CallbackMixin",
     "ServerGamePacketListenerImplMixin"

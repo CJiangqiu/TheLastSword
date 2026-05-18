@@ -24,6 +24,9 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.sounds.SoundEvents;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
+import net.the_last_sword.init.ModAttributes;
+import net.the_last_sword.item.DragonArmorItem;
+import net.the_last_sword.item.TheLastSword;
 import net.the_last_sword.summon.WraithSummonManager;
 
 import java.util.ArrayList;
@@ -202,6 +205,25 @@ public class EntityUtil {
         return entity.getPersistentData().getBoolean(NBT_IS_PROTECTED);
     }
 
+    //检查玩家背包中是否拥有最终之剑或龙之套装
+    public static boolean hasInventoryProtection(Player player) {
+        for (ItemStack stack : player.getInventory().items) {
+            if (!stack.isEmpty() && (stack.getItem() instanceof TheLastSword || stack.getItem() instanceof DragonArmorItem)) {
+                return true;
+            }
+        }
+        for (ItemStack stack : player.getInventory().armor) {
+            if (!stack.isEmpty() && (stack.getItem() instanceof TheLastSword || stack.getItem() instanceof DragonArmorItem)) {
+                return true;
+            }
+        }
+        if (!player.getInventory().offhand.isEmpty() &&
+                player.getInventory().offhand.get(0).getItem() instanceof TheLastSword) {
+            return true;
+        }
+        return false;
+    }
+
     //设置实体的保护状态
     public static void setProtection(LivingEntity entity, boolean value) {
         if (entity == null) return;
@@ -313,6 +335,17 @@ public class EntityUtil {
         if (TheLastSwordConfiguration.getDieMessageSafely()) {
             sendDeathMessage(entity, damageSource);
         }
+        //清除防御系统，防止 die/tickDeath 被保护拦截
+        clearDefence(entity);
+        var shieldAttr = entity.getAttribute(ModAttributes.JUSTIFIED_DEFENCE.get());
+        if (shieldAttr != null) {
+            shieldAttr.setBaseValue(0.0);
+        }
+        var maxShieldAttr = entity.getAttribute(ModAttributes.MAX_JUSTIFIED_DEFENCE.get());
+        if (maxShieldAttr != null) {
+            maxShieldAttr.setBaseValue(0.0);
+        }
+
         EcaAPI.kill(entity, damageSource);
     }
 

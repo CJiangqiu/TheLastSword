@@ -64,20 +64,28 @@ public class LivingEntityMixin {
     }
 
 
-    //肃正防御存在时自动注册保护，消失时清除（不影响剑的保护）
+    //肃正防御护盾 > 0 时注册保护，= 0 时清除（不影响剑的保护）
     @Unique
     private void the_last_sword$handleJustifiedDefenceProtection(LivingEntity entity) {
-        AttributeInstance maxAttr = entity.getAttribute(ModAttributes.MAX_JUSTIFIED_DEFENCE.get());
-        if (maxAttr == null) return;
+        AttributeInstance curAttr = entity.getAttribute(ModAttributes.JUSTIFIED_DEFENCE.get());
+        if (curAttr == null) return;
 
-        if (maxAttr.getValue() > 0) {
-            EntityUtil.registerDefence(entity, entity.getMaxHealth());
-            entity.getPersistentData().putBoolean("JustifiedDefenceProtection", true);
+        if (curAttr.getValue() > 0) {
+            if (!EntityUtil.hasProtection(entity)) {
+                float realHealth = entity.getHealth(); // hasProtection=false 时取原版血量
+                EntityUtil.setProtection(entity, true);
+                EntityUtil.setWorldAnchor(entity, realHealth);
+                EntityUtil.setWorldAnchorMax(entity, entity.getMaxHealth());
+                entity.getPersistentData().putBoolean("JustifiedDefenceProtection", true);
+            }
         } else if (entity.getPersistentData().getBoolean("JustifiedDefenceProtection")) {
             entity.getPersistentData().remove("JustifiedDefenceProtection");
-            // 只在没有其他保护来源时才清除
             if (!entity.getPersistentData().getBoolean("TheLastSwordDefence")) {
+                float anchor = EntityUtil.getWorldAnchor(entity);
                 EntityUtil.clearDefence(entity);
+                if (anchor >= 0 && anchor < entity.getHealth()) {
+                    entity.setHealth(anchor);
+                }
             }
         }
     }

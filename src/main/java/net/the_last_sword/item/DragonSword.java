@@ -62,7 +62,7 @@ public class DragonSword extends TheLastEndSwordItems implements ISummonableItem
                 }
             },
             3,
-            -2.4f,
+            -0.8f,
             new Item.Properties().fireResistant().rarity(Rarity.RARE),
             128f,
             200

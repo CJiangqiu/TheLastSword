@@ -12,6 +12,8 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
@@ -22,6 +24,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.the_last_sword.TheLastSwordMod;
+import net.the_last_sword.init.ModEntities;
 import net.the_last_sword.compat.lucky_block.lucky_event.ArenaBattleHandler;
 import net.the_last_sword.compat.lucky_block.lucky_event.LuckyEvent;
 import net.the_last_sword.compat.lucky_block.lucky_event.LuckyEventCategory;
@@ -35,6 +38,7 @@ public class ArenaEvent extends LuckyEvent {
 
     private static final ResourceLocation STRUCTURE_ID = new ResourceLocation(TheLastSwordMod.MOD_ID, "the_last_end_arena");
     private static final String LOAD_FAILED_KEY = "message.the_last_sword.arena.load_failed";
+    private static final String ANCHOR_MISSING_KEY = "message.the_last_sword.arena.anchor_missing";
     private static final String INTRO_KEY = "message.the_last_sword.lucky_block.arena_intro";
     private static final String OPPONENT_KEY = "message.the_last_sword.lucky_block.arena_opponent";
     private static final int TICKS_PER_SECOND = 20;
@@ -83,7 +87,7 @@ public class ArenaEvent extends LuckyEvent {
         BlockPos playerSpawn = anchors[0];
         BlockPos enemySpawn = anchors[1];
         if (playerSpawn == null || enemySpawn == null) {
-            player.sendSystemMessage(Component.translatable(LOAD_FAILED_KEY));
+            player.sendSystemMessage(Component.translatable(ANCHOR_MISSING_KEY));
             return;
         }
 
@@ -102,6 +106,7 @@ public class ArenaEvent extends LuckyEvent {
             ForgeEventFactory.onFinalizeSpawn(opponent, world, world.getCurrentDifficultyAt(enemySpawn), MobSpawnType.EVENT, null, null);
             world.addFreshEntity(opponent);
             opponent.setTarget(player);
+            opponent.addEffect(new MobEffectInstance(MobEffects.GLOWING, 999999, 0, false, false));
             ArenaBattleHandler.tagParticipants(player, opponent);
             player.sendSystemMessage(Component.translatable(OPPONENT_KEY, opponent.getType().getDescription()));
         });
@@ -135,6 +140,7 @@ public class ArenaEvent extends LuckyEvent {
         RandomSource random = world.getRandom();
         List<EntityType<?>> pool = ForgeRegistries.ENTITY_TYPES.getValues().stream()
             .filter(t -> t.getCategory() != MobCategory.MISC)
+            .filter(t -> t != ModEntities.TEST_ENTITY.get())
             .toList();
         if (pool.isEmpty()) return null;
         for (int tries = 0; tries < OPPONENT_PICK_RETRIES; tries++) {

@@ -45,6 +45,7 @@ public class TheLastSwordConfiguration {
     public static ForgeConfigSpec.ConfigValue<Boolean> THE_LAST_SWORD_NORMAL_MODE_CAN_MINE;
     public static ForgeConfigSpec.ConfigValue<Boolean> THE_LAST_SWORD_SUMMON_MODE_CAN_MINE;
     public static ForgeConfigSpec.ConfigValue<Double> THE_LAST_SWORD_PERCENTAGE_DAMAGE;
+    public static ForgeConfigSpec.ConfigValue<Boolean> THE_LAST_SWORD_ENABLE_STRONG_INVENTORY_PROTECTION;
 
     // Dragon Crystal Armor | 龙晶护甲配置
     public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_CRYSTAL_ARMOR_CRYSTAL_GUARD_REFRESH_INTERVAL;
@@ -395,6 +396,12 @@ public class TheLastSwordConfiguration {
                 "在额外伤害基础上追加的目标最大生命值百分比（0.0 = 禁用，1.0 = 100%）"
             )
             .defineInRange("Percentage Damage", 0.13, 0.0, 1.0);
+        THE_LAST_SWORD_ENABLE_STRONG_INVENTORY_PROTECTION = BUILDER
+            .comment(
+                "Enable strong inventory protection. When enabled, blocks external mods from writing/removing items in the inventory and replacing equipment slots, preventing forced disarm/replace. Disabled by default for compatibility with backpack-style mods (avoids item loss). Death-drop / /clear / respawn-restore protections are always active.",
+                "启用强力背包保护。开启后将阻断外部 mod 对玩家背包/装备槽的写入与取出，防止强制缴械或替换装备。默认关闭以兼容背包类 mod，避免物品丢失。死亡掉落保护、/clear 保护、重生恢复始终生效。"
+            )
+            .define("Enable Strong Inventory Protection", false);
         BUILDER.pop();
 
         BUILDER.pop(); // End Sword
@@ -1604,6 +1611,10 @@ public class TheLastSwordConfiguration {
 
     public static double getTheLastSwordPercentageDamageSafely() {
         return safeGet(THE_LAST_SWORD_PERCENTAGE_DAMAGE, 0.13);
+    }
+
+    public static boolean getEnableStrongInventoryProtectionSafely() {
+        return safeGet(THE_LAST_SWORD_ENABLE_STRONG_INVENTORY_PROTECTION, false);
     }
 
     //龙晶护甲配置

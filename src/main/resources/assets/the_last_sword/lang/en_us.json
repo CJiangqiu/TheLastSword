@@ -314,6 +314,7 @@
   "message.the_last_sword.summon_success": "Successfully summoned %s",
   "message.the_last_sword.weapon_already_summoned": "This weapon has already summoned a wraith, please recall it first",
   "message.the_last_sword.arena.load_failed": "Failed to load The Last End Arena structure file",
+  "message.the_last_sword.arena.anchor_missing": "Arena anchor blocks missing, possibly not enough space",
   "message.the_last_sword.arena.placed": "The Last End Arena has been placed",
   "message.the_last_sword.lucky_block.explosion": "Oh, that looks painful!",
   "message.the_last_sword.lucky_block.trap": "This is a trap!",

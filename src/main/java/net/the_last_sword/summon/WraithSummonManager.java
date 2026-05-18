@@ -134,6 +134,9 @@ public class WraithSummonManager {
         float attackBonus = nbt.getFloat("attack_bonus");
         removeBonusFromEntity(wraith, healthBonus, attackBonus);
 
+        //4.5. 清除禁疗状态（防止快照把禁疗带入魂石，且确保下一步 setHealth 不被禁疗拦截）
+        EntityUtil.clearHealBan(wraith);
+
         //5. 设置生命值为最大生命值（避免保存错误血量导致永远死亡）
         AttributeInstance maxHealthAttr = wraith.getAttribute(Attributes.MAX_HEALTH);
         if (maxHealthAttr != null) {
@@ -348,6 +351,9 @@ public class WraithSummonManager {
             theLastEnd.setAnimationState(TheLastEndEntity.STATE_SPAWNING);
         }
 
+        //4.6. 清除禁疗状态（防止旧魂石或 entity_nbt 里残留的禁疗拦截 setHealth）
+        EntityUtil.clearHealBan(wraith);
+
         //5. 设置生命值为最大生命值（实体刚生成后立即设置满血）
         AttributeInstance maxHealthAttr = wraith.getAttribute(Attributes.MAX_HEALTH);
         if (maxHealthAttr != null) {
@@ -465,6 +471,9 @@ public class WraithSummonManager {
             theLastEnd.setWorldAnchor(maxHealth);
             theLastEnd.setAnimationState(TheLastEndEntity.STATE_SPAWNING);
         }
+
+        //4.6. 清除禁疗状态（从 entity_nbt 恢复时会带回旧的禁疗，必须清掉后再 setHealth）
+        EntityUtil.clearHealBan(wraith);
 
         //5. 设置生命值为最大生命值（实体刚生成后立即设置满血）
         AttributeInstance maxHealthAttr = wraith.getAttribute(Attributes.MAX_HEALTH);

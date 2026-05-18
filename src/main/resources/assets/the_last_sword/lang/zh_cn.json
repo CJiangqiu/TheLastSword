@@ -314,6 +314,7 @@
   "message.the_last_sword.summon_success": "成功召唤%s",
   "message.the_last_sword.weapon_already_summoned": "该武器已召唤剑灵，请先唤回",
   "message.the_last_sword.arena.load_failed": "无法加载终焉竞技场结构文件",
+  "message.the_last_sword.arena.anchor_missing": "终焉竞技场锚点丢失，可能是放置空间不足",
   "message.the_last_sword.arena.placed": "终焉竞技场已放置",
   "message.the_last_sword.lucky_block.explosion": "哦，那看起来很疼！",
   "message.the_last_sword.lucky_block.trap": "这是个陷阱！",
