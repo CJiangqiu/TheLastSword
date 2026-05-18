@@ -30,10 +30,13 @@ public class WingsThatCoverTheWorld extends Item implements ICurioItem {
     public void curioTick(SlotContext slotContext, ItemStack stack) {
         LivingEntity entity = slotContext.entity();
         if (entity instanceof Player player) {
-            //非创造/旁观模式下给予飞行能力
+            //非创造/旁观模式下给予飞行能力，仅在尚未赋予时设置，避免每tick重推abilities包导致飞行卡顿
             if (!player.isCreative() && !player.isSpectator()) {
-                player.getAbilities().mayfly = true;
-                player.onUpdateAbilities();
+                if (!player.getAbilities().mayfly) {
+                    player.getAbilities().mayfly = true;
+                    player.getPersistentData().putBoolean("WingsFly", true);
+                    player.onUpdateAbilities();
+                }
             }
         }
     }
@@ -42,11 +45,14 @@ public class WingsThatCoverTheWorld extends Item implements ICurioItem {
     public void onUnequip(SlotContext slotContext, ItemStack newStack, ItemStack stack) {
         LivingEntity entity = slotContext.entity();
         if (entity instanceof Player player) {
-            //卸下时移除飞行能力（非创造/旁观模式）
+            //卸下时仅移除自己赋予的飞行能力（通过NBT标记区分来源，避免清除其他装备赋予的飞行）
             if (!player.isCreative() && !player.isSpectator()) {
-                player.getAbilities().mayfly = false;
-                player.getAbilities().flying = false;
-                player.onUpdateAbilities();
+                if (player.getPersistentData().getBoolean("WingsFly")) {
+                    player.getAbilities().mayfly = false;
+                    player.getAbilities().flying = false;
+                    player.getPersistentData().remove("WingsFly");
+                    player.onUpdateAbilities();
+                }
             }
         }
     }
