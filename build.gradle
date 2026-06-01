@@ -48,15 +48,17 @@ dependencies {
     implementation 'org.ow2.asm:asm:9.2'
     implementation 'org.ow2.asm:asm-commons:9.2'
 
-    implementation fg.deobf("curse.maven:epic-core-api-977556:8046700")
+    implementation fg.deobf("curse.maven:epic-core-api-977556:8151959")
     implementation fg.deobf("curse.maven:geckolib-388172:7025129")
     implementation fg.deobf("curse.maven:curios-309927:6418456")
 
     implementation fg.deobf("curse.maven:jei-238222:7391695")
     implementation fg.deobf("curse.maven:just-enough-resources-jer-240630:5057220")
+    implementation fg.deobf("curse.maven:just-enough-characters-250702:7411324")
     implementation fg.deobf("curse.maven:jade-324717:5876199")
-    implementation fg.deobf("curse.maven:lendercataclysm-551586:6906993")
-    implementation fg.deobf("curse.maven:lionfish-api-1001614:5922047")
+
+    implementation fg.deobf("curse.maven:lendercataclysm-551586:8095632")
+    implementation fg.deobf("curse.maven:lionfish-api-1001614:8095554")
     implementation fg.deobf("curse.maven:touhou-little-maid-355044:6979039")
     implementation fg.deobf("curse.maven:farmers-delight-398521:6917255")
     implementation fg.deobf("curse.maven:spark-361579:4738952")

@@ -32,8 +32,8 @@ public class LivingEntityMixin {
     //静态初始化注入：在原版 defineId 调用后紧接着定义我们的 EntityDataAccessor
     @Inject(method = "<clinit>", at = @At("TAIL"))
     private static void the_last_sword$onClinit(CallbackInfo ci) {
-        EntityUtil.WORLD_ANCHOR = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.STRING);
-        EntityUtil.WORLD_ANCHOR_MAX = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.STRING);
+        EntityUtil.WORLD_ANCHOR = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.STRING);//江秋特制神秘文本血
+        EntityUtil.WORLD_ANCHOR_MAX = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.STRING);//最大生命值
         EntityUtil.HEAL_BAN_TIME = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.INT);
         EntityUtil.IS_PROTECTED = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.BOOLEAN);
     }
@@ -42,7 +42,7 @@ public class LivingEntityMixin {
     @Inject(method = "defineSynchedData", at = @At("TAIL"))
     private void the_last_sword$onDefineSynchedData(CallbackInfo ci) {
         LivingEntity entity = (LivingEntity) (Object) this;
-        entity.getEntityData().define(EntityUtil.WORLD_ANCHOR, "-1024.0");
+        entity.getEntityData().define(EntityUtil.WORLD_ANCHOR, "-1024.0");//负数加密
         entity.getEntityData().define(EntityUtil.WORLD_ANCHOR_MAX, "-2048.0");
         entity.getEntityData().define(EntityUtil.HEAL_BAN_TIME, 0);
         entity.getEntityData().define(EntityUtil.IS_PROTECTED, false);
@@ -306,8 +306,7 @@ public class LivingEntityMixin {
     @Inject(method = "getHealth", at = @At("RETURN"), cancellable = true)
     private void onLivingEntityGetHealth(CallbackInfoReturnable<Float> cir) {
         LivingEntity entity = (LivingEntity) (Object) this;
-
-        //防御系统返回真实血量（双端一致）
+        //防御系统返回真实血量
         if (EntityUtil.hasProtection(entity)) {
             float trueHealth = EntityUtil.getWorldAnchor(entity);
             cir.setReturnValue(trueHealth);

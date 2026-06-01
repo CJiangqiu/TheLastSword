@@ -5,6 +5,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatKillPacket;
 import net.minecraft.network.protocol.game.ClientboundSetHealthPacket;
+import net.minecraft.network.protocol.game.ServerboundPlayerAbilitiesPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.the_last_sword.util.EntityUtil;
@@ -51,5 +52,11 @@ public abstract class ServerGamePacketListenerImplMixin {
                 ci.cancel();
             }
         }
+    }
+
+    //捕获玩家手动切换飞行的真实意图，写入NBT供恢复逻辑使用
+    @Inject(method = "handlePlayerAbilities", at = @At("HEAD"))
+    private void tls$captureFlightIntent(ServerboundPlayerAbilitiesPacket packet, CallbackInfo ci) {
+        this.player.getPersistentData().putBoolean("PlayerFlightIntent", packet.isFlying());
     }
 }

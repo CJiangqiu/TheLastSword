@@ -393,6 +393,7 @@ public class TheLastSword extends TheLastEndSwordItems implements ISummonableIte
                         player.getAbilities().mayfly = false;
                         player.getAbilities().flying = false;
                         player.getPersistentData().remove("TheLastSwordFly");
+                        player.getPersistentData().remove("PlayerFlightIntent");
                         player.onUpdateAbilities();
                     }
                 }

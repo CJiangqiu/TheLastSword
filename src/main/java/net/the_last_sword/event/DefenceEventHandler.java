@@ -1,6 +1,7 @@
 package net.the_last_sword.event;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -112,6 +113,26 @@ public final class DefenceEventHandler {
                 if (PERCEPTION_SCAN_TIMERS.containsKey(player.getUUID())) {
                     PERCEPTION_SCAN_TIMERS.remove(player.getUUID());
                     NetworkHandler.sendToPlayer(new PerceptionScanPacket(Map.of(), 0), sp);
+                }
+            }
+        }
+
+        //飞行状态恢复：在所有实体tick完毕后执行，将被外部清掉的flying拉回
+        @SubscribeEvent
+        public static void onLevelTickEnd(TickEvent.LevelTickEvent event) {
+            if (event.phase != TickEvent.Phase.END || event.level.isClientSide()) return;
+
+            for (Player player : event.level.players()) {
+                if (player.isCreative() || player.isSpectator()) continue;
+                CompoundTag data = player.getPersistentData();
+                //三套飞行来源的NBT标记任一存在，即代表有有效飞行授权（标记本身已含各自配置开关）
+                boolean hasFlightSource = data.getBoolean("TheLastSwordFly")
+                        || data.getBoolean("DragonArmorFly")
+                        || data.getBoolean("WingsFly");
+                if (hasFlightSource
+                        && data.getBoolean("PlayerFlightIntent")
+                        && !player.getAbilities().flying) {
+                    player.getAbilities().flying = true;
                 }
             }
         }
@@ -501,6 +522,7 @@ public final class DefenceEventHandler {
                 player.getAbilities().flying = false;
                 player.getPersistentData().remove("DragonArmorFly");
                 player.getPersistentData().remove("DragonArmorFlyAnim");
+                player.getPersistentData().remove("PlayerFlightIntent");
                 player.onUpdateAbilities();
             }
             return;
@@ -526,6 +548,7 @@ public final class DefenceEventHandler {
                 player.getAbilities().flying = false;
                 player.getPersistentData().remove("DragonArmorFly");
                 player.getPersistentData().remove("DragonArmorFlyAnim");
+                player.getPersistentData().remove("PlayerFlightIntent");
                 player.onUpdateAbilities();
             }
         }

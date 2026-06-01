@@ -51,6 +51,7 @@ public class WingsThatCoverTheWorld extends Item implements ICurioItem {
                     player.getAbilities().mayfly = false;
                     player.getAbilities().flying = false;
                     player.getPersistentData().remove("WingsFly");
+                    player.getPersistentData().remove("PlayerFlightIntent");
                     player.onUpdateAbilities();
                 }
             }

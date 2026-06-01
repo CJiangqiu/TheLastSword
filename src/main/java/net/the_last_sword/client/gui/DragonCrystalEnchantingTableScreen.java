@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.locale.Language;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -20,6 +21,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.the_last_sword.client.gui.menu.DragonCrystalEnchantingTableMenu;
+import net.the_last_sword.compat.jec.JECCompat;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.network.EnchantmentApplyPacket;
 import net.the_last_sword.network.NetworkHandler;
@@ -44,6 +46,9 @@ public class DragonCrystalEnchantingTableScreen extends AbstractContainerScreen<
     private final List<EnchantmentOption> enchantmentOptions = new ArrayList<>();
     private final List<EnchantmentOption> filteredOptions = new ArrayList<>();
     private int scrollOffset = 0;
+    private boolean draggingScrollbar = false;
+    private int scrollDragStartY = 0;
+    private int scrollDragStartOffset = 0;
     private static final int VISIBLE_ROWS = 6;
     private static final int ROW_HEIGHT = 22;
     private static final int LIST_X = 295;
@@ -169,8 +174,8 @@ public class DragonCrystalEnchantingTableScreen extends AbstractContainerScreen<
             if (query.isEmpty()) {
                 filteredOptions.add(opt);
             } else {
-                String name = opt.enchantment.getFullname(1).getString().toLowerCase();
-                if (name.contains(query)) {
+                String name = opt.enchantment.getFullname(1).getString();
+                if (JECCompat.contains(name, query)) {
                     filteredOptions.add(opt);
                 }
             }
@@ -376,8 +381,8 @@ public class DragonCrystalEnchantingTableScreen extends AbstractContainerScreen<
             int maxScroll = filteredOptions.size() - VISIBLE_ROWS;
             int thumbY = listY + (scrollBarHeight - thumbHeight) * scrollOffset / maxScroll;
 
-            guiGraphics.fill(listX + LIST_WIDTH - 3, listY, listX + LIST_WIDTH, listY + scrollBarHeight, 0x40000000);
-            guiGraphics.fill(listX + LIST_WIDTH - 3, thumbY, listX + LIST_WIDTH, thumbY + thumbHeight, 0x80FFFFFF);
+            guiGraphics.fill(listX + LIST_WIDTH + 2, listY, listX + LIST_WIDTH + 5, listY + scrollBarHeight, 0x40000000);
+            guiGraphics.fill(listX + LIST_WIDTH + 2, thumbY, listX + LIST_WIDTH + 5, thumbY + thumbHeight, 0xFF555555);
         }
     }
 
@@ -442,6 +447,11 @@ public class DragonCrystalEnchantingTableScreen extends AbstractContainerScreen<
                 List<Component> tooltip = new ArrayList<>();
 
                 tooltip.add(opt.enchantment.getFullname(Math.max(1, opt.level)));
+
+                String descKey = opt.enchantment.getDescriptionId() + ".desc";
+                if (Language.getInstance().has(descKey)) {
+                    tooltip.add(Component.translatable(descKey).withStyle(style -> style.withColor(0xAAAAAA)));
+                }
 
                 if (opt.originalLevel > 0) {
                     tooltip.add(Component.translatable("gui.the_last_sword.dragon_crystal_enchanting_table.current_level", opt.originalLevel)
@@ -518,6 +528,18 @@ public class DragonCrystalEnchantingTableScreen extends AbstractContainerScreen<
         int listX = this.leftPos + LIST_X;
         int listY = getListY();
 
+        // 竖向滚动条拖拽开始
+        if (filteredOptions.size() > VISIBLE_ROWS) {
+            int scrollBarHeight = VISIBLE_ROWS * ROW_HEIGHT;
+            if (mouseX >= listX + LIST_WIDTH + 2 && mouseX < listX + LIST_WIDTH + 5
+                    && mouseY >= listY && mouseY < listY + scrollBarHeight) {
+                draggingScrollbar = true;
+                scrollDragStartY = (int) mouseY;
+                scrollDragStartOffset = scrollOffset;
+                return true;
+            }
+        }
+
         if (mouseX >= listX && mouseX < listX + LIST_WIDTH) {
             for (int i = 0; i < VISIBLE_ROWS && i + scrollOffset < filteredOptions.size(); i++) {
                 int rowY = listY + i * ROW_HEIGHT;
@@ -558,6 +580,17 @@ public class DragonCrystalEnchantingTableScreen extends AbstractContainerScreen<
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (draggingScrollbar && filteredOptions.size() > VISIBLE_ROWS) {
+            int scrollBarHeight = VISIBLE_ROWS * ROW_HEIGHT;
+            int maxScroll = filteredOptions.size() - VISIBLE_ROWS;
+            int thumbHeight = Math.max(20, scrollBarHeight * VISIBLE_ROWS / filteredOptions.size());
+            int scrollRange = scrollBarHeight - thumbHeight;
+            if (scrollRange > 0) {
+                int dragDelta = (int) mouseY - scrollDragStartY;
+                scrollOffset = Math.max(0, Math.min(maxScroll, scrollDragStartOffset + dragDelta * maxScroll / scrollRange));
+            }
+            return true;
+        }
         if (draggingOption != null) {
             int listX = this.leftPos + LIST_X;
             int sliderX = listX + LIST_WIDTH - SLIDER_WIDTH - LEVEL_INPUT_WIDTH - 8;
@@ -570,6 +603,7 @@ public class DragonCrystalEnchantingTableScreen extends AbstractContainerScreen<
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         draggingOption = null;
+        draggingScrollbar = false;
         return super.mouseReleased(mouseX, mouseY, button);
     }
 
@@ -586,7 +620,7 @@ public class DragonCrystalEnchantingTableScreen extends AbstractContainerScreen<
         int listY = getListY();
         int listHeight = VISIBLE_ROWS * ROW_HEIGHT;
 
-        if (mouseX >= listX && mouseX < listX + LIST_WIDTH && mouseY >= listY && mouseY < listY + listHeight) {
+        if (mouseX >= listX && mouseX < listX + LIST_WIDTH + 5 && mouseY >= listY && mouseY < listY + listHeight) {
             int maxScroll = Math.max(0, filteredOptions.size() - VISIBLE_ROWS);
             scrollOffset = Math.max(0, Math.min(maxScroll, scrollOffset - (int) delta));
             // 滚动时关闭编辑框
