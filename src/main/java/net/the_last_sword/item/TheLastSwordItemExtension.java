@@ -1,6 +1,8 @@
 package net.the_last_sword.item;
 
 import net.eca.api.RegisterItemExtension;
+import net.eca.client.render.BlackHoleRenderTypes;
+import net.eca.client.render.DreamSakuraRenderTypes;
 import net.eca.client.render.TheLastEndRenderTypes;
 import net.eca.util.ItemUtil;
 import net.eca.util.item_extension.ItemExtension;
@@ -50,12 +52,12 @@ public class TheLastSwordItemExtension extends ItemExtension {
         return 0.1f;
     }
 
-    //剑名：紫色纯色 + 闪烁 + 加粗
+    //剑名：原版史诗稀有度颜色 + 乱码 + 加粗
     @Override
     public MutableComponent getItemName(ItemStack stack) {
         return ItemUtil.of(Component.translatable("item.the_last_sword.the_last_sword"))
-                .addEffect.SOLID(0x9447EB)
-                .addEffect.SHIMMER(0.2f)
+                .addEffect.SOLID(0xFF55FF)
+                .addEffect.GLITCH(0.05f)
                 .addEffect.BOLD()
                 .build();
     }
