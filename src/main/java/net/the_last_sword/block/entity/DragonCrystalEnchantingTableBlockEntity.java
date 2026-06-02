@@ -28,7 +28,7 @@ import net.minecraftforge.items.wrapper.SidedInvWrapper;
 import net.the_last_sword.client.gui.menu.DragonCrystalEnchantingTableMenu;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.init.ModBlockEntities;
-import net.the_last_sword.init.ModItems;
+import net.the_last_sword.init.ModTags;
 import net.the_last_sword.network.EnchantingTableDataPacket;
 import net.the_last_sword.network.NetworkHandler;
 import software.bernie.geckolib.animatable.GeoBlockEntity;
@@ -168,6 +168,10 @@ public class DragonCrystalEnchantingTableBlockEntity extends RandomizableContain
 
     @Override
     public boolean canPlaceItem(int index, ItemStack stack) {
+        // 红色燃料槽（index 0）仅接受燃料标签内物品，含自动化插入
+        if (index == 0) {
+            return stack.is(ModTags.DRAGON_CRYSTAL_ENCHANTING_TABLE_FUEL);
+        }
         return true;
     }
 
@@ -230,9 +234,9 @@ public class DragonCrystalEnchantingTableBlockEntity extends RandomizableContain
 
         boolean isFull = blockEntity.energyStorage.getEnergyStored() >= blockEntity.energyStorage.getMaxEnergyStored();
 
-        // 检测并消耗龙水晶（满电时不消耗）
+        // 检测并消耗燃料（满电时不消耗）
         ItemStack fuelSlot = blockEntity.getItem(0);
-        if (!isFull && !fuelSlot.isEmpty() && fuelSlot.is(ModItems.DRAGON_CRYSTAL.get())) {
+        if (!isFull && !fuelSlot.isEmpty() && fuelSlot.is(ModTags.DRAGON_CRYSTAL_ENCHANTING_TABLE_FUEL)) {
             fuelSlot.shrink(1);
             blockEntity.totalPowerTime += TheLastSwordConfiguration.getEnchantingTableCrystalPowerTimeSafely();
             changed = true;

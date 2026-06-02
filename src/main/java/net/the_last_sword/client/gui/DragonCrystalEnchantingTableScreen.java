@@ -636,6 +636,21 @@ public class DragonCrystalEnchantingTableScreen extends AbstractContainerScreen<
     @Override
     public boolean keyPressed(int key, int b, int c) {
         if (key == 256) {
+            // 有输入框处于选中状态时，ESC 先清空内容并取消选中，不关闭界面
+            if (editingOption != null && levelEditBox.isFocused()) {
+                levelEditBox.setValue("");
+                editingOption = null;
+                levelEditBox.setVisible(false);
+                levelEditBox.setFocused(false);
+                this.setFocused(null);
+                return true;
+            }
+            if (searchBox != null && searchBox.isFocused()) {
+                searchBox.setValue("");
+                searchBox.setFocused(false);
+                this.setFocused(null);
+                return true;
+            }
             this.minecraft.player.closeContainer();
             return true;
         }
