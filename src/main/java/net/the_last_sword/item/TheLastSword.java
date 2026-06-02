@@ -327,9 +327,9 @@ public class TheLastSword extends TheLastEndSwordItems implements ISummonableIte
         //6. 被动技能：终焉之主（动态计算限伤值）
         tooltip.add(Component.empty());
         float damageLimit = (float) TheLastSwordConfiguration.getDefenceMaxDamagePerHitSafely();
-        Player localPlayer = net.minecraft.client.Minecraft.getInstance().player;
-        if (localPlayer != null) {
-            float maxHealth = localPlayer.getMaxHealth();
+        //通过客户端类的静态方法获取本地玩家生命值，避免在通用代码中直接引用客户端专用类
+        float maxHealth = net.the_last_sword.event.ClientEventHandler.getLocalPlayerMaxHealth();
+        if (maxHealth > 0) {
             float ratio = (float) TheLastSwordConfiguration.getDefenceCustomHealthDamageReductionSafely();
             damageLimit = Math.min(maxHealth * ratio, damageLimit);
         }

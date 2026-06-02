@@ -102,6 +102,12 @@ public class ClientEventHandler {
         arenaPreviewMax = null;
     }
 
+    //返回本地玩家最大生命值，无玩家返回 -1（仅客户端调用，供通用代码安全获取本地玩家数据）
+    public static float getLocalPlayerMaxHealth() {
+        net.minecraft.world.entity.player.Player p = Minecraft.getInstance().player;
+        return p != null ? p.getMaxHealth() : -1f;
+    }
+
     //检查是否有活动的竞技场预览
     public static boolean hasActiveArenaPreview() {
         if (arenaPreviewMin == null) return false;

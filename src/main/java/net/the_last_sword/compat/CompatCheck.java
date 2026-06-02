@@ -13,6 +13,7 @@ public class CompatCheck {
     private static Boolean tlsuvLoaded = null;
     private static Boolean apotheosisLoaded = null;
     private static Boolean luckyBlockLoaded = null;
+    private static Boolean jecLoaded = null;
 
     public static boolean isJeiLoaded() {
         if (jeiLoaded == null) {
@@ -71,6 +72,14 @@ public class CompatCheck {
             luckyBlockLoaded = ModList.get().isLoaded("lucky");
         }
         return luckyBlockLoaded;
+    }
+
+    //检测 Just Enough Characters（拼音搜索增强）
+    public static boolean isJecLoaded() {
+        if (jecLoaded == null) {
+            jecLoaded = ModList.get().isLoaded("jecharacters");
+        }
+        return jecLoaded;
     }
 
 }

@@ -54,7 +54,7 @@ dependencies {
 
     implementation fg.deobf("curse.maven:jei-238222:7391695")
     implementation fg.deobf("curse.maven:just-enough-resources-jer-240630:5057220")
-    implementation fg.deobf("curse.maven:just-enough-characters-250702:7411324")
+    //implementation fg.deobf("curse.maven:just-enough-characters-250702:7411324")
     implementation fg.deobf("curse.maven:jade-324717:5876199")
 
     implementation fg.deobf("curse.maven:lendercataclysm-551586:8095632")
