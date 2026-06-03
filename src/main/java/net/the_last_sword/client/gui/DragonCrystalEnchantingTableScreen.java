@@ -518,6 +518,14 @@ public class DragonCrystalEnchantingTableScreen extends AbstractContainerScreen<
             return searchBox.mouseClicked(mouseX, mouseY, button);
         }
 
+        // 点击搜索框以外区域时退出编辑，但保留搜索内容
+        if (searchBox != null && searchBox.isFocused()) {
+            searchBox.setFocused(false);
+            if (this.getFocused() == searchBox) {
+                this.setFocused(null);
+            }
+        }
+
         // 等级输入框点击
         if (levelEditBox != null && levelEditBox.isVisible() && levelEditBox.isMouseOver(mouseX, mouseY)) {
             this.setFocused(levelEditBox);
