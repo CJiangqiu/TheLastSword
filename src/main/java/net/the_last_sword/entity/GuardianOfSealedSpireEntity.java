@@ -120,6 +120,12 @@ public class GuardianOfSealedSpireEntity extends TheLastEndEntity {
         return "spawn";
     }
 
+    //守卫没有生成动画，召唤时直接进入 IDLE
+    @Override
+    public boolean hasSpawnAnimation() {
+        return false;
+    }
+
     @Override
     public String getSkillAnimationName(int attackState) {
         if (attackState == STATE_ATTACK) {

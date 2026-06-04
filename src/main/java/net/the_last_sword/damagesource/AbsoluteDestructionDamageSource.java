@@ -16,6 +16,7 @@ import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.entity.TheLastEndEntity;
 import net.the_last_sword.init.ModAttributes;
+import net.the_last_sword.summon.WraithSummonManager;
 import net.the_last_sword.util.EntityUtil;
 
 //绝对毁灭伤害源
@@ -111,6 +112,7 @@ public class AbsoluteDestructionDamageSource extends DamageSource {
             entity.hurt(damageSource, 0.01f);
             theLastEnd.setWorldAnchor(newAnchor);
             if (newAnchor <= 0 && !theLastEnd.isDying()) {
+                WraithSummonManager.tryForceCapture(entity);
                 theLastEnd.triggerDeath();
             }
             return true;
@@ -119,6 +121,7 @@ public class AbsoluteDestructionDamageSource extends DamageSource {
         float originalHealth = entity.getHealth();
         // 异常血量斩杀
         if (Float.isNaN(originalHealth) || Float.isInfinite(originalHealth) || originalHealth <= 0.0F) {
+            WraithSummonManager.tryForceCapture(entity);
             if (TheLastSwordConfiguration.getEnableTheLastEndSetDeadSafely()) {
                 EntityUtil.theLastEndSetDead(entity, damageSource);
             } else {
@@ -131,6 +134,7 @@ public class AbsoluteDestructionDamageSource extends DamageSource {
 
         //预期血量判定
         if (expectedHealth <= 0) {
+            WraithSummonManager.tryForceCapture(entity);
             if (TheLastSwordConfiguration.getEnableTheLastEndSetDeadSafely()) {
                 EntityUtil.theLastEndSetDead(entity, damageSource);
                 return true;

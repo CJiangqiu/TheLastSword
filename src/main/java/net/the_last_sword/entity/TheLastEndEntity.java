@@ -216,6 +216,11 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
         return "";
     }
 
+    //是否有生成动画，无生成动画的实体召唤时直接进入 IDLE
+    public boolean hasSpawnAnimation() {
+        return true;
+    }
+
     public abstract String getSkillAnimationName(int attackState);
 
     public int getDeathAnimationDuration() {

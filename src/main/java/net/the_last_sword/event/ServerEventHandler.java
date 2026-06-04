@@ -36,11 +36,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.the_last_sword.TheLastSwordMod;
-import net.the_last_sword.compat.curios.CuriosEffectHandler;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
-import net.the_last_sword.init.ModBlocks;
-import net.the_last_sword.init.ModItems;
-import net.the_last_sword.item.DragonCrystalSoulStone;
 import net.the_last_sword.summon.WraithSummonManager;
 import net.the_last_sword.item.TheLastEndArmorItem;
 import net.the_last_sword.item.TheLastEndSwordItems;
@@ -63,34 +59,16 @@ public class ServerEventHandler {
 
     //========== 龙魂灯灵魂收集系统 ==========
 
-    //成功捕获后写入实体的去重标记键
-    private static final String SOUL_CAPTURED_KEY = "the_last_sword_soul_captured";
-
-    //实体死亡时检查龙魂灯范围并存储到魂石
+    //实体死亡时存储到魂石（捕获逻辑在剑灵管理器）
     @SubscribeEvent
     public static void onEntityDeath(LivingDeathEvent event) {
         if (event.getEntity().level().isClientSide) {
             return;
         }
-
-        if (!(event.getSource().getEntity() instanceof Player player)) {
+        if (!(event.getSource().getEntity() instanceof Player killer)) {
             return;
         }
-
-        LivingEntity victim = event.getEntity();
-        if (victim instanceof Player) {
-            return;
-        }
-
-        boolean hasPlaced = hasNearbyDragonSoulLantern(victim.level(), victim.blockPosition());
-        if (!playerMatchesLantern(victim, player, hasPlaced)) {
-            return;
-        }
-
-        //成功存入后打标记，供移除事件去重
-        if (tryCaptureToSoulStone(victim, player)) {
-            victim.getPersistentData().putBoolean(SOUL_CAPTURED_KEY, true);
-        }
+        WraithSummonManager.tryCaptureOnDeath(event.getEntity(), killer);
     }
 
     //兜底：实体被直接清除（不触发死亡事件）时尝试捕获
@@ -99,7 +77,7 @@ public class ServerEventHandler {
         if (event.getLevel().isClientSide) {
             return;
         }
-        if (!(event.getEntity() instanceof LivingEntity victim) || victim instanceof Player) {
+        if (!(event.getEntity() instanceof LivingEntity victim)) {
             return;
         }
 
@@ -109,159 +87,7 @@ public class ServerEventHandler {
             return;
         }
 
-        //排除自己的剑灵被移除，以及死亡线已成功捕获的实体
-        if (WraithSummonManager.isWraith(victim)) {
-            return;
-        }
-        if (victim.getPersistentData().getBoolean(SOUL_CAPTURED_KEY)) {
-            return;
-        }
-
-        Player owner = findNearbyCaptureOwner(victim);
-        if (owner == null) {
-            return;
-        }
-
-        if (tryCaptureToSoulStone(victim, owner)) {
-            victim.getPersistentData().putBoolean(SOUL_CAPTURED_KEY, true);
-        }
-    }
-
-    //把实体存入 owner 的空魂石，成功返回 true
-    private static boolean tryCaptureToSoulStone(LivingEntity victim, Player owner) {
-        ItemStack emptySoulStone = findEmptySoulStone(owner);
-        if (emptySoulStone.isEmpty()) {
-            return false;
-        }
-
-        ResourceLocation entityId = ForgeRegistries.ENTITY_TYPES.getKey(victim.getType());
-        if (entityId == null) {
-            return false;
-        }
-
-        CompoundTag nbt = emptySoulStone.getOrCreateTag();
-        nbt.putString("wraith_entity_id", entityId.toString());
-
-        //保存实体的完整NBT数据（包括装备、属性、自定义名称等）
-        CompoundTag entityNBT = new CompoundTag();
-        victim.save(entityNBT);
-
-        //修正血量为最大生命值（避免保存清除时的0血）
-        entityNBT.putFloat("Health", victim.getMaxHealth());
-
-        nbt.put("entity_nbt", entityNBT);
-
-        String entityName = victim.hasCustomName() ?
-            victim.getCustomName().getString() :
-            victim.getDisplayName().getString();
-
-        owner.sendSystemMessage(Component.translatable(
-            "message.the_last_sword.dragon_soul_lantern.stored_success", entityName));
-        return true;
-    }
-
-    //判断玩家相对死亡点是否满足龙魂灯捕获条件（hasPlaced 由外层预算）
-    private static boolean playerMatchesLantern(LivingEntity victim, Player player, boolean hasPlaced) {
-        if (hasPlaced) {
-            return true;
-        }
-        double equippedRange = TheLastSwordConfiguration.getDragonSoulLanternRangeEquippedSafely();
-        return CuriosEffectHandler.hasCurioEquipped(player, ModItems.DRAGON_SOUL_LANTERN.get())
-            && player.blockPosition().distSqr(victim.blockPosition()) <= equippedRange * equippedRange;
-    }
-
-    //以实体为中心，在龙魂灯范围内找最近的、满足条件且有空魂石的玩家
-    private static Player findNearbyCaptureOwner(LivingEntity victim) {
-        Level level = victim.level();
-        BlockPos deathPos = victim.blockPosition();
-        double equippedRange = TheLastSwordConfiguration.getDragonSoulLanternRangeEquippedSafely();
-        double placedRange = TheLastSwordConfiguration.getDragonSoulLanternRangePlacedSafely();
-        double searchRangeSqr = Math.max(equippedRange, placedRange) * Math.max(equippedRange, placedRange);
-
-        //先用便宜条件筛出范围内带空魂石的玩家，按距离升序
-        List<Player> candidates = new ArrayList<>();
-        for (Player player : level.players()) {
-            if (player.blockPosition().distSqr(deathPos) > searchRangeSqr) {
-                continue;
-            }
-            if (findEmptySoulStone(player).isEmpty()) {
-                continue;
-            }
-            candidates.add(player);
-        }
-        if (candidates.isEmpty()) {
-            return null;
-        }
-        candidates.sort(Comparator.comparingDouble(p -> p.blockPosition().distSqr(deathPos)));
-
-        //放置模式扫描较贵，仅在确有候选玩家时算一次
-        boolean hasPlaced = hasNearbyDragonSoulLantern(level, deathPos);
-
-        for (Player player : candidates) {
-            if (playerMatchesLantern(victim, player, hasPlaced)) {
-                return player;
-            }
-        }
-        return null;
-    }
-
-    //检查附近是否有激活的龙魂灯笼（底部必须有黑曜石或哭泣的黑曜石）
-    private static boolean hasNearbyDragonSoulLantern(Level level, BlockPos center) {
-        double rangeConfig = TheLastSwordConfiguration.getDragonSoulLanternRangePlacedSafely();
-        int range = (int) Math.ceil(rangeConfig);
-        double rangeSqr = rangeConfig * rangeConfig;
-
-        for (int x = -range; x <= range; x++) {
-            for (int y = -range; y <= range; y++) {
-                for (int z = -range; z <= range; z++) {
-                    BlockPos checkPos = center.offset(x, y, z);
-
-                    if (center.distSqr(checkPos) <= rangeSqr) {
-                        if (level.getBlockState(checkPos).getBlock() == ModBlocks.DRAGON_SOUL_LANTERN.get()) {
-                            if (isLanternActivated(level, checkPos)) {
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return false;
-    }
-
-    //检查龙魂灯笼是否激活（底部是否有黑曜石或哭泣的黑曜石）
-    private static boolean isLanternActivated(Level level, BlockPos lanternPos) {
-        BlockPos belowPos = lanternPos.below();
-        BlockState belowState = level.getBlockState(belowPos);
-        return belowState.is(Blocks.OBSIDIAN) || belowState.is(Blocks.CRYING_OBSIDIAN);
-    }
-
-    //查找玩家背包中的空魂石
-    private static ItemStack findEmptySoulStone(Player player) {
-        if (player.getMainHandItem().getItem() instanceof DragonCrystalSoulStone) {
-            ItemStack stack = player.getMainHandItem();
-            if (!DragonCrystalSoulStone.hasStoredEntity(stack)) {
-                return stack;
-            }
-        }
-
-        if (player.getOffhandItem().getItem() instanceof DragonCrystalSoulStone) {
-            ItemStack stack = player.getOffhandItem();
-            if (!DragonCrystalSoulStone.hasStoredEntity(stack)) {
-                return stack;
-            }
-        }
-
-        for (ItemStack stack : player.getInventory().items) {
-            if (stack.getItem() instanceof DragonCrystalSoulStone) {
-                if (!DragonCrystalSoulStone.hasStoredEntity(stack)) {
-                    return stack;
-                }
-            }
-        }
-
-        return ItemStack.EMPTY;
+        WraithSummonManager.tryForceCapture(victim);
     }
 
     //========== 掉落物保护系统 ==========
