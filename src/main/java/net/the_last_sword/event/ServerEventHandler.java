@@ -7,6 +7,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -25,6 +27,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
@@ -38,6 +41,7 @@ import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.init.ModBlocks;
 import net.the_last_sword.init.ModItems;
 import net.the_last_sword.item.DragonCrystalSoulStone;
+import net.the_last_sword.summon.WraithSummonManager;
 import net.the_last_sword.item.TheLastEndArmorItem;
 import net.the_last_sword.item.TheLastEndSwordItems;
 import net.the_last_sword.item.TheLastSword;
@@ -59,7 +63,10 @@ public class ServerEventHandler {
 
     //========== 龙魂灯灵魂收集系统 ==========
 
-    //实体死亡时检查龙魂灯笼范围并存储到魂石
+    //成功捕获后写入实体的去重标记键
+    private static final String SOUL_CAPTURED_KEY = "the_last_sword_soul_captured";
+
+    //实体死亡时检查龙魂灯范围并存储到魂石
     @SubscribeEvent
     public static void onEntityDeath(LivingDeathEvent event) {
         if (event.getEntity().level().isClientSide) {
@@ -70,49 +77,132 @@ public class ServerEventHandler {
             return;
         }
 
-        Level level = event.getEntity().level();
-        BlockPos deathPos = event.getEntity().blockPosition();
-
-        //优先检查佩戴模式：玩家装备龙魂灯在腰带槽位
-        boolean hasEquippedLantern = CuriosEffectHandler.hasCurioEquipped(player, ModItems.DRAGON_SOUL_LANTERN.get());
-        double equippedRange = TheLastSwordConfiguration.getDragonSoulLanternRangeEquippedSafely();
-        boolean inEquippedRange = player.blockPosition().distSqr(deathPos) <= equippedRange * equippedRange;
-
-        //检查放置模式：配置范围内有激活的龙魂灯方块
-        boolean hasPlacedLantern = hasNearbyDragonSoulLantern(level, deathPos);
-
-        //两种模式都不满足，不收集灵魂
-        if (!((hasEquippedLantern && inEquippedRange) || hasPlacedLantern)) {
+        LivingEntity victim = event.getEntity();
+        if (victim instanceof Player) {
             return;
         }
 
-        ItemStack emptySoulStone = findEmptySoulStone(player);
+        boolean hasPlaced = hasNearbyDragonSoulLantern(victim.level(), victim.blockPosition());
+        if (!playerMatchesLantern(victim, player, hasPlaced)) {
+            return;
+        }
+
+        //成功存入后打标记，供移除事件去重
+        if (tryCaptureToSoulStone(victim, player)) {
+            victim.getPersistentData().putBoolean(SOUL_CAPTURED_KEY, true);
+        }
+    }
+
+    //兜底：实体被直接清除（不触发死亡事件）时尝试捕获
+    @SubscribeEvent
+    public static void onEntityForceRemoved(EntityLeaveLevelEvent event) {
+        if (event.getLevel().isClientSide) {
+            return;
+        }
+        if (!(event.getEntity() instanceof LivingEntity victim) || victim instanceof Player) {
+            return;
+        }
+
+        //仅处理被清除/击杀，排除区块卸载和维度切换
+        Entity.RemovalReason reason = victim.getRemovalReason();
+        if (reason != Entity.RemovalReason.DISCARDED && reason != Entity.RemovalReason.KILLED) {
+            return;
+        }
+
+        //排除自己的剑灵被移除，以及死亡线已成功捕获的实体
+        if (WraithSummonManager.isWraith(victim)) {
+            return;
+        }
+        if (victim.getPersistentData().getBoolean(SOUL_CAPTURED_KEY)) {
+            return;
+        }
+
+        Player owner = findNearbyCaptureOwner(victim);
+        if (owner == null) {
+            return;
+        }
+
+        if (tryCaptureToSoulStone(victim, owner)) {
+            victim.getPersistentData().putBoolean(SOUL_CAPTURED_KEY, true);
+        }
+    }
+
+    //把实体存入 owner 的空魂石，成功返回 true
+    private static boolean tryCaptureToSoulStone(LivingEntity victim, Player owner) {
+        ItemStack emptySoulStone = findEmptySoulStone(owner);
         if (emptySoulStone.isEmpty()) {
-            return;
+            return false;
         }
 
-        ResourceLocation entityId = ForgeRegistries.ENTITY_TYPES.getKey(event.getEntity().getType());
-        if (entityId != null) {
-            CompoundTag nbt = emptySoulStone.getOrCreateTag();
-            nbt.putString("wraith_entity_id", entityId.toString());
-
-            //保存实体的完整NBT数据（包括装备、属性、自定义名称等）
-            CompoundTag entityNBT = new CompoundTag();
-            event.getEntity().save(entityNBT);
-
-            //修正血量为最大生命值（避免保存死亡时的0血）
-            float maxHealth = event.getEntity().getMaxHealth();
-            entityNBT.putFloat("Health", maxHealth);
-
-            nbt.put("entity_nbt", entityNBT);
-
-            String entityName = event.getEntity().hasCustomName() ?
-                event.getEntity().getCustomName().getString() :
-                event.getEntity().getDisplayName().getString();
-
-            player.sendSystemMessage(Component.translatable(
-                "message.the_last_sword.dragon_soul_lantern.stored_success", entityName));
+        ResourceLocation entityId = ForgeRegistries.ENTITY_TYPES.getKey(victim.getType());
+        if (entityId == null) {
+            return false;
         }
+
+        CompoundTag nbt = emptySoulStone.getOrCreateTag();
+        nbt.putString("wraith_entity_id", entityId.toString());
+
+        //保存实体的完整NBT数据（包括装备、属性、自定义名称等）
+        CompoundTag entityNBT = new CompoundTag();
+        victim.save(entityNBT);
+
+        //修正血量为最大生命值（避免保存清除时的0血）
+        entityNBT.putFloat("Health", victim.getMaxHealth());
+
+        nbt.put("entity_nbt", entityNBT);
+
+        String entityName = victim.hasCustomName() ?
+            victim.getCustomName().getString() :
+            victim.getDisplayName().getString();
+
+        owner.sendSystemMessage(Component.translatable(
+            "message.the_last_sword.dragon_soul_lantern.stored_success", entityName));
+        return true;
+    }
+
+    //判断玩家相对死亡点是否满足龙魂灯捕获条件（hasPlaced 由外层预算）
+    private static boolean playerMatchesLantern(LivingEntity victim, Player player, boolean hasPlaced) {
+        if (hasPlaced) {
+            return true;
+        }
+        double equippedRange = TheLastSwordConfiguration.getDragonSoulLanternRangeEquippedSafely();
+        return CuriosEffectHandler.hasCurioEquipped(player, ModItems.DRAGON_SOUL_LANTERN.get())
+            && player.blockPosition().distSqr(victim.blockPosition()) <= equippedRange * equippedRange;
+    }
+
+    //以实体为中心，在龙魂灯范围内找最近的、满足条件且有空魂石的玩家
+    private static Player findNearbyCaptureOwner(LivingEntity victim) {
+        Level level = victim.level();
+        BlockPos deathPos = victim.blockPosition();
+        double equippedRange = TheLastSwordConfiguration.getDragonSoulLanternRangeEquippedSafely();
+        double placedRange = TheLastSwordConfiguration.getDragonSoulLanternRangePlacedSafely();
+        double searchRangeSqr = Math.max(equippedRange, placedRange) * Math.max(equippedRange, placedRange);
+
+        //先用便宜条件筛出范围内带空魂石的玩家，按距离升序
+        List<Player> candidates = new ArrayList<>();
+        for (Player player : level.players()) {
+            if (player.blockPosition().distSqr(deathPos) > searchRangeSqr) {
+                continue;
+            }
+            if (findEmptySoulStone(player).isEmpty()) {
+                continue;
+            }
+            candidates.add(player);
+        }
+        if (candidates.isEmpty()) {
+            return null;
+        }
+        candidates.sort(Comparator.comparingDouble(p -> p.blockPosition().distSqr(deathPos)));
+
+        //放置模式扫描较贵，仅在确有候选玩家时算一次
+        boolean hasPlaced = hasNearbyDragonSoulLantern(level, deathPos);
+
+        for (Player player : candidates) {
+            if (playerMatchesLantern(victim, player, hasPlaced)) {
+                return player;
+            }
+        }
+        return null;
     }
 
     //检查附近是否有激活的龙魂灯笼（底部必须有黑曜石或哭泣的黑曜石）
