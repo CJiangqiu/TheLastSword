@@ -168,7 +168,7 @@ public final class DefenceEventHandler {
 
             if (dragonShieldActive) {
                 event.setAmount(0);
-                if (DefenceConfig.getPhasingModule().shieldEffect != DefenceConfigData.ShieldEffectMode.DISABLED
+                if (DefenceConfig.getDragonShieldModule().shieldEffect != DefenceConfigData.ShieldEffectMode.DISABLED
                         && player instanceof net.minecraft.server.level.ServerPlayer sp) {
                     NetworkHandler.sendToPlayer(DragonShieldPacket.fromDamageSource(sp, source), sp);
                 }
@@ -554,7 +554,7 @@ public final class DefenceEventHandler {
                 entity.fallDistance = 0.0f;
             }
             entity.hasImpulse = true;
-            if (player instanceof ServerPlayer sp && DefenceConfig.getPhasingModule().shieldEffect != DefenceConfigData.ShieldEffectMode.DISABLED) {
+            if (player instanceof ServerPlayer sp && DefenceConfig.getDragonShieldModule().shieldEffect != DefenceConfigData.ShieldEffectMode.DISABLED) {
                 NetworkHandler.sendToPlayer(new DragonShieldPacket(true,
                         (float) direction.x, (float) direction.y, (float) direction.z), sp);
             }

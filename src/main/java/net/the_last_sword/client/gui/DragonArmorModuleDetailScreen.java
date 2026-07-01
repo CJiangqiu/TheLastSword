@@ -124,19 +124,6 @@ public class DragonArmorModuleDetailScreen extends Screen {
         ).bounds(this.width / 2 - 100, startY + spacing, 200, 20).build();
         this.addRenderableWidget(activationModeButton);
 
-        // 护盾特效模式
-        currentShieldMode = module.shieldEffect;
-        shieldModeButton = Button.builder(
-            getShieldModeText(currentShieldMode),
-            button -> {
-                currentShieldMode = switch (currentShieldMode) {
-                    case ALWAYS -> DefenceConfigData.ShieldEffectMode.DISABLED;
-                    case ON_HIT, DISABLED -> DefenceConfigData.ShieldEffectMode.ALWAYS;
-                };
-                button.setMessage(getShieldModeText(currentShieldMode));
-            }
-        ).bounds(this.width / 2 - 100, startY + spacing * 2, 200, 20).build();
-        this.addRenderableWidget(shieldModeButton);
     }
 
     // 反重力模块：飞行速度、飞行惯性
@@ -186,6 +173,19 @@ public class DragonArmorModuleDetailScreen extends Screen {
         addCheckbox("gui.the_last_sword.module.dragon_shield.dragon_aura",
             module.enableDragonAura, startY + spacing,
             v -> module.enableDragonAura = v);
+
+        currentShieldMode = module.shieldEffect;
+        shieldModeButton = Button.builder(
+            getShieldModeText(currentShieldMode),
+            button -> {
+                currentShieldMode = switch (currentShieldMode) {
+                    case ALWAYS -> DefenceConfigData.ShieldEffectMode.DISABLED;
+                    case ON_HIT, DISABLED -> DefenceConfigData.ShieldEffectMode.ALWAYS;
+                };
+                button.setMessage(getShieldModeText(currentShieldMode));
+            }
+        ).bounds(this.width / 2 - 100, startY + spacing * 2, 200, 20).build();
+        this.addRenderableWidget(shieldModeButton);
     }
 
     private void addCheckbox(String translationKey, boolean initialValue, int y, BooleanConsumer setter) {
@@ -210,7 +210,9 @@ public class DragonArmorModuleDetailScreen extends Screen {
         switch (moduleType) {
             case PHASING -> {
                 DefenceConfig.getPhasingModule().activationMode = currentActivationMode;
-                DefenceConfig.getPhasingModule().shieldEffect = currentShieldMode;
+            }
+            case DRAGON_SHIELD -> {
+                DefenceConfig.getDragonShieldModule().shieldEffect = currentShieldMode;
             }
             case ANTI_GRAVITY -> {
                 for (ConfigEntry entry : configEntries) {
@@ -240,10 +242,10 @@ public class DragonArmorModuleDetailScreen extends Screen {
 
     private Component getShieldModeText(DefenceConfigData.ShieldEffectMode mode) {
         String key = switch (mode) {
-            case ON_HIT, ALWAYS -> "gui.the_last_sword.module.phasing.shield.enabled";
-            case DISABLED -> "gui.the_last_sword.module.phasing.shield.disabled";
+            case ON_HIT, ALWAYS -> "gui.the_last_sword.module.dragon_shield.shield.enabled";
+            case DISABLED -> "gui.the_last_sword.module.dragon_shield.shield.disabled";
         };
-        return Component.translatable("gui.the_last_sword.module.phasing.shield",
+        return Component.translatable("gui.the_last_sword.module.dragon_shield.shield",
                 Component.translatable(key));
     }
 

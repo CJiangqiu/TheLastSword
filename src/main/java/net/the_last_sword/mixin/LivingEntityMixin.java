@@ -232,7 +232,7 @@ public class LivingEntityMixin {
         //肃正防御护盾优先吸收（受伤 -1, 彻底无敌式抵挡）
         if (the_last_sword$consumeShield(entity, 1)) {
             if (entity instanceof ServerPlayer sp && DragonArmorItem.isFullSet(sp) && DragonArmorItem.hasEnergyFullSet(sp)
-                    && DefenceConfig.getPhasingModule().shieldEffect != DefenceConfigData.ShieldEffectMode.DISABLED) {
+                    && DefenceConfig.getDragonShieldModule().shieldEffect != DefenceConfigData.ShieldEffectMode.DISABLED) {
                 NetworkHandler.sendToPlayer(DragonShieldPacket.fromDamageSource(sp, damageSource), sp);
             }
             cir.setReturnValue(false);
@@ -258,7 +258,7 @@ public class LivingEntityMixin {
         //肃正防御护盾优先吸收 (兜底直接调 actuallyHurt 绕过 hurt 的路径)
         if (the_last_sword$consumeShield(entity, 1)) {
             if (entity instanceof ServerPlayer sp && DragonArmorItem.isFullSet(sp) && DragonArmorItem.hasEnergyFullSet(sp)
-                    && DefenceConfig.getPhasingModule().shieldEffect != DefenceConfigData.ShieldEffectMode.DISABLED) {
+                    && DefenceConfig.getDragonShieldModule().shieldEffect != DefenceConfigData.ShieldEffectMode.DISABLED) {
                 NetworkHandler.sendToPlayer(DragonShieldPacket.fromDamageSource(sp, damageSource), sp);
             }
             ci.cancel();

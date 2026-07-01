@@ -80,7 +80,7 @@ public class DragonShieldRenderer {
         LocalPlayer player = mc.player;
         if (player == null || mc.level == null) return;
 
-        DefenceConfigData.ShieldEffectMode mode = DefenceConfig.getPhasingModule().shieldEffect;
+        DefenceConfigData.ShieldEffectMode mode = DefenceConfig.getDragonShieldModule().shieldEffect;
         if (mode == DefenceConfigData.ShieldEffectMode.DISABLED) return;
         if (!DragonArmorItem.isFullSet(player) || !DragonArmorItem.hasEnergyFullSet(player)) return;
 

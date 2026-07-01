@@ -134,7 +134,8 @@ public class DefenceConfigData {
     public static class PhasingModule {
         public boolean enabled = true;
         public PhasingActivationMode activationMode = PhasingActivationMode.ALWAYS;
-        public ShieldEffectMode shieldEffect = ShieldEffectMode.ALWAYS;
+        @Deprecated
+        public ShieldEffectMode shieldEffect;
     }
 
     public enum PhasingActivationMode {
@@ -169,5 +170,6 @@ public class DefenceConfigData {
     public static class DragonShieldModule {
         public boolean enabled = true;
         public Boolean enableDragonAura = true;
+        public ShieldEffectMode shieldEffect = ShieldEffectMode.ALWAYS;
     }
 }

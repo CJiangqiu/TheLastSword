@@ -76,15 +76,21 @@ public class DefenceConfig {
             d.armor.dragonArmor.defence.phasing = defaults.armor.dragonArmor.defence.phasing;
             patched = true;
         }
-        if (d.armor.dragonArmor.defence.phasing.shieldEffect == null) {
-            d.armor.dragonArmor.defence.phasing.shieldEffect = defaults.armor.dragonArmor.defence.phasing.shieldEffect;
-            patched = true;
-        }
         if (d.armor.dragonArmor.defence.dragonShield == null) {
             d.armor.dragonArmor.defence.dragonShield = defaults.armor.dragonArmor.defence.dragonShield;
             patched = true;
-        } else if (d.armor.dragonArmor.defence.dragonShield.enableDragonAura == null) {
+        }
+        if (d.armor.dragonArmor.defence.phasing.shieldEffect != null) {
+            d.armor.dragonArmor.defence.dragonShield.shieldEffect = d.armor.dragonArmor.defence.phasing.shieldEffect;
+            d.armor.dragonArmor.defence.phasing.shieldEffect = null;
+            patched = true;
+        }
+        if (d.armor.dragonArmor.defence.dragonShield.enableDragonAura == null) {
             d.armor.dragonArmor.defence.dragonShield.enableDragonAura = defaults.armor.dragonArmor.defence.dragonShield.enableDragonAura;
+            patched = true;
+        }
+        if (d.armor.dragonArmor.defence.dragonShield.shieldEffect == null) {
+            d.armor.dragonArmor.defence.dragonShield.shieldEffect = defaults.armor.dragonArmor.defence.dragonShield.shieldEffect;
             patched = true;
         }
         return patched;
