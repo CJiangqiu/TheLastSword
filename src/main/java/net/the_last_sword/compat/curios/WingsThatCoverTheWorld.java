@@ -29,6 +29,13 @@ public class WingsThatCoverTheWorld extends Item implements ICurioItem {
     @Override
     public void curioTick(SlotContext slotContext, ItemStack stack) {
         LivingEntity entity = slotContext.entity();
+
+        //冰火不侵：清零冰冻积累并清除着火
+        if (TheLastSwordConfiguration.getCuriosWingsIceFireImmunityEnabledSafely()) {
+            entity.setTicksFrozen(0);
+            entity.clearFire();
+        }
+
         if (entity instanceof Player player) {
             //非创造/旁观模式下给予飞行能力，仅在尚未赋予时设置，避免每tick重推abilities包导致飞行卡顿
             if (!player.isCreative() && !player.isSpectator()) {
@@ -65,6 +72,9 @@ public class WingsThatCoverTheWorld extends Item implements ICurioItem {
         //显示减免百分比：例如 multiplier=0.1 -> 减免 90%
         String reductionPercent = String.format("-%.0f", (1.0 - reduction) * 100);
         tooltip.add(Component.translatable("item_tooltip.the_last_sword.wings_that_cover_the_world", reductionPercent));
+        if (TheLastSwordConfiguration.getCuriosWingsIceFireImmunityEnabledSafely()) {
+            tooltip.add(Component.translatable("item_tooltip.the_last_sword.wings_that_cover_the_world.ice_fire_immunity"));
+        }
         tooltip.add(Component.translatable("item_tooltip_lore.the_last_sword.wings_that_cover_the_world")
             .withStyle(net.minecraft.ChatFormatting.GRAY));
     }

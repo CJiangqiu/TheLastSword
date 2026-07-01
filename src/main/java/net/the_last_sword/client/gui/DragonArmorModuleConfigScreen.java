@@ -37,11 +37,10 @@ public class DragonArmorModuleConfigScreen extends Screen {
 
         // 虚化模块
         this.addRenderableWidget(Button.builder(
-            Component.translatable("gui.the_last_sword.dragon_armor_module.phasing"),
+            Component.translatable("gui.the_last_sword.dragon_armor_module.defence"),
             button -> {
                 if (this.minecraft != null) {
-                    this.minecraft.setScreen(new DragonArmorModuleDetailScreen(
-                        this, DragonArmorModuleDetailScreen.ModuleType.PHASING));
+                    this.minecraft.setScreen(new DragonArmorDefenceModuleScreen(this));
                 }
             }
         ).bounds(centerX - buttonWidth / 2, startY + spacing, buttonWidth, buttonHeight).build());

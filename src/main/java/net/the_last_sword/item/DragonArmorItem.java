@@ -355,6 +355,20 @@ public abstract class DragonArmorItem extends TheLastEndArmorItem implements Geo
         return BASE_ENERGY + level * perLevel;
     }
 
+    //检查全套龙套是否都有能量>0
+    public static boolean hasEnergyFullSet(Player player) {
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            if (slot.getType() != EquipmentSlot.Type.ARMOR) continue;
+            ItemStack stack = player.getItemBySlot(slot);
+            if (!(stack.getItem() instanceof DragonArmorItem)) return false;
+            boolean hasEnergy = stack.getCapability(ForgeCapabilities.ENERGY)
+                    .map(energy -> energy.getEnergyStored() > 0)
+                    .orElse(false);
+            if (!hasEnergy) return false;
+        }
+        return true;
+    }
+
     //检查实体是否穿戴全套龙之盔甲
     public static boolean isFullSet(LivingEntity entity) {
         return !entity.getItemBySlot(EquipmentSlot.HEAD).isEmpty() &&

@@ -30,6 +30,7 @@ import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.client.gui.DefenceConfigScreen;
 import net.the_last_sword.client.overlay.DragonArmorOverlay;
 import net.the_last_sword.client.overlay.JustifiedDefenceOverlay;
+import net.the_last_sword.client.renderer.DragonShieldRenderer;
 import net.the_last_sword.client.shader.TheLastEndEffect;
 import net.the_last_sword.configuration.DefenceConfig;
 import net.the_last_sword.network.DefenceConfigPacket;
@@ -280,6 +281,11 @@ public class ClientEventHandler {
 
         //渲染龙魂灯笼范围
         renderDragonSoulLanternRanges(event.getPoseStack(), event.getCamera(), mc.level);
+
+        //渲染龙套护盾（复用全局缓冲避免每帧new导致OOM）
+        MultiBufferSource.BufferSource buf = mc.renderBuffers.bufferSource();
+        DragonShieldRenderer.render(event.getPoseStack(), buf, event.getPartialTick());
+        buf.endBatch();
     }
 
     //渲染球体
@@ -377,11 +383,9 @@ public class ClientEventHandler {
         poseStack.pushPose();
         poseStack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
 
-        BufferBuilder bufferBuilder = new BufferBuilder(256);
-        MultiBufferSource.BufferSource immediateBufferSource = MultiBufferSource.immediate(bufferBuilder);
-        VertexConsumer buffer = immediateBufferSource.getBuffer(RenderType.lines());
+        MultiBufferSource.BufferSource buf = Minecraft.getInstance().renderBuffers.bufferSource();
+        VertexConsumer buffer = buf.getBuffer(RenderType.lines());
 
-        //动态闪烁效果
         float time = (System.currentTimeMillis() % 2000) / 2000.0f;
         float alpha = 0.5f + 0.3f * (float) Math.sin(time * Math.PI * 2);
         float red = 0.0f;
@@ -390,12 +394,11 @@ public class ClientEventHandler {
 
         Matrix4f matrix = poseStack.last().pose();
 
-        //渲染所有预览方块的轮廓
         for (BlockPos pos : miningPreviewBlocks) {
             renderBlockOutline(buffer, matrix, pos, red, green, blue, alpha);
         }
 
-        immediateBufferSource.endBatch();
+        buf.endBatch();
         poseStack.popPose();
     }
 
@@ -444,9 +447,8 @@ public class ClientEventHandler {
         poseStack.pushPose();
         poseStack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
 
-        BufferBuilder bufferBuilder = new BufferBuilder(256);
-        MultiBufferSource.BufferSource immediateBufferSource = MultiBufferSource.immediate(bufferBuilder);
-        VertexConsumer buffer = immediateBufferSource.getBuffer(RenderType.lines());
+        MultiBufferSource.BufferSource buf = Minecraft.getInstance().renderBuffers.bufferSource();
+        VertexConsumer buffer = buf.getBuffer(RenderType.lines());
 
         //绿色闪烁效果（与挖掘预览一致）
         float time = (System.currentTimeMillis() % 2000) / 2000.0f;
@@ -478,7 +480,7 @@ public class ClientEventHandler {
         addLine(buffer, matrix, x2, y1, z2, x2, y2, z2, 0.0f, 1.0f, 0.0f, alpha);
         addLine(buffer, matrix, x1, y1, z2, x1, y2, z2, 0.0f, 1.0f, 0.0f, alpha);
 
-        immediateBufferSource.endBatch();
+        buf.endBatch();
         poseStack.popPose();
     }
 
@@ -495,9 +497,8 @@ public class ClientEventHandler {
         poseStack.pushPose();
         poseStack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
 
-        BufferBuilder bufferBuilder = new BufferBuilder(256);
-        MultiBufferSource.BufferSource immediateBufferSource = MultiBufferSource.immediate(bufferBuilder);
-        VertexConsumer buffer = immediateBufferSource.getBuffer(RenderType.lines());
+        MultiBufferSource.BufferSource buf = Minecraft.getInstance().renderBuffers.bufferSource();
+        VertexConsumer buffer = buf.getBuffer(RenderType.lines());
 
         //紫色呼吸效果
         float time = (System.currentTimeMillis() % 2000) / 2000.0f;
@@ -511,7 +512,7 @@ public class ClientEventHandler {
             renderLanternRangeBox(buffer, matrix, lanternPos, red, green, blue, alpha);
         }
 
-        immediateBufferSource.endBatch();
+        buf.endBatch();
         poseStack.popPose();
     }
 

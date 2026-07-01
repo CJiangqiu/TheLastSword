@@ -21,6 +21,7 @@ import net.the_last_sword.entity.GuardianSaberEntity;
 import net.the_last_sword.entity.LostWraithEntity;
 import net.the_last_sword.entity.TheLastEndLightingEntity;
 import net.the_last_sword.entity.TheLastEndSwordProjectile;
+import net.the_last_sword.entity.TheLastSwordYouNeverForgotProjectile;
 import net.the_last_sword.entity.TheLastEndSwordWraithEntity;
 import net.the_last_sword.entity.ThePastShadowOfTheQueenEntity;
 import net.the_last_sword.test.TestEntity;
@@ -82,6 +83,16 @@ public class ModEntities {
                 .clientTrackingRange(4)
                 .updateInterval(10)
                 .build("the_last_end_sword_projectile")
+        );
+
+    //隐藏武器弹射物
+    public static final RegistryObject<EntityType<TheLastSwordYouNeverForgotProjectile>> THE_LAST_SWORD_YOU_NEVER_FORGOT_PROJECTILE =
+        ENTITY_TYPES.register("the_last_sword_you_never_forgot_projectile",
+            () -> EntityType.Builder.<TheLastSwordYouNeverForgotProjectile>of(TheLastSwordYouNeverForgotProjectile::new, MobCategory.MISC)
+                .sized(0.5f, 0.5f)
+                .clientTrackingRange(4)
+                .updateInterval(10)
+                .build("the_last_sword_you_never_forgot_projectile")
         );
 
     //测试实体

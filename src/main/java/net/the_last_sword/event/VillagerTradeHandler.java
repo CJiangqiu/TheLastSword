@@ -81,6 +81,17 @@ public class VillagerTradeHandler {
             0.05f   // 5%价格倍数
         ));
 
+        // 一次性能量电池（概率为远古能量核心的2倍，出现两次）
+        for (int i = 0; i < 2; i++) {
+            event.getGenericTrades().add(new BasicItemListing(
+                new ItemStack(Items.EMERALD, 8),
+                new ItemStack(ModItems.DISPOSABLE_ENERGY_BATTERY.get(), 1),
+                64,     // 最多交易64次
+                2,      // 2经验
+                0.05f
+            ));
+        }
+
         // 也添加到稀有交易列表，增加出现概率
         event.getRareTrades().add(new BasicItemListing(
             new ItemStack(Items.DRAGON_EGG, 1),
@@ -105,5 +116,16 @@ public class VillagerTradeHandler {
             50,
             0.05f
         ));
+
+        // 一次性能量电池（概率为远古能量核心的2倍，出现两次）
+        for (int i = 0; i < 2; i++) {
+            event.getRareTrades().add(new BasicItemListing(
+                new ItemStack(Items.EMERALD, 8),
+                new ItemStack(ModItems.DISPOSABLE_ENERGY_BATTERY.get(), 1),
+                64,     // 最多交易64次
+                2,      // 2经验
+                0.05f
+            ));
+        }
     }
 }

@@ -135,7 +135,7 @@
         },
         {
           "type": "minecraft:item",
-          "name": "the_last_sword:dragon_crystal_crown",
+          "name": "the_last_sword:ancient_energy_core",
           "weight": 3,
           "functions": [
             {
@@ -146,8 +146,22 @@
         },
         {
           "type": "minecraft:item",
-          "name": "the_last_sword:ancient_energy_core",
-          "weight": 5,
+          "name": "minecraft:golden_apple",
+          "weight": 30,
+          "functions": [
+            {
+              "function": "set_count",
+              "count": {
+                "min": 4,
+                "max": 8
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "the_last_sword:disposable_energy_battery",
+          "weight": 3,
           "functions": [
             {
               "function": "set_count",

@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.world.entity.LivingEntity;
+import net.the_last_sword.client.layer.JustifiedDefenceLayer;
 import net.the_last_sword.init.ModEffects;
 import net.the_last_sword.test.UltraTestSwordItem;
 import org.spongepowered.asm.mixin.Mixin;
@@ -29,6 +30,12 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 
     @Unique
     private T the_last_sword$currentEntity;
+
+    //构造器中挂载肃正防御护盾层（覆盖所有生物渲染器）
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void theLastSword$addJustifiedDefenceLayer(CallbackInfo ci) {
+        ((LivingEntityRenderer<T, M>) (Object) this).addLayer(new JustifiedDefenceLayer<>((LivingEntityRenderer<T, M>) (Object) this));
+    }
 
     //在render方法开始时捕获当前实体
     @Inject(

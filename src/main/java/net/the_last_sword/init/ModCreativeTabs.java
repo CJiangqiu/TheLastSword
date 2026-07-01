@@ -39,6 +39,7 @@ public class ModCreativeTabs {
                 output.accept(ModItems.DRAGON_CRYSTAL_ARMOR_CHESTPLATE.get());
                 output.accept(ModItems.DRAGON_CRYSTAL_ARMOR_LEGGINGS.get());
                 output.accept(ModItems.DRAGON_CRYSTAL_ARMOR_BOOTS.get());
+                output.accept(ModItems.DISPOSABLE_ENERGY_BATTERY.get().getDefaultInstance());
                 output.accept(ModItems.ANCIENT_ENERGY_CORE.get());
                 output.accept(ModItems.DRAGON_CRYSTAL_ENCHANTING_TABLE.get());
                 output.accept(ModItems.DRAGON_ARMOR_HELMET.get());

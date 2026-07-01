@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
+import net.the_last_sword.configuration.DefenceConfig;
 import net.the_last_sword.configuration.DefenceConfigData;
 import net.the_last_sword.util.TheLastSwordLogger;
 
@@ -42,6 +43,7 @@ public class DefenceConfigPacket {
                 try {
                     DefenceConfigData configData = GSON.fromJson(configJson, DefenceConfigData.class);
                     if (configData != null) {
+                        DefenceConfig.patchMissingFields(configData);
                         SERVER_CONFIG_CACHE.put(player.getUUID(), configData);
                         TheLastSwordLogger.debug("Synced defence config for player: " + player.getName().getString());
                     }

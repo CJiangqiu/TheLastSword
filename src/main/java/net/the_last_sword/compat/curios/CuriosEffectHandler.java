@@ -13,6 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodData;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
@@ -313,9 +314,23 @@ public class CuriosEffectHandler {
         handleDimensionExplorerTick(player);
     }
 
-    //极限维生装置：生命恢复+抗性提升+饱和
+    //极限维生装置：生命恢复+抗性提升+饱和（消耗FE，电量不足则停止主动buff）
     private static void handleExtremeLifeSupportTick(Player player) {
-        if (!hasCurioEquipped(player, ModItems.EXTREME_LIFE_SUPPORT_DEVICE.get())) {
+        ItemStack device = getEquippedCurioStack(player, ModItems.EXTREME_LIFE_SUPPORT_DEVICE.get());
+        if (device.isEmpty()) {
+            return;
+        }
+
+        //扣电；电量不足则不施加主动buff（盔甲韧性走属性系统不受此影响）
+        int energyCost = TheLastSwordConfiguration.getCuriosExtremeLifeSupportEnergyCostSafely();
+        boolean powered = device.getCapability(ForgeCapabilities.ENERGY).map(energy -> {
+            if (energy.extractEnergy(energyCost, true) < energyCost) {
+                return false;
+            }
+            energy.extractEnergy(energyCost, false);
+            return true;
+        }).orElse(false);
+        if (!powered) {
             return;
         }
 
@@ -327,7 +342,7 @@ public class CuriosEffectHandler {
 
         player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, duration, bonusLevel, false, false, true));
         player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, bonusLevel, false, false, true));
-        player.addEffect(new MobEffectInstance(MobEffects.SATURATION, duration, 0, false, false, true));
+        player.addEffect(new MobEffectInstance(MobEffects.SATURATION, duration, bonusLevel, false, false, true));
     }
 
     //维度探索者：跳跃提升
@@ -364,6 +379,7 @@ public class CuriosEffectHandler {
         int effectDuration = TheLastSwordConfiguration.getCuriosDimensionExplorerEffectDurationSafely();
         int cooldown = TheLastSwordConfiguration.getCuriosDimensionExplorerCooldownSafely();
         int hasteAmplifier = TheLastSwordConfiguration.getCuriosDimensionExplorerHasteAmplifierSafely();
+        int speedAmplifier = TheLastSwordConfiguration.getCuriosDimensionExplorerSpeedAmplifierSafely();
         float emergencyHealth = (float) TheLastSwordConfiguration.getCuriosDimensionExplorerEmergencyHealHealthSafely();
         int emergencyFoodLevel = TheLastSwordConfiguration.getCuriosDimensionExplorerEmergencyFoodLevelSafely();
 
@@ -381,8 +397,28 @@ public class CuriosEffectHandler {
         //急迫
         player.addEffect(new MobEffectInstance(MobEffects.DIG_SPEED, effectDuration, hasteAmplifier, false, true, true));
 
+        //速度
+        player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, effectDuration, speedAmplifier, false, true, true));
+
         //进入冷却
         player.getCooldowns().addCooldown(ModItems.DIMENSION_EXPLORER.get(), cooldown);
+    }
+
+    //获取玩家装备的指定Curios饰品ItemStack（未装备返回EMPTY）
+    public static ItemStack getEquippedCurioStack(LivingEntity entity, Item item) {
+        return CuriosApi.getCuriosInventory(entity).map(handler -> {
+            var curios = handler.getCurios();
+            for (var entry : curios.entrySet()) {
+                IDynamicStackHandler stacks = entry.getValue().getStacks();
+                for (int i = 0; i < stacks.getSlots(); i++) {
+                    ItemStack stack = stacks.getStackInSlot(i);
+                    if (stack.getItem() == item) {
+                        return stack;
+                    }
+                }
+            }
+            return ItemStack.EMPTY;
+        }).orElse(ItemStack.EMPTY);
     }
 
     //检查玩家是否装备了指定的Curios饰品

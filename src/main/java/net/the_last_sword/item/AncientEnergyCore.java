@@ -17,19 +17,18 @@ import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.IEnergyStorage;
+import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.util.nbt.ItemEnergyStorage;
+import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.type.capability.ICurioItem;
+import top.theillusivec4.curios.api.type.inventory.IDynamicStackHandler;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
 public class AncientEnergyCore extends Item implements IDragonSmithingTemplate, ICurioItem {
 
-    //远古能量核心的最大能量 4M FE
-    private static final int MAX_ENERGY = 4194304; // 4M FE
-    //每tick充能速率
-    private static final int CHARGE_RATE = 4096; // 4096 FE/tick
     //充能开关状态NBT标签
     private static final String CHARGING_ENABLED_TAG = "the_last_sword.charging_enabled";
 
@@ -44,7 +43,7 @@ public class AncientEnergyCore extends Item implements IDragonSmithingTemplate, 
     @Override
     public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundTag nbt) {
         return new ICapabilityProvider() {
-            private final ItemEnergyStorage energyStorage = new ItemEnergyStorage(stack, () -> MAX_ENERGY);
+            private final ItemEnergyStorage energyStorage = new ItemEnergyStorage(stack, TheLastSwordConfiguration::getAncientEnergyCoreMaxEnergySafely);
             private final LazyOptional<ItemEnergyStorage> energyCap = LazyOptional.of(() -> energyStorage);
 
             @Override
@@ -175,6 +174,20 @@ public class AncientEnergyCore extends Item implements IDragonSmithingTemplate, 
                     return;
                 }
             }
+
+            //饰品栏（所有Curios槽位）
+            CuriosApi.getCuriosInventory(player).ifPresent(handler -> {
+                for (var entry : handler.getCurios().entrySet()) {
+                    IDynamicStackHandler stacks = entry.getValue().getStacks();
+                    for (int i = 0; i < stacks.getSlots(); i++) {
+                        ItemStack curioStack = stacks.getStackInSlot(i);
+                        if (curioStack == stack) continue;
+                        if (chargeItem(coreEnergy, curioStack)) {
+                            return;
+                        }
+                    }
+                }
+            });
         });
     }
 
@@ -190,7 +203,7 @@ public class AncientEnergyCore extends Item implements IDragonSmithingTemplate, 
             }
 
             //尝试提取能量
-            int extracted = source.extractEnergy(CHARGE_RATE, true);
+            int extracted = source.extractEnergy(TheLastSwordConfiguration.getAncientEnergyCoreChargeRateSafely(), true);
             if (extracted <= 0) {
                 return true; //能量核心没能量了
             }

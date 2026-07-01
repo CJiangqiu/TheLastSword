@@ -17,10 +17,23 @@ public class ItemEnergyStorage extends EnergyStorage {
     private final IntSupplier maxEnergySupplier;
 
     public ItemEnergyStorage(ItemStack stack, IntSupplier maxEnergySupplier) {
+        this(stack, maxEnergySupplier, false);
+    }
+
+    // startFull: 新物品（NBT无能量数据）是否默认满电
+    public ItemEnergyStorage(ItemStack stack, IntSupplier maxEnergySupplier, boolean startFull) {
         super(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, 0);
         this.stack = stack;
         this.maxEnergySupplier = maxEnergySupplier;
-        this.energy = getEnergyFromNBT();
+
+        if (stack.hasTag() && stack.getTag().contains(ENERGY_TAG)) {
+            this.energy = stack.getTag().getInt(ENERGY_TAG);
+        } else if (startFull) {
+            this.energy = maxEnergySupplier.getAsInt();
+            saveEnergyToNBT();
+        } else {
+            this.energy = 0;
+        }
     }
 
     @Override

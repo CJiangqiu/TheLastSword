@@ -7,10 +7,14 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.TickEvent;
@@ -32,6 +36,8 @@ import net.the_last_sword.init.ModAttributes;
 import net.the_last_sword.item.DragonArmorItem;
 import net.the_last_sword.item.DragonCrystalArmorItem;
 import net.the_last_sword.network.DefenceConfigPacket;
+import net.the_last_sword.network.DragonShieldPacket;
+import net.the_last_sword.network.NetworkHandler;
 import net.the_last_sword.util.EntityUtil;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraft.world.damagesource.DamageSource;
@@ -44,6 +50,7 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.the_last_sword.client.PerceptionScanData.ScanType;
 import net.the_last_sword.network.NetworkHandler;
 import net.the_last_sword.network.PerceptionScanPacket;
@@ -152,7 +159,20 @@ public final class DefenceEventHandler {
                                   source.is(DamageTypes.FIREWORKS) ||
                                   source.is(DamageTypes.BAD_RESPAWN_POINT);
 
-            if (isNonPlayerAttack || isExplosion) {
+            if (!isNonPlayerAttack && !isExplosion) return;
+
+            DefenceConfigData playerConfig = DefenceConfigPacket.getPlayerConfig(player.getUUID());
+            DragonShieldModule dragonShield = playerConfig.armor.dragonArmor.defence.dragonShield;
+            boolean dragonShieldEnabled = dragonShield == null || dragonShield.enabled;
+            boolean dragonShieldActive = dragonShieldEnabled && DragonArmorItem.hasEnergyFullSet(player);
+
+            if (dragonShieldActive) {
+                event.setAmount(0);
+                if (DefenceConfig.getPhasingModule().shieldEffect != DefenceConfigData.ShieldEffectMode.DISABLED
+                        && player instanceof net.minecraft.server.level.ServerPlayer sp) {
+                    NetworkHandler.sendToPlayer(DragonShieldPacket.fromDamageSource(sp, source), sp);
+                }
+            } else {
                 //减少90%伤害
                 event.setAmount(event.getAmount() * 0.1f);
             }
@@ -414,7 +434,10 @@ public final class DefenceEventHandler {
         //获取玩家同步的配置
         DefenceConfigData playerConfig = DefenceConfigPacket.getPlayerConfig(player.getUUID());
         LifeSupportModule lifeSupport = playerConfig.armor.dragonArmor.lifeSupport;
-        PhasingModule phasingModule = playerConfig.armor.dragonArmor.phasing;
+        PhasingModule phasingModule = playerConfig.armor.dragonArmor.defence.phasing;
+        DragonShieldModule dragonShield = playerConfig.armor.dragonArmor.defence.dragonShield;
+        boolean dragonShieldEnabled = dragonShield == null || dragonShield.enabled;
+        boolean dragonAuraEnabled = dragonShield == null || dragonShield.enableDragonAura == null || dragonShield.enableDragonAura;
 
         //检查全套是否都有电
         boolean allHaveEnergy = true;
@@ -458,6 +481,15 @@ public final class DefenceEventHandler {
         }
 
         //感知模块扫描
+        if (allHaveEnergy && dragonShieldEnabled) {
+            drainAllArmorEnergy(player, 1);
+        }
+
+        if (allHaveEnergy && dragonAuraEnabled) {
+            repelNearbyEntities(player);
+            drainAllArmorEnergy(player, 1);
+        }
+
         PerceptionModule perceptionModule = playerConfig.armor.dragonArmor.perception;
         if (allHaveEnergy && perceptionModule.scanEntities && player instanceof ServerPlayer sp) {
             performPerceptionScan(sp, perceptionModule);
@@ -489,6 +521,46 @@ public final class DefenceEventHandler {
     }
 
     //判断实体类型
+    private static void repelNearbyEntities(Player player) {
+        final double radius = 3.0;
+        final double radiusSqr = radius * radius;
+        Vec3 center = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
+        AABB fieldBox = player.getBoundingBox().inflate(radius);
+        List<Entity> entities = player.level().getEntities(player, fieldBox,
+                entity -> entity.isAlive()
+                        && entity != player
+                        && !(entity instanceof ItemEntity)
+                        && !(entity instanceof ExperienceOrb)
+                        && !entity.isPassengerOfSameVehicle(player));
+
+        for (Entity entity : entities) {
+            Vec3 targetCenter = entity.position().add(0.0, entity.getBbHeight() * 0.5, 0.0);
+            Vec3 offset = targetCenter.subtract(center);
+            double distanceSqr = offset.lengthSqr();
+            if (distanceSqr > radiusSqr) continue;
+
+            Vec3 direction = distanceSqr < 1.0E-4
+                    ? player.getLookAngle().reverse()
+                    : offset.normalize();
+            double distance = Math.sqrt(Math.max(distanceSqr, 1.0E-4));
+            double strength = entity instanceof Projectile ? 1.15 : 0.45 + (radius - distance) * 0.12;
+            Vec3 repel = direction.scale(strength);
+
+            if (entity instanceof Projectile) {
+                entity.setDeltaMovement(repel);
+            } else {
+                Vec3 current = entity.getDeltaMovement();
+                entity.setDeltaMovement(current.x * 0.35 + repel.x, Math.max(current.y, 0.08), current.z * 0.35 + repel.z);
+                entity.fallDistance = 0.0f;
+            }
+            entity.hasImpulse = true;
+            if (player instanceof ServerPlayer sp && DefenceConfig.getPhasingModule().shieldEffect != DefenceConfigData.ShieldEffectMode.DISABLED) {
+                NetworkHandler.sendToPlayer(new DragonShieldPacket(true,
+                        (float) direction.x, (float) direction.y, (float) direction.z), sp);
+            }
+        }
+    }
+
     private static ScanType classifyEntity(LivingEntity entity) {
         if (entity instanceof Animal || entity instanceof AbstractVillager) {
             return ScanType.FRIENDLY;

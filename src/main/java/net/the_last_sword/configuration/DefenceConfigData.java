@@ -4,9 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DefenceConfigData {
-    public int configVersion = 1;
+    public int configVersion = 2;
     public HudSettings hud = new HudSettings();
     public ArmorSettings armor = new ArmorSettings();
+    public JustifiedDefenceSettings justifiedDefence = new JustifiedDefenceSettings();
 
     // ==================== HUD 设置 ====================
 
@@ -14,9 +15,7 @@ public class DefenceConfigData {
         public Map<String, HudElement> elements = createDefaultElements();
 
         private static Map<String, HudElement> createDefaultElements() {
-            Map<String, HudElement> map = new HashMap<>();
-            map.put("justified_defence_overlay", new HudElement(0, 0));
-            return map;
+            return new HashMap<>();
         }
     }
 
@@ -87,9 +86,13 @@ public class DefenceConfigData {
         public DragonArmorLeggingsConfig leggings = new DragonArmorLeggingsConfig();
         public DragonArmorBootsConfig boots = new DragonArmorBootsConfig();
         public LifeSupportModule lifeSupport = new LifeSupportModule();
-        public PhasingModule phasing = new PhasingModule();
         public AntiGravityModule antiGravity = new AntiGravityModule();
         public PerceptionModule perception = new PerceptionModule();
+        public DefenceModule defence = new DefenceModule();
+        @Deprecated
+        public PhasingModule phasing;
+        @Deprecated
+        public DragonShieldModule dragonShield;
     }
 
     public static class DragonArmorHelmetConfig {
@@ -123,13 +126,23 @@ public class DefenceConfigData {
     }
 
     // 虚化模块
+    public static class DefenceModule {
+        public PhasingModule phasing = new PhasingModule();
+        public DragonShieldModule dragonShield = new DragonShieldModule();
+    }
+
     public static class PhasingModule {
         public boolean enabled = true;
         public PhasingActivationMode activationMode = PhasingActivationMode.ALWAYS;
+        public ShieldEffectMode shieldEffect = ShieldEffectMode.ALWAYS;
     }
 
     public enum PhasingActivationMode {
         ALWAYS, FLY_ONLY
+    }
+
+    public enum ShieldEffectMode {
+        ON_HIT, ALWAYS, DISABLED
     }
 
     // 反重力模块
@@ -138,11 +151,23 @@ public class DefenceConfigData {
         public boolean enableInertia = true;
     }
 
+    // ==================== 肃正防御配置 ====================
+
+    public static class JustifiedDefenceSettings {
+        public ShieldEffectMode overlayEffect = ShieldEffectMode.ALWAYS;
+        public HudOffset overlayPosition = new HudOffset(0, 0);
+    }
+
     // 感知模块
     public static class PerceptionModule {
         public boolean enableHud = true;
         public boolean scanEntities = false;
         public int scanIntervalSeconds = 5;
         public int scanRange = 32;
+    }
+
+    public static class DragonShieldModule {
+        public boolean enabled = true;
+        public Boolean enableDragonAura = true;
     }
 }

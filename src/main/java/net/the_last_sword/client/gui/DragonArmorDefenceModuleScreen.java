@@ -5,10 +5,12 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
-public class DefenceConfigScreen extends Screen {
+public class DragonArmorDefenceModuleScreen extends Screen {
+    private final Screen parent;
 
-    public DefenceConfigScreen() {
-        super(Component.translatable("gui.the_last_sword.defence_config.title"));
+    public DragonArmorDefenceModuleScreen(Screen parent) {
+        super(Component.translatable("gui.the_last_sword.dragon_armor_module.defence"));
+        this.parent = parent;
     }
 
     @Override
@@ -18,37 +20,37 @@ public class DefenceConfigScreen extends Screen {
         int buttonWidth = 200;
         int buttonHeight = 20;
         int centerX = this.width / 2;
-        int startY = this.height / 2 - 30;
+        int startY = this.height / 2 - 35;
+        int spacing = 25;
 
-        //按钮1：装备配置
         this.addRenderableWidget(Button.builder(
-            Component.translatable("gui.the_last_sword.defence_config.equipment_settings"),
+            Component.translatable("gui.the_last_sword.dragon_armor_module.phasing"),
             button -> {
                 if (this.minecraft != null) {
-                    this.minecraft.setScreen(new ArmorConfigScreen(this));
+                    this.minecraft.setScreen(new DragonArmorModuleDetailScreen(
+                        this, DragonArmorModuleDetailScreen.ModuleType.PHASING));
                 }
             }
         ).bounds(centerX - buttonWidth / 2, startY, buttonWidth, buttonHeight).build());
 
-        //按钮2：肃正防御
         this.addRenderableWidget(Button.builder(
-            Component.translatable("gui.the_last_sword.defence_config.justified_defence"),
+            Component.translatable("gui.the_last_sword.dragon_armor_module.dragon_shield"),
             button -> {
                 if (this.minecraft != null) {
-                    this.minecraft.setScreen(new JustifiedDefenceConfigScreen(this));
+                    this.minecraft.setScreen(new DragonArmorModuleDetailScreen(
+                        this, DragonArmorModuleDetailScreen.ModuleType.DRAGON_SHIELD));
                 }
             }
-        ).bounds(centerX - buttonWidth / 2, startY + 30, buttonWidth, buttonHeight).build());
+        ).bounds(centerX - buttonWidth / 2, startY + spacing, buttonWidth, buttonHeight).build());
 
-        //关闭按钮
         this.addRenderableWidget(Button.builder(
-            Component.translatable("gui.done"),
+            Component.translatable("gui.back"),
             button -> {
                 if (this.minecraft != null) {
-                    this.minecraft.setScreen(null);
+                    this.minecraft.setScreen(parent);
                 }
             }
-        ).bounds(centerX - buttonWidth / 2, startY + 60, buttonWidth, buttonHeight).build());
+        ).bounds(centerX - buttonWidth / 2, startY + spacing * 2 + 10, buttonWidth, buttonHeight).build());
     }
 
     @Override

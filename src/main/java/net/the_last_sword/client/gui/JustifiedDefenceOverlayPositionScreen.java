@@ -28,10 +28,9 @@ public class JustifiedDefenceOverlayPositionScreen extends Screen {
     private int dragStartY;
 
     public JustifiedDefenceOverlayPositionScreen(Screen parent) {
-        super(Component.translatable("gui.the_last_sword.justified_defence_position.title"));
+        super(Component.translatable("gui.the_last_sword.defence_config.justified_defence_position"));
         this.parent = parent;
 
-        //加载当前配置
         DefenceConfigData.HudOffset offset = DefenceConfig.getHudOffset("justified_defence_overlay");
         this.offsetX = offset.x;
         this.offsetY = offset.y;
@@ -50,13 +49,10 @@ public class JustifiedDefenceOverlayPositionScreen extends Screen {
         this.addRenderableWidget(Button.builder(
             Component.translatable("gui.the_last_sword.justified_defence_position.save"),
             button -> {
-                //保存配置
                 DefenceConfig.setHudOffset("justified_defence_overlay", offsetX, offsetY);
                 DefenceConfig.save();
-                //发送配置到服务端
                 NetworkHandler.sendToServer(new DefenceConfigPacket(DefenceConfig.getData()));
 
-                //返回上一界面
                 if (this.minecraft != null) {
                     this.minecraft.setScreen(parent);
                 }
@@ -77,10 +73,8 @@ public class JustifiedDefenceOverlayPositionScreen extends Screen {
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(graphics);
 
-        //标题
         graphics.drawCenteredString(this.font, this.title, this.width / 2, 20, 0xFFFFFF);
 
-        //提示信息
         graphics.drawCenteredString(
             this.font,
             Component.translatable("gui.the_last_sword.justified_defence_position.hint"),
@@ -89,10 +83,8 @@ public class JustifiedDefenceOverlayPositionScreen extends Screen {
             0xAAAAAA
         );
 
-        //渲染HUD预览（模拟护盾显示）
         renderJustifiedDefencePreview(graphics);
 
-        //显示当前偏移量
         graphics.drawString(
             this.font,
             Component.literal("Offset: X=" + offsetX + ", Y=" + offsetY),
@@ -104,39 +96,32 @@ public class JustifiedDefenceOverlayPositionScreen extends Screen {
         super.render(graphics, mouseX, mouseY, partialTick);
     }
 
-    //渲染肃正防御护盾预览（真实图标）
     private void renderJustifiedDefencePreview(GuiGraphics graphics) {
         int screenWidth = this.width;
         int screenHeight = this.height;
 
-        //HUD右侧基准位置（与实际HUD渲染一致）
         int baseX = screenWidth / 2 + 91 - ICON_SIZE;
         int baseY = screenHeight - 49;
 
-        //应用偏移
         int startX = baseX + offsetX;
         int startY = baseY + offsetY;
 
-        //计算图标布局参数
-        int step = -ICON_SPACING;  // 正间距
+        int step = -ICON_SPACING;
         int leftX = startX + ICON_SPACING * (MAX_ICONS - 1);
 
-        //计算整体边界框
         int totalWidth = (MAX_ICONS - 1) * step + ICON_SIZE;
         int boundingBoxX = leftX - 2;
         int boundingBoxY = startY - 2;
         int boundingBoxWidth = totalWidth + 4;
         int boundingBoxHeight = ICON_SIZE + 4;
 
-        //渲染半透明边框（表示可拖拽区域）
         graphics.fill(boundingBoxX, boundingBoxY,
                      boundingBoxX + boundingBoxWidth,
                      boundingBoxY + boundingBoxHeight,
-                     dragging ? 0x80FFFF00 : 0x80FFFFFF);  // 拖拽时高亮黄色
+                     dragging ? 0x80FFFF00 : 0x80FFFFFF);
 
         RenderSystem.enableBlend();
 
-        //渲染10个满防御图标（从左到右）
         for (int i = 0; i < MAX_ICONS; i++) {
             int x = leftX + i * step;
             graphics.blit(ICON_FULL, x, startY, 0, 0, ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE);
@@ -147,7 +132,7 @@ public class JustifiedDefenceOverlayPositionScreen extends Screen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == 0) {  // 左键
+        if (button == 0) {
             int screenWidth = this.width;
             int screenHeight = this.height;
 
@@ -166,7 +151,6 @@ public class JustifiedDefenceOverlayPositionScreen extends Screen {
             int boundingBoxWidth = totalWidth + 4;
             int boundingBoxHeight = ICON_SIZE + 4;
 
-            //检查是否点击在图标区域
             if (mouseX >= boundingBoxX && mouseX <= boundingBoxX + boundingBoxWidth &&
                 mouseY >= boundingBoxY && mouseY <= boundingBoxY + boundingBoxHeight) {
                 dragging = true;

@@ -3,6 +3,7 @@ package net.the_last_sword.event;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -11,10 +12,13 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
@@ -194,6 +198,15 @@ public class ServerEventHandler {
 
     //执行挖掘
     private static void executeMining(Level world, Player player, MiningPreview preview) {
+        if (TheLastSwordConfiguration.getHighPerformanceMiningSafely() && world instanceof ServerLevel serverLevel) {
+            executeMiningHighPerformance(serverLevel, player, preview);
+        } else {
+            executeMiningVanilla(world, player, preview);
+        }
+    }
+
+    //原版兼容路径：逐方块 destroyBlock，掉落物逐个 spawn
+    private static void executeMiningVanilla(Level world, Player player, MiningPreview preview) {
         boolean superDestroy = TheLastSwordConfiguration.getSuperDestroySafely();
 
         for (BlockPos pos : preview.blocksToDestroy) {
@@ -212,6 +225,120 @@ public class ServerEventHandler {
                 world.destroyBlock(pos, true, player);
             }
         }
+    }
+
+    //高性能路径：跳过邻居/光照更新 + 掉落物聚合到黑色潜影盒
+    private static void executeMiningHighPerformance(ServerLevel level, Player player, MiningPreview preview) {
+        boolean superDestroy = TheLastSwordConfiguration.getSuperDestroySafely();
+        ItemStack tool = player.getMainHandItem();
+        int setFlags = Block.UPDATE_CLIENTS | Block.UPDATE_SUPPRESS_DROPS;
+
+        List<ItemStack> collectedDrops = new ArrayList<>();
+        BlockState airState = Blocks.AIR.defaultBlockState();
+
+        for (BlockPos pos : preview.blocksToDestroy) {
+            BlockState state = level.getBlockState(pos);
+            if (state.isAir()) continue;
+
+            boolean indestructible = state.getDestroySpeed(level, pos) < 0;
+            if (indestructible && !superDestroy) continue;
+
+            BlockEntity be = level.getBlockEntity(pos);
+
+            //收集战利品
+            if (indestructible) {
+                //不可破坏方块：直接掉方块本体
+                collectedDrops.add(new ItemStack(state.getBlock()));
+            } else {
+                collectedDrops.addAll(Block.getDrops(state, level, pos, be, player, tool));
+            }
+
+            //容器内容：潜影盒交给战利品表（NBT 保留），其他容器手动抽走
+            if (be instanceof Container container && !(be instanceof ShulkerBoxBlockEntity)) {
+                for (int i = 0; i < container.getContainerSize(); i++) {
+                    ItemStack item = container.getItem(i);
+                    if (!item.isEmpty()) {
+                        collectedDrops.add(item.copy());
+                    }
+                }
+                container.clearContent();
+            }
+
+            //弱更新：跳过邻居刷新、跳过 onRemove 掉落
+            level.setBlock(pos, airState, setFlags);
+        }
+
+        if (collectedDrops.isEmpty()) return;
+
+        //合并堆叠后打包进黑色潜影盒
+        List<ItemStack> shulkers = packIntoBlackShulkers(mergeStacks(collectedDrops));
+        BlockPos dropPos = preview.centerPos;
+        for (ItemStack shulker : shulkers) {
+            Block.popResource(level, dropPos, shulker);
+        }
+    }
+
+    //按物品+NBT合并堆叠
+    private static List<ItemStack> mergeStacks(List<ItemStack> drops) {
+        Map<net.minecraft.world.item.Item, List<ItemStack>> byItem = new HashMap<>();
+        for (ItemStack drop : drops) {
+            if (drop.isEmpty()) continue;
+            List<ItemStack> bucket = byItem.computeIfAbsent(drop.getItem(), k -> new ArrayList<>());
+            int remaining = drop.getCount();
+            for (ItemStack existing : bucket) {
+                if (remaining <= 0) break;
+                if (!ItemStack.isSameItemSameTags(existing, drop)) continue;
+                int canAdd = existing.getMaxStackSize() - existing.getCount();
+                if (canAdd <= 0) continue;
+                int take = Math.min(canAdd, remaining);
+                existing.grow(take);
+                remaining -= take;
+            }
+            while (remaining > 0) {
+                ItemStack copy = drop.copy();
+                int take = Math.min(remaining, copy.getMaxStackSize());
+                copy.setCount(take);
+                bucket.add(copy);
+                remaining -= take;
+            }
+        }
+        List<ItemStack> result = new ArrayList<>();
+        for (List<ItemStack> bucket : byItem.values()) {
+            result.addAll(bucket);
+        }
+        return result;
+    }
+
+    //打包到黑色潜影盒（每盒27格）
+    private static List<ItemStack> packIntoBlackShulkers(List<ItemStack> merged) {
+        List<ItemStack> shulkers = new ArrayList<>();
+        ListTag items = new ListTag();
+        int slot = 0;
+        for (ItemStack stack : merged) {
+            if (slot >= 27) {
+                shulkers.add(buildBlackShulker(items));
+                items = new ListTag();
+                slot = 0;
+            }
+            CompoundTag itemTag = new CompoundTag();
+            itemTag.putByte("Slot", (byte) slot);
+            stack.save(itemTag);
+            items.add(itemTag);
+            slot++;
+        }
+        if (slot > 0) {
+            shulkers.add(buildBlackShulker(items));
+        }
+        return shulkers;
+    }
+
+    //构造一个写好 BlockEntityTag.Items 的黑色潜影盒 ItemStack
+    private static ItemStack buildBlackShulker(ListTag items) {
+        ItemStack shulker = new ItemStack(Blocks.BLACK_SHULKER_BOX);
+        CompoundTag blockEntityTag = new CompoundTag();
+        blockEntityTag.put("Items", items);
+        shulker.getOrCreateTag().put("BlockEntityTag", blockEntityTag);
+        return shulker;
     }
 
     //左键挖掘不可破坏方块时手动掉落物品
@@ -244,6 +371,9 @@ public class ServerEventHandler {
 
     //发送预览到客户端
     private static void sendPreviewToClient(Player player, Set<BlockPos> blocks) {
+        if (!TheLastSwordConfiguration.getMiningPreviewEnabledSafely()) {
+            return;
+        }
         if (player instanceof ServerPlayer serverPlayer) {
             NetworkHandler.sendToPlayer(new PreviewBlocksPacket(blocks), serverPlayer);
         }

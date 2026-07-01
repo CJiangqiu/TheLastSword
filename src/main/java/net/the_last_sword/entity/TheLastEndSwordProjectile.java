@@ -241,4 +241,5 @@ public class TheLastEndSwordProjectile extends TheLastEndSwordItemsProjectile {
                 1f / (RandomSource.create().nextFloat() * 0.5f + 1));
         return projectile;
     }
+
 }

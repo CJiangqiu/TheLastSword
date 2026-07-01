@@ -2,6 +2,7 @@ package net.the_last_sword.mixin;
 
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -11,9 +12,14 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.the_last_sword.configuration.DefenceConfig;
+import net.the_last_sword.configuration.DefenceConfigData;
 import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.init.ModAttributes;
+import net.the_last_sword.item.DragonArmorItem;
+import net.the_last_sword.network.DragonShieldPacket;
+import net.the_last_sword.network.NetworkHandler;
 import net.the_last_sword.summon.WraithSummonManager;
 import net.the_last_sword.util.EntityUtil;
 import org.spongepowered.asm.mixin.Mixin;
@@ -71,21 +77,30 @@ public class LivingEntityMixin {
         if (curAttr == null) return;
 
         if (curAttr.getValue() > 0) {
+            entity.getPersistentData().remove("JustifiedDefenceClearDelay");
             if (!EntityUtil.hasProtection(entity)) {
-                float realHealth = entity.getHealth(); // hasProtection=false 时取原版血量
+                float realHealth = entity.getHealth();
                 EntityUtil.setProtection(entity, true);
                 EntityUtil.setWorldAnchor(entity, realHealth);
                 EntityUtil.setWorldAnchorMax(entity, entity.getMaxHealth());
                 entity.getPersistentData().putBoolean("JustifiedDefenceProtection", true);
             }
         } else if (entity.getPersistentData().getBoolean("JustifiedDefenceProtection")) {
-            entity.getPersistentData().remove("JustifiedDefenceProtection");
-            if (!entity.getPersistentData().getBoolean("TheLastSwordDefence")) {
-                float anchor = EntityUtil.getWorldAnchor(entity);
-                EntityUtil.clearDefence(entity);
-                if (anchor >= 0 && anchor < entity.getHealth()) {
-                    entity.setHealth(anchor);
+            int delay = entity.getPersistentData().getInt("JustifiedDefenceClearDelay");
+            if (delay <= 0) {
+                entity.getPersistentData().putInt("JustifiedDefenceClearDelay", 5);
+            } else if (delay == 1) {
+                entity.getPersistentData().remove("JustifiedDefenceClearDelay");
+                entity.getPersistentData().remove("JustifiedDefenceProtection");
+                if (!entity.getPersistentData().getBoolean("TheLastSwordDefence")) {
+                    float anchor = EntityUtil.getWorldAnchor(entity);
+                    EntityUtil.clearDefence(entity);
+                    if (anchor >= 0 && anchor < entity.getHealth()) {
+                        entity.setHealth(anchor);
+                    }
                 }
+            } else {
+                entity.getPersistentData().putInt("JustifiedDefenceClearDelay", delay - 1);
             }
         }
     }
@@ -216,6 +231,10 @@ public class LivingEntityMixin {
 
         //肃正防御护盾优先吸收（受伤 -1, 彻底无敌式抵挡）
         if (the_last_sword$consumeShield(entity, 1)) {
+            if (entity instanceof ServerPlayer sp && DragonArmorItem.isFullSet(sp) && DragonArmorItem.hasEnergyFullSet(sp)
+                    && DefenceConfig.getPhasingModule().shieldEffect != DefenceConfigData.ShieldEffectMode.DISABLED) {
+                NetworkHandler.sendToPlayer(DragonShieldPacket.fromDamageSource(sp, damageSource), sp);
+            }
             cir.setReturnValue(false);
             return;
         }
@@ -238,6 +257,10 @@ public class LivingEntityMixin {
 
         //肃正防御护盾优先吸收 (兜底直接调 actuallyHurt 绕过 hurt 的路径)
         if (the_last_sword$consumeShield(entity, 1)) {
+            if (entity instanceof ServerPlayer sp && DragonArmorItem.isFullSet(sp) && DragonArmorItem.hasEnergyFullSet(sp)
+                    && DefenceConfig.getPhasingModule().shieldEffect != DefenceConfigData.ShieldEffectMode.DISABLED) {
+                NetworkHandler.sendToPlayer(DragonShieldPacket.fromDamageSource(sp, damageSource), sp);
+            }
             ci.cancel();
             return;
         }

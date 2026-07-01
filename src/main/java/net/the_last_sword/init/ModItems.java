@@ -29,6 +29,10 @@ public class ModItems {
         DragonCrystal::new
     );
 
+    public static final RegistryObject<Item> DISPOSABLE_ENERGY_BATTERY = ITEMS.register("disposable_energy_battery",
+        DisposableEnergyBattery::new
+    );
+
     public static final RegistryObject<Item> ANCIENT_ENERGY_CORE = ITEMS.register("ancient_energy_core",
         AncientEnergyCore::new
     );
@@ -63,6 +67,10 @@ public class ModItems {
 
     public static final RegistryObject<Item> THE_LAST_SWORD = ITEMS.register("the_last_sword",
         TheLastSword::new
+    );
+
+    public static final RegistryObject<Item> THE_LAST_SWORD_YOU_NEVER_FORGOT = ITEMS.register("the_last_sword_you_never_forgot",
+        TheLastSwordYouNeverForgot::new
     );
 
     public static final RegistryObject<Item> ULTRA_TEST_SWORD = ITEMS.register("ultra_test_sword",

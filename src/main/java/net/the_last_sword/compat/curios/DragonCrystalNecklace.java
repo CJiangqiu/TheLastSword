@@ -77,6 +77,6 @@ public class DragonCrystalNecklace extends Item implements ICurioItem {
         String immunityStr = String.format("%.1f", immunity * 100);
         String critStr = String.format("%.1f", crit * 100);
         tooltip.add(Component.translatable("item_tooltip.the_last_sword.dragon_crystal_necklace.current",
-            immunityStr, critStr));
+            immunityStr, critStr).withStyle(net.minecraft.ChatFormatting.YELLOW));
     }
 }

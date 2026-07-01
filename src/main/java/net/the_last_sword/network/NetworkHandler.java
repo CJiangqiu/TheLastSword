@@ -101,6 +101,13 @@ public class NetworkHandler {
                 .decoder(ArenaPreviewPacket::decode)
                 .consumerMainThread(ArenaPreviewPacket::handle)
                 .add();
+
+        //龙套护盾触发包
+        CHANNEL.messageBuilder(DragonShieldPacket.class, id())
+                .encoder(DragonShieldPacket::encode)
+                .decoder(DragonShieldPacket::decode)
+                .consumerMainThread(DragonShieldPacket::handle)
+                .add();
     }
 
     //发送到服务端

@@ -27,6 +27,7 @@ import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.init.ModAttributes;
 import net.the_last_sword.item.DragonArmorItem;
 import net.the_last_sword.item.TheLastSword;
+import net.the_last_sword.item.TheLastSwordYouNeverForgot;
 import net.the_last_sword.summon.WraithSummonManager;
 
 import java.util.ArrayList;
@@ -205,23 +206,28 @@ public class EntityUtil {
         return entity.getPersistentData().getBoolean(NBT_IS_PROTECTED);
     }
 
-    //检查玩家背包中是否拥有最终之剑或龙之套装
+    //检查玩家背包中是否拥有最终之剑、隐藏最终之剑或龙之套装
     public static boolean hasInventoryProtection(Player player) {
         for (ItemStack stack : player.getInventory().items) {
-            if (!stack.isEmpty() && (stack.getItem() instanceof TheLastSword || stack.getItem() instanceof DragonArmorItem)) {
+            if (!stack.isEmpty() && isProtectionItem(stack)) {
                 return true;
             }
         }
         for (ItemStack stack : player.getInventory().armor) {
-            if (!stack.isEmpty() && (stack.getItem() instanceof TheLastSword || stack.getItem() instanceof DragonArmorItem)) {
+            if (!stack.isEmpty() && isProtectionItem(stack)) {
                 return true;
             }
         }
-        if (!player.getInventory().offhand.isEmpty() &&
-                player.getInventory().offhand.get(0).getItem() instanceof TheLastSword) {
+        if (!player.getInventory().offhand.isEmpty() && isProtectionItem(player.getInventory().offhand.get(0))) {
             return true;
         }
         return false;
+    }
+
+    private static boolean isProtectionItem(ItemStack stack) {
+        return stack.getItem() instanceof TheLastSword
+                || stack.getItem() instanceof DragonArmorItem
+                || stack.getItem() instanceof TheLastSwordYouNeverForgot;
     }
 
     //设置实体的保护状态

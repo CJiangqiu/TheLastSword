@@ -42,6 +42,8 @@ public class TheLastSwordConfiguration {
     public static ForgeConfigSpec.ConfigValue<Boolean> THE_LAST_SWORD_ALLOW_FLYING;
     public static ForgeConfigSpec.ConfigValue<Boolean> THE_LAST_SWORD_SUPER_DESTROY;
     public static ForgeConfigSpec.ConfigValue<Integer> THE_LAST_SWORD_MINING_RADIUS;
+    public static ForgeConfigSpec.ConfigValue<Boolean> THE_LAST_SWORD_ENABLE_MINING_PREVIEW;
+    public static ForgeConfigSpec.ConfigValue<Boolean> THE_LAST_SWORD_HIGH_PERFORMANCE_MINING;
     public static ForgeConfigSpec.ConfigValue<Boolean> THE_LAST_SWORD_NORMAL_MODE_CAN_MINE;
     public static ForgeConfigSpec.ConfigValue<Boolean> THE_LAST_SWORD_SUMMON_MODE_CAN_MINE;
     public static ForgeConfigSpec.ConfigValue<Double> THE_LAST_SWORD_PERCENTAGE_DAMAGE;
@@ -64,7 +66,16 @@ public class TheLastSwordConfiguration {
     // The Last End Scroll Configuration | 终焉卷轴配置
     public static ForgeConfigSpec.ConfigValue<Boolean> THE_LAST_END_SCROLL_ENABLE_PARTICLE_EFFECTS;
 
+    // Disposable Energy Battery | 一次性能量电池
+    public static ForgeConfigSpec.ConfigValue<Integer> DISPOSABLE_ENERGY_BATTERY_RESTORE_AMOUNT;
+
+    // Ancient Energy Core | 远古能量核心
+    public static ForgeConfigSpec.ConfigValue<Integer> ANCIENT_ENERGY_CORE_MAX_ENERGY;
+    public static ForgeConfigSpec.ConfigValue<Integer> ANCIENT_ENERGY_CORE_CHARGE_RATE;
+
     // Curios - The Giver's Pain | 给予者的痛苦
+    public static ForgeConfigSpec.ConfigValue<Double> CURIOS_GIVERS_PAIN_ATTACK_DAMAGE_BONUS;
+    public static ForgeConfigSpec.ConfigValue<Double> CURIOS_GIVERS_PAIN_ATTACK_SPEED_BONUS;
     public static ForgeConfigSpec.ConfigValue<Double> CURIOS_GIVERS_PAIN_ATTACK_DAMAGE_MULTIPLIER;
     public static ForgeConfigSpec.ConfigValue<Double> CURIOS_GIVERS_PAIN_ATTACKER_LOST_HEALTH_MULTIPLIER;
     public static ForgeConfigSpec.ConfigValue<Double> CURIOS_GIVERS_PAIN_TARGET_LOST_HEALTH_MULTIPLIER;
@@ -86,10 +97,14 @@ public class TheLastSwordConfiguration {
 
     // Curios - Wings That Cover The World | 覆世之翼
     public static ForgeConfigSpec.ConfigValue<Double> CURIOS_WINGS_VOID_DAMAGE_REDUCTION;
+    public static ForgeConfigSpec.ConfigValue<Boolean> CURIOS_WINGS_ICE_FIRE_IMMUNITY_ENABLED;
 
     // Curios - Extreme Life Support Device | 极限维生装置
     public static ForgeConfigSpec.ConfigValue<Double> CURIOS_EXTREME_LIFE_SUPPORT_TIER_THRESHOLD;
     public static ForgeConfigSpec.ConfigValue<Integer> CURIOS_EXTREME_LIFE_SUPPORT_EFFECT_DURATION;
+    public static ForgeConfigSpec.ConfigValue<Double> CURIOS_EXTREME_LIFE_SUPPORT_ARMOR_TOUGHNESS;
+    public static ForgeConfigSpec.ConfigValue<Integer> CURIOS_EXTREME_LIFE_SUPPORT_ENERGY_COST;
+    public static ForgeConfigSpec.ConfigValue<Integer> CURIOS_EXTREME_LIFE_SUPPORT_MAX_ENERGY;
 
     // Curios - Dimension Explorer | 维度探索者
     public static ForgeConfigSpec.ConfigValue<Integer> CURIOS_DIMENSION_EXPLORER_COOLDOWN;
@@ -98,6 +113,7 @@ public class TheLastSwordConfiguration {
     public static ForgeConfigSpec.ConfigValue<Integer> CURIOS_DIMENSION_EXPLORER_EMERGENCY_FOOD_LEVEL;
     public static ForgeConfigSpec.ConfigValue<Integer> CURIOS_DIMENSION_EXPLORER_JUMP_AMPLIFIER;
     public static ForgeConfigSpec.ConfigValue<Integer> CURIOS_DIMENSION_EXPLORER_HASTE_AMPLIFIER;
+    public static ForgeConfigSpec.ConfigValue<Integer> CURIOS_DIMENSION_EXPLORER_SPEED_AMPLIFIER;
 
     // ═══════════════════════════════════════════════════════════════════════════════════
     // Entity Configuration | 实体配置
@@ -378,6 +394,18 @@ public class TheLastSwordConfiguration {
                 "强力挖掘模式的挖掘半径"
             )
             .defineInRange("Mining Radius", 3, 1, 12);
+        THE_LAST_SWORD_ENABLE_MINING_PREVIEW = BUILDER
+            .comment(
+                "Render a preview outline of the powerful mining area before breaking blocks",
+                "在执行强力挖掘前渲染范围预览方块边框"
+            )
+            .define("Enable Mining Preview", true);
+        THE_LAST_SWORD_HIGH_PERFORMANCE_MINING = BUILDER
+            .comment(
+                "High performance mining mode: pack all drops into black shulker boxes and skip neighbor/lighting updates during area mining. Greatly reduces lag at large radius.",
+                "高性能挖掘模式：将范围挖掘的所有掉落物打包进黑色潜影盒整体掉落，并跳过邻居方块/光照更新。可大幅缓解大范围挖掘的卡顿。"
+            )
+            .define("High Performance Mining", true);
         THE_LAST_SWORD_NORMAL_MODE_CAN_MINE = BUILDER
             .comment(
                 "Allow The Last Sword to mine blocks in normal mode",
@@ -546,6 +574,18 @@ public class TheLastSwordConfiguration {
 
         // The Giver's Pain | 给予者的痛苦
         BUILDER.push("The Giver's Pain");
+        CURIOS_GIVERS_PAIN_ATTACK_DAMAGE_BONUS = BUILDER
+            .comment(
+                "Worn attack damage bonus, MULTIPLY_TOTAL (1.0 = +100%)",
+                "穿戴时攻击力加成，按最终值乘算（1.0 = +100%）"
+            )
+            .defineInRange("Worn Attack Damage Bonus", 1.0, 0.0, Double.MAX_VALUE);
+        CURIOS_GIVERS_PAIN_ATTACK_SPEED_BONUS = BUILDER
+            .comment(
+                "Worn attack speed bonus, MULTIPLY_TOTAL (1.0 = +100%)",
+                "穿戴时攻击速度加成，按最终值乘算（1.0 = +100%）"
+            )
+            .defineInRange("Worn Attack Speed Bonus", 1.0, 0.0, Double.MAX_VALUE);
         CURIOS_GIVERS_PAIN_ATTACK_DAMAGE_MULTIPLIER = BUILDER
             .comment(
                 "Damage formula multiplier for attacker's attack damage component",
@@ -640,6 +680,12 @@ public class TheLastSwordConfiguration {
                 "受到虚空伤害的剩余乘数（0.1 = 仅承受 10% / 减伤 90%）"
             )
             .defineInRange("Void Damage Reduction Multiplier", 0.1, 0.0, 1.0);
+        CURIOS_WINGS_ICE_FIRE_IMMUNITY_ENABLED = BUILDER
+            .comment(
+                "Worn immunity to fire and freezing",
+                "穿戴时免疫火焰与冰冻"
+            )
+            .define("Ice Fire Immunity Enabled", true);
         BUILDER.pop();
 
         // Extreme Life Support Device | 极限维生装置
@@ -656,16 +702,34 @@ public class TheLastSwordConfiguration {
                 "生命恢复 / 抗性提升 / 饱和效果每次刷新的持续时间（tick）"
             )
             .defineInRange("Effect Duration", 60, 1, Integer.MAX_VALUE);
+        CURIOS_EXTREME_LIFE_SUPPORT_ARMOR_TOUGHNESS = BUILDER
+            .comment(
+                "Worn armor toughness bonus (flat addition)",
+                "穿戴时盔甲韧性加成（直接相加）"
+            )
+            .defineInRange("Worn Armor Toughness", 100.0, 0.0, Double.MAX_VALUE);
+        CURIOS_EXTREME_LIFE_SUPPORT_ENERGY_COST = BUILDER
+            .comment(
+                "Energy consumed per tick while worn (FE)",
+                "穿戴时每 tick 消耗的能量（FE）"
+            )
+            .defineInRange("Energy Cost Per Tick", 1, 0, Integer.MAX_VALUE);
+        CURIOS_EXTREME_LIFE_SUPPORT_MAX_ENERGY = BUILDER
+            .comment(
+                "Maximum energy storage (FE)",
+                "最大能量存储上限（FE）"
+            )
+            .defineInRange("Max Energy", 102400, 0, Integer.MAX_VALUE);
         BUILDER.pop();
 
         // Dimension Explorer | 维度探索者
         BUILDER.push("Dimension Explorer");
         CURIOS_DIMENSION_EXPLORER_COOLDOWN = BUILDER
             .comment(
-                "Death-save cooldown in ticks (600 ticks = 30s)",
-                "死亡守护的冷却时间（tick；600 tick = 30 秒）"
+                "Death-save cooldown in ticks (1200 ticks = 60s)",
+                "死亡守护的冷却时间（tick；1200 tick = 60 秒）"
             )
-            .defineInRange("Cooldown", 600, 0, Integer.MAX_VALUE);
+            .defineInRange("Cooldown", 1200, 0, Integer.MAX_VALUE);
         CURIOS_DIMENSION_EXPLORER_EFFECT_DURATION = BUILDER
             .comment(
                 "Duration (ticks) of Phasing & Haste after death-save (260 ticks = 13s)",
@@ -696,6 +760,12 @@ public class TheLastSwordConfiguration {
                 "死亡守护触发后的急迫等级（0 = 急迫 I）"
             )
             .defineInRange("Haste Amplifier", 2, 0, 255);
+        CURIOS_DIMENSION_EXPLORER_SPEED_AMPLIFIER = BUILDER
+            .comment(
+                "Speed amplifier after death-save (0 = Speed I)",
+                "死亡守护触发后的速度等级（0 = 速度 I）"
+            )
+            .defineInRange("Speed Amplifier", 2, 0, 255);
         BUILDER.pop();
 
         BUILDER.pop(); // End Curios
@@ -708,6 +778,32 @@ public class TheLastSwordConfiguration {
                 "启用终焉卷轴 GUI 中的粒子效果"
             )
             .define("Enable Particle Effects", true);
+        BUILDER.pop();
+
+        // Disposable Energy Battery | 一次性能量电池
+        BUILDER.push("Disposable Energy Battery");
+        DISPOSABLE_ENERGY_BATTERY_RESTORE_AMOUNT = BUILDER
+            .comment(
+                "FE restored to each non-full energy item on use; also the battery's own max energy",
+                "使用时为每个未充满的FE物品恢复的能量，同时也是电池自身的最大能量上限"
+            )
+            .defineInRange("Restore Amount", 102400, 0, Integer.MAX_VALUE);
+        BUILDER.pop();
+
+        // Ancient Energy Core | 远古能量核心
+        BUILDER.push("Ancient Energy Core");
+        ANCIENT_ENERGY_CORE_MAX_ENERGY = BUILDER
+            .comment(
+                "Maximum energy capacity (FE) of the Ancient Energy Core",
+                "远古能量核心的最大能量上限（FE）"
+            )
+            .defineInRange("Max Energy", 4194304, 0, Integer.MAX_VALUE);
+        ANCIENT_ENERGY_CORE_CHARGE_RATE = BUILDER
+            .comment(
+                "Energy transferred per tick (FE/tick) when charging items from the Ancient Energy Core",
+                "远古能量核心每tick向其他物品转移的能量（FE/tick）"
+            )
+            .defineInRange("Charge Rate", 4096, 0, Integer.MAX_VALUE);
         BUILDER.pop();
 
         BUILDER.pop(); // End Item
@@ -1601,6 +1697,14 @@ public class TheLastSwordConfiguration {
         return safeGet(THE_LAST_SWORD_MINING_RADIUS, 3);
     }
 
+    public static boolean getMiningPreviewEnabledSafely() {
+        return safeGet(THE_LAST_SWORD_ENABLE_MINING_PREVIEW, true);
+    }
+
+    public static boolean getHighPerformanceMiningSafely() {
+        return safeGet(THE_LAST_SWORD_HIGH_PERFORMANCE_MINING, true);
+    }
+
     public static boolean getTheLastSwordNormalModeCanMineSafely() {
         return safeGet(THE_LAST_SWORD_NORMAL_MODE_CAN_MINE, true);
     }
@@ -1662,6 +1766,20 @@ public class TheLastSwordConfiguration {
     //终焉卷轴配置
     public static boolean getTheLastEndScrollEnableParticleEffectsSafely() {
         return safeGet(THE_LAST_END_SCROLL_ENABLE_PARTICLE_EFFECTS, true);
+    }
+
+    //一次性能量电池配置
+    public static int getDisposableEnergyBatteryRestoreAmountSafely() {
+        return safeGet(DISPOSABLE_ENERGY_BATTERY_RESTORE_AMOUNT, 102400);
+    }
+
+    //远古能量核心配置
+    public static int getAncientEnergyCoreMaxEnergySafely() {
+        return safeGet(ANCIENT_ENERGY_CORE_MAX_ENERGY, 4194304);
+    }
+
+    public static int getAncientEnergyCoreChargeRateSafely() {
+        return safeGet(ANCIENT_ENERGY_CORE_CHARGE_RATE, 4096);
     }
 
     //防御系统配置
@@ -1997,6 +2115,14 @@ public class TheLastSwordConfiguration {
     }
 
     //饰品 - 给予者的痛苦
+    public static double getCuriosGiversPainAttackDamageBonusSafely() {
+        return safeGet(CURIOS_GIVERS_PAIN_ATTACK_DAMAGE_BONUS, 1.0);
+    }
+
+    public static double getCuriosGiversPainAttackSpeedBonusSafely() {
+        return safeGet(CURIOS_GIVERS_PAIN_ATTACK_SPEED_BONUS, 1.0);
+    }
+
     public static double getCuriosGiversPainAttackDamageMultiplierSafely() {
         return safeGet(CURIOS_GIVERS_PAIN_ATTACK_DAMAGE_MULTIPLIER, 1.0);
     }
@@ -2053,6 +2179,10 @@ public class TheLastSwordConfiguration {
         return safeGet(CURIOS_WINGS_VOID_DAMAGE_REDUCTION, 0.1);
     }
 
+    public static boolean getCuriosWingsIceFireImmunityEnabledSafely() {
+        return safeGet(CURIOS_WINGS_ICE_FIRE_IMMUNITY_ENABLED, true);
+    }
+
     //饰品 - 极限维生装置
     public static double getCuriosExtremeLifeSupportTierThresholdSafely() {
         return safeGet(CURIOS_EXTREME_LIFE_SUPPORT_TIER_THRESHOLD, 0.2);
@@ -2062,9 +2192,21 @@ public class TheLastSwordConfiguration {
         return safeGet(CURIOS_EXTREME_LIFE_SUPPORT_EFFECT_DURATION, 60);
     }
 
+    public static double getCuriosExtremeLifeSupportArmorToughnessSafely() {
+        return safeGet(CURIOS_EXTREME_LIFE_SUPPORT_ARMOR_TOUGHNESS, 100.0);
+    }
+
+    public static int getCuriosExtremeLifeSupportEnergyCostSafely() {
+        return safeGet(CURIOS_EXTREME_LIFE_SUPPORT_ENERGY_COST, 1);
+    }
+
+    public static int getCuriosExtremeLifeSupportMaxEnergySafely() {
+        return safeGet(CURIOS_EXTREME_LIFE_SUPPORT_MAX_ENERGY, 102400);
+    }
+
     //饰品 - 维度探索者
     public static int getCuriosDimensionExplorerCooldownSafely() {
-        return safeGet(CURIOS_DIMENSION_EXPLORER_COOLDOWN, 600);
+        return safeGet(CURIOS_DIMENSION_EXPLORER_COOLDOWN, 1200);
     }
 
     public static int getCuriosDimensionExplorerEffectDurationSafely() {
@@ -2085,6 +2227,10 @@ public class TheLastSwordConfiguration {
 
     public static int getCuriosDimensionExplorerHasteAmplifierSafely() {
         return safeGet(CURIOS_DIMENSION_EXPLORER_HASTE_AMPLIFIER, 2);
+    }
+
+    public static int getCuriosDimensionExplorerSpeedAmplifierSafely() {
+        return safeGet(CURIOS_DIMENSION_EXPLORER_SPEED_AMPLIFIER, 2);
     }
 
 }
