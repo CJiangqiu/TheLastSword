@@ -9,13 +9,14 @@ import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
+import mezz.jei.api.runtime.IJeiRuntime;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.client.gui.menu.DragonCrystalSmithingTableMenu;
+import net.the_last_sword.client.recipe.ClientDragonCrystalRecipeCache;
 import net.the_last_sword.init.ModItems;
 import net.the_last_sword.init.ModMenus;
-import net.the_last_sword.recipe.ConfigRecipeManager;
 import net.the_last_sword.recipe.DragonCrystalSmithingRecipe;
 import net.the_last_sword.util.nbt.ItemLevelHelper;
 
@@ -26,6 +27,8 @@ import java.util.List;
 public class TheLastSwordJeiPlugin implements IModPlugin {
 
     private static final ResourceLocation PLUGIN_UID = new ResourceLocation(TheLastSwordMod.MOD_ID, "jei_plugin");
+    private static IJeiRuntime runtime;
+    private static List<DragonCrystalSmithingRecipe> displayedRecipes = List.of();
 
     @Override
     public ResourceLocation getPluginUid() {
@@ -55,10 +58,42 @@ public class TheLastSwordJeiPlugin implements IModPlugin {
 
     @Override
     public void registerRecipes(IRecipeRegistration registration) {
-        //从ConfigRecipeManager获取所有配方，按inputLevel排序
-        List<DragonCrystalSmithingRecipe> recipes = ConfigRecipeManager.getAllRecipes();
-        recipes.sort((a, b) -> Integer.compare(a.getInputLevel(), b.getInputLevel()));
-        registration.addRecipes(DragonCrystalSmithingCategory.RECIPE_TYPE, recipes);
+        //config配方以服务端同步为准，禁止客户端在JEI初始化阶段读取本地config
+    }
+
+    @Override
+    public void onRuntimeAvailable(IJeiRuntime jeiRuntime) {
+        runtime = jeiRuntime;
+        ClientDragonCrystalRecipeCache.setRecipeViewerListener(TheLastSwordJeiPlugin::replaceSyncedRecipes);
+    }
+
+    @Override
+    public void onRuntimeUnavailable() {
+        ClientDragonCrystalRecipeCache.clearRecipeViewerListener();
+        runtime = null;
+        displayedRecipes = List.of();
+    }
+
+    //客户端收到服务端配方或断开连接时，动态替换JEI中的对应配方
+    public static void replaceSyncedRecipes(List<DragonCrystalSmithingRecipe> recipes) {
+        if (runtime == null) {
+            return;
+        }
+
+        var recipeManager = runtime.getRecipeManager();
+        if (!displayedRecipes.isEmpty()) {
+            recipeManager.hideRecipes(DragonCrystalSmithingCategory.RECIPE_TYPE, displayedRecipes);
+        }
+
+        List<DragonCrystalSmithingRecipe> sortedRecipes = new java.util.ArrayList<>(recipes);
+        sortedRecipes.sort((a, b) -> {
+            int levelComparison = Integer.compare(a.getInputLevel(), b.getInputLevel());
+            return levelComparison != 0 ? levelComparison : a.getId().compareTo(b.getId());
+        });
+        if (!sortedRecipes.isEmpty()) {
+            recipeManager.addRecipes(DragonCrystalSmithingCategory.RECIPE_TYPE, sortedRecipes);
+        }
+        displayedRecipes = List.copyOf(sortedRecipes);
     }
 
     @Override

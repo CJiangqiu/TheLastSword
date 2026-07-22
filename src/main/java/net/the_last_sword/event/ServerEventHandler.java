@@ -30,6 +30,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
@@ -50,6 +51,7 @@ import net.the_last_sword.network.ArenaPreviewPacket;
 import net.the_last_sword.network.ClearPreviewPacket;
 import net.the_last_sword.network.NetworkHandler;
 import net.the_last_sword.network.PreviewBlocksPacket;
+import net.the_last_sword.network.SyncDragonCrystalRecipesPacket;
 import net.the_last_sword.recipe.ConfigRecipeManager;
 import net.the_last_sword.util.EntityUtil;
 import net.the_last_sword.util.TheLastSwordLogger;
@@ -125,6 +127,28 @@ public class ServerEventHandler {
     public static void onServerStarting(ServerStartingEvent event) {
         TheLastSwordLogger.info("Server starting, loading dragon crystal smithing recipes from config");
         ConfigRecipeManager.loadRecipes();
+    }
+
+    //登录时同步给单个玩家；/reload后重载config配方并同步给所有在线玩家
+    @SubscribeEvent
+    public static void onDatapackSync(OnDatapackSyncEvent event) {
+        ServerPlayer player = event.getPlayer();
+        if (player != null) {
+            syncDragonCrystalRecipes(player);
+            return;
+        }
+
+        ConfigRecipeManager.reload();
+        for (ServerPlayer onlinePlayer : event.getPlayerList().getPlayers()) {
+            syncDragonCrystalRecipes(onlinePlayer);
+        }
+    }
+
+    private static void syncDragonCrystalRecipes(ServerPlayer player) {
+        NetworkHandler.sendToPlayer(
+                new SyncDragonCrystalRecipesPacket(ConfigRecipeManager.getAllRecipes()),
+                player
+        );
     }
 
     //玩家重生时清除防御数据，让物品重新注册

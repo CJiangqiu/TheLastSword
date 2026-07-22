@@ -5,18 +5,18 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.the_last_sword.TheLastSwordMod;
+import net.the_last_sword.client.gui.scroll.ScrollRecipeRenderer;
 import net.the_last_sword.compat.CompatCheck;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.init.ModItems;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Random;
 
 //终焉卷轴教程书GUI
 public class TheLastEndScrollScreen extends Screen {
@@ -25,31 +25,19 @@ public class TheLastEndScrollScreen extends Screen {
     private static final ResourceLocation SCROLL_TEXTURE =
         new ResourceLocation(TheLastSwordMod.MOD_ID, "textures/screens/scroll_background.png");
 
-    //章节图片纹理
-    private static final ResourceLocation CHAPTER_RECIPE_1_1_TEXTURE =
-        new ResourceLocation(TheLastSwordMod.MOD_ID, "textures/screens/chapter_recipe_1_1.png");
-    private static final ResourceLocation CHAPTER_RECIPE_2_1_TEXTURE =
-        new ResourceLocation(TheLastSwordMod.MOD_ID, "textures/screens/chapter_recipe_2_1.png");
-    private static final ResourceLocation CHAPTER_RECIPE_2_2_TEXTURE =
-        new ResourceLocation(TheLastSwordMod.MOD_ID, "textures/screens/chapter_recipe_2_2.png");
-    private static final ResourceLocation CHAPTER_RECIPE_3_1_TEXTURE =
-        new ResourceLocation(TheLastSwordMod.MOD_ID, "textures/screens/chapter_recipe_3_1.png");
-    private static final ResourceLocation CHAPTER_RECIPE_3_2_TEXTURE =
-        new ResourceLocation(TheLastSwordMod.MOD_ID, "textures/screens/chapter_recipe_3_2.png");
-    private static final ResourceLocation CHAPTER_RECIPE_3_3_TEXTURE =
-        new ResourceLocation(TheLastSwordMod.MOD_ID, "textures/screens/chapter_recipe_3_3.png");
-    private static final ResourceLocation CHAPTER_RECIPE_3_4_TEXTURE =
-        new ResourceLocation(TheLastSwordMod.MOD_ID, "textures/screens/chapter_recipe_3_4.png");
-    private static final ResourceLocation CHAPTER_RECIPE_4_1_TEXTURE =
-        new ResourceLocation(TheLastSwordMod.MOD_ID, "textures/screens/chapter_recipe_4_1.png");
-    private static final ResourceLocation CHAPTER_RECIPE_4_2_TEXTURE =
-        new ResourceLocation(TheLastSwordMod.MOD_ID, "textures/screens/chapter_recipe_4_2.png");
-    private static final ResourceLocation CHAPTER_RECIPE_5_1_TEXTURE =
-        new ResourceLocation(TheLastSwordMod.MOD_ID, "textures/screens/chapter_recipe_5_1.png");
-    private static final ResourceLocation CHAPTER_RECIPE_5_2_TEXTURE =
-        new ResourceLocation(TheLastSwordMod.MOD_ID, "textures/screens/chapter_recipe_5_2.png");
-    private static final ResourceLocation CHAPTER_RECIPE_5_3_TEXTURE =
-        new ResourceLocation(TheLastSwordMod.MOD_ID, "textures/screens/chapter_recipe_5_3.png");
+    //卷轴引用真实配方ID，不再维护配方截图
+    private static final ResourceLocation DRAGON_CRYSTAL_RECIPE = recipeId("dragon_crystal_recipe");
+    private static final ResourceLocation UPGRADE_TEMPLATE_RECIPE = recipeId("dragon_crystal_upgrade_template_recipe");
+    private static final ResourceLocation SMITHING_TABLE_RECIPE = recipeId("dragon_crystal_smithing_table_recipe");
+    private static final ResourceLocation DRAGON_CRYSTAL_SWORD_RECIPE = recipeId("dragon_crystal_sword_recipe");
+    private static final ResourceLocation DRAGON_CRYSTAL_SWORD_LEVEL_0_RECIPE = configRecipeId("dragon_crystal_smithing_sword_level_0");
+    private static final ResourceLocation DRAGON_CRYSTAL_SWORD_LEVEL_5_RECIPE = configRecipeId("dragon_crystal_smithing_sword_level_5");
+    private static final ResourceLocation DRAGON_SWORD_LEVEL_6_RECIPE = configRecipeId("dragon_crystal_smithing_sword_level_6");
+    private static final ResourceLocation DRAGON_CRYSTAL_HELMET_RECIPE = recipeId("dragon_crystal_helmet_recipe");
+    private static final ResourceLocation DRAGON_CRYSTAL_HELMET_LEVEL_0_RECIPE = configRecipeId("dragon_crystal_smithing_armor_level_0_helmet");
+    private static final ResourceLocation SOUL_STONE_RECIPE = recipeId("dragon_crystal_soul_stone_recipe");
+    private static final ResourceLocation SOUL_LANTERN_RECIPE = recipeId("dragon_soul_lantern_recipe");
+    private static final ResourceLocation SOUL_LANTERN_RECIPE_1 = recipeId("dragon_soul_lantern_recipe_1");
 
     //GUI尺寸（与纹理一致）
     private static final int GUI_WIDTH = 430;
@@ -79,9 +67,11 @@ public class TheLastEndScrollScreen extends Screen {
         ItemStack icon;       // 章节图标
         int startPage;        // 起始页码
         int pageCount;        // 占用页数
+        int textPageCount;    // 文本占用页数（最后一页可以继续显示配方）
         List<String> allLines; // 所有文本行（自动换行后）
-        List<ResourceLocation> recipeImages; // 配方图片列表
-        Map<Integer, List<Integer>> recipeImagePageMap; // 配方页索引 -> 该页要渲染的图片索引列表
+        List<ResourceLocation> recipeIds; // 配方ID列表
+        List<ResourceLocation> trailingRecipeIds; // 紧跟在最后一页文本后的配方
+        List<List<ResourceLocation>> recipePages; // 放不进文本页的后续配方页
     }
 
     //粒子数据类
@@ -127,7 +117,7 @@ public class TheLastEndScrollScreen extends Screen {
     private Button nextButton;
 
     //章节按钮（第一页目录）
-    private final java.util.List<Button> chapterButtons = new ArrayList<>();
+    private final List<Button> chapterButtons = new ArrayList<>();
 
     //按钮粒子系统变量
     private final List<ScrollParticle> previousButtonParticles = new ArrayList<>();
@@ -141,6 +131,20 @@ public class TheLastEndScrollScreen extends Screen {
     private int animationTimer = 0; //动画计时器
     private static final int ANIMATION_DURATION = 60; //动画持续时间（60 ticks = 3秒）
 
+    //共享随机数实例
+    private final Random random = new Random();
+
+    //当前配方页中鼠标指向的物品，最后渲染tooltip
+    private ItemStack hoveredRecipeStack = ItemStack.EMPTY;
+
+    private static ResourceLocation recipeId(String path) {
+        return new ResourceLocation(TheLastSwordMod.MOD_ID, path);
+    }
+
+    private static ResourceLocation configRecipeId(String path) {
+        return new ResourceLocation(TheLastSwordMod.MOD_ID, "config/" + path);
+    }
+
     public TheLastEndScrollScreen() {
         super(Component.empty());
         // 章节初始化移到 init() 方法中执行
@@ -150,42 +154,42 @@ public class TheLastEndScrollScreen extends Screen {
     private void initializeChapters() {
         chapters.clear();
 
-        //章节1：稀世奇材（附带配方图片）
+        //章节1：稀世奇材
         addChapter("gui.the_last_sword.scroll_book.chapter1.title",
                   "gui.the_last_sword.scroll_book.chapter1.content",
                   new ItemStack(ModItems.DRAGON_CRYSTAL.get()),
-                  CHAPTER_RECIPE_1_1_TEXTURE);
+                   DRAGON_CRYSTAL_RECIPE);
 
         //章节2：铸剑台（附带两张配方图片）
         addChapter("gui.the_last_sword.scroll_book.chapter2.title",
                   "gui.the_last_sword.scroll_book.chapter2.content",
                   new ItemStack(ModItems.DRAGON_CRYSTAL_UPGRADE_TEMPLATE.get()),
-                  CHAPTER_RECIPE_2_1_TEXTURE,
-                  CHAPTER_RECIPE_2_2_TEXTURE);
+                   UPGRADE_TEMPLATE_RECIPE,
+                   SMITHING_TABLE_RECIPE);
 
         //章节3：传说之剑
         addChapter("gui.the_last_sword.scroll_book.chapter3.title",
                   "gui.the_last_sword.scroll_book.chapter3.content",
                   new ItemStack(ModItems.DRAGON_CRYSTAL_SWORD.get()),
-                  CHAPTER_RECIPE_3_1_TEXTURE,
-                  CHAPTER_RECIPE_3_2_TEXTURE,
-                  CHAPTER_RECIPE_3_3_TEXTURE,
-                  CHAPTER_RECIPE_3_4_TEXTURE);
+                   DRAGON_CRYSTAL_SWORD_RECIPE,
+                   DRAGON_CRYSTAL_SWORD_LEVEL_0_RECIPE,
+                   DRAGON_CRYSTAL_SWORD_LEVEL_5_RECIPE,
+                   DRAGON_SWORD_LEVEL_6_RECIPE);
 
         //章节4：龙之躯壳
         addChapter("gui.the_last_sword.scroll_book.chapter4.title",
                   "gui.the_last_sword.scroll_book.chapter4.content",
                   new ItemStack(ModItems.DRAGON_CRYSTAL_ARMOR_HELMET.get()),
-                  CHAPTER_RECIPE_4_1_TEXTURE,
-                  CHAPTER_RECIPE_4_2_TEXTURE);
+                   DRAGON_CRYSTAL_HELMET_RECIPE,
+                   DRAGON_CRYSTAL_HELMET_LEVEL_0_RECIPE);
 
         //章节5：龙与魂
         addChapter("gui.the_last_sword.scroll_book.chapter5.title",
                   "gui.the_last_sword.scroll_book.chapter5.content",
                   new ItemStack(ModItems.DRAGON_CRYSTAL_SOUL_STONE.get()),
-                  CHAPTER_RECIPE_5_1_TEXTURE,
-                  CHAPTER_RECIPE_5_2_TEXTURE,
-                  CHAPTER_RECIPE_5_3_TEXTURE);
+                   SOUL_STONE_RECIPE,
+                   SOUL_LANTERN_RECIPE,
+                   SOUL_LANTERN_RECIPE_1);
 
         //终章：虚空之下
         addChapter("gui.the_last_sword.scroll_book.chapter6.title",
@@ -198,17 +202,17 @@ public class TheLastEndScrollScreen extends Screen {
         addChapter(titleKey, contentKey, icon, new ResourceLocation[0]);
     }
 
-    //添加章节并自动分页（支持多张配方图片）
-    private void addChapter(String titleKey, String contentKey, ItemStack icon, ResourceLocation... recipeImages) {
+    //添加章节并自动分页（支持多个真实配方）
+    private void addChapter(String titleKey, String contentKey, ItemStack icon, ResourceLocation... recipeIds) {
         ChapterData chapter = new ChapterData();
         chapter.titleKey = titleKey;
         chapter.contentKey = contentKey;
         chapter.icon = icon;
-        chapter.recipeImages = new ArrayList<>();
-        if (recipeImages != null && recipeImages.length > 0) {
-            for (ResourceLocation img : recipeImages) {
-                if (img != null) {
-                    chapter.recipeImages.add(img);
+        chapter.recipeIds = new ArrayList<>();
+        if (recipeIds != null && recipeIds.length > 0) {
+            for (ResourceLocation recipeId : recipeIds) {
+                if (recipeId != null) {
+                    chapter.recipeIds.add(recipeId);
                 }
             }
         }
@@ -229,19 +233,18 @@ public class TheLastEndScrollScreen extends Screen {
         //计算需要多少页
         //第一页：标题（3行高度） + 内容
         //后续页：只有内容
-        //最后N页（如果有配方图片）：每张图片单独显示一页
+        //最后N页（如果有配方）：每页最多显示两个配方
         int firstPageLines = MAX_LINES_PER_PAGE - 3; //第一页要留空间给标题和图标
         int remainingLines = chapter.allLines.size() - firstPageLines;
 
         if (remainingLines <= 0) {
-            chapter.pageCount = 1; //一页就够了
+            chapter.textPageCount = 1; //一页就够了
         } else {
-            chapter.pageCount = 1 + (int) Math.ceil((double) remainingLines / MAX_LINES_PER_PAGE);
+            chapter.textPageCount = 1 + (int) Math.ceil((double) remainingLines / MAX_LINES_PER_PAGE);
         }
+        chapter.pageCount = chapter.textPageCount;
 
-        //如果有配方图片，计算需要多少页（从上往下排列，放不下再换页）
-        if (!chapter.recipeImages.isEmpty()) {
-            chapter.recipeImagePageMap = new java.util.HashMap<>();
+        if (!chapter.recipeIds.isEmpty()) {
             int recipePagesNeeded = calculateRecipePages(chapter);
             chapter.pageCount += recipePagesNeeded;
         }
@@ -249,68 +252,56 @@ public class TheLastEndScrollScreen extends Screen {
         chapters.add(chapter);
     }
 
-    //计算配方图片需要多少页，并构建每页的图片索引映射
+    //先利用最后一个文本页的剩余高度，放不下的配方才另起页
     private int calculateRecipePages(ChapterData chapter) {
-        if (chapter.recipeImages.isEmpty()) {
+        if (chapter.recipeIds.isEmpty()) {
             return 0;
         }
+        chapter.trailingRecipeIds = new ArrayList<>();
+        chapter.recipePages = new ArrayList<>();
 
-        try {
-            //加载所有图片尺寸（缩放后的高度）
-            List<Integer> imageHeights = new ArrayList<>();
-            for (ResourceLocation img : chapter.recipeImages) {
-                var resource = Minecraft.getInstance().getResourceManager().getResource(img);
-                if (resource.isPresent()) {
-                    try (var inputStream = resource.get().open()) {
-                        var image = com.mojang.blaze3d.platform.NativeImage.read(inputStream);
-                        int scaledHeight = image.getHeight() / 2; //缩放1/2后的高度
-                        imageHeights.add(scaledHeight);
-                        image.close();
-                    }
-                } else {
-                    imageHeights.add(110); //默认高度
-                }
+        int lastPageLineCount = getTextLineCount(chapter, chapter.textPageCount - 1);
+        int titleHeight = chapter.textPageCount == 1 ? (chapter.icon.isEmpty() ? 15 : 25) : 0;
+        int usedHeight = titleHeight + lastPageLineCount * LINE_HEIGHT;
+        int recipeIndex = 0;
+        while (recipeIndex < chapter.recipeIds.size()) {
+            ResourceLocation recipeId = chapter.recipeIds.get(recipeIndex);
+            int recipeHeight = ScrollRecipeRenderer.getDisplayHeight(recipeId);
+            if (usedHeight + recipeHeight > TEXT_HEIGHT) {
+                break;
             }
-
-            //从上往下累加图片，计算分页
-            int currentPageIndex = 0;
-            int currentPageHeight = 0;
-            List<Integer> currentPageImages = new ArrayList<>();
-
-            for (int i = 0; i < chapter.recipeImages.size(); i++) {
-                int imageHeight = imageHeights.get(i);
-
-                //检查是否能放在当前页
-                if (currentPageHeight + imageHeight <= TEXT_HEIGHT) {
-                    //能放下，加入当前页
-                    currentPageImages.add(i);
-                    currentPageHeight += imageHeight;
-                } else {
-                    //放不下，保存当前页并开始新页
-                    if (!currentPageImages.isEmpty()) {
-                        chapter.recipeImagePageMap.put(currentPageIndex, new ArrayList<>(currentPageImages));
-                        currentPageIndex++;
-                    }
-                    currentPageImages.clear();
-                    currentPageImages.add(i);
-                    currentPageHeight = imageHeight;
-                }
-            }
-
-            //保存最后一页
-            if (!currentPageImages.isEmpty()) {
-                chapter.recipeImagePageMap.put(currentPageIndex, currentPageImages);
-                currentPageIndex++;
-            }
-
-            return currentPageIndex; //返回总页数
-        } catch (Exception e) {
-            //如果加载失败，使用默认分页（每张图片一页）
-            for (int i = 0; i < chapter.recipeImages.size(); i++) {
-                chapter.recipeImagePageMap.put(i, java.util.Collections.singletonList(i));
-            }
-            return chapter.recipeImages.size();
+            chapter.trailingRecipeIds.add(recipeId);
+            usedHeight += recipeHeight;
+            recipeIndex++;
         }
+
+        //后续页面也按真实高度装箱，不再固定限制为每页两个配方
+        while (recipeIndex < chapter.recipeIds.size()) {
+            List<ResourceLocation> pageRecipes = new ArrayList<>();
+            int pageHeight = 0;
+            while (recipeIndex < chapter.recipeIds.size()) {
+                ResourceLocation recipeId = chapter.recipeIds.get(recipeIndex);
+                int recipeHeight = ScrollRecipeRenderer.getDisplayHeight(recipeId);
+                if (!pageRecipes.isEmpty() && pageHeight + recipeHeight > TEXT_HEIGHT) {
+                    break;
+                }
+                pageRecipes.add(recipeId);
+                pageHeight += recipeHeight;
+                recipeIndex++;
+            }
+            chapter.recipePages.add(pageRecipes);
+        }
+        return chapter.recipePages.size();
+    }
+
+    private int getTextLineCount(ChapterData chapter, int textPageIndex) {
+        int firstPageLines = MAX_LINES_PER_PAGE - 3;
+        if (textPageIndex == 0) {
+            return Math.min(chapter.allLines.size(), firstPageLines);
+        }
+
+        int startLineIndex = firstPageLines + (textPageIndex - 1) * MAX_LINES_PER_PAGE;
+        return Math.max(0, Math.min(MAX_LINES_PER_PAGE, chapter.allLines.size() - startLineIndex));
     }
 
     //计算总页数
@@ -333,29 +324,40 @@ public class TheLastEndScrollScreen extends Screen {
             chaptersInitialized = true;
         }
 
-        //清空之前的章节按钮
         chapterButtons.clear();
 
-        //计算GUI在屏幕中的位置（居中）
         int guiLeft = (this.width - GUI_WIDTH) / 2;
         int guiTop = (this.height - GUI_HEIGHT) / 2;
 
-        //如果是第一页（目录页），创建章节按钮
         if (currentPage == 0) {
             createChapterButtons(guiLeft, guiTop);
         }
 
-        //计算页码位置
+        createNavigationButtons(guiLeft, guiTop);
+
+        //首次打开在目录页时播放开场粒子
+        if (TheLastSwordConfiguration.getTheLastEndScrollEnableParticleEffectsSafely() && currentPage == 0 && !particleAnimationPlayed) {
+            spawnParticles(guiLeft, guiTop);
+            particleAnimationPlayed = true;
+            animationTimer = 0;
+        }
+
+        if (TheLastSwordConfiguration.getTheLastEndScrollEnableParticleEffectsSafely() && !buttonParticlesInitialized) {
+            spawnButtonParticles();
+            buttonParticlesInitialized = true;
+        }
+    }
+
+    //创建翻页按钮
+    private void createNavigationButtons(int guiLeft, int guiTop) {
         String pageNumber = (currentPage + 1) + " / " + totalPages;
         int pageNumberX = guiLeft + (GUI_WIDTH / 2) - (this.font.width(pageNumber) / 2);
         int pageNumberY = guiTop + GUI_HEIGHT - 25;
 
-        //按钮尺寸
         int buttonWidth = 40;
         int buttonHeight = 20;
-        int buttonSpacing = 10; //按钮与页码的间距
+        int buttonSpacing = 10;
 
-        //上一页按钮（页码左侧）
         this.previousButton = Button.builder(
             Component.literal("◀"),
             button -> {
@@ -366,7 +368,6 @@ public class TheLastEndScrollScreen extends Screen {
             }
         ).bounds(pageNumberX - buttonWidth - buttonSpacing, pageNumberY - 5, buttonWidth, buttonHeight).build();
 
-        //下一页按钮（页码右侧）
         this.nextButton = Button.builder(
             Component.literal("▶"),
             button -> {
@@ -381,19 +382,6 @@ public class TheLastEndScrollScreen extends Screen {
         this.addRenderableWidget(nextButton);
 
         updateButtons();
-
-        //如果是第0页且没播放过主动画，生成主粒子
-        if (TheLastSwordConfiguration.getTheLastEndScrollEnableParticleEffectsSafely() && currentPage == 0 && !particleAnimationPlayed) {
-            spawnParticles(guiLeft, guiTop);
-            particleAnimationPlayed = true;
-            animationTimer = 0;
-        }
-
-        //初始化按钮粒子效果
-        if (TheLastSwordConfiguration.getTheLastEndScrollEnableParticleEffectsSafely() && !buttonParticlesInitialized) {
-            spawnButtonParticles();
-            buttonParticlesInitialized = true;
-        }
     }
 
     //创建章节目录按钮
@@ -446,9 +434,7 @@ public class TheLastEndScrollScreen extends Screen {
     private void jumpToChapter(int chapterIndex) {
         if (chapterIndex >= 0 && chapterIndex < chapters.size()) {
             currentPage = chapters.get(chapterIndex).startPage;
-            //重新初始化界面（移除章节按钮，刷新翻页按钮状态）
-            this.clearWidgets();
-            this.init();
+            refreshPageUI();
         }
     }
 
@@ -471,8 +457,8 @@ public class TheLastEndScrollScreen extends Screen {
 
         RenderSystem.disableBlend();
 
-        //渲染当前页面内容
-        renderPageContent(graphics, guiLeft, guiTop);
+        hoveredRecipeStack = ItemStack.EMPTY;
+        renderPageContent(graphics, guiLeft, guiTop, mouseX, mouseY);
 
         //渲染粒子（在内容之上）
         if (TheLastSwordConfiguration.getTheLastEndScrollEnableParticleEffectsSafely() && !particles.isEmpty()) {
@@ -492,10 +478,14 @@ public class TheLastEndScrollScreen extends Screen {
 
         //渲染按钮等其他组件
         super.render(graphics, mouseX, mouseY, partialTick);
+
+        if (!hoveredRecipeStack.isEmpty()) {
+            graphics.renderTooltip(this.font, hoveredRecipeStack, mouseX, mouseY);
+        }
     }
 
     //渲染页面内容
-    private void renderPageContent(GuiGraphics graphics, int guiLeft, int guiTop) {
+    private void renderPageContent(GuiGraphics graphics, int guiLeft, int guiTop, int mouseX, int mouseY) {
         //如果是第一页（目录页），不渲染文本内容（由按钮代替）
         if (currentPage == 0) {
             return;
@@ -520,17 +510,17 @@ public class TheLastEndScrollScreen extends Screen {
             return;
         }
 
-        //判断是否是配方图片页
-        int recipePagesCount = currentChapter.recipeImagePageMap != null ? currentChapter.recipeImagePageMap.size() : 0;
-        int textPageCount = currentChapter.pageCount - recipePagesCount;
+        //判断是否是动态配方页
+        int recipePagesCount = currentChapter.recipePages != null ? currentChapter.recipePages.size() : 0;
+        int textPageCount = currentChapter.textPageCount;
         boolean isRecipePage = recipePagesCount > 0 && pageOffsetInChapter >= textPageCount;
 
-        //如果是配方图片页，渲染该页的所有图片（从上往下排列）
+        //如果是配方页，按配方类型渲染物品框、箭头和结果
         if (isRecipePage) {
             int recipePageIndex = pageOffsetInChapter - textPageCount;
-            if (currentChapter.recipeImagePageMap.containsKey(recipePageIndex)) {
-                List<Integer> imageIndices = currentChapter.recipeImagePageMap.get(recipePageIndex);
-                renderRecipePageImages(graphics, guiLeft, guiTop, currentChapter, imageIndices);
+            if (recipePageIndex >= 0 && recipePageIndex < currentChapter.recipePages.size()) {
+                renderRecipePage(graphics, guiLeft, guiTop,
+                        currentChapter.recipePages.get(recipePageIndex), mouseX, mouseY);
             }
             return;
         }
@@ -579,6 +569,14 @@ public class TheLastEndScrollScreen extends Screen {
             lineCount++;
         }
 
+        //最后一个文本页还有空间时，配方从正文末行下方直接开始
+        if (pageOffsetInChapter == textPageCount - 1
+                && currentChapter.trailingRecipeIds != null
+                && !currentChapter.trailingRecipeIds.isEmpty()) {
+            renderRecipes(graphics, guiLeft, textY + lineCount * LINE_HEIGHT,
+                    currentChapter.trailingRecipeIds, mouseX, mouseY);
+        }
+
         //如果是第6章且未加载tlsuv，渲染兼容性提示
         if (chapters.indexOf(currentChapter) == 5 && !CompatCheck.isTLSUVLoaded()) {
             Component hintText = Component.translatable("gui.the_last_sword.scroll_book.chapter6.compat_hint");
@@ -588,56 +586,24 @@ public class TheLastEndScrollScreen extends Screen {
         }
     }
 
-    //渲染配方图片页（从上往下排列多张图片，左右居中）
-    private void renderRecipePageImages(GuiGraphics graphics, int guiLeft, int guiTop, ChapterData chapter, List<Integer> imageIndices) {
-        try {
-            int currentY = guiTop + TEXT_START_Y; //从顶部开始
+    //渲染动态配方页
+    private void renderRecipePage(GuiGraphics graphics, int guiLeft, int guiTop,
+                                  List<ResourceLocation> recipeIds, int mouseX, int mouseY) {
+        renderRecipes(graphics, guiLeft, guiTop + TEXT_START_Y, recipeIds, mouseX, mouseY);
+    }
 
-            for (int imageIndex : imageIndices) {
-                if (imageIndex >= 0 && imageIndex < chapter.recipeImages.size()) {
-                    ResourceLocation recipeTexture = chapter.recipeImages.get(imageIndex);
-
-                    //动态获取图片原始尺寸
-                    var resource = Minecraft.getInstance().getResourceManager().getResource(recipeTexture);
-                    if (resource.isEmpty()) {
-                        continue;
-                    }
-
-                    int originalWidth;
-                    int originalHeight;
-
-                    try (var inputStream = resource.get().open()) {
-                        var image = com.mojang.blaze3d.platform.NativeImage.read(inputStream);
-                        originalWidth = image.getWidth();
-                        originalHeight = image.getHeight();
-                        image.close();
-                    }
-
-                    //显示尺寸（原图等比缩放1/2）
-                    int displayWidth = originalWidth / 2;
-                    int displayHeight = originalHeight / 2;
-
-                    //计算水平居中位置
-                    int imageX = guiLeft + TEXT_START_X + (TEXT_WIDTH - displayWidth) / 2;
-
-                    //渲染图片（等比缩放1/2）
-                    RenderSystem.setShaderTexture(0, recipeTexture);
-                    RenderSystem.setShader(GameRenderer::getPositionTexShader);
-                    RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-                    RenderSystem.enableBlend();
-                    RenderSystem.defaultBlendFunc();
-
-                    graphics.blit(recipeTexture, imageX, currentY, displayWidth, displayHeight,
-                                 0, 0, originalWidth, originalHeight, originalWidth, originalHeight);
-
-                    RenderSystem.disableBlend();
-
-                    //向下移动，准备渲染下一张图片
-                    currentY += displayHeight;
-                }
+    private void renderRecipes(GuiGraphics graphics, int guiLeft, int startY,
+                               List<ResourceLocation> recipeIds, int mouseX, int mouseY) {
+        int currentY = startY;
+        int areaX = guiLeft + TEXT_START_X;
+        for (ResourceLocation recipeId : recipeIds) {
+            ItemStack hovered = ScrollRecipeRenderer.render(
+                    recipeId, graphics, this.font, areaX, currentY, TEXT_WIDTH, mouseX, mouseY
+            );
+            if (!hovered.isEmpty()) {
+                hoveredRecipeStack = hovered;
             }
-        } catch (Exception e) {
-            //如果加载失败，静默处理
+            currentY += ScrollRecipeRenderer.getDisplayHeight(recipeId);
         }
     }
 
@@ -655,6 +621,23 @@ public class TheLastEndScrollScreen extends Screen {
 
         for (int i = 0; i < text.length(); i++) {
             char c = text.charAt(i);
+
+            //显式换行符
+            if (c == '\n') {
+                if (currentWord.length() > 0) {
+                    currentLine.append(currentWord);
+                    currentWord = new StringBuilder();
+                }
+                if (currentLine.length() > 0) {
+                    lines.add(currentLine.toString());
+                }
+                currentLine = new StringBuilder();
+                if (!activeColor.isEmpty()) {
+                    currentLine.append(activeColor);
+                }
+                inWord = false;
+                continue;
+            }
 
             //检测颜色代码（§ + 一个字符）
             if (c == '§' && i + 1 < text.length()) {
@@ -768,9 +751,7 @@ public class TheLastEndScrollScreen extends Screen {
     private void previousPage() {
         if (currentPage > 0) {
             currentPage--;
-            //重新初始化界面（刷新章节按钮显示）
-            this.clearWidgets();
-            this.init();
+            refreshPageUI();
         }
     }
 
@@ -778,10 +759,27 @@ public class TheLastEndScrollScreen extends Screen {
     private void nextPage() {
         if (currentPage < totalPages - 1) {
             currentPage++;
-            //重新初始化界面（刷新章节按钮显示）
-            this.clearWidgets();
-            this.init();
+            refreshPageUI();
         }
+    }
+
+    //翻页/跳转后刷新界面，只切换章节目录按钮和翻页按钮状态，不重建整个widget树
+    private void refreshPageUI() {
+        if (currentPage == 0) {
+            if (chapterButtons.isEmpty()) {
+                int guiLeft = (this.width - GUI_WIDTH) / 2;
+                int guiTop = (this.height - GUI_HEIGHT) / 2;
+                createChapterButtons(guiLeft, guiTop);
+            }
+        } else {
+            if (!chapterButtons.isEmpty()) {
+                for (Button btn : chapterButtons) {
+                    this.removeWidget(btn);
+                }
+                chapterButtons.clear();
+            }
+        }
+        updateButtons();
     }
 
     //更新按钮状态
@@ -796,8 +794,6 @@ public class TheLastEndScrollScreen extends Screen {
 
     //生成按钮粒子效果
     private void spawnButtonParticles() {
-        java.util.Random random = new java.util.Random();
-
         //按钮粒子颜色（黑紫色调）
         int[] colors = {
             0x000000,  //纯黑色
@@ -892,7 +888,6 @@ public class TheLastEndScrollScreen extends Screen {
     //生成粒子（覆盖整个卷轴）
     private void spawnParticles(int guiLeft, int guiTop) {
         particles.clear();
-        java.util.Random random = new java.util.Random();
 
         //粒子颜色（黑紫色调）
         int[] colors = {
@@ -928,21 +923,15 @@ public class TheLastEndScrollScreen extends Screen {
         }
     }
 
-    //渲染和更新粒子
-    private void renderParticles(GuiGraphics graphics) {
-        //更新粒子状态
-        particles.removeIf(particle -> {
+    //更新并渲染一组粒子
+    private void updateAndRenderParticles(GuiGraphics graphics, List<ScrollParticle> particleList) {
+        particleList.removeIf(particle -> {
             particle.update();
             return !particle.isAlive();
         });
-
-        //渲染粒子
-        for (ScrollParticle particle : particles) {
+        for (ScrollParticle particle : particleList) {
             int alpha = particle.getAlpha();
-            //组合颜色（ARGB格式）
             int colorWithAlpha = (alpha << 24) | (particle.color & 0x00FFFFFF);
-
-            //绘制粒子（使用fill方法绘制矩形）
             graphics.fill(
                 (int) particle.x,
                 (int) particle.y,
@@ -951,83 +940,23 @@ public class TheLastEndScrollScreen extends Screen {
                 colorWithAlpha
             );
         }
+    }
 
-        //增加动画计时器
+    //渲染和更新粒子
+    private void renderParticles(GuiGraphics graphics) {
+        updateAndRenderParticles(graphics, particles);
         animationTimer++;
     }
 
     //渲染按钮周围的粒子
     private void renderButtonParticles(GuiGraphics graphics) {
-        //更新上一页按钮粒子状态
-        previousButtonParticles.removeIf(particle -> {
-            particle.update();
-            return !particle.isAlive();
-        });
-
-        //渲染上一页按钮粒子
-        for (ScrollParticle particle : previousButtonParticles) {
-            int alpha = particle.getAlpha();
-            //组合颜色（ARGB格式）
-            int colorWithAlpha = (alpha << 24) | (particle.color & 0x00FFFFFF);
-
-            //绘制粒子（使用fill方法绘制矩形）
-            graphics.fill(
-                (int) particle.x,
-                (int) particle.y,
-                (int) (particle.x + particle.size),
-                (int) (particle.y + particle.size),
-                colorWithAlpha
-            );
-        }
-
-        //更新下一页按钮粒子状态
-        nextButtonParticles.removeIf(particle -> {
-            particle.update();
-            return !particle.isAlive();
-        });
-
-        //渲染下一页按钮粒子
-        for (ScrollParticle particle : nextButtonParticles) {
-            int alpha = particle.getAlpha();
-            //组合颜色（ARGB格式）
-            int colorWithAlpha = (alpha << 24) | (particle.color & 0x00FFFFFF);
-
-            //绘制粒子（使用fill方法绘制矩形）
-            graphics.fill(
-                (int) particle.x,
-                (int) particle.y,
-                (int) (particle.x + particle.size),
-                (int) (particle.y + particle.size),
-                colorWithAlpha
-            );
-        }
-
-        //更新点击产生的临时粒子状态
-        clickParticles.removeIf(particle -> {
-            particle.update();
-            return !particle.isAlive();
-        });
-
-        //渲染点击产生的临时粒子
-        for (ScrollParticle particle : clickParticles) {
-            int alpha = particle.getAlpha();
-            //组合颜色（ARGB格式）
-            int colorWithAlpha = (alpha << 24) | (particle.color & 0x00FFFFFF);
-
-            //绘制粒子（使用fill方法绘制矩形）
-            graphics.fill(
-                (int) particle.x,
-                (int) particle.y,
-                (int) (particle.x + particle.size),
-                (int) (particle.y + particle.size),
-                colorWithAlpha
-            );
-        }
+        updateAndRenderParticles(graphics, previousButtonParticles);
+        updateAndRenderParticles(graphics, nextButtonParticles);
+        updateAndRenderParticles(graphics, clickParticles);
     }
 
     //生成按钮点击时的粒子效果
     private void spawnClickParticles(Button button) {
-        java.util.Random random = new java.util.Random();
 
         //点击粒子颜色（黑紫色调）
         int[] colors = {

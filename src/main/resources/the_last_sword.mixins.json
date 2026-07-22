@@ -10,7 +10,8 @@
     "LevelRendererMixin",
     "LivingEntityRendererMixin",
     "LocalPlayerMixin",
-    "ScreenEffectRendererMixin"
+    "ScreenEffectRendererMixin",
+    "SmithingTransformRecipeAccessor"
   ],
   "mixins": [
     "BlockBehaviourMixin",

@@ -4,6 +4,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 import net.the_last_sword.TheLastSwordMod;
@@ -12,7 +13,7 @@ import net.minecraft.server.level.ServerPlayer;
 //网络包管理器
 public class NetworkHandler {
 
-    private static final String PROTOCOL_VERSION = "1";
+    private static final String PROTOCOL_VERSION = "2";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(TheLastSwordMod.MOD_ID, "main"),
@@ -107,6 +108,13 @@ public class NetworkHandler {
                 .encoder(DragonShieldPacket::encode)
                 .decoder(DragonShieldPacket::decode)
                 .consumerMainThread(DragonShieldPacket::handle)
+                .add();
+
+        //龙水晶锻造配方同步包（服务端配置为唯一数据源）
+        CHANNEL.messageBuilder(SyncDragonCrystalRecipesPacket.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(SyncDragonCrystalRecipesPacket::encode)
+                .decoder(SyncDragonCrystalRecipesPacket::decode)
+                .consumerMainThread(SyncDragonCrystalRecipesPacket::handle)
                 .add();
     }
 

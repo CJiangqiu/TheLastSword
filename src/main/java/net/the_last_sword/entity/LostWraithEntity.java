@@ -116,8 +116,9 @@ public class LostWraithEntity extends TheLastEndEntity {
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes()
                 .add(Attributes.MOVEMENT_SPEED, 0.3)
-                .add(Attributes.MAX_HEALTH, 200)
-                .add(Attributes.ARMOR, 0)
+                .add(Attributes.MAX_HEALTH, 400)
+                .add(Attributes.ARMOR, 10)
+                .add(Attributes.ARMOR_TOUGHNESS, 10)
                 .add(Attributes.ATTACK_DAMAGE, 10)
                 .add(Attributes.FOLLOW_RANGE, 64);
     }

@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import top.theillusivec4.curios.api.CuriosApi;
 
 import java.util.List;
 
@@ -98,19 +99,33 @@ public class EndCrystalMixin {
             }
         }
 
-        return false;
+        //检查饰品栏
+        return CuriosApi.getCuriosInventory(player).map(handler -> {
+            for (var entry : handler.getCurios().entrySet()) {
+                var stacks = entry.getValue().getStacks();
+                for (int i = 0; i < stacks.getSlots(); i++) {
+                    ItemStack stack = stacks.getStackInSlot(i);
+                    if (!stack.isEmpty()) {
+                        boolean needsCharge = stack.getCapability(ForgeCapabilities.ENERGY)
+                                .map(energy -> energy.getEnergyStored() < energy.getMaxEnergyStored())
+                                .orElse(false);
+                        if (needsCharge) return true;
+                    }
+                }
+            }
+            return false;
+        }).orElse(false);
     }
 
     //给玩家所有带FE capability且能量未满的物品充能
     private void chargePlayerItems(Player player) {
         int chargeRate = TheLastSwordConfiguration.getDragonArmorEnderCrystalChargeRateSafely();
 
-        //充能装备栏所有物品
+        //充能装备栏
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             ItemStack stack = player.getItemBySlot(slot);
             if (!stack.isEmpty()) {
                 stack.getCapability(ForgeCapabilities.ENERGY).ifPresent(energy -> {
-                    //只充能能量未满的物品
                     if (energy.getEnergyStored() < energy.getMaxEnergyStored()) {
                         energy.receiveEnergy(chargeRate, false);
                     }
@@ -118,17 +133,33 @@ public class EndCrystalMixin {
             }
         }
 
-        //充能背包所有物品
+        //充能背包
         for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
             ItemStack stack = player.getInventory().getItem(i);
             if (!stack.isEmpty()) {
                 stack.getCapability(ForgeCapabilities.ENERGY).ifPresent(energy -> {
-                    //只充能能量未满的物品
                     if (energy.getEnergyStored() < energy.getMaxEnergyStored()) {
                         energy.receiveEnergy(chargeRate, false);
                     }
                 });
             }
         }
+
+        //充能饰品栏
+        CuriosApi.getCuriosInventory(player).ifPresent(handler -> {
+            for (var entry : handler.getCurios().entrySet()) {
+                var stacks = entry.getValue().getStacks();
+                for (int i = 0; i < stacks.getSlots(); i++) {
+                    ItemStack stack = stacks.getStackInSlot(i);
+                    if (!stack.isEmpty()) {
+                        stack.getCapability(ForgeCapabilities.ENERGY).ifPresent(energy -> {
+                            if (energy.getEnergyStored() < energy.getMaxEnergyStored()) {
+                                energy.receiveEnergy(chargeRate, false);
+                            }
+                        });
+                    }
+                }
+            }
+        });
     }
 }

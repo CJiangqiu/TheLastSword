@@ -289,7 +289,23 @@ public class TheLastSwordConfiguration {
     // Compat Mods | 联动Mod配置
     public static ForgeConfigSpec.ConfigValue<Boolean> COMPAT_CATACLYSM_ENABLE;
 
+    // Quest | 任务系统配置
+    public static ForgeConfigSpec.ConfigValue<Boolean> QUEST_SYSTEM_ENABLED;
+
     static {
+        // ═══════════════════════════════════════════════════════════════════════════════
+        // Root Configuration | 根级配置（必须在任何 push 之前定义）
+        // ═══════════════════════════════════════════════════════════════════════════════
+        QUEST_SYSTEM_ENABLED = BUILDER
+            .comment(
+                "Enable the built-in quest system (quest advancements, quest villagers, quest broadcasts).",
+                "Disable this if the modpack provides its own progression. The Last End Scroll must then be",
+                "obtained another way, as the quest blacksmith will not spawn.",
+                "启用内置任务系统（任务进度、任务村民、任务播报）。",
+                "若整合包自带进度线可关闭。关闭后任务铁匠不会生成，需自行提供终焉卷轴的获取途径。"
+            )
+            .define("Enable Quest System", true);
+
         // ═══════════════════════════════════════════════════════════════════════════════
         // Item Configuration | 物品配置
         // ═══════════════════════════════════════════════════════════════════════════════
