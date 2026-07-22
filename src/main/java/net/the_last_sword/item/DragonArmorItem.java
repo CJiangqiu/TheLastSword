@@ -5,6 +5,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -71,7 +72,7 @@ public abstract class DragonArmorItem extends TheLastEndArmorItem implements Geo
 
             @Override
             public SoundEvent getEquipSound() {
-                return ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation("block.beacon.activate"));
+                return SoundEvents.ARMOR_EQUIP_NETHERITE;
             }
 
             @Override
