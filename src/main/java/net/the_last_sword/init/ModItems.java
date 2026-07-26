@@ -130,6 +130,16 @@ public class ModItems {
         () -> new ForgeSpawnEggItem(ModEntities.TEST_ENTITY, -1, -1, new Item.Properties())
     );
 
+    //拜龙教教徒刷怪蛋（深紫色 + 紫色）
+    public static final RegistryObject<Item> DRAGON_CULTIST_SPAWN_EGG = ITEMS.register("dragon_cultist_spawn_egg",
+        () -> new ForgeSpawnEggItem(ModEntities.DRAGON_CULTIST, 0x4B0082, 0x9932CC, new Item.Properties())
+    );
+
+    //拜龙教圣骑士刷怪蛋（深紫色 + 黑色）
+    public static final RegistryObject<Item> DRAGON_CULT_PALADIN_SPAWN_EGG = ITEMS.register("dragon_cult_paladin_spawn_egg",
+        () -> new ForgeSpawnEggItem(ModEntities.DRAGON_CULT_PALADIN, 0x4B0082, 0x1A1A1A, new Item.Properties())
+    );
+
     //封印尖塔守卫刷怪蛋（深灰色 + 紫色）
     public static final RegistryObject<Item> GUARDIAN_OF_SEALED_SPIRE_SPAWN_EGG = ITEMS.register("guardian_of_sealed_spire_spawn_egg",
         () -> new ForgeSpawnEggItem(ModEntities.GUARDIAN_OF_SEALED_SPIRE, 0x4B4B4B, 0x8B00FF, new Item.Properties())

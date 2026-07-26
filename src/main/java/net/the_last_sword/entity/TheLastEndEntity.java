@@ -55,6 +55,11 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
+    // 延迟到死亡动画结束后掉落战利品，因此需要保留真正造成致死伤害的来源。
+    // 否则改用 generic 会丢失击杀者、玩家击杀状态以及武器的抢夺等级。
+    @Nullable
+    private DamageSource deathDamageSource;
+
     protected TheLastEndEntity(EntityType<? extends TamableAnimal> entityType, Level level) {
         super(entityType, level);
     }
@@ -303,16 +308,26 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
 
     protected void onDeathEnd() {
         if (!level().isClientSide) {
-            this.dropAllDeathLoot(damageSources().generic());
+            DamageSource damageSource = deathDamageSource;
+            if (damageSource == null) {
+                damageSource = getLastDamageSource();
+            }
+            this.dropAllDeathLoot(damageSource != null ? damageSource : damageSources().generic());
         }
         safeRemove();
     }
 
-    public void triggerDeath() {
+    public void triggerDeath(@NotNull DamageSource damageSource) {
         if (!isDying()) {
+            this.deathDamageSource = damageSource;
             setAnimationState(STATE_DEATH);
             setDeathTick(0);
         }
+    }
+
+    public void triggerDeath() {
+        DamageSource damageSource = getLastDamageSource();
+        triggerDeath(damageSource != null ? damageSource : damageSources().generic());
     }
 
     public void safeRemove() {
@@ -347,7 +362,7 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
             setWorldAnchor(newHealth);
 
             if (newHealth <= 0 && !isDying()) {
-                triggerDeath();
+                triggerDeath(damageSource);
             }
         }
 

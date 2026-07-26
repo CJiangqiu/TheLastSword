@@ -187,8 +187,7 @@ public class EnderDragonEvent {
         int cappedLevel = Math.min(challengeCount, TheLastSwordConfiguration.ENDER_DRAGON_MAX_LEVEL.get());
 
         // 设置等级名称
-        Component displayName = dragon.getDisplayName();
-        dragon.setCustomName(Component.literal(displayName.getString() + " LV" + challengeCount));
+        dragon.setCustomName(Component.literal(dragon.getDisplayName().getString() + " LV" + cappedLevel));
 
         applyDragonUpgrades(dragon, cappedLevel);
         dragonData.putBoolean(MODIFIER_ADDED_KEY, true);

@@ -1,6 +1,8 @@
 package net.the_last_sword.util;
 
 import net.eca.api.EcaAPI;
+import net.eca.util.faction.FactionManager;
+import net.eca.util.faction.FactionRelation;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.server.players.PlayerList;
@@ -440,6 +442,14 @@ public class EntityUtil {
         //创造模式和旁观模式玩家豁免
         if (target instanceof Player player && (player.isCreative() || player.isSpectator())) {
             return false;
+        }
+
+        //ECA 阵营：同阵营与友好阵营不攻击，其余关系交由后续判断
+        if (attacker != null) {
+            FactionRelation relation = FactionManager.getEffectiveRelation(attacker, target);
+            if (relation == FactionRelation.SAME_FACTION || relation == FactionRelation.FRIENDLY) {
+                return false;
+            }
         }
 
         if (areOriginalAllies(attacker, target)) return false;

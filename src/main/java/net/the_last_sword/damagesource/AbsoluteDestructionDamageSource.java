@@ -113,7 +113,7 @@ public class AbsoluteDestructionDamageSource extends DamageSource {
             theLastEnd.setWorldAnchor(newAnchor);
             if (newAnchor <= 0 && !theLastEnd.isDying()) {
                 WraithSummonManager.tryForceCapture(entity);
-                theLastEnd.triggerDeath();
+                theLastEnd.triggerDeath(damageSource);
             }
             return true;
         }

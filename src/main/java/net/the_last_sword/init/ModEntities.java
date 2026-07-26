@@ -12,6 +12,8 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.entity.DragonCrystalSwordProjectile;
+import net.the_last_sword.entity.DragonCultistEntity;
+import net.the_last_sword.entity.DragonCultPaladinEntity;
 import net.the_last_sword.entity.DragonLightingEntity;
 import net.the_last_sword.entity.DragonSwordProjectile;
 import net.the_last_sword.entity.GuardianArcherEntity;
@@ -183,6 +185,28 @@ public class ModEntities {
                 .build("the_past_shadow_of_the_queen")
         );
 
+    //拜龙教教徒
+    public static final RegistryObject<EntityType<DragonCultistEntity>> DRAGON_CULTIST =
+        ENTITY_TYPES.register("dragon_cultist",
+            () -> EntityType.Builder.of(DragonCultistEntity::new, MobCategory.MONSTER)
+                .sized(0.6f, 1.85f)
+                .clientTrackingRange(64)
+                .updateInterval(3)
+                .fireImmune()
+                .build("dragon_cultist")
+        );
+
+    //拜龙教圣骑士
+    public static final RegistryObject<EntityType<DragonCultPaladinEntity>> DRAGON_CULT_PALADIN =
+        ENTITY_TYPES.register("dragon_cult_paladin",
+            () -> EntityType.Builder.of(DragonCultPaladinEntity::new, MobCategory.MONSTER)
+                .sized(0.7f, 2.0f)
+                .clientTrackingRange(64)
+                .updateInterval(3)
+                .fireImmune()
+                .build("dragon_cult_paladin")
+        );
+
     public static void register(IEventBus eventBus) {
         ENTITY_TYPES.register(eventBus);
     }
@@ -198,5 +222,7 @@ public class ModEntities {
         event.put(LOST_WRAITH.get(), LostWraithEntity.createAttributes().build());
         event.put(THE_LAST_END_SWORD_WRAITH.get(), TheLastEndSwordWraithEntity.createAttributes().build());
         event.put(THE_PAST_SHADOW_OF_THE_QUEEN.get(), ThePastShadowOfTheQueenEntity.createAttributes().build());
+        event.put(DRAGON_CULTIST.get(), DragonCultistEntity.createAttributes().build());
+        event.put(DRAGON_CULT_PALADIN.get(), DragonCultPaladinEntity.createAttributes().build());
     }
 }

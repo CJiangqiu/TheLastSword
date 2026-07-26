@@ -9,6 +9,8 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.client.model.WingsThatCoverTheWorldModel;
+import net.the_last_sword.client.renderer.DragonCultistRenderer;
+import net.the_last_sword.client.renderer.DragonCultPaladinRenderer;
 import net.the_last_sword.client.renderer.*;
 import net.the_last_sword.compat.lucky_block.TheLastEndLuckyBlockRenderer;
 
@@ -32,6 +34,8 @@ public class ModEntityRenderers {
         event.registerEntityRenderer(ModEntities.LOST_WRAITH.get(), LostWraithRenderer::new);
         event.registerEntityRenderer(ModEntities.THE_LAST_END_SWORD_WRAITH.get(), TheLastEndSwordWraithRenderer::new);
         event.registerEntityRenderer(ModEntities.THE_PAST_SHADOW_OF_THE_QUEEN.get(), ThePastShadowOfTheQueenRenderer::new);
+        event.registerEntityRenderer(ModEntities.DRAGON_CULTIST.get(), DragonCultistRenderer::new);
+        event.registerEntityRenderer(ModEntities.DRAGON_CULT_PALADIN.get(), DragonCultPaladinRenderer::new);
     }
 
     //注册 Model Layer 定义

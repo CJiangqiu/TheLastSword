@@ -49,6 +49,8 @@ public class ModCreativeTabs {
                 output.accept(ModItems.DRAGON_CRYSTAL_SOUL_STONE.get());
                 output.accept(ModItems.SWORD_SOUL_STONE.get());
                 output.accept(ModItems.DRAGON_SOUL_LANTERN.get());
+                output.accept(ModItems.DRAGON_CULTIST_SPAWN_EGG.get());
+                output.accept(ModItems.DRAGON_CULT_PALADIN_SPAWN_EGG.get());
                 output.accept(ModItems.GUARDIAN_OF_SEALED_SPIRE_SPAWN_EGG.get());
                 output.accept(ModItems.GUARDIAN_SABER_SPAWN_EGG.get());
                 output.accept(ModItems.GUARDIAN_BERSERKER_SPAWN_EGG.get());

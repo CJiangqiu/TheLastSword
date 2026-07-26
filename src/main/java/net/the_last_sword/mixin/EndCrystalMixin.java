@@ -9,6 +9,7 @@ import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.item.DragonArmorItem;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -18,6 +19,10 @@ import java.util.List;
 
 @Mixin(EndCrystal.class)
 public class EndCrystalMixin {
+
+    //标记光束是否由本Mixin设置，避免清除原版末影龙战斗的光束
+    @Unique
+    private boolean theLastSword$chargingBeam;
 
     //在末影水晶tick时处理充能逻辑
     @Inject(method = "tick", at = @At("TAIL"))
@@ -51,14 +56,14 @@ public class EndCrystalMixin {
         //设置光束目标并充能
         if (targetPlayer != null) {
             crystal.setBeamTarget(targetPlayer.blockPosition().below());
+            theLastSword$chargingBeam = true;
 
             //每tick给玩家所有物品充能
             chargePlayerItems(targetPlayer);
-        } else {
-            //没有需要充能的玩家，清除光束
-            if (crystal.getBeamTarget() != null) {
-                crystal.setBeamTarget(null);
-            }
+        } else if (theLastSword$chargingBeam) {
+            //只清除我们自己设的光束，不碰原版末影龙战斗/复活的光束
+            crystal.setBeamTarget(null);
+            theLastSword$chargingBeam = false;
         }
     }
 
