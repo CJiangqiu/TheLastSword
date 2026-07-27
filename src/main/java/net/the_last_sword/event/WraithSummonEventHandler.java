@@ -6,6 +6,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.the_last_sword.TheLastSwordMod;
@@ -52,8 +53,8 @@ public class WraithSummonEventHandler {
 
     // ========== 剑灵实体事件 ==========
 
-    //实体离开世界时更新剑灵状态
-    @SubscribeEvent
+    //实体离开世界时更新剑灵状态（须先于 ECA 的自动退营执行，否则查不到主人）
+    @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onEntityLeaveLevel(EntityLeaveLevelEvent event) {
         if (event.getLevel().isClientSide()) {
             return;

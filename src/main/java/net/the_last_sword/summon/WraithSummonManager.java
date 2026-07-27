@@ -36,7 +36,6 @@ import net.the_last_sword.util.TheLastSwordLogger;
 import net.the_last_sword.util.nbt.ItemLevelHelper;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 //统一的剑灵召唤管理器（重构版）
 public class WraithSummonManager {
@@ -44,14 +43,6 @@ public class WraithSummonManager {
     // ============ 魂石存储键 ============
 
     private static final String SOUL_STONE_KEY = "the_last_sword_soul_stone";
-
-    // ============ 永久绑定表（运行时索引 + 持久化） ============
-
-    //绑定表：玩家UUID → 剑灵UUID集合（永久绑定，只在firstSummon时添加）
-    private static final Map<UUID, Set<UUID>> BINDINGS = new ConcurrentHashMap<>();
-
-    //标记是否需要保存
-    private static volatile boolean needsSave = false;
 
     //剑灵与主人的最大距离（传送阈值）
     private static final double MAX_OWNER_DISTANCE = 32.0;
@@ -159,6 +150,9 @@ public class WraithSummonManager {
         //7. 删除实体
         EntityUtil.theLastEndRemove(wraith, Entity.RemovalReason.DISCARDED);
 
+        //7.1. 重新入营：ECA 对销毁类移除会自动退营，而唤回属于永久绑定
+        WraithFaction.bind(player, wraitheUUID, wraith.getType(), level);
+
         //7.5. 强制发送客户端删除包（确保客户端实体被正确清除）
         if (player instanceof ServerPlayer serverPlayer) {
             NetworkHandler.sendToPlayer(new ClientRemovePacket(wraith.getId(), List.of()), serverPlayer);
@@ -230,6 +224,9 @@ public class WraithSummonManager {
                 }
                 EntityUtil.clearDefence(wraith);
                 EntityUtil.theLastEndRemove(wraith, Entity.RemovalReason.DISCARDED);
+
+                //重新入营：ECA 对销毁类移除会自动退营，而绑定需跨登出保留
+                WraithFaction.bind(player, wraitheUUID, wraith.getType(), level);
 
                 //发送客户端删除包
                 if (player instanceof ServerPlayer serverPlayer) {
@@ -412,8 +409,8 @@ public class WraithSummonManager {
             EcaAPI.setForceLoading(wraith, serverLevel, true);
         }
 
-        //16. 添加到永久绑定表（只在首次召唤时添加）
-        addBinding(player.getUUID(), wraitheUUID);
+        //16. 加入主人的剑灵阵营（建营 + 设首领 + 绑定成员）
+        WraithFaction.bind(player, wraitheUUID, wraith.getType(), level);
 
         //17. 保存魂石到玩家数据
         saveSoulStoneToPlayer(player, soulStone);
@@ -511,13 +508,16 @@ public class WraithSummonManager {
             EcaAPI.setForceLoading(wraith, serverLevel, true);
         }
 
+        //10.6. 确保阵营绑定（清理同UUID旧实体时 ECA 会自动退营）
+        WraithFaction.bind(player, wraitheUUID, wraith.getType(), level);
+
         //11. 更新魂石加成记录
         nbt.putFloat("health_bonus", healthBonus);
         nbt.putFloat("attack_bonus", attackBonus);
         nbt.putInt("weapon_level", ItemLevelHelper.getLevel(weaponStack));
         nbt.putBoolean("is_summoned", true);
 
-        //12. 保存魂石到玩家数据（绑定已在firstSummon时添加，无需重复）
+        //12. 保存魂石到玩家数据
         saveSoulStoneToPlayer(player, soulStone);
 
         //13. 发送召唤消息
@@ -526,64 +526,30 @@ public class WraithSummonManager {
         return true;
     }
 
-    // ============ 永久绑定表管理 ============
-
-    //添加绑定（只在firstSummon时调用）
-    public static void addBinding(UUID playerUUID, UUID wraitheUUID) {
-        BINDINGS.computeIfAbsent(playerUUID, k -> ConcurrentHashMap.newKeySet()).add(wraitheUUID);
-        needsSave = true;
-    }
-
-    //移除绑定（预留API，暂不使用）
-    public static void removeBinding(UUID playerUUID, UUID wraitheUUID) {
-        Set<UUID> wraiths = BINDINGS.get(playerUUID);
-        if (wraiths != null) {
-            wraiths.remove(wraitheUUID);
-            if (wraiths.isEmpty()) {
-                BINDINGS.remove(playerUUID);
-            }
-            needsSave = true;
-        }
-    }
+    // ============ 绑定查询（底层为 ECA 阵营） ============
 
     //根据玩家查剑灵列表
     public static Set<UUID> getWraithsByOwner(UUID playerUUID) {
-        return BINDINGS.getOrDefault(playerUUID, Collections.emptySet());
+        return WraithFaction.getWraiths(playerUUID);
     }
 
-    //根据剑灵查主人（遍历绑定表）
+    //根据剑灵查主人
     public static UUID getOwnerByWraith(UUID wraitheUUID) {
-        if (wraitheUUID == null) {
-            return null;
-        }
-        for (Map.Entry<UUID, Set<UUID>> entry : BINDINGS.entrySet()) {
-            if (entry.getValue().contains(wraitheUUID)) {
-                return entry.getKey();
-            }
-        }
-        return null;
+        return WraithFaction.getOwnerUuid(wraitheUUID);
     }
 
     //判断实体是否为剑灵
     public static boolean isWraith(UUID entityUUID) {
-        if (entityUUID == null) {
-            return false;
-        }
-        for (Set<UUID> wraiths : BINDINGS.values()) {
-            if (wraiths.contains(entityUUID)) {
-                return true;
-            }
-        }
-        return false;
+        return WraithFaction.isWraith(entityUUID);
     }
 
     public static boolean isWraith(LivingEntity entity) {
-        return entity != null && isWraith(entity.getUUID());
+        return entity != null && WraithFaction.isWraith(entity.getUUID());
     }
 
     //获取剑灵的主人UUID（兼容旧API）
     public static UUID getOwnerUUID(UUID wraitheUUID) {
-        return getOwnerByWraith(wraitheUUID);
+        return WraithFaction.getOwnerUuid(wraitheUUID);
     }
 
     //获取剑灵的主人
@@ -601,38 +567,6 @@ public class WraithSummonManager {
             return serverLevel.getServer().getPlayerList().getPlayer(ownerUUID);
         }
         return null;
-    }
-
-    // ============ 持久化接口 ============
-
-    //导出绑定表（供SavedData使用）
-    public static Map<UUID, Set<UUID>> exportBindings() {
-        Map<UUID, Set<UUID>> result = new HashMap<>();
-        for (Map.Entry<UUID, Set<UUID>> entry : BINDINGS.entrySet()) {
-            result.put(entry.getKey(), new HashSet<>(entry.getValue()));
-        }
-        return result;
-    }
-
-    //导入绑定表（供SavedData使用）
-    public static void importBindings(Map<UUID, Set<UUID>> bindings) {
-        BINDINGS.clear();
-        if (bindings != null) {
-            for (Map.Entry<UUID, Set<UUID>> entry : bindings.entrySet()) {
-                BINDINGS.put(entry.getKey(), ConcurrentHashMap.newKeySet());
-                BINDINGS.get(entry.getKey()).addAll(entry.getValue());
-            }
-        }
-    }
-
-    //是否需要保存
-    public static boolean needsSave() {
-        return needsSave;
-    }
-
-    //标记已保存
-    public static void markSaved() {
-        needsSave = false;
     }
 
     // ============ 内部工具方法 ============
@@ -1014,10 +948,10 @@ public class WraithSummonManager {
         }
     }
 
-    //统一可攻击判定：合法目标、非同主人剑灵、可攻击
+    //统一可攻击判定：主人与剑灵两侧都判定可攻击（阵营已覆盖同营剑灵、主人及其盟友）
     private static boolean isAttackable(LivingEntity target, Mob wraith, Player owner) {
-        return isValidTarget(target, wraith, owner)
-            && !isSameOwnerWraith(target, owner)
+        return target != null && target.isAlive()
+            && EntityUtil.canAttack(owner, target)
             && EntityUtil.canAttack(wraith, target);
     }
 
@@ -1053,31 +987,11 @@ public class WraithSummonManager {
     private static LivingEntity findAttackingOwnerTarget(Mob wraith, Player owner) {
         for (LivingEntity entity : wraith.level().getEntitiesOfClass(LivingEntity.class,
                 wraith.getBoundingBox().inflate(16.0))) {
-            if (entity instanceof Mob mob && mob.getTarget() == owner &&
-                isValidTarget(entity, wraith, owner) &&
-                EntityUtil.canAttack(wraith, entity)) {
+            if (entity instanceof Mob mob && mob.getTarget() == owner && isAttackable(entity, wraith, owner)) {
                 return entity;
             }
         }
         return null;
-    }
-
-    //检查目标是否有效
-    private static boolean isValidTarget(LivingEntity target, Mob wraith, Player owner) {
-        if (target == null || !target.isAlive()) return false;
-        if (target == owner) return false;
-        if (target == wraith) return false;
-        if (isWraith(target.getUUID())) return false;
-        return EntityUtil.canAttack(owner, target);
-    }
-
-    //检查目标是否是同一个主人的剑灵
-    private static boolean isSameOwnerWraith(LivingEntity target, Player owner) {
-        if (!isWraith(target)) {
-            return false;
-        }
-        UUID targetOwnerUUID = getOwnerUUID(target.getUUID());
-        return targetOwnerUUID != null && targetOwnerUUID.equals(owner.getUUID());
     }
 
     //传送到主人身边

@@ -1,8 +1,7 @@
 package net.the_last_sword.util;
 
 import net.eca.api.EcaAPI;
-import net.eca.util.faction.FactionManager;
-import net.eca.util.faction.FactionRelation;
+import net.eca.util.faction.FactionUtil;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.server.players.PlayerList;
@@ -15,7 +14,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.scores.Team;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -425,158 +423,10 @@ public class EntityUtil {
     }
 
     // ==================== 实体目标与队伍模块====================
-    //综合判断是否可以攻击目标
+    //综合判断是否可以攻击目标（阵营、原版队伍、宠物主从、无敌保护统一由 ECA 判定）
     public static boolean canAttack(Entity attacker, Entity target) {
-        if (target == null) {
-            return false;
-        }
-        //原版队伍判断：同一队伍或友军队伍不攻击
-        if (attacker != null) {
-            Team attackerTeam = attacker.getTeam();
-            Team targetTeam = target.getTeam();
-            if (attackerTeam != null && targetTeam != null && attackerTeam.isAlliedTo(targetTeam)) {
-                return false;
-            }
-        }
-
-        //创造模式和旁观模式玩家豁免
-        if (target instanceof Player player && (player.isCreative() || player.isSpectator())) {
-            return false;
-        }
-
-        //ECA 阵营：同阵营与友好阵营不攻击，其余关系交由后续判断
-        if (attacker != null) {
-            FactionRelation relation = FactionManager.getEffectiveRelation(attacker, target);
-            if (relation == FactionRelation.SAME_FACTION || relation == FactionRelation.FRIENDLY) {
-                return false;
-            }
-        }
-
-        if (areOriginalAllies(attacker, target)) return false;
-        if (areWraithAllies(attacker, target)) return false;
-        return true;
+        return FactionUtil.canAttack(attacker, target);
     }
-    //判断两个实体是否是原版盟友关系（玩家组队、宠物关系）
-    public static boolean areOriginalAllies(Entity attacker, Entity target) {
-        if (attacker == null || target == null) return false;
-
-        //同一实体
-        if (attacker.getUUID().equals(target.getUUID())) return true;
-
-        //情况1：玩家 vs 玩家
-        if (attacker instanceof Player pa && target instanceof Player pt) {
-            if (pa.getTeam() != null && pa.getTeam() == pt.getTeam()) {
-                return true;
-            }
-            return false;
-        }
-
-        //情况2：玩家 vs 宠物
-        if (attacker instanceof Player pa && target instanceof TamableAnimal tt) {
-            if (tt.isOwnedBy(pa)) return true;
-
-            LivingEntity owner = tt.getOwner();
-            if (owner instanceof Player ownerPlayer) {
-                if (pa.getTeam() != null && pa.getTeam() == ownerPlayer.getTeam()) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        //情况3：宠物 vs 玩家
-        if (attacker instanceof TamableAnimal ta && target instanceof Player pt) {
-            if (ta.isOwnedBy(pt)) return true;
-
-            LivingEntity owner = ta.getOwner();
-            if (owner instanceof Player ownerPlayer) {
-                if (ownerPlayer.getTeam() != null && ownerPlayer.getTeam() == pt.getTeam()) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        //情况4：宠物 vs 宠物
-        if (attacker instanceof TamableAnimal ta && target instanceof TamableAnimal tt) {
-            LivingEntity aOwner = ta.getOwner();
-            LivingEntity tOwner = tt.getOwner();
-
-            if (aOwner != null && tOwner != null && aOwner.getUUID().equals(tOwner.getUUID())) {
-                return true;
-            }
-
-            if (aOwner instanceof Player aOwnerPlayer && tOwner instanceof Player tOwnerPlayer) {
-                if (aOwnerPlayer.getTeam() != null && aOwnerPlayer.getTeam() == tOwnerPlayer.getTeam()) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        //情况5：任何实体 vs 剑灵
-        if (target instanceof LivingEntity && WraithSummonManager.isWraith((LivingEntity) target)) {
-            Player wraithOwner = WraithSummonManager.getOwner((LivingEntity) target, target.level());
-            if (wraithOwner != null) {
-                if (areOriginalAllies(attacker, wraithOwner)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    //判断剑灵相关的盟友关系
-    public static boolean areWraithAllies(Entity attacker, Entity target) {
-        if (attacker == null || target == null) return false;
-
-        if (!(attacker instanceof LivingEntity) || !WraithSummonManager.isWraith((LivingEntity) attacker)) {
-            return false;
-        }
-
-        Player owner = WraithSummonManager.getOwner((LivingEntity) attacker, attacker.level());
-        if (owner == null) return false;
-
-        //不攻击主人
-        if (target == owner) return true;
-
-        //不攻击主人的队友
-        if (target instanceof Player targetPlayer) {
-            if (owner.getTeam() != null && owner.getTeam() == targetPlayer.getTeam()) {
-                return true;
-            }
-        }
-
-        //不攻击宠物
-        if (target instanceof TamableAnimal tamable && tamable.isTame()) {
-            LivingEntity tamableOwner = tamable.getOwner();
-            if (tamableOwner != null) {
-                if (tamableOwner == owner) return true;
-
-                if (tamableOwner instanceof Player tamableOwnerPlayer) {
-                    if (owner.getTeam() != null && owner.getTeam() == tamableOwnerPlayer.getTeam()) {
-                        return true;
-                    }
-                }
-            }
-        }
-
-        //不攻击剑灵
-        if (target instanceof LivingEntity && WraithSummonManager.isWraith((LivingEntity) target)) {
-            Player targetOwner = WraithSummonManager.getOwner((LivingEntity) target, target.level());
-            if (targetOwner != null) {
-                if (targetOwner == owner) return true;
-
-                if (owner.getTeam() != null && owner.getTeam() == targetOwner.getTeam()) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
     //查找实体的主人
     public static LivingEntity findOwner(Entity entity) {
         if (entity instanceof TamableAnimal tamable && tamable.isTame()) {

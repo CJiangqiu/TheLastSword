@@ -212,21 +212,13 @@ public class LivingEntityMixin {
         }
     }
 
-    //hurt：盟友判断 + 护盾吸收 + 剑灵绝毁附加
+    //hurt：护盾吸收 + 剑灵绝毁附加（盟友判断由 ECA 阵营接管）
     @Inject(method = "hurt", at = @At("HEAD"), cancellable = true)
     private void onLivingEntityHurt(DamageSource damageSource, float damageAmount, CallbackInfoReturnable<Boolean> cir) {
         LivingEntity entity = (LivingEntity) (Object) this;
 
         if (entity.level().isClientSide) {
             return;
-        }
-
-        //统一使用 canAttack 判断盟友关系（包含剑灵的所有盟友关系）
-        if (damageSource.getEntity() instanceof LivingEntity attacker) {
-            if (!EntityUtil.canAttack(attacker, entity)) {
-                cir.setReturnValue(false);
-                return;
-            }
         }
 
         //肃正防御护盾优先吸收（受伤 -1, 彻底无敌式抵挡）

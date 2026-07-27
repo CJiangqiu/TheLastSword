@@ -2,11 +2,9 @@ package net.the_last_sword.mixin;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.entity.EntityInLevelCallback;
 import net.the_last_sword.client.PerceptionScanData;
 import net.the_last_sword.init.ModEffects;
-import net.the_last_sword.summon.WraithSummonManager;
 import net.the_last_sword.util.EntityUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -96,46 +94,6 @@ public class EntityMixin {
         if (self instanceof LivingEntity livingEntity) {
             if (livingEntity.hasEffect(ModEffects.PHASING.get())) {
                 cir.setReturnValue(false);
-            }
-        }
-    }
-
-    //剑灵系统盟友判断
-    @Inject(method = "isAlliedTo", at = @At("HEAD"), cancellable = true)
-    private void theLastSword$checkWraithAllied(Entity other, CallbackInfoReturnable<Boolean> cir) {
-        Entity self = (Entity)(Object)this;
-
-        //情况1：自己是剑灵 - 检查对方是否是主人或主人的盟友
-        if (self instanceof LivingEntity living && WraithSummonManager.isWraith(living)) {
-            Player owner = WraithSummonManager.getOwner(living, self.level());
-            if (owner != null) {
-                //不攻击主人
-                if (other == owner) {
-                    cir.setReturnValue(true);
-                    return;
-                }
-                //不攻击主人的盟友
-                if (EntityUtil.areOriginalAllies(owner, other)) {
-                    cir.setReturnValue(true);
-                    return;
-                }
-            }
-        }
-
-        //情况2：对方是剑灵 - 检查自己是否是对方主人或主人的盟友
-        if (other instanceof LivingEntity living && WraithSummonManager.isWraith(living)) {
-            Player owner = WraithSummonManager.getOwner(living, other.level());
-            if (owner != null) {
-                //主人不攻击剑灵
-                if (self == owner) {
-                    cir.setReturnValue(true);
-                    return;
-                }
-                //主人的盟友不攻击剑灵
-                if (EntityUtil.areOriginalAllies(owner, self)) {
-                    cir.setReturnValue(true);
-                    return;
-                }
             }
         }
     }
