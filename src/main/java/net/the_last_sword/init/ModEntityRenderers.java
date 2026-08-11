@@ -11,6 +11,7 @@ import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.client.model.WingsThatCoverTheWorldModel;
 import net.the_last_sword.client.renderer.DragonCultistRenderer;
 import net.the_last_sword.client.renderer.DragonCultPaladinRenderer;
+import net.the_last_sword.client.renderer.DragonCultPriestRenderer;
 import net.the_last_sword.client.renderer.*;
 import net.the_last_sword.compat.lucky_block.TheLastEndLuckyBlockRenderer;
 
@@ -36,6 +37,8 @@ public class ModEntityRenderers {
         event.registerEntityRenderer(ModEntities.THE_PAST_SHADOW_OF_THE_QUEEN.get(), ThePastShadowOfTheQueenRenderer::new);
         event.registerEntityRenderer(ModEntities.DRAGON_CULTIST.get(), DragonCultistRenderer::new);
         event.registerEntityRenderer(ModEntities.DRAGON_CULT_PALADIN.get(), DragonCultPaladinRenderer::new);
+        event.registerEntityRenderer(ModEntities.DRAGON_CULT_PRIEST.get(), DragonCultPriestRenderer::new);
+        event.registerEntityRenderer(ModEntities.GROUND_RUPTURE_FRAGMENT.get(), GroundRuptureFragmentRenderer::new);
     }
 
     //注册 Model Layer 定义

@@ -421,7 +421,10 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
     public void readAdditionalSaveData(@NotNull CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         if (tag.contains("AnimationState")) {
-            setAnimationState(tag.getInt("AnimationState"));
+            int savedState = tag.getInt("AnimationState");
+            // Skill Goal timers are transient and are not serialized. Restoring one of
+            // those states would leave GeckoLib frozen on the last animation frame.
+            setAnimationState(savedState > STATE_IDLE ? STATE_IDLE : savedState);
         }
         if (tag.contains("Level")) {
             setTheLastEndLevel(tag.getInt("Level"));
@@ -441,7 +444,8 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
     @Override
     public void addAdditionalSaveData(@NotNull CompoundTag tag) {
         super.addAdditionalSaveData(tag);
-        tag.putInt("AnimationState", getAnimationState());
+        int animationState = getAnimationState();
+        tag.putInt("AnimationState", animationState > STATE_IDLE ? STATE_IDLE : animationState);
         tag.putInt("Level", getTheLastEndLevel());
         tag.putBoolean("AllThingsEnd", isAllThingsEnd());
     }
@@ -455,6 +459,15 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
     @Override
     protected boolean isAlwaysExperienceDropper() {
         return true;
+    }
+
+    /**
+     * TamableAnimal inherits Animal's random 1-3 XP reward. Use the explicit
+     * reward configured by each end entity instead (xpReward in its constructor).
+    */
+    @Override
+    public int getExperienceReward() {
+        return this.xpReward;
     }
 
     @Override

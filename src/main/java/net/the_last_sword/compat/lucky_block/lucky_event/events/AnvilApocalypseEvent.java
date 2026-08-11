@@ -40,6 +40,11 @@ public class AnvilApocalypseEvent extends LuckyEvent {
     }
 
     @Override
+    public String getId() {
+        return "Anvil Apocalypse";
+    }
+
+    @Override
     public int getMinLuck() {
         return -100;
     }

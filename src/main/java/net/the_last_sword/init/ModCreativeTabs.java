@@ -25,6 +25,8 @@ public class ModCreativeTabs {
                 output.accept(ModItems.DRAGON_CRYSTAL.get());
                 output.accept(ModItems.DRAGON_CRYSTAL_UPGRADE_TEMPLATE.get());
                 output.accept(ModItems.DRAGON_CRYSTAL_SMITHING_TABLE.get());
+                output.accept(ModItems.KNIGHT_GREATSWORD.get());
+                output.accept(ModItems.PRIEST_STAFF.get());
                 output.accept(ModItems.DRAGON_CRYSTAL_SWORD.get());
                 output.accept(ModItems.DRAGON_SWORD.get());
                 output.accept(ModItems.THE_LAST_SWORD.get());
@@ -51,6 +53,7 @@ public class ModCreativeTabs {
                 output.accept(ModItems.DRAGON_SOUL_LANTERN.get());
                 output.accept(ModItems.DRAGON_CULTIST_SPAWN_EGG.get());
                 output.accept(ModItems.DRAGON_CULT_PALADIN_SPAWN_EGG.get());
+                output.accept(ModItems.DRAGON_CULT_PRIEST_SPAWN_EGG.get());
                 output.accept(ModItems.GUARDIAN_OF_SEALED_SPIRE_SPAWN_EGG.get());
                 output.accept(ModItems.GUARDIAN_SABER_SPAWN_EGG.get());
                 output.accept(ModItems.GUARDIAN_BERSERKER_SPAWN_EGG.get());

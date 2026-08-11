@@ -31,6 +31,11 @@ public class VoidBountyEvent extends LuckyEvent {
     }
 
     @Override
+    public String getId() {
+        return "Bounty";
+    }
+
+    @Override
     public int getMinLuck() {
         return -100;
     }

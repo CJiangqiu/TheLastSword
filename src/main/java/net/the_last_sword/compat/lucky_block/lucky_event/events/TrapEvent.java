@@ -27,6 +27,11 @@ public class TrapEvent extends LuckyEvent {
     }
 
     @Override
+    public String getId() {
+        return "Trap";
+    }
+
+    @Override
     public int getMinLuck() {
         return -100;
     }

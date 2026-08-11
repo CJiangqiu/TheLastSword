@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "item": "the_last_sword:priest_staff"
+    },
+    "title": {
+      "translate": "advancements.dragon_cult_raid_victory.title"
+    },
+    "description": {
+      "translate": "advancements.dragon_cult_raid_victory.descr"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "dragon_cult_raid_victory_0": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "the_last_sword:dragon_cult_raid"
+}

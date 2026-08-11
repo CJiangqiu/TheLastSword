@@ -38,6 +38,11 @@ public class WoundOfTimeLaunchEvent extends LuckyEvent {
     }
 
     @Override
+    public String getId() {
+        return "Wound Of Time";
+    }
+
+    @Override
     public int getMinLuck() {
         return 0;
     }

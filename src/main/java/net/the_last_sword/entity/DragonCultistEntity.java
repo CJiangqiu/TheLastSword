@@ -37,7 +37,6 @@ import net.the_last_sword.util.EntityUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-// 拜龙教教徒，黑色皮革甲+铁剑，近战(<8格)和远程魔法(>=8格)两种攻击模式
 public class DragonCultistEntity extends TheLastEndEntity {
 
     public static final int STATE_ATTACK = 3;
@@ -46,7 +45,7 @@ public class DragonCultistEntity extends TheLastEndEntity {
     public DragonCultistEntity(EntityType<? extends DragonCultistEntity> type, Level world) {
         super(type, world);
         setMaxUpStep(0.6f);
-        xpReward = 10;
+        xpReward = 40;
         setPersistenceRequired();
     }
 
@@ -141,12 +140,12 @@ public class DragonCultistEntity extends TheLastEndEntity {
 
     @Override
     protected float getDamageLimit() {
-        return (float) TheLastSwordConfiguration.getGuardianDamageLimitSafely();
+        return (float) TheLastSwordConfiguration.getDragonCultistDamageLimitSafely();
     }
 
     @Override
     protected int getHurtResistTime() {
-        return TheLastSwordConfiguration.getGuardianHurtResistTimeSafely();
+        return TheLastSwordConfiguration.getDragonCultistHurtResistTimeSafely();
     }
 
     @Override

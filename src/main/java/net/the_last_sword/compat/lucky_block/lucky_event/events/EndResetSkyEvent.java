@@ -32,6 +32,11 @@ public class EndResetSkyEvent extends LuckyEvent {
     }
 
     @Override
+    public String getId() {
+        return "End Resting Place";
+    }
+
+    @Override
     public int getMinLuck() {
         return 0;
     }

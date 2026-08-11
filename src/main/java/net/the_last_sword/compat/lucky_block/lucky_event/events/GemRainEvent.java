@@ -43,6 +43,11 @@ public class GemRainEvent extends LuckyEvent {
     }
 
     @Override
+    public String getId() {
+        return "Gem Rain";
+    }
+
+    @Override
     public int getMinLuck() {
         return 0;
     }

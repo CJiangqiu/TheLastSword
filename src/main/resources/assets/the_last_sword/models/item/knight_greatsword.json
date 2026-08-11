@@ -1,0 +1,172 @@
+{
+	"format_version": "1.21.11",
+	"credit": "Made with Blockbench",
+	"texture_size": [128, 64],
+	"textures": {
+		"0": "the_last_sword:item/knight_greatsword",
+		"particle": "the_last_sword:item/knight_greatsword"
+	},
+	"elements": [
+		{
+			"name": "grip",
+			"from": [7.8, 1.2, 7.8],
+			"to": [8.2, 4.4, 8.2],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 2.8, 8]},
+			"faces": {
+				"north": {"uv": [7.5, 14.5, 9.5, 15], "rotation": 90, "texture": "#0"},
+				"east": {"uv": [7.5, 14.5, 7.25, 10.5], "rotation": 90, "texture": "#0"},
+				"south": {"uv": [5.25, 14.5, 7.25, 15], "rotation": 90, "texture": "#0"},
+				"west": {"uv": [7.75, 10.5, 7.5, 14.5], "rotation": 90, "texture": "#0"},
+				"up": {"uv": [7.25, 14.5, 7.5, 15], "rotation": 90, "texture": "#0"},
+				"down": {"uv": [9.5, 14.5, 9.75, 15], "rotation": 90, "texture": "#0"}
+			}
+		},
+		{
+			"name": "pommel",
+			"from": [7.7, 0.4, 7.7],
+			"to": [8.3, 1.2, 8.3],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 2.8, 8]},
+			"faces": {
+				"north": {"uv": [15.125, 15.25, 15.625, 16], "rotation": 90, "texture": "#0"},
+				"east": {"uv": [15.125, 15.25, 14.75, 14.25], "rotation": 90, "texture": "#0"},
+				"south": {"uv": [14.25, 15.25, 14.75, 16], "rotation": 90, "texture": "#0"},
+				"west": {"uv": [15.5, 14.25, 15.125, 15.25], "rotation": 90, "texture": "#0"},
+				"up": {"uv": [14.75, 15.25, 15.125, 16], "rotation": 90, "texture": "#0"},
+				"down": {"uv": [15.625, 15.25, 16, 16], "rotation": 90, "texture": "#0"}
+			}
+		},
+		{
+			"name": "crossguard",
+			"from": [7.6, 4.4, 7.7],
+			"to": [8.4, 4.8, 8.3],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 2.8, 8]},
+			"faces": {
+				"north": {"uv": [15.375, 13.25, 15.625, 14.25], "rotation": 90, "texture": "#0"},
+				"east": {"uv": [15.375, 13.25, 15, 12.75], "rotation": 90, "texture": "#0"},
+				"south": {"uv": [14.75, 13.25, 15, 14.25], "rotation": 90, "texture": "#0"},
+				"west": {"uv": [15.75, 12.75, 15.375, 13.25], "rotation": 90, "texture": "#0"},
+				"up": {"uv": [15, 13.25, 15.375, 14.25], "rotation": 90, "texture": "#0"},
+				"down": {"uv": [15.625, 13.25, 16, 14.25], "rotation": 90, "texture": "#0"}
+			}
+		},
+		{
+			"name": "upper_guard",
+			"from": [8.4, 4.4, 7.9],
+			"to": [9, 4.8, 8.1],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 2.8, 8]},
+			"faces": {
+				"north": {"uv": [10.125, 15.25, 10.375, 16], "rotation": 90, "texture": "#0"},
+				"east": {"uv": [10.125, 15.25, 10, 14.75], "rotation": 90, "texture": "#0"},
+				"south": {"uv": [9.75, 15.25, 10, 16], "rotation": 90, "texture": "#0"},
+				"west": {"uv": [10.25, 14.75, 10.125, 15.25], "rotation": 90, "texture": "#0"},
+				"up": {"uv": [10, 15.25, 10.125, 16], "rotation": 90, "texture": "#0"},
+				"down": {"uv": [10.375, 15.25, 10.5, 16], "rotation": 90, "texture": "#0"}
+			}
+		},
+		{
+			"name": "lower_guard",
+			"from": [7, 4.4, 7.9],
+			"to": [7.6, 4.8, 8.1],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 2.8, 8]},
+			"faces": {
+				"north": {"uv": [10, 14, 9.75, 14.75], "rotation": 90, "texture": "#0"},
+				"east": {"uv": [10, 14, 10.125, 13.5], "rotation": 90, "texture": "#0"},
+				"south": {"uv": [10.375, 14, 10.125, 14.75], "rotation": 90, "texture": "#0"},
+				"west": {"uv": [10.125, 13.5, 10.25, 14], "rotation": 90, "texture": "#0"},
+				"up": {"uv": [10.125, 14, 10, 14.75], "rotation": 90, "texture": "#0"},
+				"down": {"uv": [10.5, 14, 10.375, 14.75], "rotation": 90, "texture": "#0"}
+			}
+		},
+		{
+			"name": "blade",
+			"from": [7.6, 4.8, 7.8],
+			"to": [8.4, 14.4, 8.2],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 2.8, 8]},
+			"faces": {
+				"north": {"uv": [6.125, 2.5, 12.125, 3.5], "rotation": 90, "texture": "#0"},
+				"east": {"uv": [6, 3, 0, 2.5], "rotation": 180, "texture": "#0"},
+				"south": {"uv": [0, 2.5, 6, 3.5], "rotation": 90, "texture": "#0"},
+				"west": {"uv": [5.75, 3.25, 11.75, 2.5], "rotation": 180, "texture": "#0"},
+				"up": {"uv": [5.875, 2.5, 6.125, 3.5], "rotation": 90, "texture": "#0"},
+				"down": {"uv": [12.125, 2.5, 12.375, 3.5], "rotation": 90, "texture": "#0"}
+			}
+		},
+		{
+			"name": "upper_blade_tip",
+			"from": [8.04899, 14.35371, 8],
+			"to": [8.44899, 14.95371, 8],
+			"rotation": {"angle": 22.5, "axis": "z", "origin": [7.80541, 14.35371, 8]},
+			"faces": {
+				"north": {"uv": [6, 3.5, 6.375, 4], "rotation": 90, "texture": "#0"},
+				"east": {"uv": [6, 3.5, 6, 2.75], "rotation": 90, "texture": "#0"},
+				"south": {"uv": [5.625, 3.5, 6, 4], "rotation": 90, "texture": "#0"},
+				"west": {"uv": [6, 2.75, 6, 3.5], "rotation": 90, "texture": "#0"},
+				"up": {"uv": [6, 3.5, 6, 4], "rotation": 90, "texture": "#0"},
+				"down": {"uv": [6.375, 3.5, 6.375, 4], "rotation": 90, "texture": "#0"}
+			}
+		},
+		{
+			"name": "lower_blade_tip",
+			"from": [7.61854, 14.69321, 8],
+			"to": [8.01854, 15.29321, 8],
+			"rotation": {"angle": -22.5, "axis": "z", "origin": [7.37496, 14.69321, 8]},
+			"faces": {
+				"north": {"uv": [6, 4, 6.375, 4.5], "rotation": 90, "texture": "#0"},
+				"east": {"uv": [6, 4, 6, 3.25], "rotation": 90, "texture": "#0"},
+				"south": {"uv": [5.625, 4, 6, 4.5], "rotation": 90, "texture": "#0"},
+				"west": {"uv": [6, 3.25, 6, 4], "rotation": 90, "texture": "#0"},
+				"up": {"uv": [6, 4, 6, 4.5], "rotation": 90, "texture": "#0"},
+				"down": {"uv": [6.375, 4, 6.375, 4.5], "rotation": 90, "texture": "#0"}
+			}
+		}
+	],
+	"display": {
+		"thirdperson_righthand": {
+			"rotation": [0, 90, -1],
+			"translation": [0.25, 12.25, 0.5],
+			"scale": [3, 3, 3]
+		},
+		"thirdperson_lefthand": {
+			"rotation": [0, 90, 1],
+			"translation": [0, 12, 0.5],
+			"scale": [3, 3, 3]
+		},
+		"firstperson_righthand": {
+			"rotation": [0, -90, 25],
+			"translation": [1.13, 5.5, 1.13]
+		},
+		"firstperson_lefthand": {
+			"rotation": [0, 90, -25],
+			"translation": [1.13, 5.5, 1.13]
+		},
+		"ground": {
+			"rotation": [-90, 0, -90],
+			"translation": [5.75, -3, 0.75]
+		},
+		"gui": {
+			"rotation": [0, 0, -45],
+			"scale": [1.5, 1.5, 1.5]
+		},
+		"head": {
+			"rotation": [0, -180, 0],
+			"translation": [0, 13, 7]
+		},
+		"fixed": {
+			"rotation": [0, 0, 47],
+			"scale": [2, 2, 2]
+		},
+		"on_shelf": {
+			"translation": [0, 0, -2.5],
+			"scale": [2, 2, 2]
+		}
+	},
+	"groups": [
+		{
+			"name": "knight_greatsword",
+			"origin": [8, 8, 8],
+			"scope": 0,
+			"color": 0,
+			"children": [0, 1, 2, 3, 4, 5, 6, 7]
+		}
+	]
+}

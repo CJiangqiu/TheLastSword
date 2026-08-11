@@ -2,6 +2,9 @@ package net.the_last_sword.configuration;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class TheLastSwordConfiguration {
     public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
     public static final ForgeConfigSpec SPEC;
@@ -14,6 +17,10 @@ public class TheLastSwordConfiguration {
     public static ForgeConfigSpec.ConfigValue<Double> SWORD_INCREASE_VALUE;
     public static ForgeConfigSpec.ConfigValue<Double> SWORD_INCREASE_VALUE_HIGH_LEVEL;
     public static ForgeConfigSpec.ConfigValue<Boolean> SWORD_BLOCK_CANCEL_USE;
+    public static ForgeConfigSpec.ConfigValue<Double> KNIGHT_GREATSWORD_GROUND_SLAM_DAMAGE_MULTIPLIER;
+    public static ForgeConfigSpec.ConfigValue<Double> PRIEST_STAFF_PROJECTILE_DAMAGE_MULTIPLIER;
+    public static ForgeConfigSpec.ConfigValue<Double> PRIEST_STAFF_GUARD_RADIUS;
+    public static ForgeConfigSpec.ConfigValue<Double> PRIEST_STAFF_GUARD_SHIELD_GAIN;
 
     // Armor Generic | 盔甲类通用配置（等级区间）
     public static ForgeConfigSpec.ConfigValue<Double> ARMOR_INCREASE_LOW_LEVEL;    // < 6级
@@ -119,6 +126,8 @@ public class TheLastSwordConfiguration {
     // Entity Configuration | 实体配置
     // ═══════════════════════════════════════════════════════════════════════════════════
 
+    public static ForgeConfigSpec.ConfigValue<Boolean> ENTITY_ENABLE_DANGEROUS_SKILL_ALARM;
+
     // The Last End Entity | 终焉种族配置
     public static ForgeConfigSpec.ConfigValue<Boolean> THE_LAST_END_ENTITY_ENABLE_ALL_THINGS_END;
 
@@ -179,6 +188,52 @@ public class TheLastSwordConfiguration {
     // Guardian Berserker | 狂战士守卫
     public static ForgeConfigSpec.ConfigValue<Double> GUARDIAN_BERSERKER_LIFESTEAL_RATIO;
 
+    // Dragon Cultist | 拜龙教教徒
+    public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULTIST_DAMAGE_LIMIT;
+    public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_CULTIST_HURT_RESIST_TIME;
+    public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULTIST_MELEE_ATTACK_RANGE;
+    public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULTIST_MAGIC_MIN_DISTANCE;
+    public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_CULTIST_MAGIC_COOLDOWN;
+
+    // Dragon Cult Paladin | 拜龙教圣骑士
+    public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PALADIN_DAMAGE_LIMIT;
+    public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_CULT_PALADIN_HURT_RESIST_TIME;
+    // Attack | 普通攻击
+    public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PALADIN_ATTACK_RANGE;
+    public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PALADIN_ATTACK_DAMAGE_MULTIPLIER;
+    // Heavy Attack | 重击
+    public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PALADIN_HEAVY_ATTACK_RANGE;
+    public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_CULT_PALADIN_HEAVY_ATTACK_COOLDOWN;
+    public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PALADIN_HEAVY_ATTACK_DAMAGE_MULTIPLIER;
+    public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_CULT_PALADIN_HEAVY_ATTACK_SHIELD_DISABLE_TIME;
+    // Block | 格挡
+    public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PALADIN_BLOCK_RANGE;
+    public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_CULT_PALADIN_BLOCK_COOLDOWN;
+
+    // Dragon Cult Priest | 拜龙教祭司
+    public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PRIEST_DAMAGE_LIMIT;
+    public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_CULT_PRIEST_HURT_RESIST_TIME;
+    public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PRIEST_DEATH_EXPLOSION_POWER;
+    public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PRIEST_HOVER_HEIGHT;
+    // Breath | 龙息
+    public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PRIEST_BREATH_MAX_DISTANCE;
+    public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_CULT_PRIEST_BREATH_COOLDOWN;
+    public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PRIEST_BREATH_SIZE;
+    public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PRIEST_BREATH_DAMAGE_MULTIPLIER;
+    // Lightning | 落雷
+    public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_CULT_PRIEST_LIGHTNING_COOLDOWN;
+    public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PRIEST_LIGHTNING_DAMAGE_MULTIPLIER;
+    public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PRIEST_LIGHTNING_AOE_RADIUS;
+    // Guard | 庇佑
+    public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_CULT_PRIEST_GUARD_COOLDOWN;
+    public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PRIEST_GUARD_RADIUS;
+    public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PRIEST_GUARD_SHIELD_GAIN;
+    public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PRIEST_GUARD_LOW_HP_RATIO;
+    // Keep Distance | 距离控制
+    public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PRIEST_KEEP_MIN_DISTANCE;
+    public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PRIEST_KEEP_MAX_DISTANCE;
+    public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PRIEST_RETREAT_SPEED;
+
     // Projectile | 弹射物配置
     // Dragon Sword Projectile | 龙之剑弹射物
     public static ForgeConfigSpec.ConfigValue<Double> DRAGON_SWORD_PROJECTILE_EXTRA_DAMAGE_MULTIPLIER;
@@ -211,6 +266,7 @@ public class TheLastSwordConfiguration {
 
     // Enchant | 虚空附魔
     public static ForgeConfigSpec.ConfigValue<Integer> SKILL_ENCHANT_DURATION;
+    public static ForgeConfigSpec.ConfigValue<Integer> SKILL_ENCHANT_COOLDOWN;
 
     // End of All Things | 万物终焉
     public static ForgeConfigSpec.ConfigValue<Double> SKILL_END_OF_ALL_THINGS_DAMAGE_MULTIPLIER;
@@ -278,6 +334,7 @@ public class TheLastSwordConfiguration {
     public static ForgeConfigSpec.ConfigValue<Boolean> ENDER_DRAGON_EGG_GIVE_TO_ABSENT_PLAYERS;
 
     // Stronger Ender Dragon | 更强的末影龙配置
+    public static ForgeConfigSpec.ConfigValue<Integer> ENDER_DRAGON_NAMED_CHANCE;
     public static ForgeConfigSpec.ConfigValue<Integer> ENDER_DRAGON_MAX_LEVEL;
     public static ForgeConfigSpec.ConfigValue<Double> ENDER_DRAGON_HEALTH_INCREASE_VALUE;
     public static ForgeConfigSpec.ConfigValue<Double> ENDER_DRAGON_HEALTH_INCREASE_VALUE_HIGH_LEVEL;
@@ -288,6 +345,9 @@ public class TheLastSwordConfiguration {
 
     // Compat Mods | 联动Mod配置
     public static ForgeConfigSpec.ConfigValue<Boolean> COMPAT_CATACLYSM_ENABLE;
+
+    // Lucky Block | 幸运方块事件权重（键为事件 id）
+    public static final Map<String, ForgeConfigSpec.ConfigValue<Integer>> LUCKY_EVENT_WEIGHTS = new HashMap<>();
 
     // Quest | 任务系统配置
     public static ForgeConfigSpec.ConfigValue<Boolean> QUEST_SYSTEM_ENABLED;
@@ -337,6 +397,36 @@ public class TheLastSwordConfiguration {
         BUILDER.pop();
 
         // Dragon Crystal Sword Settings | 龙水晶剑设置
+        BUILDER.push("Knight Greatsword");
+        KNIGHT_GREATSWORD_GROUND_SLAM_DAMAGE_MULTIPLIER = BUILDER
+            .comment(
+                "Ground slam damage multiplier based on the player's attack damage",
+                "裂地重击基于玩家攻击力的伤害倍率"
+            )
+            .defineInRange("Ground Slam Damage Multiplier", 2.0, 0.0, 100.0);
+        BUILDER.pop();
+
+        BUILDER.push("Priest Staff");
+        PRIEST_STAFF_PROJECTILE_DAMAGE_MULTIPLIER = BUILDER
+            .comment(
+                "Projectile damage multiplier based on the player's attack damage",
+                "弹射物基于玩家攻击力的伤害倍率"
+            )
+            .defineInRange("Projectile Damage Multiplier", 1.0, 0.0, 100.0);
+        PRIEST_STAFF_GUARD_RADIUS = BUILDER
+            .comment(
+                "Radius within which friendly entities are purified and shielded in blocks",
+                "净化并为友方增加肃正防御护盾的半径（格）"
+            )
+            .defineInRange("Guard Radius", 8.0, 0.0, 64.0);
+        PRIEST_STAFF_GUARD_SHIELD_GAIN = BUILDER
+            .comment(
+                "Amount of Justified Defence granted to each friendly entity",
+                "为每个友方增加的肃正防御护盾值"
+            )
+            .defineInRange("Guard Shield Gain", 1.0, 0.0, 100.0);
+        BUILDER.pop();
+
         BUILDER.push("Dragon Crystal Sword");
         DRAGON_CRYSTAL_SWORD_CAN_MINE = BUILDER
             .comment(
@@ -887,6 +977,13 @@ public class TheLastSwordConfiguration {
         // ═══════════════════════════════════════════════════════════════════════════════
         BUILDER.push("Entity");
 
+        ENTITY_ENABLE_DANGEROUS_SKILL_ALARM = BUILDER
+            .comment(
+                "Enable alarm sounds for dangerous entity skills",
+                "启用实体高危险技能的警报声"
+            )
+            .define("Enable Dangerous Skill Alarm", true);
+
         // The Last End Entity Settings | 终焉实体设置
         BUILDER.push("The Last End Entity");
         THE_LAST_END_ENTITY_ENABLE_ALL_THINGS_END = BUILDER
@@ -1001,6 +1098,12 @@ public class TheLastSwordConfiguration {
                 "Buff 持续时间（tick；600 tick = 30 秒）"
             )
             .defineInRange("Duration", 600, 1, Integer.MAX_VALUE);
+        SKILL_ENCHANT_COOLDOWN = BUILDER
+            .comment(
+                "Skill cooldown in ticks (600 ticks = 30 seconds)",
+                "技能冷却时间（tick；600 tick = 30 秒）"
+            )
+            .defineInRange("Cooldown", 600, 0, Integer.MAX_VALUE);
         BUILDER.pop();
 
         // End of All Things | 万物终焉
@@ -1309,6 +1412,260 @@ public class TheLastSwordConfiguration {
 
         BUILDER.pop(); // End Guardian Of Sealed Spire
 
+        // Dragon Cult Settings | 拜龙教设置（各实体独立，彼此无继承关系）
+        BUILDER.push("Dragon Cult");
+
+        // Dragon Cultist | 拜龙教教徒
+        BUILDER.push("Dragon Cultist");
+        DRAGON_CULTIST_DAMAGE_LIMIT = BUILDER
+            .comment(
+                "Maximum damage cultist can take per hit",
+                "拜龙教教徒每次承受的最大伤害"
+            )
+            .defineInRange("Damage Limit", 10.0, 0.0, Double.MAX_VALUE);
+        DRAGON_CULTIST_HURT_RESIST_TIME = BUILDER
+            .comment(
+                "Invulnerable ticks after being hurt (20 ticks = 1 second)",
+                "受伤后的无敌时间（tick；20 tick = 1 秒）"
+            )
+            .defineInRange("Hurt Resist Time", 10, 0, Integer.MAX_VALUE);
+
+        BUILDER.push("Skills");
+
+        BUILDER.push("Melee Attack");
+        DRAGON_CULTIST_MELEE_ATTACK_RANGE = BUILDER
+            .comment(
+                "Attack range in blocks",
+                "近战攻击范围（格）"
+            )
+            .defineInRange("Attack Range", 2.0, 0.0, 32.0);
+        BUILDER.pop();
+
+        BUILDER.push("Magic");
+        DRAGON_CULTIST_MAGIC_MIN_DISTANCE = BUILDER
+            .comment(
+                "Minimum distance to target to cast fireball in blocks",
+                "施放火球所需与目标的最小距离（格）"
+            )
+            .defineInRange("Min Distance", 8.0, 0.0, 64.0);
+        DRAGON_CULTIST_MAGIC_COOLDOWN = BUILDER
+            .comment(
+                "Cooldown between casts in ticks (20 ticks = 1 second)",
+                "施法冷却（tick；20 tick = 1 秒）"
+            )
+            .defineInRange("Cooldown", 240, 0, Integer.MAX_VALUE);
+        BUILDER.pop();
+
+        BUILDER.pop(); // End Skills
+        BUILDER.pop(); // End Dragon Cultist
+
+        // Dragon Cult Paladin | 拜龙教圣骑士
+        BUILDER.push("Dragon Cult Paladin");
+        DRAGON_CULT_PALADIN_DAMAGE_LIMIT = BUILDER
+            .comment(
+                "Maximum damage paladin can take per hit",
+                "拜龙教圣骑士每次承受的最大伤害"
+            )
+            .defineInRange("Damage Limit", 10.0, 0.0, Double.MAX_VALUE);
+        DRAGON_CULT_PALADIN_HURT_RESIST_TIME = BUILDER
+            .comment(
+                "Invulnerable ticks after being hurt (20 ticks = 1 second)",
+                "受伤后的无敌时间（tick；20 tick = 1 秒）"
+            )
+            .defineInRange("Hurt Resist Time", 10, 0, Integer.MAX_VALUE);
+
+        BUILDER.push("Skills");
+
+        BUILDER.push("Attack");
+        DRAGON_CULT_PALADIN_ATTACK_RANGE = BUILDER
+            .comment(
+                "Attack range in blocks",
+                "普通攻击范围（格）"
+            )
+            .defineInRange("Attack Range", 3.0, 0.0, 32.0);
+        DRAGON_CULT_PALADIN_ATTACK_DAMAGE_MULTIPLIER = BUILDER
+            .comment(
+                "Damage multiplier of attack damage for each of the two hits",
+                "两段伤害每段的攻击力倍率"
+            )
+            .defineInRange("Damage Multiplier", 1.0, 0.0, 100.0);
+        BUILDER.pop();
+
+        BUILDER.push("Heavy Attack");
+        DRAGON_CULT_PALADIN_HEAVY_ATTACK_RANGE = BUILDER
+            .comment(
+                "Heavy attack range in blocks",
+                "重击范围（格）"
+            )
+            .defineInRange("Attack Range", 4.0, 0.0, 32.0);
+        DRAGON_CULT_PALADIN_HEAVY_ATTACK_COOLDOWN = BUILDER
+            .comment(
+                "Cooldown between heavy attacks in ticks (20 ticks = 1 second)",
+                "重击冷却（tick；20 tick = 1 秒）"
+            )
+            .defineInRange("Cooldown", 180, 0, Integer.MAX_VALUE);
+        DRAGON_CULT_PALADIN_HEAVY_ATTACK_DAMAGE_MULTIPLIER = BUILDER
+            .comment(
+                "Damage multiplier of attack damage",
+                "重击伤害的攻击力倍率"
+            )
+            .defineInRange("Damage Multiplier", 3.0, 0.0, 100.0);
+        DRAGON_CULT_PALADIN_HEAVY_ATTACK_SHIELD_DISABLE_TIME = BUILDER
+            .comment(
+                "Cooldown applied to the blocking item on hit in ticks (0 disables)",
+                "命中时给格挡物品附加的冷却（tick；0 为禁用）"
+            )
+            .defineInRange("Shield Disable Time", 60, 0, Integer.MAX_VALUE);
+        BUILDER.pop();
+
+        BUILDER.push("Block");
+        DRAGON_CULT_PALADIN_BLOCK_RANGE = BUILDER
+            .comment(
+                "Maximum distance to target to start blocking in blocks",
+                "触发格挡所需与目标的最大距离（格）"
+            )
+            .defineInRange("Trigger Range", 4.0, 0.0, 32.0);
+        DRAGON_CULT_PALADIN_BLOCK_COOLDOWN = BUILDER
+            .comment(
+                "Cooldown between blocks in ticks (20 ticks = 1 second)",
+                "格挡冷却（tick；20 tick = 1 秒）"
+            )
+            .defineInRange("Cooldown", 200, 0, Integer.MAX_VALUE);
+        BUILDER.pop();
+
+        BUILDER.pop(); // End Skills
+        BUILDER.pop();
+
+        // Dragon Cult Priest | 拜龙教祭司
+        BUILDER.push("Dragon Cult Priest");
+        DRAGON_CULT_PRIEST_DAMAGE_LIMIT = BUILDER
+            .comment(
+                "Maximum damage priest can take per hit",
+                "拜龙教祭司每次承受的最大伤害"
+            )
+            .defineInRange("Damage Limit", 10.0, 0.0, Double.MAX_VALUE);
+        DRAGON_CULT_PRIEST_HURT_RESIST_TIME = BUILDER
+            .comment(
+                "Invulnerable ticks after being hurt (20 ticks = 1 second)",
+                "受伤后的无敌时间（tick；20 tick = 1 秒）"
+            )
+            .defineInRange("Hurt Resist Time", 10, 0, Integer.MAX_VALUE);
+        DRAGON_CULT_PRIEST_DEATH_EXPLOSION_POWER = BUILDER
+            .comment(
+                "Explosion power when the death animation ends (0 disables)",
+                "死亡动画结束时的爆炸威力（0 为禁用）"
+            )
+            .defineInRange("Death Explosion Power", 3.0, 0.0, 100.0);
+        DRAGON_CULT_PRIEST_HOVER_HEIGHT = BUILDER
+            .comment(
+                "Minimum height above ground the priest hovers at in blocks",
+                "祭司悬浮时距离地面的最小高度（格）"
+            )
+            .defineInRange("Hover Height", 1.0, 0.0, 32.0);
+
+        BUILDER.push("Skills");
+
+        BUILDER.push("Breath");
+        DRAGON_CULT_PRIEST_BREATH_MAX_DISTANCE = BUILDER
+            .comment(
+                "Maximum distance to target to use breath in blocks",
+                "使用龙息所需与目标的最大距离（格）"
+            )
+            .defineInRange("Max Distance", 3.0, 0.0, 64.0);
+        DRAGON_CULT_PRIEST_BREATH_COOLDOWN = BUILDER
+            .comment(
+                "Cooldown between breaths in ticks (20 ticks = 1 second)",
+                "龙息冷却（tick；20 tick = 1 秒）"
+            )
+            .defineInRange("Cooldown", 100, 0, Integer.MAX_VALUE);
+        DRAGON_CULT_PRIEST_BREATH_SIZE = BUILDER
+            .comment(
+                "Edge length of the cubic breath area in front of the priest in blocks",
+                "身前龙息立方体的边长（格）"
+            )
+            .defineInRange("Size", 3.0, 0.0, 32.0);
+        DRAGON_CULT_PRIEST_BREATH_DAMAGE_MULTIPLIER = BUILDER
+            .comment(
+                "Breath damage per tick as a multiple of attack damage",
+                "龙息每 tick 伤害相对攻击力的倍数"
+            )
+            .defineInRange("Damage Multiplier", 1.0, 0.0, 100.0);
+        BUILDER.pop();
+
+        BUILDER.push("Lightning");
+        DRAGON_CULT_PRIEST_LIGHTNING_COOLDOWN = BUILDER
+            .comment(
+                "Cooldown between lightning strikes in ticks (20 ticks = 1 second)",
+                "落雷冷却（tick；20 tick = 1 秒）"
+            )
+            .defineInRange("Cooldown", 160, 0, Integer.MAX_VALUE);
+        DRAGON_CULT_PRIEST_LIGHTNING_DAMAGE_MULTIPLIER = BUILDER
+            .comment(
+                "Lightning damage as a multiple of attack damage",
+                "落雷伤害相对攻击力的倍数"
+            )
+            .defineInRange("Damage Multiplier", 2.0, 0.0, 100.0);
+        DRAGON_CULT_PRIEST_LIGHTNING_AOE_RADIUS = BUILDER
+            .comment(
+                "Lightning area of effect radius in blocks",
+                "落雷溅射半径（格）"
+            )
+            .defineInRange("AOE Radius", 3.0, 0.0, 32.0);
+        BUILDER.pop();
+
+        BUILDER.push("Guard");
+        DRAGON_CULT_PRIEST_GUARD_COOLDOWN = BUILDER
+            .comment(
+                "Cooldown between guards in ticks (20 ticks = 1 second)",
+                "庇佑冷却（tick；20 tick = 1 秒）"
+            )
+            .defineInRange("Cooldown", 300, 0, Integer.MAX_VALUE);
+        DRAGON_CULT_PRIEST_GUARD_RADIUS = BUILDER
+            .comment(
+                "Radius within which allies are purified and shielded in blocks",
+                "净化并为友方加盾的半径（格）"
+            )
+            .defineInRange("Radius", 8.0, 0.0, 64.0);
+        DRAGON_CULT_PRIEST_GUARD_SHIELD_GAIN = BUILDER
+            .comment(
+                "Temporary justified defence shield granted to each ally",
+                "为每个友方提供的临时肃正防御护盾点数"
+            )
+            .defineInRange("Shield Gain", 1.0, 0.0, 100.0);
+        DRAGON_CULT_PRIEST_GUARD_LOW_HP_RATIO = BUILDER
+            .comment(
+                "Also cast guard when own health drops below this ratio",
+                "自身血量低于此比例时也施放庇佑"
+            )
+            .defineInRange("Low HP Ratio", 0.6, 0.0, 1.0);
+        BUILDER.pop();
+
+        BUILDER.push("Keep Distance");
+        DRAGON_CULT_PRIEST_KEEP_MIN_DISTANCE = BUILDER
+            .comment(
+                "Retreat when target is closer than this distance in blocks",
+                "目标距离小于此值（格）时后撤"
+            )
+            .defineInRange("Min Distance", 3.0, 0.0, 64.0);
+        DRAGON_CULT_PRIEST_KEEP_MAX_DISTANCE = BUILDER
+            .comment(
+                "Approach when target is beyond this distance in blocks",
+                "目标距离超过此值（格）时靠近"
+            )
+            .defineInRange("Max Distance", 8.0, 0.0, 64.0);
+        DRAGON_CULT_PRIEST_RETREAT_SPEED = BUILDER
+            .comment(
+                "Retreat movement per tick in blocks while facing the target",
+                "面向目标后撤时每 tick 的位移（格）"
+            )
+            .defineInRange("Retreat Speed", 0.08, 0.0, 10.0);
+        BUILDER.pop();
+
+        BUILDER.pop(); // End Skills
+        BUILDER.pop(); // End Dragon Cult Priest
+
+        BUILDER.pop(); // End Dragon Cult
+
         // Projectile Settings | 弹射物设置
         BUILDER.push("Projectile");
 
@@ -1550,6 +1907,12 @@ public class TheLastSwordConfiguration {
 
         // Stronger Ender Dragon Settings | 更强的末影龙设置
         BUILDER.push("Stronger Ender Dragon");
+        ENDER_DRAGON_NAMED_CHANCE = BUILDER
+            .comment(
+                "Chance (percent) for a respawned Ender Dragon to receive a named variant",
+                "重生末影龙获得命名变体的概率（百分比）"
+            )
+            .defineInRange("Named Dragon Chance", 25, 0, 100);
         ENDER_DRAGON_MAX_LEVEL = BUILDER
             .comment(
                 "Maximum level for Ender Dragon",
@@ -1604,12 +1967,71 @@ public class TheLastSwordConfiguration {
             )
             .define("Enable Cataclysm Compat", true);
         BUILDER.pop();
+
+        BUILDER
+            .comment(
+                "Draw weight of each lucky block event. Only events whose luck range covers the block's luck value",
+                "take part in the draw, and each one's chance is its weight divided by the total weight of that pool.",
+                "Set a weight to 0 to disable the event entirely.",
+                "终焉幸运方块各事件的抽取权重。只有幸运值落在事件区间内的事件参与抽取，",
+                "单个事件的概率为其权重占参与抽取事件总权重的比例。权重设为 0 表示禁用该事件。"
+            )
+            .push("Lucky Block");
+        defineLuckyEventWeight("Explosion", 100,
+            "Explosion: explodes at the block, breaks blocks without setting fire",
+            "爆炸：在方块处爆炸，破坏方块但不点火");
+        defineLuckyEventWeight("Trap", 100,
+            "Trap: lava under the player, obsidian ring around, end crystals on top",
+            "陷阱：玩家脚下岩浆，周围黑曜石，其上末影水晶");
+        defineLuckyEventWeight("Anvil Apocalypse", 100,
+            "Anvil Apocalypse: anvils fall over a 16x16 area above the block for 13 seconds",
+            "铁砧末日：方块上方 16x16 范围持续 13 秒掉落铁砧");
+        defineLuckyEventWeight("Bounty", 100,
+            "Bounty: iron bar cage with swordsman/berserker/archer inside, plus debuffs",
+            "悬赏：生成铁栏杆围墙关入剑士/狂战士/弓箭手，并给玩家负面效果");
+        defineLuckyEventWeight("Dragon Crystal Set Bob", 100,
+            "Dragon Crystal Set Bob: spawns a zombie in full level 5 dragon crystal gear",
+            "龙水晶套Bob：生成一只满配 5 级龙水晶装备的僵尸");
+        defineLuckyEventWeight("Dragon Set Bob", 100,
+            "Dragon Set Bob: spawns a zombie in full level 12 dragon armor with a dragon sword",
+            "龙套Bob：生成一只满配 12 级龙盔甲与龙之剑的僵尸");
+        defineLuckyEventWeight("End Resting Place", 100,
+            "End Resting Place: places the end_reset structure 16 blocks above",
+            "末地休憩处：在方块上方 16 格放置 end_reset 结构");
+        defineLuckyEventWeight("Gem Rain", 100,
+            "Gem Rain: gems rain down over an 8x8 area above the block for 12 seconds",
+            "宝石雨：方块上方 8x8 范围持续 12 秒掉落宝石");
+        defineLuckyEventWeight("Wound Of Time", 100,
+            "Wound Of Time: places the wound_of_time structure 64 blocks above with a countdown",
+            "时间之伤：倒计时后在方块上方 64 格放置 wound_of_time 结构");
+        defineLuckyEventWeight("The Last Sword", 100,
+            "The Last Sword: a 10 second ritual in front of the player that grants The Last Sword",
+            "最终之剑：在玩家身前进行 10 秒仪式，最终生成最终之剑");
+        defineLuckyEventWeight("Random Drop", 100,
+            "Random Drop: drops a random item from this mod's creative tab",
+            "随机掉落：随机掉落一件本 Mod 创造栏中的物品");
+        defineLuckyEventWeight("Lucky Well", 100,
+            "Lucky Well: places the lucky_well structure at the block position",
+            "幸运水井：在方块原位置放置 lucky_well 结构");
+        defineLuckyEventWeight("Arena", 100,
+            "Arena: places the arena structure and spawns a random opponent",
+            "终焉竞技场：放置竞技场结构并生成随机对手");
+        BUILDER.pop();
+
         BUILDER.pop(); // End Compat Mods
 
         BUILDER.pop(); // End Others
 
         SPEC = BUILDER.build();
     }
+
+    //定义单个幸运事件的权重项并登记到查表
+    private static void defineLuckyEventWeight(String id, int defaultWeight, String commentEn, String commentZh) {
+        LUCKY_EVENT_WEIGHTS.put(id, BUILDER
+            .comment(commentEn, commentZh)
+            .defineInRange(id + " Weight", defaultWeight, 0, 10000));
+    }
+
     // ═══════════════════════════════════════════════════════════════════════════════
     // Safe Config Access Methods | 安全的配置访问方法
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -1623,6 +2045,11 @@ public class TheLastSwordConfiguration {
         }
     }
 
+    //幸运事件权重（未登记的事件按默认权重 100 处理）
+    public static int getLuckyEventWeightSafely(String id) {
+        return safeGet(LUCKY_EVENT_WEIGHTS.get(id), 100);
+    }
+
     //剑类配置
     public static double getIncreaseValueSafely() {
         return safeGet(SWORD_INCREASE_VALUE, 20.0);
@@ -1634,6 +2061,22 @@ public class TheLastSwordConfiguration {
 
     public static boolean getBlockCancelUseSafely() {
         return safeGet(SWORD_BLOCK_CANCEL_USE, true);
+    }
+
+    public static double getKnightGreatswordGroundSlamDamageMultiplierSafely() {
+        return safeGet(KNIGHT_GREATSWORD_GROUND_SLAM_DAMAGE_MULTIPLIER, 2.0);
+    }
+
+    public static double getPriestStaffProjectileDamageMultiplierSafely() {
+        return safeGet(PRIEST_STAFF_PROJECTILE_DAMAGE_MULTIPLIER, 1.0);
+    }
+
+    public static double getPriestStaffGuardRadiusSafely() {
+        return safeGet(PRIEST_STAFF_GUARD_RADIUS, 8.0);
+    }
+
+    public static double getPriestStaffGuardShieldGainSafely() {
+        return safeGet(PRIEST_STAFF_GUARD_SHIELD_GAIN, 1.0);
     }
 
     //盔甲类通用配置（等级区间）
@@ -1883,6 +2326,10 @@ public class TheLastSwordConfiguration {
     }
 
     //迷失战魂配置
+    public static boolean getEntityDangerousSkillAlarmEnabledSafely() {
+        return safeGet(ENTITY_ENABLE_DANGEROUS_SKILL_ALARM, true);
+    }
+
     public static boolean getLostWraithEnableCustomBossBarSafely() {
         return safeGet(LOST_WRAITH_ENABLE_CUSTOM_BOSS_BAR, true);
     }
@@ -2022,6 +2469,141 @@ public class TheLastSwordConfiguration {
         return safeGet(GUARDIAN_BERSERKER_LIFESTEAL_RATIO, 0.05);
     }
 
+    //拜龙教教徒配置
+    public static double getDragonCultistDamageLimitSafely() {
+        return safeGet(DRAGON_CULTIST_DAMAGE_LIMIT, 10.0);
+    }
+
+    public static int getDragonCultistHurtResistTimeSafely() {
+        return safeGet(DRAGON_CULTIST_HURT_RESIST_TIME, 10);
+    }
+
+    public static double getDragonCultistMeleeAttackRangeSafely() {
+        return safeGet(DRAGON_CULTIST_MELEE_ATTACK_RANGE, 2.0);
+    }
+
+    public static double getDragonCultistMagicMinDistanceSafely() {
+        return safeGet(DRAGON_CULTIST_MAGIC_MIN_DISTANCE, 8.0);
+    }
+
+    public static int getDragonCultistMagicCooldownSafely() {
+        return safeGet(DRAGON_CULTIST_MAGIC_COOLDOWN, 240);
+    }
+
+    //拜龙教圣骑士配置
+    public static double getDragonCultPaladinDamageLimitSafely() {
+        return safeGet(DRAGON_CULT_PALADIN_DAMAGE_LIMIT, 10.0);
+    }
+
+    public static int getDragonCultPaladinHurtResistTimeSafely() {
+        return safeGet(DRAGON_CULT_PALADIN_HURT_RESIST_TIME, 10);
+    }
+
+    public static double getDragonCultPaladinAttackRangeSafely() {
+        return safeGet(DRAGON_CULT_PALADIN_ATTACK_RANGE, 3.0);
+    }
+
+    public static double getDragonCultPaladinAttackDamageMultiplierSafely() {
+        return safeGet(DRAGON_CULT_PALADIN_ATTACK_DAMAGE_MULTIPLIER, 1.0);
+    }
+
+    public static double getDragonCultPaladinHeavyAttackRangeSafely() {
+        return safeGet(DRAGON_CULT_PALADIN_HEAVY_ATTACK_RANGE, 4.0);
+    }
+
+    public static int getDragonCultPaladinHeavyAttackCooldownSafely() {
+        return safeGet(DRAGON_CULT_PALADIN_HEAVY_ATTACK_COOLDOWN, 180);
+    }
+
+    public static double getDragonCultPaladinHeavyAttackDamageMultiplierSafely() {
+        return safeGet(DRAGON_CULT_PALADIN_HEAVY_ATTACK_DAMAGE_MULTIPLIER, 3.0);
+    }
+
+    public static int getDragonCultPaladinHeavyAttackShieldDisableTimeSafely() {
+        return safeGet(DRAGON_CULT_PALADIN_HEAVY_ATTACK_SHIELD_DISABLE_TIME, 60);
+    }
+
+    public static double getDragonCultPaladinBlockRangeSafely() {
+        return safeGet(DRAGON_CULT_PALADIN_BLOCK_RANGE, 4.0);
+    }
+
+    public static int getDragonCultPaladinBlockCooldownSafely() {
+        return safeGet(DRAGON_CULT_PALADIN_BLOCK_COOLDOWN, 200);
+    }
+
+    //拜龙教祭司配置
+    public static double getDragonCultPriestDamageLimitSafely() {
+        return safeGet(DRAGON_CULT_PRIEST_DAMAGE_LIMIT, 10.0);
+    }
+
+    public static int getDragonCultPriestHurtResistTimeSafely() {
+        return safeGet(DRAGON_CULT_PRIEST_HURT_RESIST_TIME, 10);
+    }
+
+    public static double getDragonCultPriestDeathExplosionPowerSafely() {
+        return safeGet(DRAGON_CULT_PRIEST_DEATH_EXPLOSION_POWER, 3.0);
+    }
+
+    public static double getDragonCultPriestHoverHeightSafely() {
+        return safeGet(DRAGON_CULT_PRIEST_HOVER_HEIGHT, 1.0);
+    }
+
+    public static double getDragonCultPriestBreathMaxDistanceSafely() {
+        return safeGet(DRAGON_CULT_PRIEST_BREATH_MAX_DISTANCE, 3.0);
+    }
+
+    public static int getDragonCultPriestBreathCooldownSafely() {
+        return safeGet(DRAGON_CULT_PRIEST_BREATH_COOLDOWN, 100);
+    }
+
+    public static double getDragonCultPriestBreathSizeSafely() {
+        return safeGet(DRAGON_CULT_PRIEST_BREATH_SIZE, 3.0);
+    }
+
+    public static double getDragonCultPriestBreathDamageMultiplierSafely() {
+        return safeGet(DRAGON_CULT_PRIEST_BREATH_DAMAGE_MULTIPLIER, 1.0);
+    }
+
+    public static int getDragonCultPriestLightningCooldownSafely() {
+        return safeGet(DRAGON_CULT_PRIEST_LIGHTNING_COOLDOWN, 160);
+    }
+
+    public static double getDragonCultPriestLightningDamageMultiplierSafely() {
+        return safeGet(DRAGON_CULT_PRIEST_LIGHTNING_DAMAGE_MULTIPLIER, 2.0);
+    }
+
+    public static double getDragonCultPriestLightningAoeRadiusSafely() {
+        return safeGet(DRAGON_CULT_PRIEST_LIGHTNING_AOE_RADIUS, 3.0);
+    }
+
+    public static int getDragonCultPriestGuardCooldownSafely() {
+        return safeGet(DRAGON_CULT_PRIEST_GUARD_COOLDOWN, 300);
+    }
+
+    public static double getDragonCultPriestGuardRadiusSafely() {
+        return safeGet(DRAGON_CULT_PRIEST_GUARD_RADIUS, 8.0);
+    }
+
+    public static double getDragonCultPriestGuardShieldGainSafely() {
+        return safeGet(DRAGON_CULT_PRIEST_GUARD_SHIELD_GAIN, 1.0);
+    }
+
+    public static double getDragonCultPriestGuardLowHpRatioSafely() {
+        return safeGet(DRAGON_CULT_PRIEST_GUARD_LOW_HP_RATIO, 0.6);
+    }
+
+    public static double getDragonCultPriestKeepMinDistanceSafely() {
+        return safeGet(DRAGON_CULT_PRIEST_KEEP_MIN_DISTANCE, 3.0);
+    }
+
+    public static double getDragonCultPriestKeepMaxDistanceSafely() {
+        return safeGet(DRAGON_CULT_PRIEST_KEEP_MAX_DISTANCE, 8.0);
+    }
+
+    public static double getDragonCultPriestRetreatSpeedSafely() {
+        return safeGet(DRAGON_CULT_PRIEST_RETREAT_SPEED, 0.08);
+    }
+
     //弹射物配置
     public static double getDragonSwordProjectileExtraDamageMultiplierSafely() {
         return safeGet(DRAGON_SWORD_PROJECTILE_EXTRA_DAMAGE_MULTIPLIER, 1.0);
@@ -2083,6 +2665,10 @@ public class TheLastSwordConfiguration {
 
     public static int getSkillEnchantDurationSafely() {
         return safeGet(SKILL_ENCHANT_DURATION, 600);
+    }
+
+    public static int getSkillEnchantCooldownSafely() {
+        return safeGet(SKILL_ENCHANT_COOLDOWN, 600);
     }
 
     public static double getSkillEndOfAllThingsDamageMultiplierSafely() {

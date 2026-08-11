@@ -30,6 +30,7 @@ import net.the_last_sword.init.ModSounds;
 import net.the_last_sword.network.NetworkHandler;
 import net.the_last_sword.util.TheLastSwordLogger;
 import net.the_last_sword.event.ClientEventHandler;
+import net.the_last_sword.event.EnderDragonEvent;
 import net.the_last_sword.compat.apotheosis.ApotheosisCompat;
 
 import java.util.PriorityQueue;
@@ -67,6 +68,7 @@ public class TheLastSwordMod {
 
         //注册内置资源包
         modEventBus.addListener(this::addPackFinders);
+        modEventBus.addListener(EnderDragonEvent::onEntityAttributeModification);
 
         //神化mod（Apotheosis）兼容：通过IMC声明剑类类别
         modEventBus.register(new ApotheosisCompat());
@@ -90,8 +92,6 @@ public class TheLastSwordMod {
     private void initializeEcaProtection() {
         try {
             //添加黑名单关键词，防止 ECA 的阶段2扫描修改这些字段
-            EcaAPI.addHealthBlacklistKeyword("WORLD_ANCHOR");
-            EcaAPI.addHealthBlacklistKeyword("WORLD_ANCHOR_MAX");
             EcaAPI.addHealthBlacklistKeyword("HEAL_BAN_TIME");
             EcaAPI.addHealthBlacklistKeyword("IS_PROTECTED");
 

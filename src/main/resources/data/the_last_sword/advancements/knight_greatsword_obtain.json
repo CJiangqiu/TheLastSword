@@ -1,0 +1,35 @@
+{
+  "display": {
+    "icon": {
+      "item": "the_last_sword:knight_greatsword"
+    },
+    "title": {
+      "translate": "advancements.knight_greatsword_obtain.title"
+    },
+    "description": {
+      "translate": "advancements.knight_greatsword_obtain.descr"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "knight_greatsword_obtain_0": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "the_last_sword:knight_greatsword"
+            ],
+            "count": {
+              "min": 1
+            }
+          }
+        ]
+      }
+    }
+  },
+  "parent": "the_last_sword:dragon_cult_raid"
+}

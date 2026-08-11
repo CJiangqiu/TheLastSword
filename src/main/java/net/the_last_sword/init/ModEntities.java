@@ -14,12 +14,14 @@ import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.entity.DragonCrystalSwordProjectile;
 import net.the_last_sword.entity.DragonCultistEntity;
 import net.the_last_sword.entity.DragonCultPaladinEntity;
+import net.the_last_sword.entity.DragonCultPriestEntity;
 import net.the_last_sword.entity.DragonLightingEntity;
 import net.the_last_sword.entity.DragonSwordProjectile;
 import net.the_last_sword.entity.GuardianArcherEntity;
 import net.the_last_sword.entity.GuardianBerserkerEntity;
 import net.the_last_sword.entity.GuardianOfSealedSpireEntity;
 import net.the_last_sword.entity.GuardianSaberEntity;
+import net.the_last_sword.entity.GroundRuptureFragmentEntity;
 import net.the_last_sword.entity.LostWraithEntity;
 import net.the_last_sword.entity.TheLastEndLightingEntity;
 import net.the_last_sword.entity.TheLastEndSwordProjectile;
@@ -207,6 +209,28 @@ public class ModEntities {
                 .build("dragon_cult_paladin")
         );
 
+    //拜龙教祭司
+    public static final RegistryObject<EntityType<DragonCultPriestEntity>> DRAGON_CULT_PRIEST =
+        ENTITY_TYPES.register("dragon_cult_priest",
+            () -> EntityType.Builder.of(DragonCultPriestEntity::new, MobCategory.MONSTER)
+                .sized(0.7f, 2.0f)
+                .clientTrackingRange(64)
+                .updateInterval(3)
+                .fireImmune()
+                .build("dragon_cult_priest")
+        );
+
+    public static final RegistryObject<EntityType<GroundRuptureFragmentEntity>> GROUND_RUPTURE_FRAGMENT =
+        ENTITY_TYPES.register("ground_rupture_fragment",
+            () -> EntityType.Builder.<GroundRuptureFragmentEntity>of(GroundRuptureFragmentEntity::new, MobCategory.MISC)
+                .sized(0.5F, 0.5F)
+                .clientTrackingRange(48)
+                .updateInterval(1)
+                .noSave()
+                .noSummon()
+                .build("ground_rupture_fragment")
+        );
+
     public static void register(IEventBus eventBus) {
         ENTITY_TYPES.register(eventBus);
     }
@@ -224,5 +248,6 @@ public class ModEntities {
         event.put(THE_PAST_SHADOW_OF_THE_QUEEN.get(), ThePastShadowOfTheQueenEntity.createAttributes().build());
         event.put(DRAGON_CULTIST.get(), DragonCultistEntity.createAttributes().build());
         event.put(DRAGON_CULT_PALADIN.get(), DragonCultPaladinEntity.createAttributes().build());
+        event.put(DRAGON_CULT_PRIEST.get(), DragonCultPriestEntity.createAttributes().build());
     }
 }

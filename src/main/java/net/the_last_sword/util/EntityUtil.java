@@ -10,6 +10,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
@@ -41,13 +42,10 @@ public class EntityUtil {
     private static final String NBT_HEAL_BAN_TIME = "tlsHealBanTime";
     private static final String NBT_IS_PROTECTED = "tlsIsProtected";
 
-    // ==================== 实体数据定义（由 LivingEntityMixin 的 <clinit> 注入初始化） ====================
+    //临时护盾标记：不设上限、不参与回复，打光即失效
+    public static final String NBT_TEMP_JUSTIFIED_DEFENCE = "tlsTempJustifiedDefence";
 
-    //真实生命值——现世锚度（编码：anchor - 1024）
-    public static EntityDataAccessor<String> WORLD_ANCHOR;
-
-    //现世锚度上限（编码：anchorMax - 2048）
-    public static EntityDataAccessor<String> WORLD_ANCHOR_MAX;
+    // ==================== TLS 实体数据定义（由 LivingEntityMixin 的 <clinit> 注入初始化） ====================
 
     //禁疗时间（tick）
     public static EntityDataAccessor<Integer> HEAL_BAN_TIME;
@@ -60,75 +58,40 @@ public class EntityUtil {
     //获取真实血量
     public static float getWorldAnchor(LivingEntity entity) {
         if (entity == null) return 0.0f;
-        String encoded = null;
-        if (WORLD_ANCHOR != null) {
-            try {
-                encoded = entity.getEntityData().get(WORLD_ANCHOR);
-            } catch (Exception ignored) {
-            }
-        }
-        if (encoded == null || encoded.isEmpty()) {
-            encoded = entity.getPersistentData().getString(NBT_WORLD_ANCHOR);
-        }
-        try {
-            return Float.parseFloat(encoded) + 1024.0f;
-        } catch (NumberFormatException e) {
-            return 0.0f;
-        }
+        Float lockedHealth = EcaAPI.getLockedHealth(entity);
+        return lockedHealth != null ? lockedHealth : EcaAPI.getRealHealth(entity);
     }
 
     //设置真实血量
     public static void setWorldAnchor(LivingEntity entity, float anchor) {
         if (entity == null) return;
-        String encoded = Float.toString(anchor - 1024.0f);
-        if (WORLD_ANCHOR != null) {
-            try {
-                entity.getEntityData().set(WORLD_ANCHOR, encoded);
-                syncHealthLock(entity, anchor);
-                return;
-            } catch (Exception ignored) {
+        entity.getPersistentData().remove(NBT_WORLD_ANCHOR);
+        if (Float.isFinite(anchor) && anchor > 0.0f) {
+            EcaAPI.lockHealth(entity, anchor);
+        } else {
+            EcaAPI.unlockHealth(entity);
+            if (Float.isFinite(anchor)) {
+                EcaAPI.setHealth(entity, 0.0f);
             }
         }
-        entity.getPersistentData().putString(NBT_WORLD_ANCHOR, encoded);
-        syncHealthLock(entity, anchor);
-    }
-
-    //保护系统已通过Mixin完整控制血量流程，无需ECA锁血
-    private static void syncHealthLock(LivingEntity entity, float health) {
     }
 
     //获取最大真实血量上限
     public static float getWorldAnchorMax(LivingEntity entity) {
         if (entity == null) return 0.0f;
-        String encoded = null;
-        if (WORLD_ANCHOR_MAX != null) {
-            try {
-                encoded = entity.getEntityData().get(WORLD_ANCHOR_MAX);
-            } catch (Exception ignored) {
-            }
-        }
-        if (encoded == null || encoded.isEmpty()) {
-            encoded = entity.getPersistentData().getString(NBT_WORLD_ANCHOR_MAX);
-        }
-        try {
-            return Float.parseFloat(encoded) + 2048.0f;
-        } catch (NumberFormatException e) {
-            return 0.0f;
-        }
+        Float lockedMaxHealth = EcaAPI.getLockedMaxHealth(entity);
+        return lockedMaxHealth != null ? lockedMaxHealth : entity.getMaxHealth();
     }
 
     //设置最大真实血量上限
     public static void setWorldAnchorMax(LivingEntity entity, float maxAnchor) {
         if (entity == null) return;
-        String encoded = Float.toString(maxAnchor - 2048.0f);
-        if (WORLD_ANCHOR_MAX != null) {
-            try {
-                entity.getEntityData().set(WORLD_ANCHOR_MAX, encoded);
-                return;
-            } catch (Exception ignored) {
-            }
+        entity.getPersistentData().remove(NBT_WORLD_ANCHOR_MAX);
+        if (Float.isFinite(maxAnchor) && maxAnchor > 0.0f) {
+            EcaAPI.lockMaxHealth(entity, maxAnchor);
+        } else {
+            EcaAPI.unlockMaxHealth(entity);
         }
-        entity.getPersistentData().putString(NBT_WORLD_ANCHOR_MAX, encoded);
     }
 
     //获取禁疗时间（tick）
@@ -252,23 +215,29 @@ public class EntityUtil {
             return;
         }
 
-        //设置保护标志（TLS 主系统）
-        setProtection(entity, true);
+        Float savedMaxHealth = EcaAPI.getLockedMaxHealth(entity);
+        Float savedHealth = EcaAPI.getLockedHealth(entity);
+        float lockedMaxHealth = savedMaxHealth != null ? savedMaxHealth : maxHealth;
+        float lockedHealth = savedHealth != null ? savedHealth : lockedMaxHealth;
 
-        //设置现世锚度（setWorldAnchor内部会自动同步ECA锁血）
-        setWorldAnchor(entity, maxHealth);
-        setWorldAnchorMax(entity, maxHealth);
+        setWorldAnchorMax(entity, lockedMaxHealth);
+        setWorldAnchor(entity, Math.min(lockedHealth, lockedMaxHealth));
+        setProtection(entity, true);
     }
 
     //清除防御数据
     public static void clearDefence(LivingEntity entity) {
         if (entity == null) return;
 
-        //清除保护标志（TLS 主系统）
+        float currentHealth = getWorldAnchor(entity);
         setProtection(entity, false);
-
-        //清除现世锚度
-        clearWorldAnchor(entity);
+        entity.getPersistentData().remove(NBT_WORLD_ANCHOR);
+        entity.getPersistentData().remove(NBT_WORLD_ANCHOR_MAX);
+        EcaAPI.unlockHealth(entity);
+        EcaAPI.unlockMaxHealth(entity);
+        if (Float.isFinite(currentHealth) && currentHealth > 0.0f) {
+            EcaAPI.setHealth(entity, currentHealth);
+        }
     }
 
     //强化免疫：清除火焰、冰冻和非增益效果（不清除生命吸收）
@@ -302,16 +271,17 @@ public class EntityUtil {
 
     //获取实体真实生命值
     public static float TheLastEndGetHealth(LivingEntity entity) {
-        return EcaAPI.getHealth(entity);
+        return getWorldAnchor(entity);
     }
 
     public static boolean theLastEndSetHealth(LivingEntity entity, float expectedHealth) {
         if (entity == null) return false;
 
         try {
-            // 同步更新你们的实体数据系统
-            setWorldAnchor(entity, expectedHealth);
-            return EcaAPI.setHealth(entity, expectedHealth);
+            if (!Float.isFinite(expectedHealth)) return false;
+            float normalizedHealth = Math.max(0.0f, expectedHealth);
+            setWorldAnchor(entity, normalizedHealth);
+            return EcaAPI.setHealth(entity, normalizedHealth);
 
         } catch (Exception e) {
             return false;
@@ -351,12 +321,30 @@ public class EntityUtil {
         if (maxShieldAttr != null) {
             maxShieldAttr.setBaseValue(0.0);
         }
+        entity.getPersistentData().remove(NBT_TEMP_JUSTIFIED_DEFENCE);
 
         EcaAPI.kill(entity, damageSource);
     }
 
     public static void theLastEndRevive(LivingEntity entity) {
         EcaAPI.revive(entity);
+    }
+
+    // ==================== 临时护盾模块 ====================
+
+    //叠加临时护盾：只加当前值，不动上限，打光后自动失效
+    public static void grantTempShield(LivingEntity entity, double amount) {
+        if (entity == null || amount <= 0) {
+            return;
+        }
+
+        AttributeInstance current = entity.getAttribute(ModAttributes.JUSTIFIED_DEFENCE.get());
+        if (current == null) {
+            return;
+        }
+
+        current.setBaseValue(current.getValue() + amount);
+        entity.getPersistentData().putBoolean(NBT_TEMP_JUSTIFIED_DEFENCE, true);
     }
 
     //发送死亡消息

@@ -52,6 +52,11 @@ public class TheLastSwordChosenEvent extends LuckyEvent {
     }
 
     @Override
+    public String getId() {
+        return "The Last Sword";
+    }
+
+    @Override
     public int getMinLuck() {
         return 0;
     }

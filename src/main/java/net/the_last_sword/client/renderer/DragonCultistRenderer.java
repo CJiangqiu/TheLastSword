@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.resources.ResourceLocation;
+import net.the_last_sword.client.layer.DragonCultistItemLayer;
 import net.the_last_sword.client.model.DragonCultistModel;
 import net.the_last_sword.entity.DragonCultistEntity;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
@@ -17,6 +18,7 @@ public class DragonCultistRenderer extends GeoEntityRenderer<DragonCultistEntity
     public DragonCultistRenderer(EntityRendererProvider.Context renderManager) {
         super(renderManager, new DragonCultistModel());
         this.shadowRadius = 0.5f;
+        this.addRenderLayer(new DragonCultistItemLayer(this));
     }
 
     @Override

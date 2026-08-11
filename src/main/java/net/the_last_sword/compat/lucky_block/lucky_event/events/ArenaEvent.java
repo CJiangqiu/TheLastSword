@@ -52,6 +52,11 @@ public class ArenaEvent extends LuckyEvent {
     }
 
     @Override
+    public String getId() {
+        return "Arena";
+    }
+
+    @Override
     public int getMinLuck() {
         return -100;
     }

@@ -33,6 +33,11 @@ public class LuckyWellEvent extends LuckyEvent {
     }
 
     @Override
+    public String getId() {
+        return "Lucky Well";
+    }
+
+    @Override
     public int getMinLuck() {
         return -100;
     }

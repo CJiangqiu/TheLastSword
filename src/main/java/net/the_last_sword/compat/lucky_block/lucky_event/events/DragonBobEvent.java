@@ -25,6 +25,11 @@ public class DragonBobEvent extends LuckyEvent {
     }
 
     @Override
+    public String getId() {
+        return "Dragon Set Bob";
+    }
+
+    @Override
     public int getMinLuck() {
         return -100;
     }

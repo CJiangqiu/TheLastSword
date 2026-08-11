@@ -3,6 +3,7 @@ package net.the_last_sword.entity.ai;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.entity.DragonCultistEntity;
 
 import java.util.EnumSet;
@@ -11,8 +12,6 @@ import java.util.EnumSet;
 public class DragonCultistMeleeAttackGoal extends Goal {
     private static final int ANIMATION_LENGTH = 15;
     private static final int DAMAGE_TICK = 10;
-    private static final float MELEE_RANGE = 3.0f;
-    private static final float ATTACK_RANGE = 3.0f;
 
     private final DragonCultistEntity cultist;
     private int animationTick;
@@ -85,8 +84,8 @@ public class DragonCultistMeleeAttackGoal extends Goal {
 
         float dist = cultist.distanceTo(target);
 
-        // 距离≤3格，触发攻击
-        if (dist <= ATTACK_RANGE) {
+        // 进入攻击范围，触发攻击
+        if (dist <= TheLastSwordConfiguration.getDragonCultistMeleeAttackRangeSafely()) {
             animationTick = ANIMATION_LENGTH;
             damaged = false;
             cultist.setAnimationState(DragonCultistEntity.STATE_ATTACK);
@@ -119,7 +118,7 @@ public class DragonCultistMeleeAttackGoal extends Goal {
         if (target == null || !target.isAlive()) {
             return;
         }
-        if (cultist.distanceTo(target) > ATTACK_RANGE + 1.0f) {
+        if (cultist.distanceTo(target) > TheLastSwordConfiguration.getDragonCultistMeleeAttackRangeSafely()) {
             return;
         }
         target.invulnerableTime = 0;

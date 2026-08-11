@@ -20,6 +20,11 @@ public class ExplosionEvent extends LuckyEvent {
     }
 
     @Override
+    public String getId() {
+        return "Explosion";
+    }
+
+    @Override
     public int getMinLuck() {
         return -100;
     }

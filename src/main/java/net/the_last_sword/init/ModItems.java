@@ -61,6 +61,14 @@ public class ModItems {
         DragonCrystalSword::new
     );
 
+    public static final RegistryObject<Item> KNIGHT_GREATSWORD = ITEMS.register("knight_greatsword",
+        KnightGreatswordItem::new
+    );
+
+    public static final RegistryObject<Item> PRIEST_STAFF = ITEMS.register("priest_staff",
+        PriestStaffItem::new
+    );
+
     public static final RegistryObject<Item> DRAGON_SWORD = ITEMS.register("dragon_sword",
         DragonSword::new
     );
@@ -138,6 +146,11 @@ public class ModItems {
     //拜龙教圣骑士刷怪蛋（深紫色 + 黑色）
     public static final RegistryObject<Item> DRAGON_CULT_PALADIN_SPAWN_EGG = ITEMS.register("dragon_cult_paladin_spawn_egg",
         () -> new ForgeSpawnEggItem(ModEntities.DRAGON_CULT_PALADIN, 0x4B0082, 0x1A1A1A, new Item.Properties())
+    );
+
+    //拜龙教祭司刷怪蛋（深紫色 + 金色）
+    public static final RegistryObject<Item> DRAGON_CULT_PRIEST_SPAWN_EGG = ITEMS.register("dragon_cult_priest_spawn_egg",
+        () -> new ForgeSpawnEggItem(ModEntities.DRAGON_CULT_PRIEST, 0x4B0082, 0xD4AF37, new Item.Properties())
     );
 
     //封印尖塔守卫刷怪蛋（深灰色 + 紫色）

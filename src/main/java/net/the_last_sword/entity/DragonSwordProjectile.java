@@ -91,6 +91,11 @@ public class DragonSwordProjectile extends TheLastEndSwordItemsProjectile {
 
     //发射弹射物的静态方法
     public static DragonSwordProjectile shoot(Level world, LivingEntity entity, RandomSource random, UUID shooterUUID, float damage) {
+        return shoot(world, entity, random, shooterUUID, damage, entity.getMainHandItem());
+    }
+
+    public static DragonSwordProjectile shoot(Level world, LivingEntity entity, RandomSource random, UUID shooterUUID,
+                                               float damage, ItemStack weapon) {
         DragonSwordProjectile projectile = new DragonSwordProjectile(
                 ModEntities.DRAGON_SWORD_PROJECTILE.get(),
                 entity,
@@ -103,7 +108,6 @@ public class DragonSwordProjectile extends TheLastEndSwordItemsProjectile {
         projectile.setSilent(true);
 
         //发射时计算伤害快照
-        ItemStack weapon = entity.getMainHandItem();
         projectile.applyWeaponEnchantments(weapon);
         float baseDamage = damage + projectile.enchantBonusDamage;
         int level = ItemLevelHelper.getLevel(weapon);

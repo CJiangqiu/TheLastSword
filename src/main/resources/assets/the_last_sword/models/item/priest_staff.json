@@ -1,0 +1,175 @@
+{
+	"format_version": "1.21.11",
+	"credit": "Made with Blockbench",
+	"texture_size": [64, 64],
+	"textures": {
+		"0": "the_last_sword:item/priest_staff",
+		"particle": "the_last_sword:item/priest_staff"
+	},
+	"elements": [
+		{
+			"name": "staff_shaft",
+			"from": [7.832, 0.755, 7.811],
+			"to": [8.168, 12.473, 8.189],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 5.081, 8]},
+			"faces": {
+				"north": {"uv": [0, 4, 0.25, 10.75], "texture": "#0"},
+				"east": {"uv": [0, 4, 0.25, 10.75], "texture": "#0"},
+				"south": {"uv": [0, 4, 0.25, 10.75], "texture": "#0"},
+				"west": {"uv": [0, 4, 0.25, 10.75], "texture": "#0"},
+				"up": {"uv": [0, 4, 0.25, 4.25], "texture": "#0"},
+				"down": {"uv": [0, 4, 0.25, 4.25], "texture": "#0"}
+			}
+		},
+		{
+			"name": "staff_grip",
+			"from": [7.748, 4.157, 7.727],
+			"to": [8.252, 5.417, 8.273],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 5.081, 8]},
+			"faces": {
+				"north": {"uv": [14, 7.25, 14.25, 8], "texture": "#0"},
+				"east": {"uv": [13.75, 7.25, 14, 8], "texture": "#0"},
+				"south": {"uv": [14.5, 7.25, 14.75, 8], "texture": "#0"},
+				"west": {"uv": [14.25, 7.25, 14.5, 8], "texture": "#0"},
+				"up": {"uv": [14.25, 7.25, 14, 7], "texture": "#0"},
+				"down": {"uv": [14.5, 7, 14.25, 7.25], "texture": "#0"}
+			}
+		},
+		{
+			"name": "staff_crook_lower",
+			"from": [7.727, 12.095, 7.727],
+			"to": [8.273, 13.439, 8.273],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 12.221, 8]},
+			"faces": {
+				"north": {"uv": [15, 7.25, 15.25, 8], "texture": "#0"},
+				"east": {"uv": [14.75, 7.25, 15, 8], "texture": "#0"},
+				"south": {"uv": [15.5, 7.25, 15.75, 8], "texture": "#0"},
+				"west": {"uv": [15.25, 7.25, 15.5, 8], "texture": "#0"},
+				"up": {"uv": [15.25, 7.25, 15, 7], "texture": "#0"},
+				"down": {"uv": [15.5, 7, 15.25, 7.25], "texture": "#0"}
+			}
+		},
+		{
+			"name": "staff_crook_upper",
+			"from": [7.685, 13.061, 7.685],
+			"to": [8.315, 14.111, 8.315],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 13.145, 8]},
+			"faces": {
+				"north": {"uv": [14, 8.25, 14.25, 8.75], "texture": "#0"},
+				"east": {"uv": [13.75, 8.25, 14, 8.75], "texture": "#0"},
+				"south": {"uv": [14.5, 8.25, 14.75, 8.75], "texture": "#0"},
+				"west": {"uv": [14.25, 8.25, 14.5, 8.75], "texture": "#0"},
+				"up": {"uv": [14.25, 8.25, 14, 8], "texture": "#0"},
+				"down": {"uv": [14.5, 8, 14.25, 8.25], "texture": "#0"}
+			}
+		},
+		{
+			"name": "staff_dragon_head",
+			"from": [7.391, 13.817, 7.496],
+			"to": [8.609, 14.657, 8.462],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 13.943, 8]},
+			"faces": {
+				"north": {"uv": [10.75, 7, 11.25, 7.5], "texture": "#0"},
+				"east": {"uv": [10.25, 7, 10.75, 7.5], "texture": "#0"},
+				"south": {"uv": [11.75, 7, 12.25, 7.5], "texture": "#0"},
+				"west": {"uv": [11.25, 7, 11.75, 7.5], "texture": "#0"},
+				"up": {"uv": [11.25, 7, 10.75, 6.5], "texture": "#0"},
+				"down": {"uv": [11.75, 6.5, 11.25, 7], "texture": "#0"}
+			}
+		},
+		{
+			"name": "staff_dragon_upper_jaw",
+			"from": [7.496, 13.481, 6.74],
+			"to": [8.504, 13.943, 7.664],
+			"rotation": {"angle": 22.5, "axis": "x", "origin": [8, 13.817, 7.664]},
+			"faces": {
+				"north": {"uv": [10.75, 8, 11.25, 8.25], "texture": "#0"},
+				"east": {"uv": [10.25, 8, 10.75, 8.25], "texture": "#0"},
+				"south": {"uv": [11.75, 8, 12.25, 8.25], "texture": "#0"},
+				"west": {"uv": [11.25, 8, 11.75, 8.25], "texture": "#0"},
+				"up": {"uv": [11.25, 8, 10.75, 7.5], "texture": "#0"},
+				"down": {"uv": [11.75, 7.5, 11.25, 8], "texture": "#0"}
+			}
+		},
+		{
+			"name": "staff_dragon_lower_jaw",
+			"from": [7.601, 13.187, 6.866],
+			"to": [8.399, 13.565, 7.685],
+			"rotation": {"angle": -22.5, "axis": "x", "origin": [8, 13.523, 7.664]},
+			"faces": {
+				"north": {"uv": [10.25, 8.25, 10.5, 8.5], "texture": "#0"},
+				"east": {"uv": [10.25, 8.25, 10.5, 8.5], "texture": "#0"},
+				"south": {"uv": [10.25, 8.25, 10.5, 8.5], "texture": "#0"},
+				"west": {"uv": [10.25, 8.25, 10.5, 8.5], "texture": "#0"},
+				"up": {"uv": [10.75, 8.5, 10.5, 8.25], "texture": "#0"},
+				"down": {"uv": [11, 8.25, 10.75, 8.5], "texture": "#0"}
+			}
+		},
+		{
+			"name": "staff_dragon_left_horn",
+			"from": [7.412, 14.405, 7.853],
+			"to": [7.727, 15.245, 8.21],
+			"rotation": {"angle": 22.5, "axis": "z", "origin": [7.559, 14.447, 8]},
+			"faces": {
+				"north": {"uv": [7.75, 4, 8, 4.5], "texture": "#0"},
+				"east": {"uv": [7.75, 4, 8, 4.5], "texture": "#0"},
+				"south": {"uv": [7.75, 4, 8, 4.5], "texture": "#0"},
+				"west": {"uv": [7.75, 4, 8, 4.5], "texture": "#0"},
+				"up": {"uv": [7.75, 4, 8, 4.25], "texture": "#0"},
+				"down": {"uv": [7.75, 4, 8, 4.25], "texture": "#0"}
+			}
+		},
+		{
+			"name": "staff_dragon_right_horn",
+			"from": [8.273, 14.405, 7.853],
+			"to": [8.588, 15.245, 8.21],
+			"rotation": {"angle": -22.5, "axis": "z", "origin": [8.441, 14.447, 8]},
+			"faces": {
+				"north": {"uv": [7.75, 4, 8, 4.5], "texture": "#0"},
+				"east": {"uv": [7.75, 4, 8, 4.5], "texture": "#0"},
+				"south": {"uv": [7.75, 4, 8, 4.5], "texture": "#0"},
+				"west": {"uv": [7.75, 4, 8, 4.5], "texture": "#0"},
+				"up": {"uv": [7.75, 4, 8, 4.25], "texture": "#0"},
+				"down": {"uv": [7.75, 4, 8, 4.25], "texture": "#0"}
+			}
+		}
+	],
+	"display": {
+		"thirdperson_righthand": {
+			"translation": [0, 4.5, 0],
+			"scale": [2, 2, 2]
+		},
+		"thirdperson_lefthand": {
+			"translation": [0, 4.75, 0],
+			"scale": [2, 2, 2]
+		},
+		"firstperson_righthand": {
+			"translation": [3.25, 0, 0]
+		},
+		"firstperson_lefthand": {
+			"translation": [3.25, 0, 0]
+		},
+		"ground": {
+			"rotation": [0, 0, 90],
+			"translation": [0, -3, 0.75]
+		},
+		"gui": {
+			"rotation": [90, 45, -90]
+		},
+		"fixed": {
+			"rotation": [90, -45, 90]
+		},
+		"on_shelf": {
+			"rotation": [0, 90, 0]
+		}
+	},
+	"groups": [
+		{
+			"name": "priest_staff",
+			"origin": [8, 8, 8],
+			"scope": 0,
+			"color": 0,
+			"children": [0, 1, 2, 3, 4, 5, 6, 7, 8]
+		}
+	]
+}

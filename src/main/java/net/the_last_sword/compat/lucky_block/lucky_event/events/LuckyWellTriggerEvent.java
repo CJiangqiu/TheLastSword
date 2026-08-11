@@ -20,6 +20,12 @@ public class LuckyWellTriggerEvent extends LuckyEvent {
         return LuckyEventCategory.NEUTRAL;
     }
 
+    //不进池子, 无对应权重配置项
+    @Override
+    public String getId() {
+        return "Lucky Well Trigger";
+    }
+
     @Override
     public int getMinLuck() {
         return Integer.MIN_VALUE;

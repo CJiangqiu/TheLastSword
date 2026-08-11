@@ -1,0 +1,35 @@
+{
+  "display": {
+    "icon": {
+      "item": "the_last_sword:priest_staff"
+    },
+    "title": {
+      "translate": "advancements.priest_staff_obtain.title"
+    },
+    "description": {
+      "translate": "advancements.priest_staff_obtain.descr"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "priest_staff_obtain_0": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "the_last_sword:priest_staff"
+            ],
+            "count": {
+              "min": 1
+            }
+          }
+        ]
+      }
+    }
+  },
+  "parent": "the_last_sword:dragon_cult_raid"
+}

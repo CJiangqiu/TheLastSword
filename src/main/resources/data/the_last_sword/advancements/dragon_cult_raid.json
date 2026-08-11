@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "item": "the_last_sword:dragon_cultist_spawn_egg"
+    },
+    "title": {
+      "translate": "advancements.dragon_cult_raid.title"
+    },
+    "description": {
+      "translate": "advancements.dragon_cult_raid.descr"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "dragon_cult_raid_0": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "the_last_sword:dragon_crystal_obtain"
+}

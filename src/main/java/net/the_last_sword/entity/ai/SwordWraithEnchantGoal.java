@@ -14,6 +14,7 @@ import java.util.EnumSet;
 public class SwordWraithEnchantGoal extends Goal {
     private final TheLastEndSwordWraithEntity wraith;
     private int animationTick;
+    private long lastUseTime;
 
     private static final int ANIMATION_LENGTH = 45;
     private static final int ENCHANT_TICK = 20;
@@ -37,13 +38,19 @@ public class SwordWraithEnchantGoal extends Goal {
             return false;
         }
 
-        //没有虚空附魔buff时触发
-        return !wraith.hasEffect(ModEffects.VOID_ENCHANTING.get());
+        //已有虚空附魔buff时不触发
+        if (wraith.hasEffect(ModEffects.VOID_ENCHANTING.get())) {
+            return false;
+        }
+
+        //冷却结束后才可再次触发
+        return wraith.level().getGameTime() - lastUseTime >= TheLastSwordConfiguration.getSkillEnchantCooldownSafely();
     }
 
     @Override
     public void start() {
         animationTick = ANIMATION_LENGTH;
+        lastUseTime = wraith.level().getGameTime();
         wraith.setAnimationState(TheLastEndSwordWraithEntity.STATE_ENCHANT);
         wraith.getNavigation().stop();
     }

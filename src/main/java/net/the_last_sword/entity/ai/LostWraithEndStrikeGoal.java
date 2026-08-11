@@ -91,7 +91,8 @@ public class LostWraithEndStrikeGoal extends Goal {
             teleportToTarget();
         }
 
-        if (relativeFrame == SOUND_TICK) {
+        if (relativeFrame == SOUND_TICK
+            && TheLastSwordConfiguration.getEntityDangerousSkillAlarmEnabledSafely()) {
             wraith.level().playSound(null, wraith.blockPosition(),
                 ModSounds.ALARM.get(), wraith.getSoundSource(), 0.5F, 1.0F);
         }

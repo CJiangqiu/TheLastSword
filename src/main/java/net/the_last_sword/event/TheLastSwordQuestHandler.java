@@ -1,5 +1,7 @@
 package net.the_last_sword.event;
 
+import net.eca.api.EcaAPI;
+import net.eca.util.raid.RaidInstance;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.core.BlockPos;
@@ -35,6 +37,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.init.ModItems;
+import net.the_last_sword.raid.DragonCultRaid;
 
 import java.util.UUID;
 
@@ -48,6 +51,9 @@ public class TheLastSwordQuestHandler {
 
     private static final ResourceLocation WELCOME = new ResourceLocation(TheLastSwordMod.MOD_ID, "the_last_sword_welcome");
     private static final ResourceLocation TROUBLED_BLACKSMITH = new ResourceLocation(TheLastSwordMod.MOD_ID, "troubled_blacksmith");
+    private static final ResourceLocation DRAGON_CULT_RAID = new ResourceLocation(TheLastSwordMod.MOD_ID, "dragon_cult_raid");
+    public static final ResourceLocation DRAGON_CULT_RAID_VICTORY =
+            new ResourceLocation(TheLastSwordMod.MOD_ID, "dragon_cult_raid_victory");
 
     private static final int CHECK_INTERVAL = 40;
     private static final int VILLAGE_HINT_DELAY = 60;
@@ -92,6 +98,7 @@ public class TheLastSwordQuestHandler {
             return;
         }
         checkTroubledBlacksmith(player);
+        checkDragonCultRaid(player);
     }
 
     //达成欢迎进度后延迟播报最近的村庄
@@ -189,6 +196,37 @@ public class TheLastSwordQuestHandler {
         return new MerchantOffer(new ItemStack(Items.EMERALD, emeralds), stack, 1, GEAR_TRADE_XP, 0.0F);
     }
 
+    //========== 拜龙教袭击 ==========
+
+    //携带龙水晶的玩家首次进入村庄时触发三波拜龙教袭击
+    private static void checkDragonCultRaid(ServerPlayer player) {
+        if (isDone(player, DRAGON_CULT_RAID_VICTORY)
+                || !player.getInventory().contains(new ItemStack(ModItems.DRAGON_CRYSTAL.get()))) {
+            return;
+        }
+
+        ServerLevel level = player.serverLevel();
+        var village = level.structureManager().getStructureWithPieceAt(player.blockPosition(), StructureTags.VILLAGE);
+        if (!village.isValid()) {
+            return;
+        }
+
+        //多人同时进入同一村庄时复用已经开始的袭击，避免波次叠加
+        boolean raidAlreadyActive = EcaAPI.getActiveRaids(level).stream()
+                .anyMatch(activeRaid -> DragonCultRaid.ID.equals(activeRaid.getDefinitionId())
+                        && village.getBoundingBox().isInside(activeRaid.getCenter()));
+        if (raidAlreadyActive) {
+            grant(player, DRAGON_CULT_RAID);
+            return;
+        }
+
+        //玩家位置已经确认位于真实村庄结构拼图内，避免包围盒中心落在拼图空隙导致首次 tick 判败
+        RaidInstance raid = EcaAPI.startRaidAt(level, player.blockPosition(), DragonCultRaid.ID);
+        if (raid != null) {
+            grant(player, DRAGON_CULT_RAID);
+        }
+    }
+
     //========== 进度工具 ==========
 
     //判断进度是否已完成
@@ -198,7 +236,7 @@ public class TheLastSwordQuestHandler {
     }
 
     //授予进度（补齐全部条件）
-    private static void grant(ServerPlayer player, ResourceLocation id) {
+    public static void grant(ServerPlayer player, ResourceLocation id) {
         Advancement advancement = player.server.getAdvancements().getAdvancement(id);
         if (advancement == null) {
             return;

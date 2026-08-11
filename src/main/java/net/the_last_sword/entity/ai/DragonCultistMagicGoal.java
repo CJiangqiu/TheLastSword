@@ -1,11 +1,13 @@
 package net.the_last_sword.entity.ai;
 
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.projectile.LargeFireball;
 import net.minecraft.world.phys.Vec3;
+import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.entity.DragonCultistEntity;
 
 import java.util.EnumSet;
@@ -14,8 +16,10 @@ import java.util.EnumSet;
 public class DragonCultistMagicGoal extends Goal {
     private static final int ANIMATION_LENGTH = 35;
     private static final int FIRE_TICK = 25;
-    private static final int COOLDOWN_TICKS = 60;
-    private static final float MAGIC_MIN_DISTANCE = 8.0f;
+    private static final double CHARGE_DISTANCE = 1.1D;
+    private static final double MIN_CHARGE_RADIUS = 0.12D;
+    private static final double MAX_CHARGE_RADIUS = 0.42D;
+    private static final int CHARGE_PARTICLE_COUNT = 8;
 
     private final DragonCultistEntity cultist;
     private int animationTick;
@@ -50,7 +54,7 @@ public class DragonCultistMagicGoal extends Goal {
         }
 
         // 高血量时只在远处用
-        return cultist.distanceTo(target) >= MAGIC_MIN_DISTANCE;
+        return cultist.distanceTo(target) >= TheLastSwordConfiguration.getDragonCultistMagicMinDistanceSafely();
     }
 
     @Override
@@ -80,6 +84,14 @@ public class DragonCultistMagicGoal extends Goal {
         if (animationTick > 0) {
             int relativeFrame = ANIMATION_LENGTH - animationTick;
 
+            LivingEntity target = cultist.getTarget();
+            if (target != null && target.isAlive()) {
+                cultist.getLookControl().setLookAt(target, 30.0F, 30.0F);
+                if (relativeFrame < FIRE_TICK) {
+                    spawnChargeParticles(target, relativeFrame);
+                }
+            }
+
             if (relativeFrame == FIRE_TICK && !fired) {
                 fireGhastFireball();
                 fired = true;
@@ -87,14 +99,10 @@ public class DragonCultistMagicGoal extends Goal {
 
             animationTick--;
 
-            LivingEntity target = cultist.getTarget();
-            if (target != null && target.isAlive()) {
-                cultist.getLookControl().setLookAt(target, 30.0F, 30.0F);
-            }
-
             if (animationTick == 0) {
                 cultist.setAnimationState(DragonCultistEntity.STATE_IDLE);
-                cooldownEnd = cultist.level().getGameTime() + COOLDOWN_TICKS;
+                cooldownEnd = cultist.level().getGameTime()
+                + TheLastSwordConfiguration.getDragonCultistMagicCooldownSafely();
             }
             return;
         }
@@ -156,6 +164,47 @@ public class DragonCultistMagicGoal extends Goal {
         return cultist.getWorldAnchor() / max;
     }
 
+    private void spawnChargeParticles(LivingEntity target, int relativeFrame) {
+        if (!(cultist.level() instanceof ServerLevel serverLevel)) {
+            return;
+        }
+
+        Vec3 eyePos = cultist.getEyePosition();
+        Vec3 direction = getCastDirection(target, eyePos);
+        Vec3 center = eyePos.add(direction.scale(CHARGE_DISTANCE));
+        double progress = Math.min(1.0D, relativeFrame / (double) FIRE_TICK);
+        double radius = MIN_CHARGE_RADIUS
+            + (MAX_CHARGE_RADIUS - MIN_CHARGE_RADIUS) * progress;
+
+        for (int i = 0; i < CHARGE_PARTICLE_COUNT; i++) {
+            double y = cultist.getRandom().nextDouble() * 2.0D - 1.0D;
+            double angle = cultist.getRandom().nextDouble() * Math.PI * 2.0D;
+            double horizontal = Math.sqrt(1.0D - y * y);
+            Vec3 offset = new Vec3(
+                Math.cos(angle) * horizontal,
+                y,
+                Math.sin(angle) * horizontal
+            ).scale(radius);
+
+            // A zero count uses the offsets as the exact velocity of one particle.
+            serverLevel.sendParticles(
+                ParticleTypes.FLAME,
+                center.x + offset.x, center.y + offset.y, center.z + offset.z,
+                0,
+                -offset.x, -offset.y, -offset.z,
+                0.045D
+            );
+        }
+        serverLevel.sendParticles(ParticleTypes.FLAME, center.x, center.y, center.z,
+            1, 0.02D, 0.02D, 0.02D, 0.0D);
+    }
+
+    private Vec3 getCastDirection(LivingEntity target, Vec3 origin) {
+        Vec3 targetPos = target.position().add(0, target.getEyeHeight() * 0.5D, 0);
+        Vec3 direction = targetPos.subtract(origin);
+        return direction.lengthSqr() < 1.0E-6D ? cultist.getLookAngle() : direction.normalize();
+    }
+
     private void fireGhastFireball() {
         if (!(cultist.level() instanceof ServerLevel)) {
             return;
@@ -166,16 +215,17 @@ public class DragonCultistMagicGoal extends Goal {
             return;
         }
 
-        Vec3 eyePos = cultist.position().add(0, cultist.getEyeHeight(), 0);
-        Vec3 targetPos = target.position().add(0, target.getEyeHeight() * 0.5, 0);
-        Vec3 direction = targetPos.subtract(eyePos).normalize();
+        Vec3 eyePos = cultist.getEyePosition();
+        Vec3 direction = getCastDirection(target, eyePos);
+        Vec3 launchPos = eyePos.add(direction.scale(CHARGE_DISTANCE));
 
         LargeFireball fireball = new LargeFireball(
             cultist.level(), cultist,
             direction.x, direction.y, direction.z,
-            1
+            0
         );
-        fireball.setPos(eyePos.x, eyePos.y, eyePos.z);
+        fireball.setOwner(cultist);
+        fireball.setPos(launchPos.x, launchPos.y, launchPos.z);
         cultist.level().addFreshEntity(fireball);
 
         cultist.level().playSound(null, cultist.blockPosition(),

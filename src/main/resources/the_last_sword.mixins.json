@@ -17,6 +17,7 @@
     "BlockBehaviourMixin",
     "ConnectionMixin",
     "EndCrystalMixin",
+    "EnderDragonMixin",
     "EntityMixin",
     "InventoryMixin",
     "LivingEntityMixin",

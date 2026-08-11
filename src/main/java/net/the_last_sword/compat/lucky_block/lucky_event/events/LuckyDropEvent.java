@@ -27,6 +27,11 @@ public class LuckyDropEvent extends LuckyEvent {
     }
 
     @Override
+    public String getId() {
+        return "Random Drop";
+    }
+
+    @Override
     public int getMinLuck() {
         return -100;
     }

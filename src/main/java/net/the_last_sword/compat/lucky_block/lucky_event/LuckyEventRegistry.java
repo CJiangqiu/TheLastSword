@@ -19,7 +19,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-//幸运事件注册表 - 懒加载静态列表, 按 luck 过滤可用事件后均匀抽取, 空池兜底返回 null
+//幸运事件注册表 - 懒加载静态列表, 按 luck 过滤可用事件后依配置权重抽取, 空池兜底返回 null
 public final class LuckyEventRegistry {
 
     private static final List<LuckyEvent> EVENTS = new ArrayList<>();
@@ -49,33 +49,45 @@ public final class LuckyEventRegistry {
         register(new ArenaEvent());
     }
 
-    //过滤全部可用事件, 均匀抽一个; 若全池为空, 返回 null 以触发外层兜底
+    //过滤全部可用事件, 按权重抽一个; 若全池为空, 返回 null 以触发外层兜底
     @Nullable
     public static LuckyEvent pickEvent(int luck, RandomSource random) {
-        bootstrapOnce();
-        List<LuckyEvent> pool = new ArrayList<>();
-        for (LuckyEvent e : EVENTS) {
-            if (e.isEligible(luck)) pool.add(e);
-        }
-        if (pool.isEmpty()) return null;
-        return pool.get(random.nextInt(pool.size()));
+        return pickWeighted(luck, random);
     }
 
     //同 pickEvent, 但排除指定事件类(井变体专用, 避免递归刷井等)
     @SafeVarargs
     @Nullable
     public static LuckyEvent pickEventExcluding(int luck, RandomSource random, Class<? extends LuckyEvent>... exclusions) {
+        return pickWeighted(luck, random, exclusions);
+    }
+
+    //权重抽取 - 跳过 luck 区间外、被排除以及权重非正的事件, 按权重占比落点选中
+    @SafeVarargs
+    @Nullable
+    private static LuckyEvent pickWeighted(int luck, RandomSource random, Class<? extends LuckyEvent>... exclusions) {
         bootstrapOnce();
         List<LuckyEvent> pool = new ArrayList<>();
+        List<Integer> weights = new ArrayList<>();
+        int total = 0;
         outer:
         for (LuckyEvent e : EVENTS) {
             if (!e.isEligible(luck)) continue;
             for (Class<? extends LuckyEvent> ex : exclusions) {
                 if (ex.isInstance(e)) continue outer;
             }
+            int weight = e.getWeight();
+            if (weight <= 0) continue;
             pool.add(e);
+            weights.add(weight);
+            total += weight;
         }
-        if (pool.isEmpty()) return null;
-        return pool.get(random.nextInt(pool.size()));
+        if (total <= 0) return null;
+        int roll = random.nextInt(total);
+        for (int i = 0; i < pool.size(); i++) {
+            roll -= weights.get(i);
+            if (roll < 0) return pool.get(i);
+        }
+        return pool.get(pool.size() - 1);
     }
 }

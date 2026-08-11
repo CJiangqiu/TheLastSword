@@ -48,8 +48,8 @@ dependencies {
     implementation 'org.ow2.asm:asm:9.2'
     implementation 'org.ow2.asm:asm-commons:9.2'
 
-    //implementation fg.deobf("maven.modrinth:epic-core-api:1.1.7")
-    implementation files("lib/epic-core-api-1.1.7-fix-dev.jar")
+    implementation fg.deobf("maven.modrinth:epic-core-api:1.1.7-fix-fix")
+    //implementation files("lib/epic-core-api-1.1.7-fix-dev.jar")
     implementation fg.deobf("curse.maven:geckolib-388172:7025129")
     implementation fg.deobf("curse.maven:curios-309927:6418456")
 
@@ -57,7 +57,6 @@ dependencies {
     implementation fg.deobf("curse.maven:just-enough-resources-jer-240630:5057220")
     //implementation fg.deobf("curse.maven:just-enough-characters-250702:7411324")
     implementation fg.deobf("curse.maven:jade-324717:5876199")
-
     implementation fg.deobf("curse.maven:lendercataclysm-551586:8095632")
     implementation fg.deobf("curse.maven:lionfish-api-1001614:8095554")
     implementation fg.deobf("curse.maven:touhou-little-maid-355044:6979039")

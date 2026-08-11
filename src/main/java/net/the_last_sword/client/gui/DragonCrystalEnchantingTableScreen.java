@@ -126,12 +126,20 @@ public class DragonCrystalEnchantingTableScreen extends AbstractContainerScreen<
         super.containerTick();
 
         ItemStack currentItem = this.menu.getSlot(1).getItem();
-        if (!ItemStack.isSameItemSameTags(currentItem, lastSlotItem)) {
+        if (hasEnchantingTargetChanged(currentItem)) {
             lastSlotItem = currentItem.copy();
             updateEnchantmentList();
         }
 
         updateApplyButtonState();
+    }
+
+    // 充能会持续修改物品的能量 NBT，但能量变化不应重置玩家尚未提交的附魔选择。
+    // 只有物品类型或实际附魔数据变化时，才需要重建右侧列表。
+    private boolean hasEnchantingTargetChanged(ItemStack currentItem) {
+        return currentItem.getItem() != lastSlotItem.getItem()
+                || !EnchantmentHelper.getEnchantments(currentItem)
+                .equals(EnchantmentHelper.getEnchantments(lastSlotItem));
     }
 
     // 更新可用附魔列表
