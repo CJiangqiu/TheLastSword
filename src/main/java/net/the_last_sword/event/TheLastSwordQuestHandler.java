@@ -29,6 +29,7 @@ import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.AdvancementEvent;
@@ -54,12 +55,17 @@ public class TheLastSwordQuestHandler {
     private static final ResourceLocation DRAGON_CULT_RAID = new ResourceLocation(TheLastSwordMod.MOD_ID, "dragon_cult_raid");
     public static final ResourceLocation DRAGON_CULT_RAID_VICTORY =
             new ResourceLocation(TheLastSwordMod.MOD_ID, "dragon_cult_raid_victory");
+    private static final ResourceLocation NETHER_TRAVELER_OUTPOST =
+            new ResourceLocation(TheLastSwordMod.MOD_ID, "nether_traveler_outpost");
+    private static final ResourceLocation LIBERATOR = new ResourceLocation(TheLastSwordMod.MOD_ID, "liberator");
 
     private static final int CHECK_INTERVAL = 40;
     private static final int VILLAGE_HINT_DELAY = 60;
     private static final int VILLAGE_SEARCH_RADIUS = 100;
     private static final int BLACKSMITH_EFFECT_DURATION = 999 * 20;
     private static final double BLACKSMITH_MAX_HEALTH = 100.0D;
+    private static final double BLACKSMITH_MIN_PLAYER_DISTANCE = 16.0D;
+    private static final int BLACKSMITH_SPAWN_ATTEMPTS = 64;
     private static final int GEAR_TRADE_XP = 10;
     //多人下多名玩家共用同一铁匠，卷轴留足次数
     private static final int SCROLL_TRADE_USES = 12;
@@ -99,20 +105,26 @@ public class TheLastSwordQuestHandler {
         }
         checkTroubledBlacksmith(player);
         checkDragonCultRaid(player);
+        checkNetherTravelerOutpost(player);
     }
 
-    //达成欢迎进度后延迟播报最近的村庄
+    //达成关键进度后播报下一步任务提示
     @SubscribeEvent
     public static void onAdvancementEarn(AdvancementEvent.AdvancementEarnEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
         }
-        if (!WELCOME.equals(event.getAdvancement().getId()) || !isQuestSystemEnabled()) {
+        if (!isQuestSystemEnabled()) {
             return;
         }
-        MinecraftServer server = player.server;
-        UUID playerId = player.getUUID();
-        TheLastSwordMod.queueServerWork(VILLAGE_HINT_DELAY, () -> locateNearestVillage(server, playerId));
+        ResourceLocation advancementId = event.getAdvancement().getId();
+        if (WELCOME.equals(advancementId)) {
+            MinecraftServer server = player.server;
+            UUID playerId = player.getUUID();
+            TheLastSwordMod.queueServerWork(VILLAGE_HINT_DELAY, () -> locateNearestVillage(server, playerId));
+        } else if (LIBERATOR.equals(advancementId)) {
+            broadcast(player, "message.the_last_sword.liberator_tower_hint");
+        }
     }
 
     //========== 苦恼的铁匠 ==========
@@ -141,21 +153,27 @@ public class TheLastSwordQuestHandler {
             return;
         }
         ServerLevel level = player.serverLevel();
-        if (!level.structureManager().getStructureWithPieceAt(player.blockPosition(), StructureTags.VILLAGE).isValid()) {
+        StructureStart village = level.structureManager()
+                .getStructureWithPieceAt(player.blockPosition(), StructureTags.VILLAGE);
+        if (!village.isValid()) {
             return;
         }
-        grant(player, TROUBLED_BLACKSMITH);
-        spawnTroubledBlacksmith(level, player);
+        if (spawnTroubledBlacksmith(level, player, village)) {
+            grant(player, TROUBLED_BLACKSMITH);
+        }
     }
 
     //刷出苦恼的铁匠村民并向玩家播报位置
-    private static void spawnTroubledBlacksmith(ServerLevel level, ServerPlayer player) {
+    private static boolean spawnTroubledBlacksmith(ServerLevel level, ServerPlayer player,
+            StructureStart village) {
         Villager villager = EntityType.VILLAGER.create(level);
         if (villager == null) {
-            return;
+            return false;
         }
-        BlockPos base = player.blockPosition().offset(level.random.nextInt(5) - 2, 0, level.random.nextInt(5) - 2);
-        BlockPos pos = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, base);
+        BlockPos pos = findBlacksmithSpawnPos(level, player, village, villager);
+        if (pos == null) {
+            return false;
+        }
         villager.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, level.random.nextFloat() * 360.0F, 0.0F);
         ForgeEventFactory.onFinalizeSpawn(villager, level, level.getCurrentDifficultyAt(pos), MobSpawnType.EVENT, null, null);
 
@@ -183,9 +201,52 @@ public class TheLastSwordQuestHandler {
         offers.add(gearOffer(7, Items.IRON_LEGGINGS, Enchantments.BLAST_PROTECTION));
         offers.add(gearOffer(4, Items.IRON_BOOTS, Enchantments.FALL_PROTECTION));
 
-        level.addFreshEntity(villager);
+        if (!level.addFreshEntity(villager)) {
+            return false;
+        }
         broadcast(player, "message.the_last_sword.troubled_blacksmith_intro");
         broadcast(player, "message.the_last_sword.troubled_blacksmith_location", coordinates(pos.getX(), pos.getY(), pos.getZ()));
+        return true;
+    }
+
+    //优先在村庄结构内随机选择距玩家至少16格的安全落点；小村庄则选择最远备选点
+    private static BlockPos findBlacksmithSpawnPos(ServerLevel level, ServerPlayer player,
+            StructureStart village, Villager villager) {
+        if (village.getPieces().isEmpty()) {
+            return null;
+        }
+
+        double minimumDistanceSqr = BLACKSMITH_MIN_PLAYER_DISTANCE * BLACKSMITH_MIN_PLAYER_DISTANCE;
+        double farthestDistanceSqr = -1.0D;
+        BlockPos farthestPos = null;
+
+        for (int attempt = 0; attempt < BLACKSMITH_SPAWN_ATTEMPTS; attempt++) {
+            var piece = village.getPieces().get(level.random.nextInt(village.getPieces().size()));
+            var box = piece.getBoundingBox();
+            int x = box.minX() + level.random.nextInt(box.getXSpan());
+            int z = box.minZ() + level.random.nextInt(box.getZSpan());
+            BlockPos pos = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                    new BlockPos(x, 0, z));
+
+            villager.moveTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D, 0.0F, 0.0F);
+            if (!level.getFluidState(pos).isEmpty()
+                    || !level.getFluidState(pos.above()).isEmpty()
+                    || !level.noCollision(villager)) {
+                continue;
+            }
+
+            double dx = pos.getX() + 0.5D - player.getX();
+            double dz = pos.getZ() + 0.5D - player.getZ();
+            double distanceSqr = dx * dx + dz * dz;
+            if (distanceSqr >= minimumDistanceSqr) {
+                return pos;
+            }
+            if (distanceSqr > farthestDistanceSqr) {
+                farthestDistanceSqr = distanceSqr;
+                farthestPos = pos;
+            }
+        }
+        return farthestPos;
     }
 
     //家当交易：绿宝石换经验修补+指定1级附魔的铁装备
@@ -227,10 +288,19 @@ public class TheLastSwordQuestHandler {
         }
     }
 
+    //击退拜龙教并取得秘信后，引导玩家前往旅行者的下界据点
+    private static void checkNetherTravelerOutpost(ServerPlayer player) {
+        if (!isDone(player, NETHER_TRAVELER_OUTPOST)
+                && isDone(player, DRAGON_CULT_RAID_VICTORY)
+                && player.getInventory().contains(new ItemStack(ModItems.DRAGON_CULT_SECRET_LETTER.get()))) {
+            grant(player, NETHER_TRAVELER_OUTPOST);
+        }
+    }
+
     //========== 进度工具 ==========
 
     //判断进度是否已完成
-    private static boolean isDone(ServerPlayer player, ResourceLocation id) {
+    public static boolean isDone(ServerPlayer player, ResourceLocation id) {
         Advancement advancement = player.server.getAdvancements().getAdvancement(id);
         return advancement != null && player.getAdvancements().getOrStartProgress(advancement).isDone();
     }

@@ -18,18 +18,24 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
 import net.the_last_sword.entity.TheLastSwordYouNeverForgotProjectile;
 import net.the_last_sword.util.EntityUtil;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 // 隐藏武器 - 无模式/等级系统，纯粹的高额伤害+弹射物
 public class TheLastSwordYouNeverForgot extends TheLastEndSwordItems {
 
     public static final float ABSOLUTE_DESTRUCTION_DAMAGE = 7999999874453995500f;
+    private static final int ALL_RETURN_DURATION_TICKS = 13 * 20;
+    private static final Map<String, Long> ALL_RETURN_EXPIRATIONS = new HashMap<>();
+    private static long nextAllReturnToken;
 
     public TheLastSwordYouNeverForgot() {
         super(new Tier() {
@@ -82,10 +88,41 @@ public class TheLastSwordYouNeverForgot extends TheLastEndSwordItems {
         if (!super.hurtEnemy(stack, target, attacker)) return false;
 
         if (!attacker.level().isClientSide) {
+            applyTimedAllReturn(target);
             target.invulnerableTime = 0;
             attack(target, attacker, ABSOLUTE_DESTRUCTION_DAMAGE);
         }
         return true;
+    }
+
+    /**
+     * AllReturn 实际作用于目标实体所属的整个 Mod，而不是单个实体。
+     * 使用实体注册命名空间合并同一 Mod 的计时，重复命中会刷新完整的 13 秒持续时间。
+     */
+    private static void applyTimedAllReturn(LivingEntity target) {
+        var entityId = ForgeRegistries.ENTITY_TYPES.getKey(target.getType());
+        String scopeKey = entityId != null ? entityId.getNamespace() : target.getClass().getName();
+        long token;
+
+        synchronized (ALL_RETURN_EXPIRATIONS) {
+            if (!ALL_RETURN_EXPIRATIONS.containsKey(scopeKey) && !EcaAPI.enableAllReturn(target)) {
+                return;
+            }
+
+            token = ++nextAllReturnToken;
+            ALL_RETURN_EXPIRATIONS.put(scopeKey, token);
+        }
+
+        TheLastSwordMod.queueServerWork(ALL_RETURN_DURATION_TICKS, () -> {
+            synchronized (ALL_RETURN_EXPIRATIONS) {
+                if (!Long.valueOf(token).equals(ALL_RETURN_EXPIRATIONS.get(scopeKey))) {
+                    return;
+                }
+
+                EcaAPI.disableAllReturn(target);
+                ALL_RETURN_EXPIRATIONS.remove(scopeKey);
+            }
+        });
     }
 
     // 右键：发射独立弹射物

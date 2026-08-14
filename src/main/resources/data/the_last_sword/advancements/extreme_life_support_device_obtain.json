@@ -1,0 +1,38 @@
+{
+  "display": {
+    "icon": {
+      "item": "the_last_sword:extreme_life_support_device"
+    },
+    "title": {
+      "translate": "advancements.extreme_life_support_device_obtain.title"
+    },
+    "description": {
+      "translate": "advancements.extreme_life_support_device_obtain.descr"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "extreme_life_support_device_obtain": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "the_last_sword:extreme_life_support_device"
+            ],
+            "count": {
+              "min": 1
+            }
+          }
+        ]
+      }
+    }
+  },
+  "rewards": {
+    "experience": 50
+  },
+  "parent": "the_last_sword:dragon_crystal_enchanting_table_obtain"
+}

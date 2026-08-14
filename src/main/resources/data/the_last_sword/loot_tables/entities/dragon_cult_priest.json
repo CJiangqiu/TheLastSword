@@ -79,6 +79,15 @@
       "entries": [
         {
           "type": "minecraft:item",
+          "name": "the_last_sword:dragon_cult_secret_letter"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
           "name": "the_last_sword:dragon_crystal",
           "conditions": [
             {

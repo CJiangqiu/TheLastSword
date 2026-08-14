@@ -116,6 +116,27 @@ public class NetworkHandler {
                 .decoder(SyncDragonCrystalRecipesPacket::decode)
                 .consumerMainThread(SyncDragonCrystalRecipesPacket::handle)
                 .add();
+
+        //终焉卷轴打开及被毁村庄坐标同步
+        CHANNEL.messageBuilder(OpenLastEndScrollPacket.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(OpenLastEndScrollPacket::encode)
+                .decoder(OpenLastEndScrollPacket::decode)
+                .consumerMainThread(OpenLastEndScrollPacket::handle)
+                .add();
+
+        //纸条阅读GUI打开包
+        CHANNEL.messageBuilder(OpenPaperNotePacket.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(OpenPaperNotePacket::encode)
+                .decoder(OpenPaperNotePacket::decode)
+                .consumerMainThread(OpenPaperNotePacket::handle)
+                .add();
+
+        //纸条收集确认包
+        CHANNEL.messageBuilder(ConfirmPaperNotePacket.class, id())
+                .encoder(ConfirmPaperNotePacket::encode)
+                .decoder(ConfirmPaperNotePacket::decode)
+                .consumerMainThread(ConfirmPaperNotePacket::handle)
+                .add();
     }
 
     //发送到服务端

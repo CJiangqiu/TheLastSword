@@ -23,6 +23,12 @@ public class ModSounds {
                     () -> SoundEvent.createVariableRangeEvent(
                             new ResourceLocation(TheLastSwordMod.MOD_ID, "lost_wraith")));
 
+    //拜龙教袭击开始音乐
+    public static final RegistryObject<SoundEvent> DRAGON_CULT_IS_COMING =
+            SOUNDS.register("dragon_cult_is_coming",
+                    () -> SoundEvent.createFixedRangeEvent(
+                            new ResourceLocation(TheLastSwordMod.MOD_ID, "dragon_cult_is_coming"), 64.0F));
+
     //危险技能提醒音效
     public static final RegistryObject<SoundEvent> ALARM =
             SOUNDS.register("alarm",

@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "the_last_sword:travelers_hold",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 32,
+    "separation": 16,
+    "salt": 194736285
+  }
+}

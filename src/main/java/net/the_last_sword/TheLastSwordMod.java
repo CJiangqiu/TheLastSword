@@ -28,6 +28,7 @@ import net.the_last_sword.init.ModMenus;
 import net.the_last_sword.init.ModRecipes;
 import net.the_last_sword.init.ModSounds;
 import net.the_last_sword.network.NetworkHandler;
+import net.the_last_sword.worldgen.ModStructureTypes;
 import net.the_last_sword.util.TheLastSwordLogger;
 import net.the_last_sword.event.ClientEventHandler;
 import net.the_last_sword.event.EnderDragonEvent;
@@ -65,6 +66,7 @@ public class TheLastSwordMod {
         ModRecipes.register(modEventBus);
         ModCreativeTabs.register(modEventBus);
         ModSounds.SOUNDS.register(modEventBus);
+        ModStructureTypes.register(modEventBus);
 
         //注册内置资源包
         modEventBus.addListener(this::addPackFinders);

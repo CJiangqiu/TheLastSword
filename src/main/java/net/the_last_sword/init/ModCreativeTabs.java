@@ -90,6 +90,14 @@ public class ModCreativeTabs {
                     unluckyVariant.getOrCreateTag().putInt("Luck", -100);
                     output.accept(unluckyVariant);
                 }
+
+                //剧情笔记
+                output.accept(ModItems.MAGE_NOTE_1.get());
+                output.accept(ModItems.MAGE_NOTE_2.get());
+                output.accept(ModItems.MAGE_NOTE_3.get());
+                output.accept(ModItems.MAGE_NOTE_4.get());
+                output.accept(ModItems.DRAGON_CULT_SECRET_LETTER.get());
+                output.accept(ModItems.TRAVELER_MESSAGE.get());
             })
             .build()
     );

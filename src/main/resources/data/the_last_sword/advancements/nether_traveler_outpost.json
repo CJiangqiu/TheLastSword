@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "item": "the_last_sword:dragon_cult_secret_letter"
+    },
+    "title": {
+      "translate": "advancements.nether_traveler_outpost.title"
+    },
+    "description": {
+      "translate": "advancements.nether_traveler_outpost.descr"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "nether_traveler_outpost_0": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "the_last_sword:dragon_cult_raid_victory"
+}

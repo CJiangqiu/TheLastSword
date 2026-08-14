@@ -297,7 +297,10 @@ public class DragonCultPriestEntity extends TheLastEndEntity {
         if (!level().isClientSide) {
             CompoundTag data = getPersistentData();
             if (!data.contains(NAMED_VARIANT_ID_KEY)) {
-                data.putInt(NAMED_VARIANT_ID_KEY, NamedPriestVariant.random(getRandom()).getId());
+                int variantId = TheLastSwordConfiguration.getDragonCultPriestNamedEnableSafely()
+                        ? NamedPriestVariant.random(getRandom()).getId()
+                        : 0;
+                data.putInt(NAMED_VARIANT_ID_KEY, variantId);
             }
             syncNamedVariant(true);
 

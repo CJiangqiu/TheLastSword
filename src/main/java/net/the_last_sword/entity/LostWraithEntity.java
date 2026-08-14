@@ -326,7 +326,8 @@ public class LostWraithEntity extends TheLastEndEntity {
             return InteractionResult.sidedSuccess(level().isClientSide);
         }
 
-        if (itemstack.isEmpty() && !isReady()) {
+        // 未激活时，除龙蛋以外的任何物品（包括空手）右键都会继续对话。
+        if (!isReady()) {
             if (!level().isClientSide) {
                 sendNextTalk(player);
             }

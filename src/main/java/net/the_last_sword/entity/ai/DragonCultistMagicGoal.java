@@ -12,10 +12,11 @@ import net.the_last_sword.entity.DragonCultistEntity;
 
 import java.util.EnumSet;
 
-// 教徒魔法远程Goal，HP>50%且≥8格发射火球+靠近，HP≤50%持续火球+远离
+// 教徒魔法远程Goal，HP>50%时在远处发射火球，HP≤50%时近距离后撤、拉开后等待冷却施法
 public class DragonCultistMagicGoal extends Goal {
     private static final int ANIMATION_LENGTH = 35;
     private static final int FIRE_TICK = 25;
+    private static final double LOW_HP_RETREAT_DISTANCE = 3.0D;
     private static final double CHARGE_DISTANCE = 1.1D;
     private static final double MIN_CHARGE_RADIUS = 0.12D;
     private static final double MAX_CHARGE_RADIUS = 0.42D;
@@ -44,13 +45,12 @@ public class DragonCultistMagicGoal extends Goal {
         if (target == null || !target.isAlive()) {
             return false;
         }
-        if (isOnCooldown()) {
-            return false;
-        }
-
         float hpRatio = getHpRatio();
         if (hpRatio <= 0.5f) {
-            return true; // 低血量时冷却好了就用
+            return true;
+        }
+        if (isOnCooldown()) {
+            return false;
         }
 
         // 高血量时只在远处用
@@ -63,7 +63,7 @@ public class DragonCultistMagicGoal extends Goal {
         if (animationTick > 0) {
             return true;
         }
-        // 低血量模式：持续循环（施法→冷却+后退→施法）
+        // 低血量模式：持续根据距离在后退和施法之间切换
         if (lowHpMode) {
             LivingEntity target = cultist.getTarget();
             return target != null && target.isAlive();
@@ -75,7 +75,9 @@ public class DragonCultistMagicGoal extends Goal {
     public void start() {
         float hpRatio = getHpRatio();
         lowHpMode = hpRatio <= 0.5f;
-        beginCast();
+        if (!lowHpMode) {
+            beginCast();
+        }
     }
 
     @Override
@@ -107,16 +109,18 @@ public class DragonCultistMagicGoal extends Goal {
             return;
         }
 
-        // 低血量模式：冷却期间后退
+        // 低血量模式：3格内后退，拉开距离后等待冷却施法
         if (lowHpMode) {
             LivingEntity target = cultist.getTarget();
             if (target == null || !target.isAlive()) {
                 return;
             }
-            retreat(target);
 
-            // 冷却完毕，再次施法
-            if (!isOnCooldown() && cultist.getAnimationState() == DragonCultistEntity.STATE_IDLE) {
+            cultist.getLookControl().setLookAt(target, 30.0F, 30.0F);
+            if (cultist.distanceTo(target) <= LOW_HP_RETREAT_DISTANCE) {
+                retreat(target);
+            } else if (!isOnCooldown()
+                && cultist.getAnimationState() == DragonCultistEntity.STATE_IDLE) {
                 beginCast();
             }
         }

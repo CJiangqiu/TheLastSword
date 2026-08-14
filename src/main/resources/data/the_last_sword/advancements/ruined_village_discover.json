@@ -1,0 +1,30 @@
+{
+  "display": {
+    "icon": {
+      "item": "minecraft:ender_eye"
+    },
+    "title": {
+      "translate": "advancements.ruined_village_discover.title"
+    },
+    "description": {
+      "translate": "advancements.ruined_village_discover.descr"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "ruined_village_discover_0": {
+      "trigger": "minecraft:tick",
+      "conditions": {
+        "player": {
+          "location": {
+            "structure": "the_last_sword:ruined_village"
+          }
+        }
+      }
+    }
+  },
+  "parent": "the_last_sword:mage_village_destination"
+}

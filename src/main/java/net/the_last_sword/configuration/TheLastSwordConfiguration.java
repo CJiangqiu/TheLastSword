@@ -211,6 +211,7 @@ public class TheLastSwordConfiguration {
     public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_CULT_PALADIN_BLOCK_COOLDOWN;
 
     // Dragon Cult Priest | 拜龙教祭司
+    public static ForgeConfigSpec.ConfigValue<Boolean> DRAGON_CULT_PRIEST_NAMED_ENABLE;
     public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PRIEST_DAMAGE_LIMIT;
     public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_CULT_PRIEST_HURT_RESIST_TIME;
     public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PRIEST_DEATH_EXPLOSION_POWER;
@@ -334,7 +335,7 @@ public class TheLastSwordConfiguration {
     public static ForgeConfigSpec.ConfigValue<Boolean> ENDER_DRAGON_EGG_GIVE_TO_ABSENT_PLAYERS;
 
     // Stronger Ender Dragon | 更强的末影龙配置
-    public static ForgeConfigSpec.ConfigValue<Integer> ENDER_DRAGON_NAMED_CHANCE;
+    public static ForgeConfigSpec.ConfigValue<Boolean> ENDER_DRAGON_NAMED_ENABLE;
     public static ForgeConfigSpec.ConfigValue<Integer> ENDER_DRAGON_MAX_LEVEL;
     public static ForgeConfigSpec.ConfigValue<Double> ENDER_DRAGON_HEALTH_INCREASE_VALUE;
     public static ForgeConfigSpec.ConfigValue<Double> ENDER_DRAGON_HEALTH_INCREASE_VALUE_HIGH_LEVEL;
@@ -1538,6 +1539,12 @@ public class TheLastSwordConfiguration {
 
         // Dragon Cult Priest | 拜龙教祭司
         BUILDER.push("Dragon Cult Priest");
+        DRAGON_CULT_PRIEST_NAMED_ENABLE = BUILDER
+            .comment(
+                "Enable random named variants for Dragon Cult Priests",
+                "启用拜龙教祭司的随机命名变体强化"
+            )
+            .define("Enable Named Priest", true);
         DRAGON_CULT_PRIEST_DAMAGE_LIMIT = BUILDER
             .comment(
                 "Maximum damage priest can take per hit",
@@ -1907,12 +1914,12 @@ public class TheLastSwordConfiguration {
 
         // Stronger Ender Dragon Settings | 更强的末影龙设置
         BUILDER.push("Stronger Ender Dragon");
-        ENDER_DRAGON_NAMED_CHANCE = BUILDER
+        ENDER_DRAGON_NAMED_ENABLE = BUILDER
             .comment(
-                "Chance (percent) for a respawned Ender Dragon to receive a named variant",
-                "重生末影龙获得命名变体的概率（百分比）"
+                "Enable random named variants for respawned Ender Dragons",
+                "启用重生末影龙的随机命名变体强化"
             )
-            .defineInRange("Named Dragon Chance", 25, 0, 100);
+            .define("Enable Named Dragon", true);
         ENDER_DRAGON_MAX_LEVEL = BUILDER
             .comment(
                 "Maximum level for Ender Dragon",
@@ -2532,6 +2539,10 @@ public class TheLastSwordConfiguration {
     }
 
     //拜龙教祭司配置
+    public static boolean getDragonCultPriestNamedEnableSafely() {
+        return safeGet(DRAGON_CULT_PRIEST_NAMED_ENABLE, true);
+    }
+
     public static double getDragonCultPriestDamageLimitSafely() {
         return safeGet(DRAGON_CULT_PRIEST_DAMAGE_LIMIT, 10.0);
     }

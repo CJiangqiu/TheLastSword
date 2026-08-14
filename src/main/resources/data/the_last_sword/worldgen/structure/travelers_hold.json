@@ -1,0 +1,7 @@
+{
+  "type": "the_last_sword:travelers_hold",
+  "spawn_overrides": {},
+  "step": "surface_structures",
+  "terrain_adaptation": "none",
+  "biomes": "#the_last_sword:has_structure/travelers_hold"
+}

@@ -25,6 +25,66 @@ public class ModItems {
         TheLastEndScroll::new
     );
 
+    //法师的笔记1 - 剧情纸条
+    public static final RegistryObject<Item> MAGE_NOTE_1 = ITEMS.register("mage_note_1",
+        () -> new PaperNote(
+            "item.the_last_sword.mage_note_1",
+            "item_tooltip.the_last_sword.mage_note_1",
+            "note.the_last_sword.mage_note_1.content",
+            "note.the_last_sword.mage_note_1.gui"
+        )
+    );
+
+    //法师的笔记2 - 剧情纸条
+    public static final RegistryObject<Item> MAGE_NOTE_2 = ITEMS.register("mage_note_2",
+        () -> new PaperNote(
+            "item.the_last_sword.mage_note_2",
+            "item_tooltip.the_last_sword.mage_note_2",
+            "note.the_last_sword.mage_note_2.content",
+            "note.the_last_sword.mage_note_2.gui"
+        )
+    );
+
+    //法师的笔记3 - 剧情纸条
+    public static final RegistryObject<Item> MAGE_NOTE_3 = ITEMS.register("mage_note_3",
+        () -> new PaperNote(
+            "item.the_last_sword.mage_note_3",
+            "item_tooltip.the_last_sword.mage_note_3",
+            "note.the_last_sword.mage_note_3.content",
+            "note.the_last_sword.mage_note_3.gui"
+        )
+    );
+
+    //法师的笔记4 - 剧情纸条
+    public static final RegistryObject<Item> MAGE_NOTE_4 = ITEMS.register("mage_note_4",
+        () -> new PaperNote(
+            "item.the_last_sword.mage_note_4",
+            "item_tooltip.the_last_sword.mage_note_4",
+            "note.the_last_sword.mage_note_4.content",
+            "note.the_last_sword.mage_note_4.gui"
+        )
+    );
+
+    //拜龙教的秘信 - 剧情纸条
+    public static final RegistryObject<Item> DRAGON_CULT_SECRET_LETTER = ITEMS.register("dragon_cult_secret_letter",
+        () -> new PaperNote(
+            "item.the_last_sword.dragon_cult_secret_letter",
+            "item_tooltip.the_last_sword.dragon_cult_secret_letter",
+            "note.the_last_sword.dragon_cult_secret_letter.content",
+            "note.the_last_sword.dragon_cult_secret_letter.gui"
+        )
+    );
+
+    //旅行者的讯息 - 剧情纸条
+    public static final RegistryObject<Item> TRAVELER_MESSAGE = ITEMS.register("traveler_message",
+        () -> new PaperNote(
+            "item.the_last_sword.traveler_message",
+            "item_tooltip.the_last_sword.traveler_message",
+            "note.the_last_sword.traveler_message.content",
+            "note.the_last_sword.traveler_message.content"
+        )
+    );
+
     public static final RegistryObject<Item> DRAGON_CRYSTAL = ITEMS.register("dragon_crystal",
         DragonCrystal::new
     );

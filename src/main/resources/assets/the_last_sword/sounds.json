@@ -17,6 +17,15 @@
       }
     ]
   },
+  "dragon_cult_is_coming": {
+    "subtitle": "subtitles.dragon_cult_is_coming",
+    "sounds": [
+      {
+        "name": "the_last_sword:dragon_cult_is_coming",
+        "stream": true
+      }
+    ]
+  },
   "alarm": {
     "subtitle": "subtitles.alarm",
     "sounds": [

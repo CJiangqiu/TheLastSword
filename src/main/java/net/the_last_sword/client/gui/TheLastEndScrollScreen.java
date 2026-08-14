@@ -13,6 +13,7 @@ import net.the_last_sword.client.gui.scroll.ScrollRecipeRenderer;
 import net.the_last_sword.compat.CompatCheck;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.init.ModItems;
+import net.the_last_sword.network.OpenLastEndScrollPacket.PaperNoteEntry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -137,6 +138,14 @@ public class TheLastEndScrollScreen extends Screen {
     //当前配方页中鼠标指向的物品，最后渲染tooltip
     private ItemStack hoveredRecipeStack = ItemStack.EMPTY;
 
+    //卷轴首次打开时由服务端写入物品NBT，此后始终显示同一座被毁村庄
+    private final boolean hasRuinedVillageLocation;
+    private final int ruinedVillageX;
+    private final int ruinedVillageZ;
+
+    //已收集纸条列表（旅途见闻章节数据）
+    private final List<PaperNoteEntry> collectedNotes;
+
     private static ResourceLocation recipeId(String path) {
         return new ResourceLocation(TheLastSwordMod.MOD_ID, path);
     }
@@ -145,8 +154,13 @@ public class TheLastEndScrollScreen extends Screen {
         return new ResourceLocation(TheLastSwordMod.MOD_ID, "config/" + path);
     }
 
-    public TheLastEndScrollScreen() {
+    public TheLastEndScrollScreen(boolean hasRuinedVillageLocation, int ruinedVillageX, int ruinedVillageZ,
+            List<PaperNoteEntry> collectedNotes) {
         super(Component.empty());
+        this.hasRuinedVillageLocation = hasRuinedVillageLocation;
+        this.ruinedVillageX = ruinedVillageX;
+        this.ruinedVillageZ = ruinedVillageZ;
+        this.collectedNotes = collectedNotes;
         // 章节初始化移到 init() 方法中执行
     }
 
@@ -218,7 +232,14 @@ public class TheLastEndScrollScreen extends Screen {
         }
 
         //获取章节内容并自动换行
-        Component contentComp = Component.translatable(contentKey);
+        Component contentComp;
+        if ("gui.the_last_sword.scroll_book.chapter5.content".equals(contentKey)) {
+            Object x = hasRuinedVillageLocation ? ruinedVillageX : "?";
+            Object z = hasRuinedVillageLocation ? ruinedVillageZ : "?";
+            contentComp = Component.translatable(contentKey, x, z);
+        } else {
+            contentComp = Component.translatable(contentKey);
+        }
         String content = contentComp.getString();
         chapter.allLines = wrapText(content, TEXT_WIDTH);
 
@@ -395,9 +416,11 @@ public class TheLastEndScrollScreen extends Screen {
         int startX = guiLeft + TEXT_START_X + 10;
         int startY = guiTop + TEXT_START_Y + 20;
 
-        //第一行：3个按钮
-        for (int i = 0; i < 3; i++) {
+        //前6个章节按钮两行排布（3+3）
+        for (int i = 0; i < 6; i++) {
             final int chapterIndex = i;
+            int row = i < 3 ? 0 : 1;
+            int col = i % 3;
             Button btn = Button.builder(
                 Component.literal((i + 1) + ". ").append(Component.translatable("gui.the_last_sword.the_last_end_scroll.chapter_" + (i + 1))),
                 button -> {
@@ -406,28 +429,27 @@ public class TheLastEndScrollScreen extends Screen {
                         spawnClickParticles(button);
                     }
                 }
-            ).bounds(startX + i * (buttonWidth + buttonSpacingX), startY, buttonWidth, buttonHeight).build();
+            ).bounds(startX + col * (buttonWidth + buttonSpacingX), startY + row * (buttonHeight + buttonSpacingY), buttonWidth, buttonHeight).build();
 
             chapterButtons.add(btn);
             this.addRenderableWidget(btn);
         }
 
-        //第二行：3个按钮
-        for (int i = 3; i < 6; i++) {
-            final int chapterIndex = i;
-            Button btn = Button.builder(
-                Component.literal((i + 1) + ". ").append(Component.translatable("gui.the_last_sword.the_last_end_scroll.chapter_" + (i + 1))),
-                button -> {
-                    jumpToChapter(chapterIndex);
-                    if (TheLastSwordConfiguration.getTheLastEndScrollEnableParticleEffectsSafely()) {
-                        spawnClickParticles(button);
-                    }
+        //第三行对齐第二列（按钮2、5所在列）：「旅途见闻」无章节编号，打开见闻GUI
+        int journeyLogsX = startX + (buttonWidth + buttonSpacingX);
+        int journeyLogsY = startY + 2 * (buttonHeight + buttonSpacingY);
+        Button journeyLogsButton = Button.builder(
+            Component.translatable("gui.the_last_sword.the_last_end_scroll.chapter_7"),
+            button -> {
+                Minecraft.getInstance().setScreen(new JourneyLogsScreen(collectedNotes, TheLastEndScrollScreen.this));
+                if (TheLastSwordConfiguration.getTheLastEndScrollEnableParticleEffectsSafely()) {
+                    spawnClickParticles(button);
                 }
-            ).bounds(startX + (i - 3) * (buttonWidth + buttonSpacingX), startY + buttonHeight + buttonSpacingY, buttonWidth, buttonHeight).build();
+            }
+        ).bounds(journeyLogsX, journeyLogsY, buttonWidth, buttonHeight).build();
 
-            chapterButtons.add(btn);
-            this.addRenderableWidget(btn);
-        }
+        chapterButtons.add(journeyLogsButton);
+        this.addRenderableWidget(journeyLogsButton);
     }
 
     //跳转到指定章节

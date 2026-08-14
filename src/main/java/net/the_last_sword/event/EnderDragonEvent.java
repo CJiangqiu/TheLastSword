@@ -303,9 +303,8 @@ public class EnderDragonEvent {
             return;
         }
 
-        int chance = TheLastSwordConfiguration.ENDER_DRAGON_NAMED_CHANCE.get();
         int variantId = 0;
-        if (chance > 0 && dragon.getRandom().nextInt(100) < chance) {
+        if (TheLastSwordConfiguration.ENDER_DRAGON_NAMED_ENABLE.get()) {
             variantId = NamedDragonVariant.random(dragon.getRandom()).getId();
         }
 
