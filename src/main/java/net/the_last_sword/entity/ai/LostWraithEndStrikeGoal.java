@@ -1,8 +1,5 @@
 package net.the_last_sword.entity.ai;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -22,21 +19,18 @@ import java.util.List;
 // 迷失战魂终焉一击技能Goal
 public class LostWraithEndStrikeGoal extends Goal {
     private static final int ANIMATION_LENGTH = 80;
-    private static final int TELEPORT_TICK = 5;
     private static final int SOUND_TICK = 10;
     private static final int PULL_START_TICK = 30;
     private static final int PULL_END_TICK = 70;
     private static final int DAMAGE_TICK = 70;
 
     private final LostWraithEntity wraith;
-    private final boolean punishmentMode;
     private int animationTick;
-    private int cooldown;
+    private long cooldownEnd;
     private final List<TargetPositionData> pullTargets = new ArrayList<>();
 
-    public LostWraithEndStrikeGoal(LostWraithEntity wraith, boolean punishmentMode) {
+    public LostWraithEndStrikeGoal(LostWraithEntity wraith) {
         this.wraith = wraith;
-        this.punishmentMode = punishmentMode;
         setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
     }
 
@@ -52,17 +46,11 @@ public class LostWraithEndStrikeGoal extends Goal {
         if (target == null || !target.isAlive()) {
             return false;
         }
-        if (punishmentMode) {
-            return wraith.consumeForceEndStrike();
-        }
-        if (wraith.isForceEndStrike()) {
+        if (wraith.level().getGameTime() < cooldownEnd) {
             return false;
         }
-        if (cooldown > 0) {
-            cooldown--;
-            return false;
-        }
-        return true;
+        return wraith.distanceTo(target)
+            <= TheLastSwordConfiguration.getLostWraithPunchAttackDistanceSafely();
     }
 
     @Override
@@ -76,7 +64,6 @@ public class LostWraithEndStrikeGoal extends Goal {
         wraith.setAnimationState(LostWraithEntity.STATE_END_STRIKE);
         wraith.getNavigation().stop();
         pullTargets.clear();
-        wraith.resetPatience();
     }
 
     @Override
@@ -86,10 +73,6 @@ public class LostWraithEndStrikeGoal extends Goal {
         }
 
         int relativeFrame = ANIMATION_LENGTH - animationTick;
-
-        if (relativeFrame == TELEPORT_TICK) {
-            teleportToTarget();
-        }
 
         if (relativeFrame == SOUND_TICK
             && TheLastSwordConfiguration.getEntityDangerousSkillAlarmEnabledSafely()) {
@@ -118,9 +101,8 @@ public class LostWraithEndStrikeGoal extends Goal {
 
         if (animationTick == 0) {
             wraith.setAnimationState(LostWraithEntity.STATE_IDLE);
-            if (!punishmentMode) {
-                cooldown = TheLastSwordConfiguration.getLostWraithEndStrikeCooldownSafely();
-            }
+            cooldownEnd = wraith.level().getGameTime()
+                + TheLastSwordConfiguration.getLostWraithEndStrikeCooldownSafely();
         }
     }
 
@@ -138,69 +120,12 @@ public class LostWraithEndStrikeGoal extends Goal {
         return true;
     }
 
-    private void teleportToTarget() {
-        LivingEntity target = wraith.getTarget();
-        if (target == null) return;
-
-        Vec3 teleportPos = findRandomPositionAroundTarget(target);
-        if (teleportPos == null) return;
-
-        Vec3 oldPosition = wraith.position();
-
-        if (wraith.level() instanceof ServerLevel serverLevel) {
-            spawnTeleportParticles(serverLevel, oldPosition);
-            wraith.level().playSound(null, BlockPos.containing(oldPosition),
-                SoundEvents.ENDERMAN_TELEPORT, wraith.getSoundSource(), 1.0F, 1.0F);
-        }
-
-        EntityUtil.theLastEndTeleport(wraith, teleportPos.x, teleportPos.y, teleportPos.z);
-        EntityUtil.faceTarget(wraith, target);
-
-        if (wraith.level() instanceof ServerLevel serverLevel) {
-            spawnTeleportParticles(serverLevel, teleportPos);
-            wraith.level().playSound(null, BlockPos.containing(teleportPos),
-                SoundEvents.ENDERMAN_TELEPORT, wraith.getSoundSource(), 1.0F, 1.0F);
-        }
-    }
-
-    private Vec3 findRandomPositionAroundTarget(LivingEntity target) {
-        Vec3 targetPos = target.position();
-        double angle = wraith.getRandom().nextDouble() * 2 * Math.PI;
-        double distance = 1.0;
-
-        double x = targetPos.x + Math.cos(angle) * distance;
-        double y = targetPos.y;
-        double z = targetPos.z + Math.sin(angle) * distance;
-
-        if (isSafeTeleportPosition(x, y, z)) {
-            return new Vec3(x, y, z);
-        }
-        return new Vec3(targetPos.x, targetPos.y, targetPos.z);
-    }
-
-    private boolean isSafeTeleportPosition(double x, double y, double z) {
-        BlockPos pos = BlockPos.containing(x, y, z);
-        BlockPos posAbove = pos.above();
-        return !wraith.level().getBlockState(pos).isSolid() &&
-               !wraith.level().getBlockState(posAbove).isSolid();
-    }
-
-    private void spawnTeleportParticles(ServerLevel serverLevel, Vec3 position) {
-        for (int i = 0; i < 32; i++) {
-            double d0 = serverLevel.random.nextGaussian() * 0.02D;
-            double d1 = serverLevel.random.nextGaussian() * 0.02D;
-            double d2 = serverLevel.random.nextGaussian() * 0.02D;
-
-            serverLevel.sendParticles(ParticleTypes.REVERSE_PORTAL,
-                position.x + (serverLevel.random.nextDouble() - 0.5D) * 2.0D,
-                position.y + serverLevel.random.nextDouble() * 2.0D,
-                position.z + (serverLevel.random.nextDouble() - 0.5D) * 2.0D,
-                1, d0, d1, d2, 0.1D);
-        }
-    }
-
     private void markPullTargets() {
-        Vec3 forward = wraith.getLookAngle();
+        Vec3 forward = wraith.getLookAngle().multiply(1.0, 0.0, 1.0);
+        if (forward.lengthSqr() < 1.0E-6) {
+            return;
+        }
+        forward = forward.normalize();
         Vec3 centerPos = wraith.position().add(forward.scale(2));
 
         double pullRadius = TheLastSwordConfiguration.getLostWraithEndStrikePullRadiusSafely();
@@ -214,7 +139,10 @@ public class LostWraithEndStrikeGoal extends Goal {
         Vec3 pullTarget = wraith.position().add(forward.scale(1));
 
         for (LivingEntity target : targets) {
-            pullTargets.add(new TargetPositionData(target, pullTarget));
+            Vec3 safePullTarget = EntityUtil.findSafeTeleportPosition(target, pullTarget, 2);
+            if (safePullTarget != null) {
+                pullTargets.add(new TargetPositionData(target, safePullTarget));
+            }
         }
     }
 

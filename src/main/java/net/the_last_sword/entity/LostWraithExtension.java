@@ -28,6 +28,11 @@ public class LostWraithExtension extends EntityExtension {
     }
 
     @Override
+    public boolean enableBossBar() {
+        return true;
+    }
+
+    @Override
     public boolean shouldShowBossBar(LivingEntity entity) {
         return entity instanceof LostWraithEntity lw && lw.isAlive()
             && lw.getAnimationState() != TheLastEndEntity.STATE_UNSPAWNED && !lw.isDying();

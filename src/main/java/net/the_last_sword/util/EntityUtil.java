@@ -2,6 +2,7 @@ package net.the_last_sword.util;
 
 import net.eca.api.EcaAPI;
 import net.eca.util.faction.FactionUtil;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.server.players.PlayerList;
@@ -398,6 +399,55 @@ public class EntityUtil {
 
     public static boolean theLastEndTeleport(Entity entity, double x, double y, double z) {
         return EcaAPI.teleport(entity, x, y, z);
+    }
+
+    //在目标XZ附近上下搜索安全落脚高度：身体空间无方块碰撞，脚下存在碰撞支撑
+    public static Vec3 findSafeTeleportPosition(Entity entity, Vec3 desiredPosition, int verticalSearchRange) {
+        if (entity == null || desiredPosition == null || verticalSearchRange < 0) {
+            return null;
+        }
+
+        Vec3 safePosition = checkSafeTeleportPosition(entity, desiredPosition);
+        if (safePosition != null) {
+            return safePosition;
+        }
+
+        for (int offset = 1; offset <= verticalSearchRange; offset++) {
+            safePosition = checkSafeTeleportPosition(entity, desiredPosition.add(0.0, offset, 0.0));
+            if (safePosition != null) {
+                return safePosition;
+            }
+
+            safePosition = checkSafeTeleportPosition(entity, desiredPosition.add(0.0, -offset, 0.0));
+            if (safePosition != null) {
+                return safePosition;
+            }
+        }
+        return null;
+    }
+
+    private static Vec3 checkSafeTeleportPosition(Entity entity, Vec3 position) {
+        Level level = entity.level();
+        if (position.y < level.getMinBuildHeight()
+                || position.y + entity.getBbHeight() > level.getMaxBuildHeight()
+                || !level.hasChunkAt(BlockPos.containing(position))) {
+            return null;
+        }
+
+        AABB targetBox = entity.getBoundingBox().move(
+            position.x - entity.getX(),
+            position.y - entity.getY(),
+            position.z - entity.getZ()
+        );
+        if (level.getBlockCollisions(entity, targetBox).iterator().hasNext()) {
+            return null;
+        }
+
+        AABB supportBox = targetBox.move(0.0, -0.0625, 0.0);
+        if (!level.getBlockCollisions(entity, supportBox).iterator().hasNext()) {
+            return null;
+        }
+        return position;
     }
 
     // ==================== 实体清除模块 ====================

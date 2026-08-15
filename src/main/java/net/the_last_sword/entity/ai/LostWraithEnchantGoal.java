@@ -35,9 +35,6 @@ public class LostWraithEnchantGoal extends Goal {
         if (wraith.getTarget() == null) {
             return false;
         }
-        if (wraith.isForceEndStrike()) {
-            return false;
-        }
         return !wraith.hasEffect(ModEffects.VOID_ENCHANTING.get());
     }
 

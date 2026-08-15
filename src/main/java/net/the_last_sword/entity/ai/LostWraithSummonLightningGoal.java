@@ -50,9 +50,6 @@ public class LostWraithSummonLightningGoal extends Goal {
         if (target == null || !target.isAlive()) {
             return false;
         }
-        if (wraith.isForceEndStrike()) {
-            return false;
-        }
         return wraith.distanceTo(target) > TheLastSwordConfiguration.getLostWraithLightningMinDistanceSafely();
     }
 

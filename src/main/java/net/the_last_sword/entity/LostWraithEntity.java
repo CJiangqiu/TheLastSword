@@ -47,7 +47,6 @@ import net.the_last_sword.entity.ai.LostWraithChaseTargetGoal;
 import net.the_last_sword.entity.ai.LostWraithEnchantGoal;
 import net.the_last_sword.entity.ai.LostWraithEndStrikeGoal;
 import net.the_last_sword.entity.ai.LostWraithPunchGoal;
-import net.the_last_sword.entity.ai.LostWraithPatienceGoal;
 import net.the_last_sword.entity.ai.LostWraithSummonLightningGoal;
 import net.the_last_sword.util.EntityUtil;
 import org.jetbrains.annotations.NotNull;
@@ -74,10 +73,6 @@ public class LostWraithEntity extends TheLastEndEntity {
     // 生成动画计时
     private int spawnTick = 0;
 
-    // 耐心机制
-    private int patienceTicks = 0;
-    private boolean forceEndStrike = false;
-
     public LostWraithEntity(EntityType<? extends LostWraithEntity> type, Level world) {
         super(type, world);
         setMaxUpStep(0.6f);
@@ -95,13 +90,11 @@ public class LostWraithEntity extends TheLastEndEntity {
     protected void registerGoals() {
         super.registerGoals();
 
-        this.goalSelector.addGoal(0, new LostWraithPatienceGoal(this));
         this.goalSelector.addGoal(1, new LostWraithEnchantGoal(this));
-        this.goalSelector.addGoal(2, new LostWraithEndStrikeGoal(this, true));
+        this.goalSelector.addGoal(2, new LostWraithEndStrikeGoal(this));
         this.goalSelector.addGoal(3, new LostWraithPunchGoal(this));
         this.goalSelector.addGoal(4, new LostWraithDragonFireBallGoal(this));
         this.goalSelector.addGoal(5, new LostWraithSummonLightningGoal(this));
-        this.goalSelector.addGoal(6, new LostWraithEndStrikeGoal(this, false));
         this.goalSelector.addGoal(7, new LostWraithChaseTargetGoal(this));
         this.goalSelector.addGoal(8, new FloatGoal(this));
         this.goalSelector.addGoal(9, new LookAtPlayerGoal(this, Player.class, 8.0F));
@@ -414,34 +407,6 @@ public class LostWraithEntity extends TheLastEndEntity {
 
     public void setTalkIndex(int index) {
         this.entityData.set(TALK_INDEX, Math.max(1, Math.min(7, index)));
-    }
-
-    public int incrementPatienceTick() {
-        return ++patienceTicks;
-    }
-
-    public void resetPatience() {
-        patienceTicks = 0;
-    }
-
-    public void setForceEndStrike(boolean force) {
-        forceEndStrike = force;
-    }
-
-    public boolean isForceEndStrike() {
-        return forceEndStrike;
-    }
-
-    public void clearForceEndStrike() {
-        forceEndStrike = false;
-    }
-
-    public boolean consumeForceEndStrike() {
-        if (!forceEndStrike) {
-            return false;
-        }
-        forceEndStrike = false;
-        return true;
     }
 
     private void sendActivationTalk(Player player) {

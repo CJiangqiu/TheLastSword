@@ -12,6 +12,7 @@ import net.the_last_sword.util.EntityUtil;
 public class GuardianMeleeAttackGoal extends Goal {
     private static final int ANIMATION_LENGTH = 25;
     private static final int DAMAGE_TICK = 15;
+    private static final double HIT_RANGE_GRACE = 1.0;
 
     private final GuardianOfSealedSpireEntity guardian;
     private int animationTick;
@@ -107,7 +108,9 @@ public class GuardianMeleeAttackGoal extends Goal {
         }
 
         double distance = guardian.distanceTo(target);
-        if (distance > TheLastSwordConfiguration.getGuardianMeleeAttackRangeSafely()) {
+        double hitRange = TheLastSwordConfiguration.getGuardianMeleeAttackRangeSafely()
+            + HIT_RANGE_GRACE;
+        if (distance > hitRange) {
             return;
         }
 

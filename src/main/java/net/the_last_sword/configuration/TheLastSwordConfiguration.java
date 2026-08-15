@@ -140,9 +140,6 @@ public class TheLastSwordConfiguration {
     public static ForgeConfigSpec.ConfigValue<Integer> LOST_WRAITH_HURT_RESIST_TIME;
 
     // Lost Wraith Skills | 迷失战魂技能
-    // Patience | 耐心
-    public static ForgeConfigSpec.ConfigValue<Double> LOST_WRAITH_PATIENCE_TRIGGER_DISTANCE;
-    public static ForgeConfigSpec.ConfigValue<Integer> LOST_WRAITH_PATIENCE_TIMEOUT;
     // Enchant | 虚空附魔
     public static ForgeConfigSpec.ConfigValue<Integer> LOST_WRAITH_ENCHANT_DURATION;
     public static ForgeConfigSpec.ConfigValue<Integer> LOST_WRAITH_ENCHANT_AMPLIFIER;
@@ -179,14 +176,24 @@ public class TheLastSwordConfiguration {
     // Assist Ally | 协同
     public static ForgeConfigSpec.ConfigValue<Double> GUARDIAN_ASSIST_ALLY_MAX_SEARCH_DISTANCE;
 
+    // Guardian Saber | 剑士守卫
+    public static ForgeConfigSpec.ConfigValue<Double> GUARDIAN_SABER_BLOCK_RANGE;
+    public static ForgeConfigSpec.ConfigValue<Integer> GUARDIAN_SABER_BLOCK_DURATION;
+    public static ForgeConfigSpec.ConfigValue<Integer> GUARDIAN_SABER_BLOCK_COOLDOWN;
+    public static ForgeConfigSpec.ConfigValue<Integer> GUARDIAN_SABER_SHIELD_DISABLE_TIME;
+
     // Guardian Archer | 弓箭守卫
     public static ForgeConfigSpec.ConfigValue<Double> GUARDIAN_ARCHER_RANGED_MIN_DISTANCE;
     public static ForgeConfigSpec.ConfigValue<Double> GUARDIAN_ARCHER_RANGED_MAX_DISTANCE;
     public static ForgeConfigSpec.ConfigValue<Double> GUARDIAN_ARCHER_MAINTAIN_MIN_DISTANCE;
     public static ForgeConfigSpec.ConfigValue<Double> GUARDIAN_ARCHER_MAINTAIN_MAX_DISTANCE;
+    public static ForgeConfigSpec.ConfigValue<Double> GUARDIAN_ARCHER_TELEPORT_TRIGGER_DISTANCE;
+    public static ForgeConfigSpec.ConfigValue<Double> GUARDIAN_ARCHER_TELEPORT_RANGE;
+    public static ForgeConfigSpec.ConfigValue<Integer> GUARDIAN_ARCHER_TELEPORT_COOLDOWN;
 
     // Guardian Berserker | 狂战士守卫
     public static ForgeConfigSpec.ConfigValue<Double> GUARDIAN_BERSERKER_LIFESTEAL_RATIO;
+    public static ForgeConfigSpec.ConfigValue<Double> GUARDIAN_BERSERKER_TOTEM_REVIVE_RATIO;
 
     // Dragon Cultist | 拜龙教教徒
     public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULTIST_DAMAGE_LIMIT;
@@ -1159,26 +1166,6 @@ public class TheLastSwordConfiguration {
         // Skills Configuration | 技能配置
         BUILDER.push("Skills");
 
-        // Patience | 耐心
-        BUILDER.push("Patience");
-        BUILDER.comment(
-            "Accumulate patience when target stays beyond trigger distance; timeout forces End Strike",
-            "目标停留在触发距离外时累积耐心；超时则强制释放终焉一击"
-        );
-        LOST_WRAITH_PATIENCE_TRIGGER_DISTANCE = BUILDER
-            .comment(
-                "Accumulate patience when target is beyond this distance in blocks",
-                "目标距离超过此值（格）时累积耐心"
-            )
-            .defineInRange("Trigger Distance", 4.0, 0.0, 32.0);
-        LOST_WRAITH_PATIENCE_TIMEOUT = BUILDER
-            .comment(
-                "Ticks of continuous patience before End Strike is forced (20 ticks = 1 second)",
-                "持续累积多少 tick 后强制释放终焉一击（20 tick = 1 秒）"
-            )
-            .defineInRange("Timeout", 240, 1, Integer.MAX_VALUE);
-        BUILDER.pop();
-
         // Enchant | 虚空附魔
         BUILDER.push("Enchant");
         LOST_WRAITH_ENCHANT_DURATION = BUILDER
@@ -1252,7 +1239,7 @@ public class TheLastSwordConfiguration {
                 "Number of forward blocks checked for knockback",
                 "向前检测击退的格数"
             )
-            .defineInRange("Forward Steps", 4, 1, 32);
+            .defineInRange("Forward Steps", 5, 1, 32);
         LOST_WRAITH_PUNCH_SIDE_HALF_WIDTH = BUILDER
             .comment(
                 "Half width of knockback cone (1 means 3-wide cone)",
@@ -1359,6 +1346,38 @@ public class TheLastSwordConfiguration {
 
         BUILDER.pop(); // End Skills
 
+        // Guardian Saber Settings | 剑士守卫设置（基类子节）
+        BUILDER.push("Guardian Saber");
+        BUILDER.push("Skills");
+        BUILDER.push("Block");
+        GUARDIAN_SABER_BLOCK_RANGE = BUILDER
+            .comment(
+                "Maximum distance to target to attempt blocking in blocks",
+                "尝试格挡所需与目标的最大距离（格）"
+            )
+            .defineInRange("Trigger Range", 3.0, 0.0, 32.0);
+        GUARDIAN_SABER_BLOCK_DURATION = BUILDER
+            .comment(
+                "How long the saber guardian keeps its shield raised in ticks (20 ticks = 1 second)",
+                "剑士守卫持续举盾的时间（tick；20 tick = 1 秒）"
+            )
+            .defineInRange("Duration", 40, 1, Integer.MAX_VALUE);
+        GUARDIAN_SABER_BLOCK_COOLDOWN = BUILDER
+            .comment(
+                "Cooldown between successful blocks in ticks (20 ticks = 1 second)",
+                "成功格挡后的冷却（tick；20 tick = 1 秒）"
+            )
+            .defineInRange("Cooldown", 200, 0, Integer.MAX_VALUE);
+        GUARDIAN_SABER_SHIELD_DISABLE_TIME = BUILDER
+            .comment(
+                "How long an axe disables the shield in ticks (20 ticks = 1 second)",
+                "斧类攻击使盾牌失效的时间（tick；20 tick = 1 秒）"
+            )
+            .defineInRange("Axe Disable Time", 100, 0, Integer.MAX_VALUE);
+        BUILDER.pop();
+        BUILDER.pop();
+        BUILDER.pop();
+
         // Guardian Archer Settings | 弓箭守卫设置（基类子节）
         BUILDER.push("Guardian Archer");
 
@@ -1397,6 +1416,28 @@ public class TheLastSwordConfiguration {
             .defineInRange("Max Distance", 16.0, 0.0, 64.0);
         BUILDER.pop();
 
+        // Teleport | 瞬移
+        BUILDER.push("Teleport");
+        GUARDIAN_ARCHER_TELEPORT_TRIGGER_DISTANCE = BUILDER
+            .comment(
+                "Teleport away when target is within this distance in blocks",
+                "目标进入此距离（格）时瞬移脱离"
+            )
+            .defineInRange("Trigger Distance", 3.0, 0.0, 64.0);
+        GUARDIAN_ARCHER_TELEPORT_RANGE = BUILDER
+            .comment(
+                "Maximum teleport displacement in blocks",
+                "瞬移的最大位移距离（格）"
+            )
+            .defineInRange("Range", 8.0, 1.0, 128.0);
+        GUARDIAN_ARCHER_TELEPORT_COOLDOWN = BUILDER
+            .comment(
+                "Cooldown between teleports in ticks (20 ticks = 1 second)",
+                "两次瞬移之间的冷却（tick；20 tick = 1 秒）"
+            )
+            .defineInRange("Cooldown", 300, 0, Integer.MAX_VALUE);
+        BUILDER.pop();
+
         BUILDER.pop(); // End Skills
 
         BUILDER.pop(); // End Guardian Archer
@@ -1409,6 +1450,12 @@ public class TheLastSwordConfiguration {
                 "近战命中时的吸血比例（0.05 = 攻击力的 5%）"
             )
             .defineInRange("Lifesteal Ratio", 0.05, 0.0, 10.0);
+        GUARDIAN_BERSERKER_TOTEM_REVIVE_RATIO = BUILDER
+            .comment(
+                "Health restored by the totem of undying as a ratio of max health (1.0 = full health)",
+                "不死图腾复活后恢复的生命值占最大生命的比例（1.0 = 满血）"
+            )
+            .defineInRange("Totem Revive Ratio", 1.0, 0.01, 1.0);
         BUILDER.pop();
 
         BUILDER.pop(); // End Guardian Of Sealed Spire
@@ -2350,15 +2397,6 @@ public class TheLastSwordConfiguration {
     }
 
     //迷失战魂技能配置
-    //耐心
-    public static double getLostWraithPatienceTriggerDistanceSafely() {
-        return safeGet(LOST_WRAITH_PATIENCE_TRIGGER_DISTANCE, 4.0);
-    }
-
-    public static int getLostWraithPatienceTimeoutSafely() {
-        return safeGet(LOST_WRAITH_PATIENCE_TIMEOUT, 240);
-    }
-
     //虚空附魔
     public static int getLostWraithEnchantDurationSafely() {
         return safeGet(LOST_WRAITH_ENCHANT_DURATION, 1200);
@@ -2400,7 +2438,7 @@ public class TheLastSwordConfiguration {
     }
 
     public static int getLostWraithPunchForwardStepsSafely() {
-        return safeGet(LOST_WRAITH_PUNCH_FORWARD_STEPS, 4);
+        return safeGet(LOST_WRAITH_PUNCH_FORWARD_STEPS, 5);
     }
 
     public static int getLostWraithPunchSideHalfWidthSafely() {
@@ -2454,6 +2492,23 @@ public class TheLastSwordConfiguration {
         return safeGet(GUARDIAN_ASSIST_ALLY_MAX_SEARCH_DISTANCE, 32.0);
     }
 
+    //剑士守卫配置
+    public static double getGuardianSaberBlockRangeSafely() {
+        return safeGet(GUARDIAN_SABER_BLOCK_RANGE, 3.0);
+    }
+
+    public static int getGuardianSaberBlockDurationSafely() {
+        return safeGet(GUARDIAN_SABER_BLOCK_DURATION, 40);
+    }
+
+    public static int getGuardianSaberBlockCooldownSafely() {
+        return safeGet(GUARDIAN_SABER_BLOCK_COOLDOWN, 200);
+    }
+
+    public static int getGuardianSaberShieldDisableTimeSafely() {
+        return safeGet(GUARDIAN_SABER_SHIELD_DISABLE_TIME, 100);
+    }
+
     //弓箭守卫配置
     public static double getGuardianArcherRangedMinDistanceSafely() {
         return safeGet(GUARDIAN_ARCHER_RANGED_MIN_DISTANCE, 4.0);
@@ -2471,9 +2526,25 @@ public class TheLastSwordConfiguration {
         return safeGet(GUARDIAN_ARCHER_MAINTAIN_MAX_DISTANCE, 16.0);
     }
 
+    public static double getGuardianArcherTeleportTriggerDistanceSafely() {
+        return safeGet(GUARDIAN_ARCHER_TELEPORT_TRIGGER_DISTANCE, 3.0);
+    }
+
+    public static double getGuardianArcherTeleportRangeSafely() {
+        return safeGet(GUARDIAN_ARCHER_TELEPORT_RANGE, 8.0);
+    }
+
+    public static int getGuardianArcherTeleportCooldownSafely() {
+        return safeGet(GUARDIAN_ARCHER_TELEPORT_COOLDOWN, 300);
+    }
+
     //狂战士守卫配置
     public static double getGuardianBerserkerLifestealRatioSafely() {
         return safeGet(GUARDIAN_BERSERKER_LIFESTEAL_RATIO, 0.05);
+    }
+
+    public static double getGuardianBerserkerTotemReviveRatioSafely() {
+        return safeGet(GUARDIAN_BERSERKER_TOTEM_REVIVE_RATIO, 1.0);
     }
 
     //拜龙教教徒配置

@@ -47,6 +47,7 @@ public class DragonCultPaladinEntity extends TheLastEndEntity {
 
     //格挡免伤窗口，由格挡Goal开关
     private boolean blockImmune;
+    private boolean blockRequested;
     private long lastBlockSoundTick = Long.MIN_VALUE;
 
     public DragonCultPaladinEntity(EntityType<? extends DragonCultPaladinEntity> type, Level world) {
@@ -153,6 +154,18 @@ public class DragonCultPaladinEntity extends TheLastEndEntity {
         this.blockImmune = immune;
     }
 
+    public boolean hasBlockRequest() {
+        return blockRequested;
+    }
+
+    public void requestBlock() {
+        blockRequested = true;
+    }
+
+    public void consumeBlockRequest() {
+        blockRequested = false;
+    }
+
     //格挡免伤窗口内完全不受伤
     @Override
     public boolean hurt(@NotNull DamageSource source, float amount) {
@@ -165,7 +178,11 @@ public class DragonCultPaladinEntity extends TheLastEndEntity {
             }
             return false;
         }
-        return super.hurt(source, amount);
+        boolean hurt = super.hurt(source, amount);
+        if (hurt && !level().isClientSide) {
+            requestBlock();
+        }
+        return hurt;
     }
 
     @Override

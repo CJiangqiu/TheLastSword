@@ -55,8 +55,8 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
-    // 延迟到死亡动画结束后掉落战利品，因此需要保留真正造成致死伤害的来源。
-    // 否则改用 generic 会丢失击杀者、玩家击杀状态以及武器的抢夺等级。
+    // 延迟到死亡动画结束后执行原版死亡结算，因此需要保留真正造成致死伤害的来源。
+    // 否则改用 generic 会丢失击杀者、进度触发以及武器的抢夺等级。
     @Nullable
     private DamageSource deathDamageSource;
 
@@ -307,18 +307,46 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
     }
 
     protected void onDeathEnd() {
-        if (!level().isClientSide) {
-            DamageSource damageSource = deathDamageSource;
-            if (damageSource == null) {
-                damageSource = getLastDamageSource();
-            }
-            this.dropAllDeathLoot(damageSource != null ? damageSource : damageSources().generic());
+        if (level().isClientSide) {
+            return;
         }
-        safeRemove();
+
+        DamageSource damageSource = deathDamageSource;
+        if (damageSource == null) {
+            damageSource = getLastDamageSource();
+        }
+        if (damageSource == null) {
+            damageSource = damageSources().generic();
+        }
+
+        float previousMaxHealth = getWorldAnchorMax();
+        setWorldAnchor(0.0F);
+        EntityUtil.clearDefence(this);
+        super.die(damageSource);
+
+        if (this.dead) {
+            safeRemove();
+            return;
+        }
+
+        // 其他死亡事件处理器仍可取消最终结算；取消后必须退出死亡动画并恢复真实血量保护。
+        float restoredMaxHealth = Float.isFinite(previousMaxHealth) && previousMaxHealth > 0.0F
+                ? previousMaxHealth
+                : getMaxHealth();
+        float restoredHealth = super.getHealth();
+        if (!Float.isFinite(restoredHealth) || restoredHealth <= 0.0F) {
+            restoredHealth = restoredMaxHealth;
+        }
+        setWorldAnchorMax(restoredMaxHealth);
+        setWorldAnchor(Math.min(restoredHealth, restoredMaxHealth));
+        EntityUtil.setProtection(this, true);
+        deathDamageSource = null;
+        setDeathTick(0);
+        setAnimationState(STATE_IDLE);
     }
 
     public void triggerDeath(@NotNull DamageSource damageSource) {
-        if (!isDying()) {
+        if (!isRemoved() && !dead && !hasPositiveRealHealth() && !isDying()) {
             this.deathDamageSource = damageSource;
             setAnimationState(STATE_DEATH);
             setDeathTick(0);
@@ -359,6 +387,12 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
         if (realDamage > 0) {
             float currentHealth = getWorldAnchor();
             float newHealth = currentHealth - realDamage;
+
+            //致死拦截：子类可在此消耗保命道具吃掉这次伤害
+            if (newHealth <= 0 && !isDying() && onLethalDamage(damageSource)) {
+                return;
+            }
+
             setWorldAnchor(newHealth);
 
             if (newHealth <= 0 && !isDying()) {
@@ -371,12 +405,18 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
         this.invulnerableTime = hurtTime;
     }
 
+    // 限伤后仍会致死时调用，返回true表示已被保命道具吃掉这次伤害
+    protected boolean onLethalDamage(@NotNull DamageSource damageSource) {
+        return false;
+    }
+
     // 死亡相关覆写
     @Override
     public void die(@NotNull DamageSource damageSource) {
-        if (isDying()) {
-            super.die(damageSource);
+        if (hasPositiveRealHealth()) {
+            return;
         }
+        triggerDeath(damageSource);
     }
 
     @Override
@@ -385,24 +425,25 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
 
     @Override
     public boolean isDeadOrDying() {
-        return isDying();
+        return dead || isDying() || !hasPositiveRealHealth();
     }
 
     @Override
     public boolean isAlive() {
-        return !isDying();
+        return !isRemoved() && !dead && !isDying() && hasPositiveRealHealth();
     }
 
     @Override
     public void kill() {
-        if (isDying()) {
-            super.kill();
+        if (hasPositiveRealHealth()) {
+            return;
         }
+        triggerDeath();
     }
 
     @Override
     public void remove(@NotNull RemovalReason reason) {
-        if (level() instanceof ServerLevel && !isDying()) {
+        if (shouldBlockDestructiveRemoval(reason)) {
             return;
         }
         super.remove(reason);
@@ -410,10 +451,22 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
 
     @Override
     public void setRemoved(@NotNull RemovalReason reason) {
-        if (level() instanceof ServerLevel && !isDying()) {
+        if (shouldBlockDestructiveRemoval(reason)) {
             return;
         }
         super.setRemoved(reason);
+    }
+
+    private boolean hasPositiveRealHealth() {
+        float health = getWorldAnchor();
+        return Float.isFinite(health) && health > 0.0F;
+    }
+
+    private boolean shouldBlockDestructiveRemoval(RemovalReason reason) {
+        return level() instanceof ServerLevel
+                && reason.shouldDestroy()
+                && !isDying()
+                && hasPositiveRealHealth();
     }
 
     // NBT

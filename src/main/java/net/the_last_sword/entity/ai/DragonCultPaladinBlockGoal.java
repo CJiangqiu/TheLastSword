@@ -20,6 +20,7 @@ public class DragonCultPaladinBlockGoal extends Goal {
     private final DragonCultPaladinEntity paladin;
     private int animationTick;
     private long cooldownEnd;
+    private boolean running;
 
     public DragonCultPaladinBlockGoal(DragonCultPaladinEntity paladin) {
         this.paladin = paladin;
@@ -28,21 +29,15 @@ public class DragonCultPaladinBlockGoal extends Goal {
 
     @Override
     public boolean canUse() {
-        if (!paladin.canAct()) {
+        if (!paladin.hasBlockRequest()) {
             return false;
         }
-        if (paladin.getAnimationState() != DragonCultPaladinEntity.STATE_IDLE) {
+        if (!paladin.canAct() || paladin.level().getGameTime() < cooldownEnd) {
+            //冷却期间受到的伤害不会在冷却结束后补触发格挡
+            paladin.consumeBlockRequest();
             return false;
         }
-        if (paladin.level().getGameTime() < cooldownEnd) {
-            return false;
-        }
-
-        LivingEntity target = paladin.getTarget();
-        if (target == null || !target.isAlive()) {
-            return false;
-        }
-        return paladin.distanceTo(target) <= TheLastSwordConfiguration.getDragonCultPaladinBlockRangeSafely();
+        return true;
     }
 
     @Override
@@ -52,7 +47,9 @@ public class DragonCultPaladinBlockGoal extends Goal {
 
     @Override
     public void start() {
+        paladin.consumeBlockRequest();
         animationTick = ANIMATION_LENGTH;
+        running = true;
         paladin.setAnimationState(DragonCultPaladinEntity.STATE_BLOCK);
         paladin.getNavigation().stop();
     }
@@ -74,19 +71,25 @@ public class DragonCultPaladinBlockGoal extends Goal {
         }
 
         if (animationTick == 0) {
-            paladin.setAnimationState(DragonCultPaladinEntity.STATE_IDLE);
-            cooldownEnd = paladin.level().getGameTime()
-                + TheLastSwordConfiguration.getDragonCultPaladinBlockCooldownSafely();
+            finishBlock();
         }
     }
 
     @Override
     public void stop() {
+        finishBlock();
+    }
+
+    private void finishBlock() {
         animationTick = 0;
-        //中断时必须复位，否则会一直免伤
         paladin.setBlockImmune(false);
         if (paladin.getAnimationState() == DragonCultPaladinEntity.STATE_BLOCK) {
             paladin.setAnimationState(DragonCultPaladinEntity.STATE_IDLE);
+        }
+        if (running) {
+            running = false;
+            cooldownEnd = paladin.level().getGameTime()
+                + TheLastSwordConfiguration.getDragonCultPaladinBlockCooldownSafely();
         }
     }
 
