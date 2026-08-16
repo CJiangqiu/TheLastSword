@@ -1,4 +1,7 @@
-<p style="text-align:center">Have you ever been repeatedly defeated by creatures you've never encountered before in the newer versions of Minecraft?</p><p style="text-align:center">Perhaps it's time to reclaim what was lost...  </p><p style="text-align:center">Now, as you defeat the Ender Dragon once more and transform the Dragon Egg into Dragon Crystals, you discover the weapon that once accompanied you long ago. </p><p style="text-align:center">Raise it, adventurer—The Last Sword You Never Forgot</p>
+<p style="text-align:center"><em>In ages past, countless adventurers sought a legendary weapon.</em></p>
+<p style="text-align:center"><em>Yet as the ages passed, the sword was shattered, and the Queen who forged it vanished without a trace.</em></p>
+<p style="text-align:center"><em>Now, scattered clues converge once more, pointing toward the End, as this forgotten tale awaits the adventurer who will continue it.</em></p>
+<p style="text-align:center"><em>Though the road ahead be arduous, though the sword be shattered, embark on the journey and reforge it—The Last Sword You Never Forgot.</em></p>
 
 ***
 
@@ -196,7 +199,10 @@ Mods with added compatibility content:
 
 ---
 
-<p style="text-align:center">你是否曾在 Minecraft 的新版本中，被那些从未见过的生物一次又一次地击倒？</p><p style="text-align:center">也许，是时候夺回曾经失去的一切了……</p><p style="text-align:center">如今，当你再次击败末影龙，将龙蛋化为龙晶之时，你发现了那把很久以前曾与你并肩作战的武器。</p><p style="text-align:center">举起它吧，冒险者——那把你从未忘记的最终之剑</p>
+<p style="text-align:center"><em>在过去的纪元里，无数冒险者都曾追寻一把传说中的武器。</em></p>
+<p style="text-align:center"><em>然而岁月流转，剑已破碎，铸造它的女皇销声匿迹。</em></p>
+<p style="text-align:center"><em>如今，散落的线索再次汇聚，指向末地，而这段被遗忘的故事，即将迎来它的续写者。</em></p>
+<p style="text-align:center"><em>纵使前路艰难，纵使剑已破碎，也请踏上旅程，重铸那把——你从未忘记的最终之剑。</em></p>
 
 ***
 
