@@ -51,7 +51,7 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.the_last_sword.client.PerceptionScanData.ScanType;
+import net.the_last_sword.network.PerceptionScanPacket.ScanType;
 import net.the_last_sword.network.NetworkHandler;
 import net.the_last_sword.network.PerceptionScanPacket;
 

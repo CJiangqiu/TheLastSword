@@ -26,7 +26,6 @@ import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
@@ -35,6 +34,7 @@ import net.the_last_sword.entity.ai.DragonCultPaladinBlockGoal;
 import net.the_last_sword.entity.ai.DragonCultPaladinHeavyAttackGoal;
 import net.the_last_sword.faction.DragonCultFaction;
 import net.the_last_sword.init.ModItems;
+import net.the_last_sword.util.DragonCultDisguise;
 import net.the_last_sword.util.EntityUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -72,7 +72,8 @@ public class DragonCultPaladinEntity extends TheLastEndEntity {
 
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this)
                 .setAlertOthers(DragonCultPaladinEntity.class, DragonCultistEntity.class));
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false,
+                DragonCultDisguise.NOT_DISGUISED_PLAYER));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, true));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
     }
@@ -122,6 +123,7 @@ public class DragonCultPaladinEntity extends TheLastEndEntity {
                 .add(Attributes.MAX_HEALTH, 100)
                 .add(Attributes.ARMOR, 0)
                 .add(Attributes.ARMOR_TOUGHNESS, 2)
+                .add(Attributes.KNOCKBACK_RESISTANCE, 0.5)
                 .add(Attributes.ATTACK_DAMAGE, 2)
                 .add(Attributes.FOLLOW_RANGE, 32);
     }
@@ -221,16 +223,16 @@ public class DragonCultPaladinEntity extends TheLastEndEntity {
     }
 
     private void equipGear() {
-        setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
+        setItemSlot(EquipmentSlot.HEAD, new ItemStack(ModItems.DRAGON_CULT_PALADIN_ARMOR_HELMET.get()));
         setDropChance(EquipmentSlot.HEAD, 0.0F);
 
-        setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));
+        setItemSlot(EquipmentSlot.CHEST, new ItemStack(ModItems.DRAGON_CULT_PALADIN_ARMOR_CHESTPLATE.get()));
         setDropChance(EquipmentSlot.CHEST, 0.0F);
 
-        setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.IRON_LEGGINGS));
+        setItemSlot(EquipmentSlot.LEGS, new ItemStack(ModItems.DRAGON_CULT_PALADIN_ARMOR_LEGGINGS.get()));
         setDropChance(EquipmentSlot.LEGS, 0.0F);
 
-        setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.IRON_BOOTS));
+        setItemSlot(EquipmentSlot.FEET, new ItemStack(ModItems.DRAGON_CULT_PALADIN_ARMOR_BOOTS.get()));
         setDropChance(EquipmentSlot.FEET, 0.0F);
 
         setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(ModItems.KNIGHT_GREATSWORD.get()));

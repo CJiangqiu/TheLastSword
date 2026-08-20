@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "d  ",
+    " hl",
+    " l "
+  ],
+  "key": {
+    "d": {
+      "item": "the_last_sword:dragon_crystal"
+    },
+    "h": {
+      "item": "minecraft:goat_horn"
+    },
+    "l": {
+      "item": "minecraft:leather"
+    }
+  },
+  "result": {
+    "item": "the_last_sword:dragon_cult_horn",
+    "count": 1
+  }
+}

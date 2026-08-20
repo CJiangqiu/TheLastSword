@@ -25,7 +25,7 @@ import java.util.Set;
 public class LostWraithPunchGoal extends Goal {
     private static final int ANIMATION_LENGTH = 30;
     private static final int SOUND_TICK = 10;
-    private static final int DAMAGE_TICK = 24;
+    private static final int DAMAGE_TICK = 15;
     private static final double TELEPORT_DISTANCE = 2.0;
 
     private final LostWraithEntity wraith;
@@ -48,7 +48,13 @@ public class LostWraithPunchGoal extends Goal {
         if (target == null || !target.isAlive()) {
             return false;
         }
-        return wraith.distanceTo(target) <= TheLastSwordConfiguration.getLostWraithPunchAttackDistanceSafely();
+        double distance = wraith.distanceTo(target);
+        double distanceThreshold = TheLastSwordConfiguration.getLostWraithPunchAttackDistanceSafely();
+        //传送就绪：与远程技能一致的最小距离启动并突进；冷却中：保持原有近身启动
+        if (wraith.isPunchTeleportReady()) {
+            return distance > distanceThreshold;
+        }
+        return distance <= distanceThreshold;
     }
 
     @Override
@@ -61,7 +67,10 @@ public class LostWraithPunchGoal extends Goal {
         animationTick = ANIMATION_LENGTH;
         wraith.setAnimationState(LostWraithEntity.STATE_PUNCH);
         wraith.getNavigation().stop();
-        teleportInFrontOfTarget();
+        //传送就绪时突进，成功落地才进入冷却；冷却中原地出拳
+        if (wraith.isPunchTeleportReady() && teleportInFrontOfTarget()) {
+            wraith.startPunchTeleportCooldown();
+        }
     }
 
     @Override
@@ -77,6 +86,14 @@ public class LostWraithPunchGoal extends Goal {
                 wraith.getX(), wraith.getY(), wraith.getZ(),
                 SoundEvents.PLAYER_ATTACK_SWEEP,
                 wraith.getSoundSource(), 1.0F, 1.0F);
+        }
+
+        //伤害前一帧转身，确保拳击正面朝向目标
+        if (relativeFrame == DAMAGE_TICK - 1) {
+            LivingEntity target = wraith.getTarget();
+            if (target != null && target.isAlive()) {
+                EntityUtil.faceTarget(wraith, target);
+            }
         }
 
         if (relativeFrame == DAMAGE_TICK) {
@@ -164,11 +181,11 @@ public class LostWraithPunchGoal extends Goal {
         }
     }
 
-    //传送到目标面朝方向的前方，让拳击主动贴近目标
-    private void teleportInFrontOfTarget() {
+    //传送到目标面朝方向的前方，让拳击主动贴近目标；传送成功返回true
+    private boolean teleportInFrontOfTarget() {
         LivingEntity target = wraith.getTarget();
         if (target == null || !target.isAlive()) {
-            return;
+            return false;
         }
 
         Vec3 direction = target.getLookAngle().multiply(1.0, 0.0, 1.0);
@@ -185,11 +202,11 @@ public class LostWraithPunchGoal extends Goal {
         Vec3 desiredPosition = target.position().add(direction.scale(TELEPORT_DISTANCE));
         Vec3 teleportPosition = EntityUtil.findSafeTeleportPosition(wraith, desiredPosition, 4);
         if (teleportPosition == null) {
-            return;
+            return false;
         }
         if (!EntityUtil.theLastEndTeleport(
                 wraith, teleportPosition.x, teleportPosition.y, teleportPosition.z)) {
-            return;
+            return false;
         }
 
         ParticleUtil.spawnTeleportParticles(
@@ -198,6 +215,7 @@ public class LostWraithPunchGoal extends Goal {
             SoundEvents.ENDERMAN_TELEPORT, wraith.getSoundSource(), 1.0F, 1.0F);
         wraith.playSound(SoundEvents.ENDERMAN_TELEPORT, 1.0F, 1.0F);
         EntityUtil.faceTarget(wraith, target);
+        return true;
     }
 
     private boolean isTargetBlocking(LivingEntity target) {

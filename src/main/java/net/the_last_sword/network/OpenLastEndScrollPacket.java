@@ -1,9 +1,9 @@
 package net.the_last_sword.network;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
-import net.the_last_sword.client.gui.TheLastEndScrollScreen;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,9 +51,9 @@ public class OpenLastEndScrollPacket {
 
     public static void handle(OpenLastEndScrollPacket message, Supplier<NetworkEvent.Context> contextSupplier) {
         NetworkEvent.Context context = contextSupplier.get();
-        context.enqueueWork(() -> Minecraft.getInstance().setScreen(
-            new TheLastEndScrollScreen(message.hasLocation, message.x, message.z, message.collectedNotes)
-        ));
+        context.enqueueWork(() -> DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
+                () -> () -> net.the_last_sword.client.ClientPacketHandler.openLastEndScroll(
+                        message.hasLocation, message.x, message.z, message.collectedNotes)));
         context.setPacketHandled(true);
     }
 }

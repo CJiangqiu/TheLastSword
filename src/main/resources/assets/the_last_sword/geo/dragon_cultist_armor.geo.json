@@ -1,0 +1,511 @@
+{
+	"format_version": "1.12.0",
+	"minecraft:geometry": [
+		{
+			"description": {
+				"identifier": "geometry.dragon_cultist_armor",
+				"texture_width": 32,
+				"texture_height": 32,
+				"visible_bounds_width": 3,
+				"visible_bounds_height": 3.5,
+				"visible_bounds_offset": [0, 1.25, 0]
+			},
+			"bones": [
+				{
+					"name": "dragon_cultist_armor",
+					"pivot": [0, 0, 0]
+				},
+				{
+					"name": "armorHead",
+					"parent": "dragon_cultist_armor",
+					"pivot": [0, 24, 0],
+					"cubes": [
+						{
+							"origin": [-5, 22, -4],
+							"size": [9, 10, 9],
+							"uv": {
+								"north": {"uv": [24, 8], "uv_size": [8, 8]},
+								"east": {"uv": [0, 8], "uv_size": [8, 8]},
+								"south": {"uv": [24, 8], "uv_size": [8, 8]},
+								"west": {"uv": [16, 8], "uv_size": [8, 8]},
+								"up": {"uv": [8, 0], "uv_size": [8, 8]},
+								"down": {"uv": [16, 8], "uv_size": [8, -8]}
+							}
+						},
+						{
+							"origin": [2.7, 29.2, -4.2],
+							"size": [1.2, 6.8, 2],
+							"pivot": [3.7, 29, 0],
+							"rotation": [0, 0, -15],
+							"uv": {
+								"north": {"uv": [2, 26], "uv_size": [1, 4]},
+								"east": {"uv": [0, 26], "uv_size": [2, 4]},
+								"south": {"uv": [5, 26], "uv_size": [1, 4]},
+								"west": {"uv": [3, 26], "uv_size": [2, 4]},
+								"up": {"uv": [2, 24], "uv_size": [1, 2]},
+								"down": {"uv": [3, 26], "uv_size": [1, -2]}
+							}
+						},
+						{
+							"origin": [-4.9, 29.2, -4.2],
+							"size": [1.2, 6.8, 2],
+							"pivot": [-3.7, 29, 0],
+							"rotation": [0, 0, 15],
+							"uv": {
+								"north": {"uv": [2, 26], "uv_size": [1, 4]},
+								"east": {"uv": [0, 26], "uv_size": [2, 4]},
+								"south": {"uv": [5, 26], "uv_size": [1, 4]},
+								"west": {"uv": [3, 26], "uv_size": [2, 4]},
+								"up": {"uv": [2, 24], "uv_size": [1, 2]},
+								"down": {"uv": [3, 26], "uv_size": [1, -2]}
+							}
+						},
+						{
+							"origin": [-4.2, 23, -4.8],
+							"size": [7.4, 8, 1.8],
+							"uv": {
+								"north": {"uv": [0, 16], "uv_size": [6, 6]},
+								"east": {"uv": [0, 16], "uv_size": [0, 6]},
+								"south": {"uv": [6, 16], "uv_size": [6, 6]},
+								"west": {"uv": [6, 16], "uv_size": [0, 6]},
+								"up": {"uv": [0, 16], "uv_size": [6, 0]},
+								"down": {"uv": [6, 16], "uv_size": [6, 0]}
+							}
+						},
+						{
+							"origin": [-1.6, 24.2, -5.5],
+							"size": [2.6, 5.4, 1],
+							"uv": {
+								"north": {"uv": [2, 17], "uv_size": [1, 3]},
+								"east": {"uv": [0, 17], "uv_size": [1, 3]},
+								"south": {"uv": [3, 17], "uv_size": [1, 3]},
+								"west": {"uv": [2, 17], "uv_size": [1, 3]},
+								"up": {"uv": [1, 16], "uv_size": [1, 1]},
+								"down": {"uv": [2, 17], "uv_size": [1, -1]}
+							}
+						},
+						{
+							"origin": [-3.6, 22.4, -5.05],
+							"size": [6.2, 3.7, 2.05],
+							"uv": {
+								"north": {"uv": [1, 17], "uv_size": [5, 1]},
+								"east": {"uv": [0, 17], "uv_size": [1, 1]},
+								"south": {"uv": [7, 17], "uv_size": [5, 1]},
+								"west": {"uv": [6, 17], "uv_size": [1, 1]},
+								"up": {"uv": [1, 16], "uv_size": [5, 1]},
+								"down": {"uv": [6, 17], "uv_size": [5, -1]}
+							}
+						},
+						{
+							"origin": [0.3, 22, -5.15],
+							"size": [2.1, 4, 1.8],
+							"pivot": [2, 24, 0],
+							"rotation": [0, 0, 12],
+							"uv": {
+								"north": {"uv": [0, 16], "uv_size": [1, 2]},
+								"east": {"uv": [0, 16], "uv_size": [0, 2]},
+								"south": {"uv": [1, 16], "uv_size": [1, 2]},
+								"west": {"uv": [1, 16], "uv_size": [0, 2]},
+								"up": {"uv": [0, 16], "uv_size": [1, 0]},
+								"down": {"uv": [1, 16], "uv_size": [1, 0]}
+							}
+						},
+						{
+							"origin": [-3.4, 22, -5.15],
+							"size": [2.1, 4, 1.8],
+							"pivot": [-2, 24, 0],
+							"rotation": [0, 0, -12],
+							"uv": {
+								"north": {"uv": [0, 16], "uv_size": [1, 2]},
+								"east": {"uv": [0, 16], "uv_size": [0, 2]},
+								"south": {"uv": [1, 16], "uv_size": [1, 2]},
+								"west": {"uv": [1, 16], "uv_size": [0, 2]},
+								"up": {"uv": [0, 16], "uv_size": [1, 0]},
+								"down": {"uv": [1, 16], "uv_size": [1, 0]}
+							}
+						}
+					]
+				},
+				{
+					"name": "armorBody",
+					"parent": "dragon_cultist_armor",
+					"pivot": [0, 22, 0],
+					"cubes": [
+						{
+							"origin": [-5, 12, -3],
+							"size": [9, 12, 7],
+							"uv": {
+								"north": {"uv": [4, 4], "uv_size": [8, 10]},
+								"east": {"uv": [0, 4], "uv_size": [4, 10]},
+								"south": {"uv": [16, 4], "uv_size": [8, 10]},
+								"west": {"uv": [12, 4], "uv_size": [4, 10]},
+								"up": {"uv": [4, 0], "uv_size": [8, 4]},
+								"down": {"uv": [12, 4], "uv_size": [8, -4]}
+							}
+						},
+						{
+							"origin": [-5.35, 13.5, -3.35],
+							"size": [9.7, 3.5, 7.7],
+							"uv": {
+								"north": {"uv": [20, 20], "uv_size": [8, 1]},
+								"east": {"uv": [16, 20], "uv_size": [4, 1]},
+								"south": {"uv": [20, 20], "uv_size": [8, 1]},
+								"west": {"uv": [28, 20], "uv_size": [4, 1]},
+								"up": {"uv": [20, 16], "uv_size": [8, 4]},
+								"down": {"uv": [28, 20], "uv_size": [-8, -4]}
+							}
+						}
+					]
+				},
+				{
+					"name": "front_tabard",
+					"parent": "armorBody",
+					"pivot": [0, 16, 0],
+					"cubes": [
+						{
+							"origin": [-2.5, 5, -3.65],
+							"size": [4, 13, 3.55],
+							"uv": {
+								"north": {"uv": [0, 0], "uv_size": [3, 11]},
+								"east": {"uv": [0, 0], "uv_size": [0, 11]},
+								"south": {"uv": [3, 0], "uv_size": [3, 11]},
+								"west": {"uv": [3, 0], "uv_size": [0, 11]},
+								"up": {"uv": [0, 0], "uv_size": [3, 0]},
+								"down": {"uv": [3, 0], "uv_size": [3, 0]}
+							}
+						},
+						{
+							"origin": [-2.7, 7, -3.72],
+							"size": [4.4, 2.8, 3.57],
+							"uv": {
+								"north": {"uv": [16, 16], "uv_size": [3, 0]},
+								"east": {"uv": [16, 16], "uv_size": [0, 0]},
+								"south": {"uv": [19, 16], "uv_size": [3, 0]},
+								"west": {"uv": [19, 16], "uv_size": [0, 0]},
+								"up": {"uv": [16, 16], "uv_size": [3, 0]},
+								"down": {"uv": [19, 16], "uv_size": [3, 0]}
+							}
+						},
+						{
+							"origin": [-2.7, 11, -3.72],
+							"size": [4.4, 2.8, 3.57],
+							"uv": {
+								"north": {"uv": [16, 16], "uv_size": [3, 0]},
+								"east": {"uv": [16, 16], "uv_size": [0, 0]},
+								"south": {"uv": [19, 16], "uv_size": [3, 0]},
+								"west": {"uv": [19, 16], "uv_size": [0, 0]},
+								"up": {"uv": [16, 16], "uv_size": [3, 0]},
+								"down": {"uv": [19, 16], "uv_size": [3, 0]}
+							}
+						}
+					]
+				},
+				{
+					"name": "shoulder_drape",
+					"parent": "armorBody",
+					"pivot": [0, 22, 0],
+					"cubes": [
+						{
+							"origin": [-5.7, 19, -3.35],
+							"size": [10.4, 5.5, 5.65],
+							"uv": {
+								"north": {"uv": [2, 2], "uv_size": [9, 3]},
+								"east": {"uv": [0, 2], "uv_size": [2, 3]},
+								"south": {"uv": [13, 2], "uv_size": [9, 3]},
+								"west": {"uv": [11, 2], "uv_size": [2, 3]},
+								"up": {"uv": [2, 0], "uv_size": [9, 2]},
+								"down": {"uv": [11, 2], "uv_size": [9, -2]}
+							}
+						}
+					]
+				},
+				{
+					"name": "armorLeftArm",
+					"parent": "dragon_cultist_armor",
+					"pivot": [4, 23, 0],
+					"cubes": [
+						{
+							"origin": [3, 15, -2.8],
+							"size": [4, 10, 6.6],
+							"uv": {
+								"north": {"uv": [24, 0], "uv_size": [3, 8]},
+								"east": {"uv": [0, 3], "uv_size": [3, 8]},
+								"south": {"uv": [24, 0], "uv_size": [3, 8]},
+								"west": {"uv": [6, 3], "uv_size": [3, 8]},
+								"up": {"uv": [3, 0], "uv_size": [3, 3]},
+								"down": {"uv": [6, 3], "uv_size": [3, -3]}
+							}
+						},
+						{
+							"origin": [2.8, 18, -3],
+							"size": [4.4, 3.3, 7],
+							"uv": {
+								"north": {"uv": [20, 20], "uv_size": [3, 1]},
+								"east": {"uv": [16, 20], "uv_size": [4, 1]},
+								"south": {"uv": [27, 20], "uv_size": [3, 1]},
+								"west": {"uv": [23, 20], "uv_size": [4, 1]},
+								"up": {"uv": [20, 16], "uv_size": [3, 4]},
+								"down": {"uv": [23, 20], "uv_size": [3, -4]}
+							}
+						},
+						{
+							"origin": [2.65, 14.5, -3.15],
+							"size": [4.7, 4, 7.3],
+							"uv": {
+								"north": {"uv": [20, 20], "uv_size": [3, 2]},
+								"east": {"uv": [16, 20], "uv_size": [4, 2]},
+								"south": {"uv": [27, 20], "uv_size": [3, 2]},
+								"west": {"uv": [23, 20], "uv_size": [4, 2]},
+								"up": {"uv": [20, 16], "uv_size": [3, 4]},
+								"down": {"uv": [23, 20], "uv_size": [3, -4]}
+							}
+						}
+					]
+				},
+				{
+					"name": "left_hand",
+					"parent": "armorLeftArm",
+					"pivot": [5, 15, 0],
+					"cubes": [
+						{
+							"origin": [2.8, 12.5, -3],
+							"size": [4.4, 5.5, 7],
+							"uv": {
+								"north": {"uv": [20, 28], "uv_size": [3, 3]},
+								"east": {"uv": [16, 28], "uv_size": [4, 3]},
+								"south": {"uv": [27, 28], "uv_size": [3, 3]},
+								"west": {"uv": [23, 28], "uv_size": [4, 3]},
+								"up": {"uv": [20, 24], "uv_size": [3, 4]},
+								"down": {"uv": [23, 28], "uv_size": [3, -4]}
+							}
+						}
+					]
+				},
+				{
+					"name": "armorRightArm",
+					"parent": "dragon_cultist_armor",
+					"pivot": [-5, 23, 0],
+					"cubes": [
+						{
+							"origin": [-8, 15, -2.8],
+							"size": [4, 10, 6.6],
+							"uv": {
+								"north": {"uv": [27, 0], "uv_size": [3, 8]},
+								"east": {"uv": [6, 3], "uv_size": [3, 8]},
+								"south": {"uv": [27, 0], "uv_size": [3, 8]},
+								"west": {"uv": [0, 3], "uv_size": [3, 8]},
+								"up": {"uv": [6, 0], "uv_size": [-3, 3]},
+								"down": {"uv": [9, 3], "uv_size": [-3, -3]}
+							}
+						},
+						{
+							"origin": [-8.2, 18, -3],
+							"size": [4.4, 3.3, 7],
+							"uv": {
+								"north": {"uv": [23, 20], "uv_size": [-3, 1]},
+								"east": {"uv": [23, 20], "uv_size": [4, 1]},
+								"south": {"uv": [30, 20], "uv_size": [-3, 1]},
+								"west": {"uv": [16, 20], "uv_size": [4, 1]},
+								"up": {"uv": [23, 16], "uv_size": [-3, 4]},
+								"down": {"uv": [26, 20], "uv_size": [-3, -4]}
+							}
+						},
+						{
+							"origin": [-8.35, 14.5, -3.15],
+							"size": [4.7, 4, 7.3],
+							"uv": {
+								"north": {"uv": [23, 20], "uv_size": [-3, 2]},
+								"east": {"uv": [23, 20], "uv_size": [4, 2]},
+								"south": {"uv": [30, 20], "uv_size": [-3, 2]},
+								"west": {"uv": [16, 20], "uv_size": [4, 2]},
+								"up": {"uv": [23, 16], "uv_size": [-3, 4]},
+								"down": {"uv": [26, 20], "uv_size": [-3, -4]}
+							}
+						}
+					]
+				},
+				{
+					"name": "right_hand",
+					"parent": "armorRightArm",
+					"pivot": [-5, 15, 0],
+					"cubes": [
+						{
+							"origin": [-8.2, 12.5, -3],
+							"size": [4.4, 5.5, 7],
+							"uv": {
+								"north": {"uv": [23, 28], "uv_size": [-3, 3]},
+								"east": {"uv": [23, 28], "uv_size": [4, 3]},
+								"south": {"uv": [30, 28], "uv_size": [-3, 3]},
+								"west": {"uv": [16, 28], "uv_size": [4, 3]},
+								"up": {"uv": [23, 24], "uv_size": [-3, 4]},
+								"down": {"uv": [26, 28], "uv_size": [-3, -4]}
+							}
+						}
+					]
+				},
+				{
+					"name": "armorLeftLeg",
+					"parent": "dragon_cultist_armor",
+					"pivot": [2, 12, 0],
+					"cubes": [
+						{
+							"origin": [-0.7, 2, -1.7],
+							"size": [4.5, 12, 4.4],
+							"uv": {
+								"north": {"uv": [13, 4], "uv_size": [3, 10]},
+								"east": {"uv": [0, 3], "uv_size": [3, 10]},
+								"south": {"uv": [7, 22], "uv_size": [3, 10]},
+								"west": {"uv": [6, 3], "uv_size": [3, 10]},
+								"up": {"uv": [3, 0], "uv_size": [3, 3]},
+								"down": {"uv": [6, 3], "uv_size": [3, -3]}
+							}
+						},
+						{
+							"origin": [-0.9, 5, -1.9],
+							"size": [4.9, 3, 4.8],
+							"uv": {
+								"north": {"uv": [19, 19], "uv_size": [3, 1]},
+								"east": {"uv": [16, 19], "uv_size": [3, 1]},
+								"south": {"uv": [25, 19], "uv_size": [3, 1]},
+								"west": {"uv": [22, 19], "uv_size": [3, 1]},
+								"up": {"uv": [19, 16], "uv_size": [3, 3]},
+								"down": {"uv": [22, 19], "uv_size": [3, -3]}
+							}
+						},
+						{
+							"origin": [-0.9, 9, -1.9],
+							"size": [4.9, 3, 4.8],
+							"uv": {
+								"north": {"uv": [19, 19], "uv_size": [3, 1]},
+								"east": {"uv": [16, 19], "uv_size": [3, 1]},
+								"south": {"uv": [25, 19], "uv_size": [3, 1]},
+								"west": {"uv": [22, 19], "uv_size": [3, 1]},
+								"up": {"uv": [19, 16], "uv_size": [3, 3]},
+								"down": {"uv": [22, 19], "uv_size": [3, -3]}
+							}
+						}
+					]
+				},
+				{
+					"name": "left_skirt",
+					"parent": "armorLeftLeg",
+					"pivot": [0, 13, 0],
+					"cubes": [
+						{
+							"origin": [-1, 4, -2.2],
+							"size": [5, 11, 5.4],
+							"uv": {
+								"north": {"uv": [16, 4], "uv_size": [-4, 9]},
+								"east": {"uv": [0, 4], "uv_size": [4, 9]},
+								"south": {"uv": [10, 22], "uv_size": [4, 9]},
+								"west": {"uv": [8, 4], "uv_size": [4, 9]},
+								"up": {"uv": [4, 0], "uv_size": [4, 4]},
+								"down": {"uv": [8, 4], "uv_size": [4, -4]}
+							}
+						}
+					]
+				},
+				{
+					"name": "armorRightLeg",
+					"parent": "dragon_cultist_armor",
+					"pivot": [-2, 12, 0],
+					"cubes": [
+						{
+							"origin": [-4.8, 2, -1.7],
+							"size": [4.5, 12, 4.4],
+							"uv": {
+								"north": {"uv": [16, 4], "uv_size": [-3, 10]},
+								"east": {"uv": [6, 3], "uv_size": [3, 10]},
+								"south": {"uv": [10, 22], "uv_size": [3, 10]},
+								"west": {"uv": [0, 3], "uv_size": [3, 10]},
+								"up": {"uv": [6, 0], "uv_size": [-3, 3]},
+								"down": {"uv": [9, 3], "uv_size": [-3, -3]}
+							}
+						},
+						{
+							"origin": [-5, 5, -1.9],
+							"size": [4.9, 3, 4.8],
+							"uv": {
+								"north": {"uv": [22, 19], "uv_size": [-3, 1]},
+								"east": {"uv": [22, 19], "uv_size": [3, 1]},
+								"south": {"uv": [28, 19], "uv_size": [-3, 1]},
+								"west": {"uv": [16, 19], "uv_size": [3, 1]},
+								"up": {"uv": [22, 16], "uv_size": [-3, 3]},
+								"down": {"uv": [25, 19], "uv_size": [-3, -3]}
+							}
+						},
+						{
+							"origin": [-5, 9, -1.9],
+							"size": [4.9, 3, 4.8],
+							"uv": {
+								"north": {"uv": [22, 19], "uv_size": [-3, 1]},
+								"east": {"uv": [22, 19], "uv_size": [3, 1]},
+								"south": {"uv": [28, 19], "uv_size": [-3, 1]},
+								"west": {"uv": [16, 19], "uv_size": [3, 1]},
+								"up": {"uv": [22, 16], "uv_size": [-3, 3]},
+								"down": {"uv": [25, 19], "uv_size": [-3, -3]}
+							}
+						}
+					]
+				},
+				{
+					"name": "right_skirt",
+					"parent": "armorRightLeg",
+					"pivot": [0, 13, 0],
+					"cubes": [
+						{
+							"origin": [-5, 4, -2.2],
+							"size": [5, 11, 5.4],
+							"uv": {
+								"north": {"uv": [12, 4], "uv_size": [4, 9]},
+								"east": {"uv": [0, 4], "uv_size": [4, 9]},
+								"south": {"uv": [6, 22], "uv_size": [4, 9]},
+								"west": {"uv": [8, 4], "uv_size": [4, 9]},
+								"up": {"uv": [4, 0], "uv_size": [4, 4]},
+								"down": {"uv": [8, 4], "uv_size": [4, -4]}
+							}
+						}
+					]
+				},
+				{
+					"name": "armorRightBoot",
+					"parent": "dragon_cultist_armor",
+					"pivot": [-2, 12, 0],
+					"cubes": [
+						{
+							"origin": [-4.9, 0, -2.7],
+							"size": [5.1, 5, 5.9],
+							"uv": {
+								"north": {"uv": [24, 28], "uv_size": [-4, 3]},
+								"east": {"uv": [24, 28], "uv_size": [4, 3]},
+								"south": {"uv": [32, 28], "uv_size": [-4, 3]},
+								"west": {"uv": [16, 28], "uv_size": [4, 3]},
+								"up": {"uv": [24, 24], "uv_size": [-4, 4]},
+								"down": {"uv": [28, 28], "uv_size": [-4, -4]}
+							}
+						}
+					]
+				},
+				{
+					"name": "armorLeftBoot",
+					"parent": "dragon_cultist_armor",
+					"pivot": [2, 12, 0],
+					"cubes": [
+						{
+							"origin": [-0.9, 0, -2.7],
+							"size": [5.1, 5, 5.9],
+							"uv": {
+								"north": {"uv": [20, 28], "uv_size": [4, 3]},
+								"east": {"uv": [16, 28], "uv_size": [4, 3]},
+								"south": {"uv": [28, 28], "uv_size": [4, 3]},
+								"west": {"uv": [24, 28], "uv_size": [4, 3]},
+								"up": {"uv": [20, 24], "uv_size": [4, 4]},
+								"down": {"uv": [24, 28], "uv_size": [4, -4]}
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}

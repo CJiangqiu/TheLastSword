@@ -30,7 +30,8 @@ public abstract class DragonCrystalArmorItem extends TheLastEndArmorItem {
         super(new ArmorMaterial() {
             @Override
             public int getDurabilityForType(Type t) {
-                return new int[]{407*2, 592*2, 555*2, 481*2}[t.getSlot().getIndex()];
+                //顺序对应 EquipmentSlot 索引 [靴子, 护腿, 胸甲, 头盔]，取下界合金各部位基数的 2 倍
+                return new int[]{481*2, 555*2, 592*2, 407*2}[t.getSlot().getIndex()];
             }
 
             @Override

@@ -139,6 +139,7 @@ public class GuardianOfSealedSpireEntity extends TheLastEndEntity {
                 .add(Attributes.MOVEMENT_SPEED, 0.25)
                 .add(Attributes.MAX_HEALTH, 50)
                 .add(Attributes.ARMOR, 0)
+                .add(Attributes.KNOCKBACK_RESISTANCE, 0.3)
                 .add(Attributes.ATTACK_DAMAGE, 2)
                 .add(Attributes.FOLLOW_RANGE, 32);
     }

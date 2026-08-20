@@ -1,9 +1,9 @@
 package net.the_last_sword.network;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
-import net.the_last_sword.client.gui.PaperNoteScreen;
 
 import java.util.function.Supplier;
 
@@ -40,12 +40,9 @@ public class OpenPaperNotePacket {
 
     public static void handle(OpenPaperNotePacket message, Supplier<NetworkEvent.Context> contextSupplier) {
         NetworkEvent.Context context = contextSupplier.get();
-        context.enqueueWork(() -> Minecraft.getInstance().setScreen(new PaperNoteScreen(
-            message.noteId,
-            message.nameKey,
-            message.guiContentKey,
-            message.collected
-        )));
+        context.enqueueWork(() -> DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
+                () -> () -> net.the_last_sword.client.ClientPacketHandler.openPaperNote(
+                        message.noteId, message.nameKey, message.guiContentKey, message.collected)));
         context.setPacketHandled(true);
     }
 }

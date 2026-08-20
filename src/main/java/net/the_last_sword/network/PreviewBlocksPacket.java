@@ -1,8 +1,9 @@
 package net.the_last_sword.network;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.HashSet;
@@ -37,13 +38,8 @@ public class PreviewBlocksPacket {
 
     //处理
     public static void handle(PreviewBlocksPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
-            //客户端接收：设置预览方块
-            Minecraft minecraft = Minecraft.getInstance();
-            if (minecraft.level != null) {
-                net.the_last_sword.event.ClientEventHandler.setMiningPreviewBlocks(msg.blocks);
-            }
-        });
+        ctx.get().enqueueWork(() -> DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
+                () -> () -> net.the_last_sword.client.ClientPacketHandler.setMiningPreview(msg.blocks)));
         ctx.get().setPacketHandled(true);
     }
 }

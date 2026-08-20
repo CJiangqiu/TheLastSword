@@ -44,7 +44,6 @@ import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
@@ -59,6 +58,7 @@ import net.the_last_sword.entity.variant.NamedPriestVariant;
 import net.the_last_sword.faction.DragonCultFaction;
 import net.the_last_sword.init.ModItems;
 import net.the_last_sword.init.ModEntities;
+import net.the_last_sword.util.DragonCultDisguise;
 import net.the_last_sword.util.EntityUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -144,7 +144,8 @@ public class DragonCultPriestEntity extends TheLastEndEntity {
 
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this)
                 .setAlertOthers(DragonCultistEntity.class, DragonCultPaladinEntity.class, DragonCultPriestEntity.class));
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false,
+                DragonCultDisguise.NOT_DISGUISED_PLAYER));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, true));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
     }
@@ -225,7 +226,7 @@ public class DragonCultPriestEntity extends TheLastEndEntity {
                 .add(Attributes.MAX_HEALTH, 200)
                 .add(Attributes.ARMOR, 0)
                 .add(Attributes.ARMOR_TOUGHNESS, 0)
-                .add(Attributes.KNOCKBACK_RESISTANCE, 0)
+                .add(Attributes.KNOCKBACK_RESISTANCE, 0.3)
                 .add(Attributes.ATTACK_DAMAGE, 2)
                 .add(Attributes.FOLLOW_RANGE, 32);
     }
@@ -324,16 +325,16 @@ public class DragonCultPriestEntity extends TheLastEndEntity {
     }
 
     private void equipGear() {
-        setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.GOLDEN_HELMET));
+        setItemSlot(EquipmentSlot.HEAD, new ItemStack(ModItems.DRAGON_CULT_PRIEST_ARMOR_HELMET.get()));
         setDropChance(EquipmentSlot.HEAD, 0.0F);
 
-        setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.GOLDEN_CHESTPLATE));
+        setItemSlot(EquipmentSlot.CHEST, new ItemStack(ModItems.DRAGON_CULT_PRIEST_ARMOR_CHESTPLATE.get()));
         setDropChance(EquipmentSlot.CHEST, 0.0F);
 
-        setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.GOLDEN_LEGGINGS));
+        setItemSlot(EquipmentSlot.LEGS, new ItemStack(ModItems.DRAGON_CULT_PRIEST_ARMOR_LEGGINGS.get()));
         setDropChance(EquipmentSlot.LEGS, 0.0F);
 
-        setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.GOLDEN_BOOTS));
+        setItemSlot(EquipmentSlot.FEET, new ItemStack(ModItems.DRAGON_CULT_PRIEST_ARMOR_BOOTS.get()));
         setDropChance(EquipmentSlot.FEET, 0.0F);
 
         setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(ModItems.PRIEST_STAFF.get()));
@@ -401,17 +402,7 @@ public class DragonCultPriestEntity extends TheLastEndEntity {
         if (getNamedVariant() == NamedPriestVariant.RAHGOT) {
             return;
         }
-
-        strength *= 1.0 - getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
-        if (strength <= 0.0) {
-            return;
-        }
-        Vec3 direction = new Vec3(x, 0.0, z).normalize().scale(strength);
-        Vec3 movement = getDeltaMovement();
-        setDeltaMovement(movement.x * 0.5 - direction.x,
-                onGround() ? Math.min(0.4, movement.y * 0.5 + strength) : movement.y,
-                movement.z * 0.5 - direction.z);
-        hasImpulse = true;
+        super.knockback(strength, x, z);
     }
 
     @Override

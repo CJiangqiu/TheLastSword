@@ -89,6 +89,11 @@ public class ModItems {
         DragonCrystal::new
     );
 
+    //拜龙教号角 - 在村庄内吹响可召来拜龙教袭击
+    public static final RegistryObject<Item> DRAGON_CULT_HORN = ITEMS.register("dragon_cult_horn",
+        DragonCultHornItem::new
+    );
+
     public static final RegistryObject<Item> DISPOSABLE_ENERGY_BATTERY = ITEMS.register("disposable_energy_battery",
         DisposableEnergyBattery::new
     );
@@ -191,6 +196,57 @@ public class ModItems {
 
     public static final RegistryObject<Item> DRAGON_ARMOR_BOOTS = ITEMS.register("dragon_armor_boots",
         DragonArmorItem.Boots::new
+    );
+
+    //拜龙教盔甲
+    public static final RegistryObject<Item> DRAGON_CULTIST_ARMOR_HELMET = ITEMS.register("dragon_cultist_armor_helmet",
+        DragonCultistArmorItem.Helmet::new
+    );
+
+    public static final RegistryObject<Item> DRAGON_CULTIST_ARMOR_CHESTPLATE = ITEMS.register("dragon_cultist_armor_chestplate",
+        DragonCultistArmorItem.Chestplate::new
+    );
+
+    public static final RegistryObject<Item> DRAGON_CULTIST_ARMOR_LEGGINGS = ITEMS.register("dragon_cultist_armor_leggings",
+        DragonCultistArmorItem.Leggings::new
+    );
+
+    public static final RegistryObject<Item> DRAGON_CULTIST_ARMOR_BOOTS = ITEMS.register("dragon_cultist_armor_boots",
+        DragonCultistArmorItem.Boots::new
+    );
+
+    //拜龙教圣骑士战甲
+    public static final RegistryObject<Item> DRAGON_CULT_PALADIN_ARMOR_HELMET = ITEMS.register("dragon_cult_paladin_armor_helmet",
+        DragonCultPaladinArmorItem.Helmet::new
+    );
+
+    public static final RegistryObject<Item> DRAGON_CULT_PALADIN_ARMOR_CHESTPLATE = ITEMS.register("dragon_cult_paladin_armor_chestplate",
+        DragonCultPaladinArmorItem.Chestplate::new
+    );
+
+    public static final RegistryObject<Item> DRAGON_CULT_PALADIN_ARMOR_LEGGINGS = ITEMS.register("dragon_cult_paladin_armor_leggings",
+        DragonCultPaladinArmorItem.Leggings::new
+    );
+
+    public static final RegistryObject<Item> DRAGON_CULT_PALADIN_ARMOR_BOOTS = ITEMS.register("dragon_cult_paladin_armor_boots",
+        DragonCultPaladinArmorItem.Boots::new
+    );
+
+    //拜龙教祭司法袍
+    public static final RegistryObject<Item> DRAGON_CULT_PRIEST_ARMOR_HELMET = ITEMS.register("dragon_cult_priest_armor_helmet",
+        DragonCultPriestArmorItem.Helmet::new
+    );
+
+    public static final RegistryObject<Item> DRAGON_CULT_PRIEST_ARMOR_CHESTPLATE = ITEMS.register("dragon_cult_priest_armor_chestplate",
+        DragonCultPriestArmorItem.Chestplate::new
+    );
+
+    public static final RegistryObject<Item> DRAGON_CULT_PRIEST_ARMOR_LEGGINGS = ITEMS.register("dragon_cult_priest_armor_leggings",
+        DragonCultPriestArmorItem.Leggings::new
+    );
+
+    public static final RegistryObject<Item> DRAGON_CULT_PRIEST_ARMOR_BOOTS = ITEMS.register("dragon_cult_priest_armor_boots",
+        DragonCultPriestArmorItem.Boots::new
     );
 
     //测试实体刷怪蛋

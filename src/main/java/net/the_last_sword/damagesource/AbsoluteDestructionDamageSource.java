@@ -141,13 +141,8 @@ public class AbsoluteDestructionDamageSource extends DamageSource {
             }
         }
 
-        entity.invulnerableTime=0;
-        entity.hurt(damageSource, damageAmount);
-        float actualHealth = entity.getHealth();
-        //预期血量>0但实际不一致，ECA校正血量
-        if (actualHealth != expectedHealth) {
-            EntityUtil.theLastEndSetHealth(entity, expectedHealth);
-        }
+        //ECA hurt：清无敌帧走原版减伤流程，扣血不符时兜底强制改血
+        EcaAPI.hurt(entity, damageSource, damageAmount);
 
         //禁疗
         int banTime = TheLastSwordConfiguration.getHealNegationTimeSafely();

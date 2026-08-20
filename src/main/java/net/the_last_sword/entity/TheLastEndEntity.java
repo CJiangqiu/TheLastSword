@@ -1,5 +1,6 @@
 package net.the_last_sword.entity;
 
+import net.eca.api.EcaAPI;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -37,6 +38,9 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
     public static final int STATE_SPAWNING = 1;
     public static final int STATE_IDLE = 2;
 
+    // 达到该终焉等级后交由 ECA 线程复活守护，只要世界锚度未清零就常驻
+    public static final int RESURRECTION_LEVEL = 13;
+
     // 同步字段
     private static final EntityDataAccessor<Integer> ANIMATION_STATE =
             SynchedEntityData.defineId(TheLastEndEntity.class, EntityDataSerializers.INT);
@@ -59,6 +63,9 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
     // 否则改用 generic 会丢失击杀者、进度触发以及武器的抢夺等级。
     @Nullable
     private DamageSource deathDamageSource;
+
+    // 强加载是否由复活追踪开启，避免退出追踪时误关其他系统开启的强加载
+    private boolean resurrectionForceLoaded;
 
     protected TheLastEndEntity(EntityType<? extends TamableAnimal> entityType, Level level) {
         super(entityType, level);
@@ -253,6 +260,7 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
             if (!EntityUtil.canAttack(this, target)) {
                 setTarget(null);
             }
+            syncResurrectionTracking();
         }
 
         // 死亡状态
@@ -347,6 +355,8 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
 
     public void triggerDeath(@NotNull DamageSource damageSource) {
         if (!isRemoved() && !dead && !hasPositiveRealHealth() && !isDying()) {
+            // 死亡动画期间必须先退出复活追踪，否则守护线程会清掉 dead 标记导致死亡结算被打断
+            stopResurrectionTracking();
             this.deathDamageSource = damageSource;
             setAnimationState(STATE_DEATH);
             setDeathTick(0);
@@ -359,9 +369,61 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
     }
 
     public void safeRemove() {
+        stopResurrectionTracking();
         setWorldAnchor(0);
         EntityUtil.clearDefence(this);
         EntityUtil.theLastEndRemove(this, RemovalReason.KILLED);
+    }
+
+    // 是否应处于线程复活追踪
+    protected boolean shouldTrackResurrection() {
+        return getTheLastEndLevel() >= RESURRECTION_LEVEL
+                && !isDying()
+                && !isRemoved()
+                && hasPositiveRealHealth();
+    }
+
+    // 每 tick 对齐追踪状态，ECA 的追踪表与手动强加载都不跨重载保留，需要在这里补回
+    private void syncResurrectionTracking() {
+        if (!(level() instanceof ServerLevel serverLevel)) {
+            return;
+        }
+
+        if (!shouldTrackResurrection()) {
+            stopResurrectionTracking();
+            return;
+        }
+
+        // ECA 会在读档时按 NBT 自动恢复追踪，但守护线程不会自启，这里无条件兜底
+        if (!EcaAPI.isResurrectionRunning()) {
+            EcaAPI.startResurrection();
+        }
+
+        if (!EcaAPI.isResurrectionTracked(this)) {
+            EcaAPI.addResurrectionTarget(this);
+        }
+
+        // 已被其他系统强加载时不接管，避免退出追踪时把它们的票据一并释放
+        if (!EcaAPI.isForceLoaded(this)) {
+            EcaAPI.setForceLoading(this, serverLevel, true);
+            resurrectionForceLoaded = true;
+        }
+    }
+
+    // 退出线程复活追踪，任何强制清除路径都必须先调用
+    protected void stopResurrectionTracking() {
+        if (!(level() instanceof ServerLevel serverLevel)) {
+            return;
+        }
+
+        if (EcaAPI.isResurrectionTracked(this)) {
+            EcaAPI.removeResurrectionTarget(this);
+        }
+
+        if (resurrectionForceLoaded) {
+            EcaAPI.setForceLoading(this, serverLevel, false);
+            resurrectionForceLoaded = false;
+        }
     }
 
     // 伤害处理
@@ -530,10 +592,6 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
 
     @Override
     public void teleportTo(double x, double y, double z) {
-    }
-
-    @Override
-    public void knockback(double strength, double x, double z) {
     }
 
     @Override

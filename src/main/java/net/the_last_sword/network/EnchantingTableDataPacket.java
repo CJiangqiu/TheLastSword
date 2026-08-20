@@ -1,9 +1,9 @@
 package net.the_last_sword.network;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
-import net.the_last_sword.client.gui.menu.DragonCrystalEnchantingTableMenu;
 
 import java.util.function.Supplier;
 
@@ -34,15 +34,9 @@ public class EnchantingTableDataPacket {
     }
 
     public static void handle(EnchantingTableDataPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
-            var player = Minecraft.getInstance().player;
-            if (player != null && player.containerMenu instanceof DragonCrystalEnchantingTableMenu menu
-                    && menu.containerId == msg.containerId) {
-                menu.setClientEnergy(msg.energy);
-                menu.setClientMaxEnergy(msg.maxEnergy);
-                menu.setClientTotalPowerTime(msg.totalPowerTime);
-            }
-        });
+        ctx.get().enqueueWork(() -> DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
+                () -> () -> net.the_last_sword.client.ClientPacketHandler.syncEnchantingTable(
+                        msg.containerId, msg.energy, msg.maxEnergy, msg.totalPowerTime)));
         ctx.get().setPacketHandled(true);
     }
 }

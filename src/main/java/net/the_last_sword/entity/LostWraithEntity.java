@@ -70,8 +70,14 @@ public class LostWraithEntity extends TheLastEndEntity {
     private static final EntityDataAccessor<Integer> TALK_INDEX =
             SynchedEntityData.defineId(LostWraithEntity.class, EntityDataSerializers.INT);
 
+    private static final EntityDataAccessor<Boolean> PUNCH_TELEPORT_READY =
+            SynchedEntityData.defineId(LostWraithEntity.class, EntityDataSerializers.BOOLEAN);
+
     // 生成动画计时
     private int spawnTick = 0;
+
+    // 拳击传送冷却截止时间（服务端）
+    private long punchTeleportCooldownEnd;
 
     public LostWraithEntity(EntityType<? extends LostWraithEntity> type, Level world) {
         super(type, world);
@@ -84,6 +90,7 @@ public class LostWraithEntity extends TheLastEndEntity {
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(TALK_INDEX, 1);
+        this.entityData.define(PUNCH_TELEPORT_READY, true);
     }
 
     @Override
@@ -112,6 +119,7 @@ public class LostWraithEntity extends TheLastEndEntity {
                 .add(Attributes.MAX_HEALTH, 400)
                 .add(Attributes.ARMOR, 10)
                 .add(Attributes.ARMOR_TOUGHNESS, 10)
+                .add(Attributes.KNOCKBACK_RESISTANCE, 1.0)
                 .add(Attributes.ATTACK_DAMAGE, 10)
                 .add(Attributes.FOLLOW_RANGE, 64);
     }
@@ -250,6 +258,39 @@ public class LostWraithEntity extends TheLastEndEntity {
     public void tick() {
         super.tick();
         this.refreshDimensions();
+
+        if (level().isClientSide) {
+            if (isPunchTeleportReady()) {
+                spawnPunchTeleportReadyParticles();
+            }
+            return;
+        }
+
+        //只在就绪状态翻转时写同步数据，避免每tick发包
+        boolean ready = level().getGameTime() >= punchTeleportCooldownEnd;
+        if (ready != isPunchTeleportReady()) {
+            this.entityData.set(PUNCH_TELEPORT_READY, ready);
+        }
+    }
+
+    public boolean isPunchTeleportReady() {
+        return this.entityData.get(PUNCH_TELEPORT_READY);
+    }
+
+    //拳击成功突进后进入传送冷却
+    public void startPunchTeleportCooldown() {
+        this.punchTeleportCooldownEnd = level().getGameTime()
+                + TheLastSwordConfiguration.getLostWraithPunchTeleportCooldownSafely();
+        this.entityData.set(PUNCH_TELEPORT_READY, false);
+    }
+
+    //拳击传送就绪时脚部持续冒末影人粒子
+    private void spawnPunchTeleportReadyParticles() {
+        for (int i = 0; i < 2; i++) {
+            level().addParticle(ParticleTypes.PORTAL,
+                    getRandomX(0.6), getY() + random.nextDouble() * 0.3, getRandomZ(0.6),
+                    (random.nextDouble() - 0.5) * 0.4, random.nextDouble() * 0.2, (random.nextDouble() - 0.5) * 0.4);
+        }
     }
 
     @Override

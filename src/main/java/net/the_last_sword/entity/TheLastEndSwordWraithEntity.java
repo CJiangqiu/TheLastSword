@@ -110,6 +110,7 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
                 .add(Attributes.MOVEMENT_SPEED, 0.3)
                 .add(Attributes.MAX_HEALTH, 200)
                 .add(Attributes.ARMOR, 20)
+                .add(Attributes.KNOCKBACK_RESISTANCE, 1.0)
                 .add(Attributes.ATTACK_DAMAGE, 20)
                 .add(Attributes.FOLLOW_RANGE, 64);
     }

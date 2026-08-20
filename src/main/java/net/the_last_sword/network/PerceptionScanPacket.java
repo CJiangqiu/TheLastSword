@@ -1,9 +1,9 @@
 package net.the_last_sword.network;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
-import net.the_last_sword.client.PerceptionScanData;
-import net.the_last_sword.client.PerceptionScanData.ScanType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,6 +11,18 @@ import java.util.function.Supplier;
 
 // 感知扫描结果同步包（服务端→客户端）
 public class PerceptionScanPacket {
+
+    public enum ScanType {
+        HOSTILE(0xFF0000),
+        FRIENDLY(0x00FF00),
+        NEUTRAL(0xFFFF00);
+
+        public final int color;
+
+        ScanType(int color) {
+            this.color = color;
+        }
+    }
 
     private final Map<Integer, ScanType> scannedEntities;
     private final int glowDurationSeconds;
@@ -42,7 +54,9 @@ public class PerceptionScanPacket {
     }
 
     public static void handle(PerceptionScanPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> PerceptionScanData.update(msg.scannedEntities, msg.glowDurationSeconds));
+        ctx.get().enqueueWork(() -> DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
+                () -> () -> net.the_last_sword.client.ClientPacketHandler.updatePerceptionScan(
+                        msg.scannedEntities, msg.glowDurationSeconds)));
         ctx.get().setPacketHandled(true);
     }
 }

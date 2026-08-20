@@ -155,6 +155,7 @@ public class TheLastSwordConfiguration {
     public static ForgeConfigSpec.ConfigValue<Double> LOST_WRAITH_PUNCH_ATTACK_DISTANCE;
     public static ForgeConfigSpec.ConfigValue<Integer> LOST_WRAITH_PUNCH_FORWARD_STEPS;
     public static ForgeConfigSpec.ConfigValue<Integer> LOST_WRAITH_PUNCH_SIDE_HALF_WIDTH;
+    public static ForgeConfigSpec.ConfigValue<Integer> LOST_WRAITH_PUNCH_TELEPORT_COOLDOWN;
     // End Strike | 终焉一击
     public static ForgeConfigSpec.ConfigValue<Integer> LOST_WRAITH_END_STRIKE_COOLDOWN;
     public static ForgeConfigSpec.ConfigValue<Double> LOST_WRAITH_END_STRIKE_PULL_RADIUS;
@@ -1230,8 +1231,8 @@ public class TheLastSwordConfiguration {
         BUILDER.push("Punch");
         LOST_WRAITH_PUNCH_ATTACK_DISTANCE = BUILDER
             .comment(
-                "Distance within which this skill can trigger in blocks",
-                "可触发此技能的距离范围（格）"
+                "Dynamic trigger range for the punch skill: while the punch teleport is on cooldown the skill triggers within this distance (same as before), once the teleport is ready the skill triggers beyond this distance and teleports to the target (same as the ranged skills)",
+                "拳击动态启动距离：传送冷却中在此距离内触发（与以往一致），传送就绪时在此距离外触发并突进传送（与远程技能一致）"
             )
             .defineInRange("Attack Distance", 4.0, 0.0, 32.0);
         LOST_WRAITH_PUNCH_FORWARD_STEPS = BUILDER
@@ -1246,6 +1247,12 @@ public class TheLastSwordConfiguration {
                 "击退锥形的一半宽度（1 表示宽度为 3 的锥形）"
             )
             .defineInRange("Side Half Width", 1, 0, 32);
+        LOST_WRAITH_PUNCH_TELEPORT_COOLDOWN = BUILDER
+            .comment(
+                "Cooldown between punch teleports in ticks (20 ticks = 1 second)",
+                "拳击传送的使用间隔冷却时间（tick；20 tick = 1 秒）"
+            )
+            .defineInRange("Teleport Cooldown", 240, 0, Integer.MAX_VALUE);
         BUILDER.pop();
 
         // End Strike | 终焉一击
@@ -2443,6 +2450,10 @@ public class TheLastSwordConfiguration {
 
     public static int getLostWraithPunchSideHalfWidthSafely() {
         return safeGet(LOST_WRAITH_PUNCH_SIDE_HALF_WIDTH, 1);
+    }
+
+    public static int getLostWraithPunchTeleportCooldownSafely() {
+        return safeGet(LOST_WRAITH_PUNCH_TELEPORT_COOLDOWN, 240);
     }
 
     //终焉一击

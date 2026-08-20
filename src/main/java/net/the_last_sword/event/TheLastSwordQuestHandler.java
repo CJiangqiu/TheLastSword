@@ -265,27 +265,41 @@ public class TheLastSwordQuestHandler {
                 || !player.getInventory().contains(new ItemStack(ModItems.DRAGON_CRYSTAL.get()))) {
             return;
         }
+        tryStartDragonCultRaid(player);
+    }
 
+    //拜龙教袭击的开启结果
+    public enum DragonCultRaidResult {
+        STARTED,
+        ALREADY_ACTIVE,
+        UNAVAILABLE
+    }
+
+    //在玩家所处村庄开启拜龙教袭击，供任务系统与拜龙教号角共用
+    public static DragonCultRaidResult tryStartDragonCultRaid(ServerPlayer player) {
         ServerLevel level = player.serverLevel();
         var village = level.structureManager().getStructureWithPieceAt(player.blockPosition(), StructureTags.VILLAGE);
         if (!village.isValid()) {
-            return;
+            return DragonCultRaidResult.UNAVAILABLE;
         }
 
-        //多人同时进入同一村庄时复用已经开始的袭击，避免波次叠加
+        //ECA 不做同地点去重，多人同时进入同一村庄时复用已经开始的袭击，避免波次叠加
         boolean raidAlreadyActive = EcaAPI.getActiveRaids(level).stream()
                 .anyMatch(activeRaid -> DragonCultRaid.ID.equals(activeRaid.getDefinitionId())
                         && village.getBoundingBox().isInside(activeRaid.getCenter()));
         if (raidAlreadyActive) {
             grant(player, DRAGON_CULT_RAID);
-            return;
+            return DragonCultRaidResult.ALREADY_ACTIVE;
         }
 
         //玩家位置已经确认位于真实村庄结构拼图内，避免包围盒中心落在拼图空隙导致首次 tick 判败
         RaidInstance raid = EcaAPI.startRaidAt(level, player.blockPosition(), DragonCultRaid.ID);
-        if (raid != null) {
-            grant(player, DRAGON_CULT_RAID);
+        if (raid == null) {
+            //定义或阵营异常导致启动失败，ECA 已记录日志
+            return DragonCultRaidResult.UNAVAILABLE;
         }
+        grant(player, DRAGON_CULT_RAID);
+        return DragonCultRaidResult.STARTED;
     }
 
     //击退拜龙教并取得秘信后，引导玩家前往旅行者的下界据点

@@ -5,8 +5,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
-import net.the_last_sword.client.renderer.DragonShieldRenderer;
 
 import java.util.function.Supplier;
 
@@ -62,11 +63,9 @@ public class DragonShieldPacket {
     }
 
     public static void handle(DragonShieldPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
-            if (msg.hasDirection) {
-                DragonShieldRenderer.trigger(msg.directionX, msg.directionY, msg.directionZ);
-            }
-        });
+        ctx.get().enqueueWork(() -> DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
+                () -> () -> net.the_last_sword.client.ClientPacketHandler.triggerDragonShield(
+                        msg.hasDirection, msg.directionX, msg.directionY, msg.directionZ)));
         ctx.get().setPacketHandled(true);
     }
 }

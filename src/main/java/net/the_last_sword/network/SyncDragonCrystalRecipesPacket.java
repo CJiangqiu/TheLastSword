@@ -2,8 +2,9 @@ package net.the_last_sword.network;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
-import net.the_last_sword.client.recipe.ClientDragonCrystalRecipeCache;
 import net.the_last_sword.recipe.DragonCrystalSmithingRecipe;
 import net.the_last_sword.recipe.DragonCrystalSmithingSerializer;
 
@@ -47,7 +48,8 @@ public class SyncDragonCrystalRecipesPacket {
 
     public static void handle(SyncDragonCrystalRecipesPacket message, Supplier<NetworkEvent.Context> contextSupplier) {
         NetworkEvent.Context context = contextSupplier.get();
-        context.enqueueWork(() -> ClientDragonCrystalRecipeCache.replaceAll(message.recipes));
+        context.enqueueWork(() -> DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
+                () -> () -> net.the_last_sword.client.ClientPacketHandler.replaceDragonCrystalRecipes(message.recipes)));
         context.setPacketHandled(true);
     }
 }

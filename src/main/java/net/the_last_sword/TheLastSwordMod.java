@@ -23,6 +23,7 @@ import net.the_last_sword.init.ModBlocks;
 import net.the_last_sword.init.ModCreativeTabs;
 import net.the_last_sword.init.ModEffects;
 import net.the_last_sword.init.ModEntities;
+import net.the_last_sword.init.ModInstruments;
 import net.the_last_sword.init.ModItems;
 import net.the_last_sword.init.ModMenus;
 import net.the_last_sword.init.ModRecipes;
@@ -66,6 +67,7 @@ public class TheLastSwordMod {
         ModRecipes.register(modEventBus);
         ModCreativeTabs.register(modEventBus);
         ModSounds.SOUNDS.register(modEventBus);
+        ModInstruments.register(modEventBus);
         ModStructureTypes.register(modEventBus);
 
         //注册内置资源包

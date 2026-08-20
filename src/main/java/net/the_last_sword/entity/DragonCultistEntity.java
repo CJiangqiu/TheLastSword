@@ -33,6 +33,8 @@ import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.entity.ai.DragonCultistMagicGoal;
 import net.the_last_sword.entity.ai.DragonCultistMeleeAttackGoal;
 import net.the_last_sword.faction.DragonCultFaction;
+import net.the_last_sword.init.ModItems;
+import net.the_last_sword.util.DragonCultDisguise;
 import net.the_last_sword.util.EntityUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -62,7 +64,8 @@ public class DragonCultistEntity extends TheLastEndEntity {
 
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this)
                 .setAlertOthers(DragonCultistEntity.class, DragonCultPaladinEntity.class));
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false,
+                DragonCultDisguise.NOT_DISGUISED_PLAYER));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, true));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
     }
@@ -174,24 +177,16 @@ public class DragonCultistEntity extends TheLastEndEntity {
     }
 
     private void equipGear() {
-        ItemStack helmet = new ItemStack(Items.LEATHER_HELMET);
-        helmet.getOrCreateTag().putInt("color", 0x1A1A1A);
-        setItemSlot(EquipmentSlot.HEAD, helmet);
+        setItemSlot(EquipmentSlot.HEAD, new ItemStack(ModItems.DRAGON_CULTIST_ARMOR_HELMET.get()));
         setDropChance(EquipmentSlot.HEAD, 0.0F);
 
-        ItemStack chestplate = new ItemStack(Items.LEATHER_CHESTPLATE);
-        chestplate.getOrCreateTag().putInt("color", 0x1A1A1A);
-        setItemSlot(EquipmentSlot.CHEST, chestplate);
+        setItemSlot(EquipmentSlot.CHEST, new ItemStack(ModItems.DRAGON_CULTIST_ARMOR_CHESTPLATE.get()));
         setDropChance(EquipmentSlot.CHEST, 0.0F);
 
-        ItemStack leggings = new ItemStack(Items.LEATHER_LEGGINGS);
-        leggings.getOrCreateTag().putInt("color", 0x1A1A1A);
-        setItemSlot(EquipmentSlot.LEGS, leggings);
+        setItemSlot(EquipmentSlot.LEGS, new ItemStack(ModItems.DRAGON_CULTIST_ARMOR_LEGGINGS.get()));
         setDropChance(EquipmentSlot.LEGS, 0.0F);
 
-        ItemStack boots = new ItemStack(Items.LEATHER_BOOTS);
-        boots.getOrCreateTag().putInt("color", 0x1A1A1A);
-        setItemSlot(EquipmentSlot.FEET, boots);
+        setItemSlot(EquipmentSlot.FEET, new ItemStack(ModItems.DRAGON_CULTIST_ARMOR_BOOTS.get()));
         setDropChance(EquipmentSlot.FEET, 0.0F);
 
         ItemStack sword = new ItemStack(Items.IRON_SWORD);

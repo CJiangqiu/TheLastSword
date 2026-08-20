@@ -30,81 +30,81 @@ public class NetworkHandler {
 
     //注册所有网络包
     public static void register() {
-        CHANNEL.messageBuilder(ChangeModePacket.class, id())
+        CHANNEL.messageBuilder(ChangeModePacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
                 .encoder(ChangeModePacket::encode)
                 .decoder(ChangeModePacket::decode)
                 .consumerMainThread(ChangeModePacket::handle)
                 .add();
 
         //挖掘预览系统网络包
-        CHANNEL.messageBuilder(PreviewBlocksPacket.class, id())
+        CHANNEL.messageBuilder(PreviewBlocksPacket.class, id(), NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(PreviewBlocksPacket::encode)
                 .decoder(PreviewBlocksPacket::decode)
                 .consumerMainThread(PreviewBlocksPacket::handle)
                 .add();
 
-        CHANNEL.messageBuilder(ClearPreviewPacket.class, id())
+        CHANNEL.messageBuilder(ClearPreviewPacket.class, id(), NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(ClearPreviewPacket::encode)
                 .decoder(ClearPreviewPacket::decode)
                 .consumerMainThread(ClearPreviewPacket::handle)
                 .add();
 
-        CHANNEL.messageBuilder(CancelPreviewPacket.class, id())
+        CHANNEL.messageBuilder(CancelPreviewPacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
                 .encoder(CancelPreviewPacket::encode)
                 .decoder(CancelPreviewPacket::decode)
                 .consumerMainThread(CancelPreviewPacket::handle)
                 .add();
 
         //唤灵GUI系统网络包
-        CHANNEL.messageBuilder(OpenSummonGuiPacket.class, id())
+        CHANNEL.messageBuilder(OpenSummonGuiPacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
                 .encoder(OpenSummonGuiPacket::encode)
                 .decoder(OpenSummonGuiPacket::decode)
                 .consumerMainThread(OpenSummonGuiPacket::handle)
                 .add();
 
-        CHANNEL.messageBuilder(SyncSummonGuiPacket.class, id())
+        CHANNEL.messageBuilder(SyncSummonGuiPacket.class, id(), NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(SyncSummonGuiPacket::encode)
                 .decoder(SyncSummonGuiPacket::decode)
                 .consumerMainThread(SyncSummonGuiPacket::handle)
                 .add();
 
         //防御配置同步网络包
-        CHANNEL.messageBuilder(DefenceConfigPacket.class, id())
+        CHANNEL.messageBuilder(DefenceConfigPacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
                 .encoder(DefenceConfigPacket::encode)
                 .decoder(DefenceConfigPacket::new)
                 .consumerMainThread(DefenceConfigPacket::handle)
                 .add();
 
         //附魔应用网络包
-        CHANNEL.messageBuilder(EnchantmentApplyPacket.class, id())
+        CHANNEL.messageBuilder(EnchantmentApplyPacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
                 .encoder(EnchantmentApplyPacket::encode)
                 .decoder(EnchantmentApplyPacket::decode)
                 .consumerMainThread(EnchantmentApplyPacket::handle)
                 .add();
 
         //附魔台能量数据同步包
-        CHANNEL.messageBuilder(EnchantingTableDataPacket.class, id())
+        CHANNEL.messageBuilder(EnchantingTableDataPacket.class, id(), NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(EnchantingTableDataPacket::encode)
                 .decoder(EnchantingTableDataPacket::decode)
                 .consumerMainThread(EnchantingTableDataPacket::handle)
                 .add();
 
         //感知扫描结果同步包
-        CHANNEL.messageBuilder(PerceptionScanPacket.class, id())
+        CHANNEL.messageBuilder(PerceptionScanPacket.class, id(), NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(PerceptionScanPacket::encode)
                 .decoder(PerceptionScanPacket::decode)
                 .consumerMainThread(PerceptionScanPacket::handle)
                 .add();
 
         //竞技场预览包
-        CHANNEL.messageBuilder(ArenaPreviewPacket.class, id())
+        CHANNEL.messageBuilder(ArenaPreviewPacket.class, id(), NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(ArenaPreviewPacket::encode)
                 .decoder(ArenaPreviewPacket::decode)
                 .consumerMainThread(ArenaPreviewPacket::handle)
                 .add();
 
         //龙套护盾触发包
-        CHANNEL.messageBuilder(DragonShieldPacket.class, id())
+        CHANNEL.messageBuilder(DragonShieldPacket.class, id(), NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(DragonShieldPacket::encode)
                 .decoder(DragonShieldPacket::decode)
                 .consumerMainThread(DragonShieldPacket::handle)
@@ -132,7 +132,7 @@ public class NetworkHandler {
                 .add();
 
         //纸条收集确认包
-        CHANNEL.messageBuilder(ConfirmPaperNotePacket.class, id())
+        CHANNEL.messageBuilder(ConfirmPaperNotePacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
                 .encoder(ConfirmPaperNotePacket::encode)
                 .decoder(ConfirmPaperNotePacket::decode)
                 .consumerMainThread(ConfirmPaperNotePacket::handle)

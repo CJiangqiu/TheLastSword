@@ -10,7 +10,6 @@ import net.the_last_sword.util.EntityUtil;
 // 迷失战魂追击目标Goal
 public class LostWraithChaseTargetGoal extends Goal {
     private static final double APPROACH_DISTANCE = 4.0;
-    private static final int REPATH_TICKS = 10;
 
     private final LostWraithEntity wraith;
 
@@ -64,9 +63,8 @@ public class LostWraithChaseTargetGoal extends Goal {
 
         wraith.getLookControl().setLookAt(target, 30.0F, 30.0F);
 
-        if (wraith.tickCount % REPATH_TICKS == 0 || !wraith.getNavigation().isInProgress()) {
-            wraith.getNavigation().moveTo(target, 1.0);
-        }
+        //每tick更新路径，紧跟目标实时位置
+        wraith.getNavigation().moveTo(target, 1.0);
     }
 
     @Override

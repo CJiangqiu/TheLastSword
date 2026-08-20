@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    "the_last_sword:dragon_cultist_armor_helmet",
+    "the_last_sword:dragon_cultist_armor_chestplate",
+    "the_last_sword:dragon_cultist_armor_leggings",
+    "the_last_sword:dragon_cultist_armor_boots",
+    "the_last_sword:dragon_cult_paladin_armor_helmet",
+    "the_last_sword:dragon_cult_paladin_armor_chestplate",
+    "the_last_sword:dragon_cult_paladin_armor_leggings",
+    "the_last_sword:dragon_cult_paladin_armor_boots",
+    "the_last_sword:dragon_cult_priest_armor_helmet",
+    "the_last_sword:dragon_cult_priest_armor_chestplate",
+    "the_last_sword:dragon_cult_priest_armor_leggings",
+    "the_last_sword:dragon_cult_priest_armor_boots"
+  ]
+}

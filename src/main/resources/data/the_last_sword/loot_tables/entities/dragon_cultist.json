@@ -6,18 +6,12 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:leather_helmet",
+          "name": "the_last_sword:dragon_cultist_armor_helmet",
           "conditions": [
             {
               "condition": "minecraft:random_chance_with_looting",
               "chance": 0.2,
               "looting_multiplier": 0.01
-            }
-          ],
-          "functions": [
-            {
-              "function": "minecraft:set_nbt",
-              "tag": "{display:{color:1703956}}"
             }
           ]
         }
@@ -28,18 +22,12 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:leather_chestplate",
+          "name": "the_last_sword:dragon_cultist_armor_chestplate",
           "conditions": [
             {
               "condition": "minecraft:random_chance_with_looting",
               "chance": 0.2,
               "looting_multiplier": 0.01
-            }
-          ],
-          "functions": [
-            {
-              "function": "minecraft:set_nbt",
-              "tag": "{display:{color:1703956}}"
             }
           ]
         }
@@ -50,18 +38,12 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:leather_leggings",
+          "name": "the_last_sword:dragon_cultist_armor_leggings",
           "conditions": [
             {
               "condition": "minecraft:random_chance_with_looting",
               "chance": 0.2,
               "looting_multiplier": 0.01
-            }
-          ],
-          "functions": [
-            {
-              "function": "minecraft:set_nbt",
-              "tag": "{display:{color:1703956}}"
             }
           ]
         }
@@ -72,18 +54,12 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:leather_boots",
+          "name": "the_last_sword:dragon_cultist_armor_boots",
           "conditions": [
             {
               "condition": "minecraft:random_chance_with_looting",
               "chance": 0.2,
               "looting_multiplier": 0.01
-            }
-          ],
-          "functions": [
-            {
-              "function": "minecraft:set_nbt",
-              "tag": "{display:{color:1703956}}"
             }
           ]
         }

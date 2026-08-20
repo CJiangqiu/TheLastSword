@@ -6,7 +6,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:iron_helmet",
+          "name": "the_last_sword:dragon_cult_paladin_armor_helmet",
           "conditions": [
             {
               "condition": "minecraft:random_chance_with_looting",
@@ -22,7 +22,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:iron_chestplate",
+          "name": "the_last_sword:dragon_cult_paladin_armor_chestplate",
           "conditions": [
             {
               "condition": "minecraft:random_chance_with_looting",
@@ -38,7 +38,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:iron_leggings",
+          "name": "the_last_sword:dragon_cult_paladin_armor_leggings",
           "conditions": [
             {
               "condition": "minecraft:random_chance_with_looting",
@@ -54,7 +54,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:iron_boots",
+          "name": "the_last_sword:dragon_cult_paladin_armor_boots",
           "conditions": [
             {
               "condition": "minecraft:random_chance_with_looting",

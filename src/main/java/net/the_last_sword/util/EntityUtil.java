@@ -453,6 +453,8 @@ public class EntityUtil {
     // ==================== 实体清除模块 ====================
 
     public static void theLastEndRemove(Entity entity, Entity.RemovalReason reason) {
+        //强制清除前先退出线程复活追踪，否则守护线程会把实体拉回来
+        EcaAPI.removeResurrectionTarget(entity);
         EcaAPI.remove(entity, reason);
     }
 
