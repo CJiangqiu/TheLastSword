@@ -1,5 +1,6 @@
 package net.the_last_sword.item;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -221,7 +222,7 @@ public abstract class DragonArmorItem extends TheLastEndArmorItem implements Geo
         int chargeRate = TheLastSwordConfiguration.getDragonArmorEnderCrystalChargeRateSafely();
         list.add(Component.translatable("item_tooltip.the_last_sword.dragon_armor_skill", crystalRange, chargeRate));
         list.add(Component.translatable("item_tooltip_lore.the_last_sword.dragon_armor")
-            .withStyle(net.minecraft.ChatFormatting.GRAY));
+            .withStyle(ChatFormatting.GRAY));
     }
 
     // ==================== GeckoLib动画 ====================

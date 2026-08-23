@@ -1,5 +1,6 @@
 package net.the_last_sword.item;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -251,6 +252,6 @@ public class AncientEnergyCore extends Item implements IDragonSmithingTemplate, 
             Component.translatable(statusKey)));
 
         tooltip.add(Component.translatable("item_tooltip_lore.the_last_sword.ancient_energy_core")
-            .withStyle(net.minecraft.ChatFormatting.GRAY));
+            .withStyle(ChatFormatting.GRAY));
     }
 }

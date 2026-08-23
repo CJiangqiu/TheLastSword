@@ -1,5 +1,6 @@
 package net.the_last_sword.item;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -23,6 +24,6 @@ public class DragonCrystal extends Item {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.translatable("item_tooltip_lore.the_last_sword.dragon_crystal")
-            .withStyle(net.minecraft.ChatFormatting.GRAY));
+            .withStyle(ChatFormatting.GRAY));
     }
 }

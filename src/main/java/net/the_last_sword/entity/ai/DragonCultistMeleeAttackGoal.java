@@ -121,7 +121,6 @@ public class DragonCultistMeleeAttackGoal extends Goal {
         if (cultist.distanceTo(target) > TheLastSwordConfiguration.getDragonCultistMeleeAttackRangeSafely()) {
             return;
         }
-        target.invulnerableTime = 0;
         cultist.doHurtTarget(target);
     }
 

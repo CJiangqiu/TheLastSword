@@ -2,6 +2,7 @@ package net.the_last_sword.compat.curios;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -56,7 +57,7 @@ public class DragonCrystalNecklace extends Item implements ICurioItem {
             immuneBase, immunePerLuck, immuneMax, critBase, critPerLuck));
         appendCurrentValueLine(tooltip);
         tooltip.add(Component.translatable("item_tooltip_lore.the_last_sword.dragon_crystal_necklace")
-            .withStyle(net.minecraft.ChatFormatting.GRAY));
+            .withStyle(ChatFormatting.GRAY));
     }
 
     //基于客户端玩家幸运值显示实时免疫概率与暴击加成
@@ -77,6 +78,6 @@ public class DragonCrystalNecklace extends Item implements ICurioItem {
         String immunityStr = String.format("%.1f", immunity * 100);
         String critStr = String.format("%.1f", crit * 100);
         tooltip.add(Component.translatable("item_tooltip.the_last_sword.dragon_crystal_necklace.current",
-            immunityStr, critStr).withStyle(net.minecraft.ChatFormatting.YELLOW));
+            immunityStr, critStr).withStyle(ChatFormatting.YELLOW));
     }
 }

@@ -115,7 +115,6 @@ public class SwordWraithDoubleStrikeGoal extends Goal {
         List<LivingEntity> targets = EntityUtil.getTargetsInHemisphere(wraith, attackRange);
         float damage = (float) wraith.getAttributeValue(Attributes.ATTACK_DAMAGE) * damageMultiplier;
         for (LivingEntity target : targets) {
-            target.invulnerableTime = 0;
             target.hurt(wraith.damageSources().mobAttack(wraith), damage);
             wraith.addEndMark();
         }
@@ -133,7 +132,6 @@ public class SwordWraithDoubleStrikeGoal extends Goal {
         List<LivingEntity> targets = EntityUtil.getTargetsInHemisphere(wraith, attackRange);
         float damage = (float) wraith.getAttributeValue(Attributes.ATTACK_DAMAGE) * damageMultiplier;
         for (LivingEntity target : targets) {
-            target.invulnerableTime = 0;
             DamageSource magicDamage = new DamageSource(
                 wraith.level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE)
                     .getHolderOrThrow(DamageTypes.MAGIC),

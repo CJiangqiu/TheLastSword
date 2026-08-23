@@ -118,7 +118,8 @@ public class AbsoluteDestructionDamageSource extends DamageSource {
             return true;
         }
 
-        float originalHealth = entity.getHealth();
+        //读真实血量：getHealth 在实体处于禁疗时返回的是禁疗上限，不是真实值
+        float originalHealth = EcaAPI.getRealHealth(entity);
         // 异常血量斩杀
         if (Float.isNaN(originalHealth) || Float.isInfinite(originalHealth) || originalHealth <= 0.0F) {
             WraithSummonManager.tryForceCapture(entity);
@@ -137,18 +138,23 @@ public class AbsoluteDestructionDamageSource extends DamageSource {
             WraithSummonManager.tryForceCapture(entity);
             if (TheLastSwordConfiguration.getEnableTheLastEndSetDeadSafely()) {
                 EntityUtil.theLastEndSetDead(entity, damageSource);
-                return true;
+            } else {
+                EntityUtil.theLastEndSetHealth(entity, 0);
             }
+            return true;
         }
 
         //ECA hurt：清无敌帧走原版减伤流程，扣血不符时兜底强制改血
         EcaAPI.hurt(entity, damageSource, damageAmount);
 
-        //禁疗
+        //禁疗：传扣血后的实际血量，传预期值会让 banHealing 内部的改血校验对不上
         int banTime = TheLastSwordConfiguration.getHealNegationTimeSafely();
         if (banTime > 0) {
-            EntityUtil.setHealBanTime(entity, banTime);
-            EcaAPI.banHealing(entity, expectedHealth);
+            float currentHealth = EcaAPI.getRealHealth(entity);
+            if (Float.isFinite(currentHealth) && currentHealth > 0.0F) {
+                EntityUtil.setHealBanTime(entity, banTime);
+                EcaAPI.banHealing(entity, currentHealth);
+            }
         }
         return true;
     }

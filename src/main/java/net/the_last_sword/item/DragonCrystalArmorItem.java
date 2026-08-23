@@ -1,5 +1,6 @@
 package net.the_last_sword.item;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -98,7 +99,7 @@ public abstract class DragonCrystalArmorItem extends TheLastEndArmorItem {
         list.add(Component.translatable("item_tooltip.the_last_sword.dragon_crystal_armor_skill", seconds));
 
         list.add(Component.translatable("item_tooltip_lore.the_last_sword.dragon_crystal_armor")
-            .withStyle(net.minecraft.ChatFormatting.GRAY));
+            .withStyle(ChatFormatting.GRAY));
     }
 
     protected abstract String getSpecificTooltipKey();

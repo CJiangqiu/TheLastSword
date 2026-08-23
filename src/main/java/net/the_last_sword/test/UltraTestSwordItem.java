@@ -1,6 +1,7 @@
 package net.the_last_sword.test;
 
 import net.eca.api.EcaAPI;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
@@ -12,12 +13,12 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.TickEvent;
@@ -32,8 +33,6 @@ import net.the_last_sword.util.EntityUtil;
 import net.the_last_sword.event.ServerEventHandler;
 import net.the_last_sword.util.nbt.ItemModeHelper;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -64,7 +63,7 @@ public class UltraTestSwordItem extends TieredItem {
         ItemModeHelper.initializeMode(stack, 0, MAX_MODES);
 
         // 两种模式下左键攻击逻辑相同（斗兽模式的左键取消预览由客户端onMouseInput处理）
-        List<Entity> targets = selectTargetsWithEcaSelector(player);
+        List<Entity> targets = TestUtil.selectTargets(player);
         DamageSource damageSource = AbsoluteDestructionDamageSource.absoluteDestruction(player, stack);
         for (Entity target : targets) {
             if (target instanceof LivingEntity living) {
@@ -86,12 +85,33 @@ public class UltraTestSwordItem extends TieredItem {
         ItemModeHelper.initializeMode(stack, 0, MAX_MODES);
 
         int mode = ItemModeHelper.getMode(stack);
-        if (!world.isClientSide && player instanceof ServerPlayer serverPlayer) {
+        if (!world.isClientSide && player instanceof ServerPlayer serverPlayer && world instanceof ServerLevel serverLevel) {
             if (mode == 0) {
                 if (serverPlayer.isShiftKeyDown()) {
-                    PowerfulRangeAttack.execute(serverPlayer);
+                    //1. 场上测试实体/终焉种先各自走后门安全退场
+                    TestUtil.safeRemoveTestTargets(serverLevel);
+
+                    //2. 翻转开关，决定全局all return + 禁生成的开启或还原
+                    boolean lockdown = !isLockdownEnabled(stack);
+                    if (lockdown) {
+                        //ECA未开激进逻辑时开启失败，不写入状态，物品渲染自然不会亮
+                        lockdown = EcaAPI.setGlobalAllReturn(true);
+                    } else {
+                        EcaAPI.setGlobalAllReturn(false);
+                        EcaAPI.unbanAllSpawns(serverLevel);
+                    }
+                    setLockdownEnabled(stack, lockdown);
+
+                    //3. ECA清除 + 环境设置，封锁开启时对本维度目标类型永久禁生成
+                    List<Entity> targets = TestUtil.selectTargets(serverPlayer);
+                    TestUtil.resetEnvironment(serverLevel);
+                    Set<EntityType<?>> targetTypes = TestUtil.freeze(targets);
+                    if (lockdown) {
+                        TestUtil.banSpawnPermanent(serverLevel, targetTypes);
+                    }
+                    TestUtil.clear(targets);
                 } else {
-                    List<Entity> targets = selectTargetsWithEcaSelector(serverPlayer);
+                    List<Entity> targets = TestUtil.selectTargets(serverPlayer);
                     for (Entity target : targets) {
                         EntityUtil.theLastEndRemove(target, Entity.RemovalReason.KILLED);
                     }
@@ -104,20 +124,16 @@ public class UltraTestSwordItem extends TieredItem {
         return InteractionResultHolder.success(stack);
     }
 
-    //使用ECA选择器获取128格目标实体
-    private static List<Entity> selectTargetsWithEcaSelector(ServerPlayer sourcePlayer) {
-        List<Entity> result = new ArrayList<>();
-        AABB area = sourcePlayer.getBoundingBox().inflate(128);
-        for (Entity entity : EcaAPI.getEntities(sourcePlayer.level(), area)) {
-            if (entity == sourcePlayer) {
-                continue;
-            }
-            if (entity instanceof Player targetPlayer && targetPlayer.isCreative()) {
-                continue;
-            }
-            result.add(entity);
-        }
-        return result;
+    //究极测试剑的全局封锁开关状态（全局all return + 禁生成），存于剑自身NBT供渲染与逻辑共用
+    private static final String LOCKDOWN_TAG = "the_last_sword.ultra_lockdown";
+
+    //读取封锁开关状态，供物品扩展渲染判断
+    public static boolean isLockdownEnabled(ItemStack stack) {
+        return !stack.isEmpty() && stack.hasTag() && stack.getTag().getBoolean(LOCKDOWN_TAG);
+    }
+
+    private static void setLockdownEnabled(ItemStack stack, boolean enabled) {
+        stack.getOrCreateTag().putBoolean(LOCKDOWN_TAG, enabled);
     }
 
     @Override
@@ -150,7 +166,7 @@ public class UltraTestSwordItem extends TieredItem {
         }
 
         tooltip.add(Component.translatable("item_tooltip_lore.the_last_sword.ultra_test_sword")
-            .withStyle(net.minecraft.ChatFormatting.GRAY));
+            .withStyle(ChatFormatting.GRAY));
         tooltip.add(
                 Component.translatable("item_tooltip.the_last_sword.mode_key")
                         .append(" ")

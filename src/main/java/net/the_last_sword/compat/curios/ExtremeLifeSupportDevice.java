@@ -2,6 +2,7 @@ package net.the_last_sword.compat.curios;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -119,7 +120,7 @@ public class ExtremeLifeSupportDevice extends Item implements ICurioItem {
         tooltip.add(Component.translatable("item_tooltip.the_last_sword.extreme_life_support_device", energyCost, thresholdPercent));
         appendCurrentValueLine(tooltip);
         tooltip.add(Component.translatable("item_tooltip_lore.the_last_sword.extreme_life_support_device")
-            .withStyle(net.minecraft.ChatFormatting.GRAY));
+            .withStyle(ChatFormatting.GRAY));
     }
 
     //基于客户端玩家当前生命比例显示损伤百分比与额外Buff等级
@@ -141,6 +142,6 @@ public class ExtremeLifeSupportDevice extends Item implements ICurioItem {
         int bonusLevel = threshold > 0 ? (int) (lostRatio / threshold) : 0;
         String lostStr = String.format("%.1f", lostRatio * 100);
         tooltip.add(Component.translatable("item_tooltip.the_last_sword.extreme_life_support_device.current",
-            lostStr, bonusLevel).withStyle(net.minecraft.ChatFormatting.YELLOW));
+            lostStr, bonusLevel).withStyle(ChatFormatting.YELLOW));
     }
 }

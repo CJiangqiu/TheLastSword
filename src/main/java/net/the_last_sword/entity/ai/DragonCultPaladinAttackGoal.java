@@ -118,8 +118,6 @@ public class DragonCultPaladinAttackGoal extends Goal {
             return;
         }
 
-        //两段间隔小于原版无敌帧，需清零才能都吃到
-        target.invulnerableTime = 0;
         target.hurt(paladin.damageSources().mobAttack(paladin), damage);
     }
 }

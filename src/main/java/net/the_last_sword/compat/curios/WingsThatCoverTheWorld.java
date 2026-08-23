@@ -1,5 +1,6 @@
 package net.the_last_sword.compat.curios;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -76,7 +77,7 @@ public class WingsThatCoverTheWorld extends Item implements ICurioItem {
             tooltip.add(Component.translatable("item_tooltip.the_last_sword.wings_that_cover_the_world.ice_fire_immunity"));
         }
         tooltip.add(Component.translatable("item_tooltip_lore.the_last_sword.wings_that_cover_the_world")
-            .withStyle(net.minecraft.ChatFormatting.GRAY));
+            .withStyle(ChatFormatting.GRAY));
     }
 
     //注册客户端渲染器

@@ -8,6 +8,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -16,6 +17,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.the_last_sword.configuration.DefenceConfig;
 import net.the_last_sword.configuration.DefenceConfigData;
 import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
+import net.the_last_sword.entity.TheLastEndEntity;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.init.ModAttributes;
 import net.the_last_sword.item.DragonArmorItem;
@@ -55,6 +57,16 @@ public class LivingEntityMixin {
     @Unique
     private boolean the_last_sword$isAbsoluteDestructionDamage(DamageSource source) {
         return source instanceof AbsoluteDestructionDamageSource;
+    }
+
+    //伤害来源是否为终焉实体或剑灵
+    @Unique
+    private boolean the_last_sword$isTheLastEndAttacker(DamageSource source) {
+        Entity attacker = source.getEntity();
+        if (attacker instanceof TheLastEndEntity) {
+            return true;
+        }
+        return attacker instanceof LivingEntity living && WraithSummonManager.isWraith(living);
     }
 
     //肃正防御护盾消费: 存在护盾则扣除指定代价, 返回是否成功消费
@@ -233,6 +245,11 @@ public class LivingEntityMixin {
         if (!the_last_sword$isAbsoluteDestructionDamage(damageSource)
                 && damageSource.getEntity() instanceof LivingEntity wraithAttacker) {
             WraithSummonManager.handleWraithDamage(entity, wraithAttacker);
+        }
+
+        //终焉侧伤害统一清目标无敌帧，须排在绝毁附加之后：绝毁会重入 hurt 并把无敌帧设回 20
+        if (the_last_sword$isTheLastEndAttacker(damageSource)) {
+            entity.invulnerableTime = 0;
         }
     }
 

@@ -1,5 +1,6 @@
 package net.the_last_sword.item;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -347,7 +348,7 @@ public class TheLastSword extends TheLastEndSwordItems implements ISummonableIte
 
         //8. Lore提示
         tooltip.add(Component.translatable("item_tooltip_lore.the_last_sword.the_last_sword")
-            .withStyle(net.minecraft.ChatFormatting.GRAY));
+            .withStyle(ChatFormatting.GRAY));
     }
 
     @Override

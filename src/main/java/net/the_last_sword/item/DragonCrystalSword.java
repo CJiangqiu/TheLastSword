@@ -1,5 +1,6 @@
 package net.the_last_sword.item;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -143,7 +144,7 @@ public class DragonCrystalSword extends TheLastEndSwordItems {
         }
 
         list.add(Component.translatable("item_tooltip_lore.the_last_sword.dragon_crystal_sword")
-            .withStyle(net.minecraft.ChatFormatting.GRAY));
+            .withStyle(ChatFormatting.GRAY));
     }
 
     @Override

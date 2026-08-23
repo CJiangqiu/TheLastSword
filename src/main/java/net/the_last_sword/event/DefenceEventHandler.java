@@ -169,7 +169,7 @@ public final class DefenceEventHandler {
             if (dragonShieldActive) {
                 event.setAmount(0);
                 if (DefenceConfig.getDragonShieldModule().shieldEffect != DefenceConfigData.ShieldEffectMode.DISABLED
-                        && player instanceof net.minecraft.server.level.ServerPlayer sp) {
+                        && player instanceof ServerPlayer sp) {
                     NetworkHandler.sendToPlayer(DragonShieldPacket.fromDamageSource(sp, source), sp);
                 }
             } else {
@@ -236,7 +236,7 @@ public final class DefenceEventHandler {
                     && !localPlayer.input.jumping
                     && !localPlayer.input.shiftKeyDown;
                 if (noInput) {
-                    player.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+                    player.setDeltaMovement(Vec3.ZERO);
                 }
             }
         }

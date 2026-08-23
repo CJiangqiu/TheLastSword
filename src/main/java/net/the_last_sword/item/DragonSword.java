@@ -1,5 +1,6 @@
 package net.the_last_sword.item;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -182,7 +183,7 @@ public class DragonSword extends TheLastEndSwordItems implements ISummonableItem
 
         //Lore提示
         list.add(Component.translatable("item_tooltip_lore.the_last_sword.dragon_sword")
-            .withStyle(net.minecraft.ChatFormatting.GRAY));
+            .withStyle(ChatFormatting.GRAY));
     }
 
     @Override

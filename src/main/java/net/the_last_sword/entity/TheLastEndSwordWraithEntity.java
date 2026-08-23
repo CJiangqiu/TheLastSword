@@ -399,7 +399,6 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
                 //伤害 = 目标最大生命值 × (13% + 剩余标记%)
                 float maxHealthDamage = (float) ((0.13 + currentMark / 100.0) * target.getMaxHealth());
 
-                target.invulnerableTime = 0;
                 AbsoluteDestructionDamageSource.applyAbsoluteDestruction(target, wraith, maxHealthDamage);
                 clearPositiveEffects(target);
             }

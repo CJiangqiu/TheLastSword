@@ -25,6 +25,7 @@ import java.util.List;
 //拜龙教号角，吹响后在村庄内召来一场拜龙教袭击
 public class DragonCultHornItem extends InstrumentItem {
 
+    private static final String DESCRIPTION_KEY = "item_tooltip.the_last_sword.dragon_cult_horn";
     private static final String LORE_KEY = "item_tooltip_lore.the_last_sword.dragon_cult_horn";
     private static final String NO_VILLAGE_KEY = "message.the_last_sword.dragon_cult_horn_no_village";
     private static final String RAID_ACTIVE_KEY = "message.the_last_sword.dragon_cult_horn_raid_active";
@@ -70,6 +71,7 @@ public class DragonCultHornItem extends InstrumentItem {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, level, tooltip, flag);
+        tooltip.add(Component.translatable(DESCRIPTION_KEY));
         tooltip.add(Component.translatable(LORE_KEY).withStyle(ChatFormatting.GRAY));
     }
 }

@@ -166,8 +166,6 @@ public class DragonCultPriestBreathGoal extends Goal {
 
         for (LivingEntity target : priest.level().getEntitiesOfClass(LivingEntity.class, area,
                 entity -> EntityUtil.canAttack(priest, entity))) {
-            //龙息为持续伤害，绕开无敌帧才能每tick生效
-            target.invulnerableTime = 0;
             if (target.hurt(damageSource, damage)) {
                 priest.onSuccessfulAttack(target);
             }

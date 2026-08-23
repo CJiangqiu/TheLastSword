@@ -4,6 +4,8 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
@@ -190,9 +192,9 @@ public class LostWraithEndStrikeGoal extends Goal {
         var useItem = target.getUseItem();
         boolean canBlock = false;
 
-        if (useItem.is(net.minecraft.world.item.Items.SHIELD)) {
+        if (useItem.is(Items.SHIELD)) {
             canBlock = player.getCooldowns().getCooldownPercent(useItem.getItem(), 0.0f) == 0.0f;
-        } else if (useItem.getUseAnimation() == net.minecraft.world.item.UseAnim.BLOCK) {
+        } else if (useItem.getUseAnimation() == UseAnim.BLOCK) {
             canBlock = player.getCooldowns().getCooldownPercent(useItem.getItem(), 0.0f) == 0.0f;
         }
 

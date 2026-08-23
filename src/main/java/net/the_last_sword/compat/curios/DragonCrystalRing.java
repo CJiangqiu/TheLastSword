@@ -2,6 +2,7 @@ package net.the_last_sword.compat.curios;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -47,6 +48,6 @@ public class DragonCrystalRing extends Item implements ICurioItem {
         String bonusPercent = String.format("%+.0f", (multiplier - 1.0) * 100);
         tooltip.add(Component.translatable("item_tooltip.the_last_sword.dragon_crystal_ring", bonusPercent));
         tooltip.add(Component.translatable("item_tooltip_lore.the_last_sword.dragon_crystal_ring")
-            .withStyle(net.minecraft.ChatFormatting.GRAY));
+            .withStyle(ChatFormatting.GRAY));
     }
 }

@@ -1,5 +1,6 @@
 package net.the_last_sword.item;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
@@ -86,7 +87,7 @@ public class DragonSoulLanternItem extends BlockItem implements ICurioItem, ISum
 
         //主标语
         tooltip.add(Component.translatable("item_tooltip_lore.the_last_sword.dragon_soul_lantern")
-            .withStyle(net.minecraft.ChatFormatting.GRAY));
+            .withStyle(ChatFormatting.GRAY));
 
         //未按Shift时提示
         if (!Screen.hasShiftDown()) {

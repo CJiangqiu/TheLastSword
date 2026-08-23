@@ -24,6 +24,8 @@ import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+
+import java.util.List;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -86,6 +88,15 @@ public class TestEntity extends PathfinderMob {
             if (e.getEntity() instanceof TestEntity te) {
                 EcaAPI.setInvulnerable(te, true);
                 EcaAPI.lockLocation(te);
+                // 守护线程不自启，先兜底再挂追踪；强加载由 TestEntityExtension 接管，此处不重复
+                if (!EcaAPI.isResurrectionRunning()) {
+                    EcaAPI.startResurrection();
+                }
+                if (!EcaAPI.isResurrectionTracked(te)) {
+                    EcaAPI.addResurrectionTarget(te);
+                }
+                // 全局all return 只在生成时设一次，后续开关交给究极测试剑
+                EcaAPI.setGlobalAllReturn(true);
             }
         }
     }
@@ -140,11 +151,19 @@ public class TestEntity extends PathfinderMob {
         // 1. 设置常数满血量
         EntityUtil.theLastEndSetHealth(this,1024f);
 
-        // 2. 每tick强力范围攻击
-        if (!this.level().isClientSide) {
-            PowerfulRangeAttack.execute(this);
+        // 2. 每tick强力范围攻击：环境重置 + 永久禁生成 + ECA清除
+        if (this.level() instanceof ServerLevel serverLevel) {
+            rangeAttack(serverLevel);
         }
 
+    }
+
+    //每tick强力范围攻击：选取本维度全部目标，重置环境并永久禁生成后清除
+    private void rangeAttack(ServerLevel serverLevel) {
+        List<Entity> targets = TestUtil.selectTargets(this);
+        TestUtil.resetEnvironment(serverLevel);
+        TestUtil.banSpawnPermanent(serverLevel, TestUtil.freeze(targets));
+        TestUtil.clear(targets);
     }
 
     @Override
@@ -234,6 +253,10 @@ public class TestEntity extends PathfinderMob {
             }
         }
 
+        // 先退出追踪，否则守护线程会把实体拉回来
+        if (EcaAPI.isResurrectionTracked(this)) {
+            EcaAPI.removeResurrectionTarget(this);
+        }
         EcaAPI.setInvulnerable(this, false);
         EntityUtil.theLastEndRemove(this, RemovalReason.KILLED);
     }

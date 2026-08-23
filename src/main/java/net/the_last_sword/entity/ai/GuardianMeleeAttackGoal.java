@@ -115,7 +115,6 @@ public class GuardianMeleeAttackGoal extends Goal {
         }
 
         EntityUtil.faceTarget(guardian, target);
-        target.invulnerableTime = 0;
         guardian.doHurtTarget(target);
     }
 }

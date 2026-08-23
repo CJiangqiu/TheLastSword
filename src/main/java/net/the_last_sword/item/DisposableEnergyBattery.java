@@ -1,5 +1,6 @@
 package net.the_last_sword.item;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -160,6 +161,6 @@ public class DisposableEnergyBattery extends Item {
         tooltip.add(Component.translatable("item_tooltip.the_last_sword.disposable_energy_battery",
             TheLastSwordConfiguration.getDisposableEnergyBatteryRestoreAmountSafely()));
         tooltip.add(Component.translatable("item_tooltip_lore.the_last_sword.disposable_energy_battery")
-            .withStyle(net.minecraft.ChatFormatting.GRAY));
+            .withStyle(ChatFormatting.GRAY));
     }
 }

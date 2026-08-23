@@ -139,7 +139,6 @@ public class SwordWraithCrossSlashGoal extends Goal {
         float damageMultiplier = (float) TheLastSwordConfiguration.getSkillCrossSlashDamageMultiplierSafely();
         float damage = (float) wraith.getAttributeValue(Attributes.ATTACK_DAMAGE) * damageMultiplier;
 
-        target.invulnerableTime = 0;
         AbsoluteDestructionDamageSource.applyAbsoluteDestruction(target, wraith, damage);
         wraith.addEndMark();
 
@@ -147,7 +146,6 @@ public class SwordWraithCrossSlashGoal extends Goal {
         List<LivingEntity> nearbyTargets = EntityUtil.getTargetsInHemisphere(wraith, attackRange);
         for (LivingEntity nearbyTarget : nearbyTargets) {
             if (!nearbyTarget.equals(target)) {
-                nearbyTarget.invulnerableTime = 0;
                 AbsoluteDestructionDamageSource.applyAbsoluteDestruction(nearbyTarget, wraith, damage);
                 wraith.addEndMark();
             }

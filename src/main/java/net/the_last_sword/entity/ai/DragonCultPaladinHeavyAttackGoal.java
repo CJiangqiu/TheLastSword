@@ -126,7 +126,6 @@ public class DragonCultPaladinHeavyAttackGoal extends Goal {
             return;
         }
 
-        target.invulnerableTime = 0;
         if (target.hurt(paladin.damageSources().mobAttack(paladin), damage)) {
             target.knockback(KNOCKBACK_STRENGTH,
                 paladin.getX() - target.getX(), paladin.getZ() - target.getZ());

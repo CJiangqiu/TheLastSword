@@ -34,6 +34,7 @@ import java.util.function.Consumer;
 public abstract class DragonCultPaladinArmorItem extends ArmorItem implements GeoItem {
 
     private static final String TEXTURE = "the_last_sword:textures/item/dragon_cult_paladin_armor.png";
+    private static final String DESCRIPTION_KEY = "item_tooltip.the_last_sword.dragon_cult_paladin_armor";
     private static final String LORE_KEY = "item_tooltip_lore.the_last_sword.dragon_cult_paladin_armor";
 
     //耐久基数与倍率同铁套
@@ -115,6 +116,7 @@ public abstract class DragonCultPaladinArmorItem extends ArmorItem implements Ge
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, level, tooltip, flag);
+        tooltip.add(Component.translatable(DESCRIPTION_KEY));
         tooltip.add(Component.translatable(LORE_KEY).withStyle(ChatFormatting.GRAY));
     }
 

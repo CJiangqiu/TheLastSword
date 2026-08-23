@@ -113,7 +113,6 @@ public class SwordWraithBlockGoal extends Goal {
                 knockbackDir.x * KNOCKBACK_STRENGTH, 0.1, knockbackDir.z * KNOCKBACK_STRENGTH
             ));
 
-            target.invulnerableTime = 0;
             target.hurt(wraith.damageSources().mobAttack(wraith), damage);
             wraith.addEndMark();
         }
@@ -126,7 +125,7 @@ public class SwordWraithBlockGoal extends Goal {
         Vec3 wraithLook = wraith.getLookAngle();
 
         List<Entity> nearbyEntities = wraith.level().getEntities(wraith, searchBox);
-        for (net.minecraft.world.entity.Entity entity : nearbyEntities) {
+        for (Entity entity : nearbyEntities) {
             if (entity instanceof Projectile projectile) {
                 Vec3 toProjectile = new Vec3(
                     projectile.getX() - wraith.getX(), 0, projectile.getZ() - wraith.getZ()

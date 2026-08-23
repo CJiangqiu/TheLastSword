@@ -25,6 +25,9 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.init.ModAttributes;
 import net.the_last_sword.item.DragonArmorItem;
@@ -33,6 +36,7 @@ import net.the_last_sword.item.TheLastSwordYouNeverForgot;
 import net.the_last_sword.summon.WraithSummonManager;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -253,16 +257,16 @@ public class EntityUtil {
             entity.setTicksFrozen(0);
         }
 
-        java.util.Collection<net.minecraft.world.effect.MobEffectInstance> activeEffects = entity.getActiveEffects();
+        Collection<MobEffectInstance> activeEffects = entity.getActiveEffects();
         if (!activeEffects.isEmpty()) {
-            java.util.ArrayList<net.minecraft.world.effect.MobEffect> effectsToRemove = new java.util.ArrayList<>();
-            for (net.minecraft.world.effect.MobEffectInstance effectInstance : activeEffects) {
-                net.minecraft.world.effect.MobEffect effect = effectInstance.getEffect();
-                if (!effect.isBeneficial() && effect != net.minecraft.world.effect.MobEffects.ABSORPTION) {
+            ArrayList<MobEffect> effectsToRemove = new ArrayList<>();
+            for (MobEffectInstance effectInstance : activeEffects) {
+                MobEffect effect = effectInstance.getEffect();
+                if (!effect.isBeneficial() && effect != MobEffects.ABSORPTION) {
                     effectsToRemove.add(effect);
                 }
             }
-            for (net.minecraft.world.effect.MobEffect effect : effectsToRemove) {
+            for (MobEffect effect : effectsToRemove) {
                 entity.removeEffect(effect);
             }
         }
