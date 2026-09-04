@@ -15,7 +15,6 @@ import net.the_last_sword.init.ModBlocks;
 import net.the_last_sword.init.ModItems;
 import net.the_last_sword.init.ModMenus;
 import net.the_last_sword.init.ModRecipes;
-import net.the_last_sword.item.IDragonSmithingTemplate;
 import net.the_last_sword.recipe.ConfigRecipeManager;
 import net.the_last_sword.recipe.DragonCrystalSmithingRecipe;
 
@@ -50,7 +49,8 @@ public class DragonCrystalSmithingTableMenu extends AbstractContainerMenu {
         this.addSlot(new Slot(container, 0, 48, 40) {
             @Override
             public boolean mayPlace(ItemStack stack) {
-                return !stack.isEmpty() && stack.getItem() instanceof IDragonSmithingTemplate;
+                //模板类型由具体配方的 Ingredient 决定，槽位本身不限制物品种类
+                return !stack.isEmpty();
             }
 
             @Override

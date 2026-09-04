@@ -10,10 +10,14 @@ import net.the_last_sword.configuration.TheLastSwordConfigManager;
 import net.the_last_sword.util.TheLastSwordLogger;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -45,8 +49,8 @@ public class ConfigRecipeManager {
             int count = 0;
             List<Path> jsonFiles = stream
                     .filter(Files::isRegularFile)
-                    .filter(p -> p.toString().endsWith(".json"))
-                    .filter(p -> !p.getFileName().toString().endsWith(".disabled.json"))
+                    .filter(ConfigRecipeManager::isJsonFile)
+                    .filter(p -> !p.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".disabled.json"))
                     .toList();
             for (Path recipePath : jsonFiles) {
                 try {
@@ -67,19 +71,72 @@ public class ConfigRecipeManager {
      * 从文件加载单个配方
      */
     private static void loadRecipeFile(Path baseDir, Path recipePath) throws IOException {
-        // 用相对路径生成唯一ID，支持嵌套文件夹
-        String relativePath = baseDir.relativize(recipePath).toString()
-                .replace('\\', '/').replace(".json", "");
+        // 用相对路径生成唯一ID，支持嵌套文件夹。
+        // 合法的小写路径保持原ID；含大写、中文或其他字符的路径使用稳定哈希ID，
+        // 避免 ResourceLocation 拒绝这些文件名，但仍保留原文件路径用于日志定位。
+        String relativePath = removeJsonExtension(baseDir.relativize(recipePath).toString()
+                .replace('\\', '/'));
 
         String content = Files.readString(recipePath);
         JsonObject json = GSON.fromJson(content, JsonObject.class);
 
-        ResourceLocation id = new ResourceLocation(TheLastSwordMod.MOD_ID, "config/" + relativePath);
+        ResourceLocation id = createRecipeId(relativePath);
         DragonCrystalSmithingSerializer serializer = new DragonCrystalSmithingSerializer();
         DragonCrystalSmithingRecipe recipe = serializer.fromJson(id, json);
 
         RECIPES.add(recipe);
-        TheLastSwordLogger.debug("Loaded recipe: {}", id);
+        TheLastSwordLogger.debug("Loaded recipe: {} (file: {})", id, relativePath);
+    }
+
+    private static boolean isJsonFile(Path path) {
+        return path.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".json");
+    }
+
+    private static String removeJsonExtension(String path) {
+        return path.substring(0, path.length() - ".json".length());
+    }
+
+    private static ResourceLocation createRecipeId(String relativePath) {
+        // "encoded" is reserved for escaped paths so that a normal path cannot collide with one.
+        if (isValidResourcePath(relativePath) && !relativePath.startsWith("encoded/")) {
+            return new ResourceLocation(TheLastSwordMod.MOD_ID, "config/" + relativePath);
+        }
+
+        return new ResourceLocation(TheLastSwordMod.MOD_ID,
+                "config/encoded/" + sha256(relativePath));
+    }
+
+    private static boolean isValidResourcePath(String path) {
+        if (path.isEmpty()) {
+            return false;
+        }
+        for (int i = 0; i < path.length(); i++) {
+            char character = path.charAt(i);
+            boolean valid = character >= 'a' && character <= 'z'
+                    || character >= '0' && character <= '9'
+                    || character == '_'
+                    || character == '-'
+                    || character == '.'
+                    || character == '/';
+            if (!valid) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static String sha256(String value) {
+        try {
+            byte[] digest = MessageDigest.getInstance("SHA-256")
+                    .digest(value.getBytes(StandardCharsets.UTF_8));
+            StringBuilder result = new StringBuilder(digest.length * 2);
+            for (byte valueByte : digest) {
+                result.append(String.format(Locale.ROOT, "%02x", valueByte & 0xff));
+            }
+            return result.toString();
+        } catch (NoSuchAlgorithmException exception) {
+            throw new IllegalStateException("SHA-256 is not available", exception);
+        }
     }
 
     //查找匹配的配方，如果没有则返回Optional.empty()

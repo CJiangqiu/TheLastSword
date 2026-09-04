@@ -79,6 +79,10 @@ public class LostWraithEntity extends TheLastEndEntity {
     // 拳击传送冷却截止时间（服务端）
     private long punchTeleportCooldownEnd;
 
+    // 激活演出BossShow的注册id
+    private static final ResourceLocation BOSS_SHOW_ID =
+            new ResourceLocation("the_last_sword", "lost_wraith");
+
     public LostWraithEntity(EntityType<? extends LostWraithEntity> type, Level world) {
         super(type, world);
         setMaxUpStep(0.6f);
@@ -325,6 +329,9 @@ public class LostWraithEntity extends TheLastEndEntity {
                 for (ServerPlayer sp : serverLevel.getEntitiesOfClass(
                         ServerPlayer.class, getBoundingBox().inflate(64.0))) {
                     EntityExtensionManager.onStartTracking(sp, this);
+
+                    // 激活演出BossShow（allow_repeat:false 时每玩家每存档只播一次，测试需用新存档）
+                    EcaAPI.playBossShowIfNew(sp, this, BOSS_SHOW_ID);
                 }
 
                 // 通过ECA API播放战斗音乐
