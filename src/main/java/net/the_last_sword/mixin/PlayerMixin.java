@@ -65,10 +65,7 @@ public class PlayerMixin {
         if (shield != null && shield.getValue() > 0) {
             tag.putDouble("tlsJustifiedDefence", shield.getValue());
         }
-        AttributeInstance maxShield = player.getAttribute(ModAttributes.MAX_JUSTIFIED_DEFENCE.get());
-        if (maxShield != null && maxShield.getValue() > 0) {
-            tag.putDouble("tlsMaxJustifiedDefence", maxShield.getValue());
-        }
+        tag.remove("tlsMaxJustifiedDefence");
     }
 
     // 从磁盘恢复世界锚度血量
@@ -91,11 +88,10 @@ public class PlayerMixin {
                 shield.setBaseValue(tag.getDouble("tlsJustifiedDefence"));
             }
         }
-        if (tag.contains("tlsMaxJustifiedDefence")) {
-            AttributeInstance maxShield = player.getAttribute(ModAttributes.MAX_JUSTIFIED_DEFENCE.get());
-            if (maxShield != null) {
-                maxShield.setBaseValue(tag.getDouble("tlsMaxJustifiedDefence"));
-            }
+        AttributeInstance maxShield = player.getAttribute(ModAttributes.MAX_JUSTIFIED_DEFENCE.get());
+        if (maxShield != null) {
+            maxShield.setBaseValue(0.0);
         }
+        tag.remove("tlsMaxJustifiedDefence");
     }
 }
