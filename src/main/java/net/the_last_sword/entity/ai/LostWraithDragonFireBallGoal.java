@@ -16,6 +16,7 @@ import java.util.EnumSet;
 public class LostWraithDragonFireBallGoal extends Goal {
     private static final int ANIMATION_LENGTH = 60;
     private static final int FIRE_TICK = 40;
+    private static final double MIN_DISTANCE = 4.0;
 
     private final LostWraithEntity wraith;
     private int animationTick;
@@ -42,7 +43,7 @@ public class LostWraithDragonFireBallGoal extends Goal {
         if (target == null || !target.isAlive()) {
             return false;
         }
-        return wraith.distanceTo(target) > TheLastSwordConfiguration.getLostWraithDragonFireballMinDistanceSafely();
+        return wraith.distanceTo(target) > MIN_DISTANCE;
     }
 
     @Override

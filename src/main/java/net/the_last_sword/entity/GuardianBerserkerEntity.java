@@ -21,6 +21,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.util.EntityUtil;
+import net.the_last_sword.util.health.TrueHealthManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -76,9 +77,9 @@ public class GuardianBerserkerEntity extends GuardianOfSealedSpireEntity {
 
         totem.shrink(1);
 
-        float reviveHealth = getWorldAnchorMax()
+        float reviveHealth = TrueHealthManager.getMaxHealth(this)
                 * (float) TheLastSwordConfiguration.getGuardianBerserkerTotemReviveRatioSafely();
-        EntityUtil.theLastEndSetHealth(this, reviveHealth);
+        TrueHealthManager.setHealth(this, reviveHealth);
 
         removeAllEffects();
         addEffect(new MobEffectInstance(MobEffects.REGENERATION, 900, 1));
@@ -98,10 +99,10 @@ public class GuardianBerserkerEntity extends GuardianOfSealedSpireEntity {
             float healAmount = damage * (float) TheLastSwordConfiguration.getGuardianBerserkerLifestealRatioSafely();
 
             if (healAmount > 0) {
-                float currentHealth = getWorldAnchor();
-                float maxHealth = getWorldAnchorMax();
+                float currentHealth = TrueHealthManager.getHealth(this);
+                float maxHealth = TrueHealthManager.getMaxHealth(this);
                 float newHealth = Math.min(currentHealth + healAmount, maxHealth);
-                setWorldAnchor(newHealth);
+                TrueHealthManager.setHealth(this, newHealth);
             }
         }
 

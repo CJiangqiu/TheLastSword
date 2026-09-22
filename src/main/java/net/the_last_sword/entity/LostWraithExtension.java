@@ -1,5 +1,7 @@
 package net.the_last_sword.entity;
 
+import net.the_last_sword.util.health.TrueHealthManager;
+
 import net.eca.api.RegisterEntityExtension;
 import net.eca.client.render.ArcaneRenderTypes;
 import net.eca.client.render.TheLastEndRenderTypes;
@@ -45,7 +47,7 @@ public class LostWraithExtension extends EntityExtension {
 
     @Override
     public Number getCustomHealthValue(LivingEntity entity) {
-        return entity instanceof LostWraithEntity lw ? lw.getWorldAnchor() : null;
+        return entity instanceof LostWraithEntity lw ? TrueHealthManager.getHealth(lw) : null;
     }
 
     @Override
@@ -55,7 +57,7 @@ public class LostWraithExtension extends EntityExtension {
 
     @Override
     public Number getCustomMaxHealthValue(LivingEntity entity) {
-        return entity instanceof LostWraithEntity lw ? lw.getWorldAnchorMax() : null;
+        return entity instanceof LostWraithEntity lw ? TrueHealthManager.getMaxHealth(lw) : null;
     }
 
     @OnlyIn(Dist.CLIENT)

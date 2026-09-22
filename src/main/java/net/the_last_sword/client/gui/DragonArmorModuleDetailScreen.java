@@ -31,6 +31,7 @@ public class DragonArmorModuleDetailScreen extends Screen {
         PHASING("gui.the_last_sword.dragon_armor_module.phasing"),
         ANTI_GRAVITY("gui.the_last_sword.dragon_armor_module.anti_gravity"),
         PERCEPTION("gui.the_last_sword.dragon_armor_module.perception"),
+        JUSTIFIED_DEFENCE_RECOVERY("gui.the_last_sword.dragon_armor_module.justified_defence_recovery"),
         DRAGON_SHIELD("gui.the_last_sword.dragon_armor_module.dragon_shield");
 
         private final String titleKey;
@@ -63,6 +64,7 @@ public class DragonArmorModuleDetailScreen extends Screen {
             case PHASING -> initPhasing(startY, spacing);
             case ANTI_GRAVITY -> initAntiGravity(startY, spacing);
             case PERCEPTION -> initPerception(startY, spacing);
+            case JUSTIFIED_DEFENCE_RECOVERY -> initJustifiedDefenceRecovery(startY);
             case DRAGON_SHIELD -> initDragonShield(startY, spacing);
         }
 
@@ -143,20 +145,41 @@ public class DragonArmorModuleDetailScreen extends Screen {
             v -> module.enableInertia = v);
     }
 
-    // 感知模块：HUD开关、扫描生物、扫描间隔
+    // 感知模块：HUD、龙甲能量信息、生物扫描
     private void initPerception(int startY, int spacing) {
         DefenceConfigData.PerceptionModule module = DefenceConfig.getPerceptionModule();
+
+        startY = 40;
+        spacing = 21;
 
         addCheckbox("gui.the_last_sword.module.perception.enable_hud",
             module.enableHud, startY,
             v -> module.enableHud = v);
 
+        addCheckbox("gui.the_last_sword.module.perception.show_armor_energy",
+            module.showArmorEnergy, startY + spacing,
+            v -> module.showArmorEnergy = v);
+
+        addCheckbox("gui.the_last_sword.module.perception.show_energy_consumption",
+            module.showEnergyConsumption, startY + spacing * 2,
+            v -> module.showEnergyConsumption = v);
+
+        this.addRenderableWidget(Button.builder(
+            Component.translatable("gui.the_last_sword.module.perception.energy_display_position"),
+            button -> {
+                saveConfig();
+                if (this.minecraft != null) {
+                    this.minecraft.setScreen(new DragonArmorEnergyDisplayPositionScreen(this));
+                }
+            }
+        ).bounds(this.width / 2 - 100, startY + spacing * 3, 200, 20).build());
+
         addCheckbox("gui.the_last_sword.module.perception.scan_entities",
-            module.scanEntities, startY + spacing,
+            module.scanEntities, startY + spacing * 4,
             v -> module.scanEntities = v);
 
         ScanIntervalSlider scanSlider = new ScanIntervalSlider(
-            this.width / 2 - 100, startY + spacing * 2,
+            this.width / 2 - 100, startY + spacing * 5,
             200, 20,
             module.scanIntervalSeconds
         );
@@ -186,6 +209,15 @@ public class DragonArmorModuleDetailScreen extends Screen {
             }
         ).bounds(this.width / 2 - 100, startY + spacing * 2, 200, 20).build();
         this.addRenderableWidget(shieldModeButton);
+    }
+
+    private void initJustifiedDefenceRecovery(int startY) {
+        DefenceConfigData.JustifiedDefenceRecoveryModule module =
+                DefenceConfig.getJustifiedDefenceRecoveryModule();
+
+        addCheckbox("gui.the_last_sword.module.justified_defence_recovery.enabled",
+            module.enabled, startY,
+            v -> module.enabled = v);
     }
 
     private void addCheckbox(String translationKey, boolean initialValue, int y, BooleanConsumer setter) {

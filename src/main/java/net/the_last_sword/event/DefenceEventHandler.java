@@ -10,6 +10,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.ExperienceOrb;
@@ -36,9 +37,11 @@ import net.the_last_sword.init.ModAttributes;
 import net.the_last_sword.item.DragonArmorItem;
 import net.the_last_sword.item.DragonCrystalArmorItem;
 import net.the_last_sword.network.DefenceConfigPacket;
+import net.the_last_sword.network.DragonArmorEnergyStatusPacket;
 import net.the_last_sword.network.DragonShieldPacket;
 import net.the_last_sword.network.NetworkHandler;
 import net.the_last_sword.util.EntityUtil;
+import net.the_last_sword.util.health.TrueHealthManager;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -71,6 +74,12 @@ public final class DefenceEventHandler {
     //感知扫描计时器（记录上次扫描的tick）
     private static final ConcurrentHashMap<UUID, Long> PERCEPTION_SCAN_TIMERS = new ConcurrentHashMap<>();
 
+    //记录玩家当前 tick 内整套龙甲实际消耗的 FE
+    private static final ConcurrentHashMap<UUID, Long> ARMOR_ENERGY_CONSUMPTION = new ConcurrentHashMap<>();
+
+    private static final UUID JUSTIFIED_DEFENCE_RECOVERY_MODULE_ID =
+            UUID.fromString("018b1e95-f8e5-4d23-8385-84065377f9b2");
+
     @Mod.EventBusSubscriber(modid = TheLastSwordMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
     public static class ModBusEvents {
         //为所有生物实体附加肃正防御属性
@@ -79,6 +88,7 @@ public final class DefenceEventHandler {
             event.getTypes().forEach(entityType -> {
                 event.add(entityType, ModAttributes.JUSTIFIED_DEFENCE.get(), 0.0);
                 event.add(entityType, ModAttributes.MAX_JUSTIFIED_DEFENCE.get(), 0.0);
+                event.add(entityType, ModAttributes.JUSTIFIED_DEFENCE_RECOVERY_SPEED.get(), 0.01);
             });
         }
     }
@@ -103,6 +113,7 @@ public final class DefenceEventHandler {
             if (event.phase != TickEvent.Phase.END || event.player.level().isClientSide()) return;
 
             Player player = event.player;
+            ARMOR_ENERGY_CONSUMPTION.put(player.getUUID(), 0L);
 
             //龙水晶盔甲效果
             applyDragonCrystalArmorEffects(player);
@@ -115,13 +126,16 @@ public final class DefenceEventHandler {
             handleDragonArmorFlying(player);
             if (DragonArmorItem.isFullSet(player)) {
                 handleDragonArmorFullSetEffects(player);
-            } else if (player instanceof ServerPlayer sp) {
+            } else {
+                setJustifiedDefenceRecoveryBoost(player, false);
                 // 脱下龙套时清除感知扫描
-                if (PERCEPTION_SCAN_TIMERS.containsKey(player.getUUID())) {
+                if (player instanceof ServerPlayer sp && PERCEPTION_SCAN_TIMERS.containsKey(player.getUUID())) {
                     PERCEPTION_SCAN_TIMERS.remove(player.getUUID());
                     NetworkHandler.sendToPlayer(new PerceptionScanPacket(Map.of(), 0), sp);
                 }
             }
+
+            syncDragonArmorEnergyStatus(player);
         }
 
         //飞行状态恢复：在所有实体tick完毕后执行，将被外部清掉的flying拉回
@@ -245,7 +259,7 @@ public final class DefenceEventHandler {
     //护盾保护触发：取消事件，设置满血，按 cost 扣除护盾
     private static void triggerShieldProtection(LivingEntity entity, Event event, int cost) {
         event.setCanceled(true);
-        EntityUtil.theLastEndSetHealth(entity, entity.getMaxHealth());
+        TrueHealthManager.setHealth(entity, entity.getMaxHealth());
         double currentShield = getShieldValue(entity);
         setShieldValue(entity, Math.max(0, currentShield - cost));
     }
@@ -390,7 +404,8 @@ public final class DefenceEventHandler {
                     enhanced = true;
                     //增强Buff消耗该件装备的能量
                     stack.getCapability(ForgeCapabilities.ENERGY).ifPresent(energy -> {
-                        energy.extractEnergy(enhanceCost, false);
+                        recordArmorEnergyConsumption(player,
+                                energy.extractEnergy(enhanceCost, false));
                     });
                 }
             }
@@ -436,6 +451,8 @@ public final class DefenceEventHandler {
         LifeSupportModule lifeSupport = playerConfig.armor.dragonArmor.lifeSupport;
         PhasingModule phasingModule = playerConfig.armor.dragonArmor.defence.phasing;
         DragonShieldModule dragonShield = playerConfig.armor.dragonArmor.defence.dragonShield;
+        JustifiedDefenceRecoveryModule recoveryModule =
+                playerConfig.armor.dragonArmor.defence.justifiedDefenceRecovery;
         boolean dragonShieldEnabled = dragonShield == null || dragonShield.enabled;
         boolean dragonAuraEnabled = dragonShield == null || dragonShield.enableDragonAura == null || dragonShield.enableDragonAura;
 
@@ -478,6 +495,14 @@ public final class DefenceEventHandler {
                 int phasingCost = net.the_last_sword.configuration.TheLastSwordConfiguration.getDragonArmorPhasingCostSafely();
                 drainAllArmorEnergy(player, phasingCost);
             }
+        }
+
+        //肃正防御恢复模块：恢复速度+100%（需要全套有电且模块开启）
+        boolean recoveryBoostActive = allHaveEnergy && recoveryModule != null && recoveryModule.enabled;
+        setJustifiedDefenceRecoveryBoost(player, recoveryBoostActive);
+        if (recoveryBoostActive) {
+            int recoveryCost = TheLastSwordConfiguration.getDragonArmorJustifiedDefenceRecoveryCostSafely();
+            drainAllArmorEnergy(player, recoveryCost);
         }
 
         //感知模块扫描
@@ -578,8 +603,62 @@ public final class DefenceEventHandler {
             ItemStack stack = player.getItemBySlot(slot);
             if (stack.isEmpty() || !(stack.getItem() instanceof DragonArmorItem)) continue;
             stack.getCapability(ForgeCapabilities.ENERGY).ifPresent(energy -> {
-                energy.extractEnergy(costPerPiece, false);
+                recordArmorEnergyConsumption(player,
+                        energy.extractEnergy(costPerPiece, false));
             });
+        }
+    }
+
+    private static void recordArmorEnergyConsumption(Player player, int extracted) {
+        if (extracted > 0) {
+            ARMOR_ENERGY_CONSUMPTION.merge(player.getUUID(), (long) extracted, Long::sum);
+        }
+    }
+
+    private static void syncDragonArmorEnergyStatus(Player player) {
+        long consumption = ARMOR_ENERGY_CONSUMPTION.getOrDefault(player.getUUID(), 0L);
+        ARMOR_ENERGY_CONSUMPTION.remove(player.getUUID());
+
+        if (!(player instanceof ServerPlayer serverPlayer)
+                || !DragonArmorItem.isFullSet(player)
+                || player.tickCount % 5 != 0) {
+            return;
+        }
+
+        long currentEnergy = 0L;
+        long maxEnergy = 0L;
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            if (slot.getType() != EquipmentSlot.Type.ARMOR) continue;
+            ItemStack stack = player.getItemBySlot(slot);
+            if (!(stack.getItem() instanceof DragonArmorItem)) continue;
+
+            int[] values = stack.getCapability(ForgeCapabilities.ENERGY)
+                    .map(energy -> new int[]{energy.getEnergyStored(), energy.getMaxEnergyStored()})
+                    .orElse(new int[]{0, 0});
+            currentEnergy += values[0];
+            maxEnergy += values[1];
+        }
+
+        NetworkHandler.sendToPlayer(
+                new DragonArmorEnergyStatusPacket(currentEnergy, maxEnergy, consumption),
+                serverPlayer);
+    }
+
+    private static void setJustifiedDefenceRecoveryBoost(Player player, boolean active) {
+        AttributeInstance attribute = player.getAttribute(ModAttributes.JUSTIFIED_DEFENCE_RECOVERY_SPEED.get());
+        if (attribute == null) return;
+
+        AttributeModifier current = attribute.getModifier(JUSTIFIED_DEFENCE_RECOVERY_MODULE_ID);
+        if (active) {
+            if (current == null) {
+                attribute.addTransientModifier(new AttributeModifier(
+                        JUSTIFIED_DEFENCE_RECOVERY_MODULE_ID,
+                        "Dragon armor justified defence recovery module",
+                        1.0,
+                        AttributeModifier.Operation.MULTIPLY_BASE));
+            }
+        } else if (current != null) {
+            attribute.removeModifier(JUSTIFIED_DEFENCE_RECOVERY_MODULE_ID);
         }
     }
 

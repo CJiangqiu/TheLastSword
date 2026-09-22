@@ -36,6 +36,7 @@ import net.the_last_sword.faction.DragonCultFaction;
 import net.the_last_sword.init.ModItems;
 import net.the_last_sword.util.DragonCultDisguise;
 import net.the_last_sword.util.EntityUtil;
+import net.the_last_sword.util.health.TrueHealthManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -204,11 +205,8 @@ public class DragonCultPaladinEntity extends TheLastEndEntity {
 
         if (!level().isClientSide) {
             float maxHealth = (float) getAttributeValue(Attributes.MAX_HEALTH);
-            setWorldAnchorMax(maxHealth);
-            setWorldAnchor(maxHealth);
-
             if (!EntityUtil.hasProtection(this)) {
-                EntityUtil.registerDefence(this, maxHealth);
+                TrueHealthManager.register(this, maxHealth);
             }
 
             setTheLastEndLevel(1);

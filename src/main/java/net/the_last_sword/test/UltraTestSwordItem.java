@@ -30,6 +30,7 @@ import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
 import net.the_last_sword.init.ModKeyMappings;
 import net.the_last_sword.util.EntityUtil;
+import net.the_last_sword.util.health.TrueHealthManager;
 import net.the_last_sword.event.ServerEventHandler;
 import net.the_last_sword.util.nbt.ItemModeHelper;
 
@@ -69,8 +70,8 @@ public class UltraTestSwordItem extends TieredItem {
             if (target instanceof LivingEntity living) {
                 if (player.isShiftKeyDown()) {
                     EntityUtil.theLastEndSetDead(living, damageSource);
-                } else {
-                    AbsoluteDestructionDamageSource.applyAbsoluteDestruction(living, player, stack, 100);
+                } else if (EntityUtil.canAttack(player, living)) {
+                    EcaAPI.hurt(living, AbsoluteDestructionDamageSource.absoluteDestruction(player, stack), 100.0F);
                 }
             }
         }
@@ -243,11 +244,11 @@ public class UltraTestSwordItem extends TieredItem {
 
         //TLS防御逻辑：持有究极测试剑时始终注册
         if (hasUltraTestSword(sp)) {
-            EntityUtil.registerDefence(sp, sp.getMaxHealth());
+            TrueHealthManager.register(sp, sp.getMaxHealth());
             sp.getPersistentData().putBoolean("UltraTestSwordTLSDefence", true);
         } else {
             if (sp.getPersistentData().getBoolean("UltraTestSwordTLSDefence")) {
-                EntityUtil.clearDefence(sp);
+                TrueHealthManager.clear(sp);
                 sp.getPersistentData().remove("UltraTestSwordTLSDefence");
             }
         }

@@ -4,16 +4,23 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.the_last_sword.TheLastSwordMod;
+import net.the_last_sword.client.DragonArmorEnergyStatus;
 import net.the_last_sword.configuration.DefenceConfig;
+import net.the_last_sword.configuration.DefenceConfigData;
 import net.the_last_sword.item.DragonArmorItem;
+
+import java.util.Locale;
 
 //龙之盔甲全套 HUD 叠加层
 public class DragonArmorOverlay {
+
+    public static final int ENERGY_DISPLAY_BASE_Y = 30;
 
     //叠加层材质
     public static final ResourceLocation OVERLAY_TEXTURE =
@@ -33,15 +40,21 @@ public class DragonArmorOverlay {
         //检查是否穿戴全套龙之盔甲
         if (!DragonArmorItem.isFullSet(player)) return;
 
-        //检查配置是否启用 HUD
-        if (!DefenceConfig.getPerceptionModule().enableHud) return;
+        DefenceConfigData.PerceptionModule perception = DefenceConfig.getPerceptionModule();
+        if (!perception.enableHud
+                && !perception.showArmorEnergy
+                && !perception.showEnergyConsumption) return;
 
-        //渲染叠加层
-        renderOverlay(event.getGuiGraphics(), mc);
+        if (perception.enableHud) {
+            renderOverlay(event.getGuiGraphics());
+        }
+        if (perception.showArmorEnergy || perception.showEnergyConsumption) {
+            renderEnergyStatus(event.getGuiGraphics(), mc);
+        }
     }
 
     //渲染龙之盔甲叠加层
-    private static void renderOverlay(GuiGraphics gui, Minecraft mc) {
+    private static void renderOverlay(GuiGraphics gui) {
         int screenWidth = gui.guiWidth();
         int screenHeight = gui.guiHeight();
 
@@ -59,5 +72,33 @@ public class DragonArmorOverlay {
         RenderSystem.enableDepthTest();
         RenderSystem.disableBlend();
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+    }
+
+    private static void renderEnergyStatus(GuiGraphics gui, Minecraft mc) {
+        DefenceConfigData.PerceptionModule perception = DefenceConfig.getPerceptionModule();
+        DefenceConfigData.HudOffset offset = DefenceConfig.getHudOffset("dragon_armor_energy_display");
+        int y = ENERGY_DISPLAY_BASE_Y + offset.y;
+
+        if (perception.showArmorEnergy) {
+            String percentage = String.format(Locale.ROOT, "%.1f",
+                    DragonArmorEnergyStatus.getEnergyPercentage());
+            Component text = Component.translatable(
+                    "gui.the_last_sword.perception_hud.current_energy", percentage);
+            gui.drawString(mc.font,
+                    text,
+                    gui.guiWidth() / 2 - mc.font.width(text) / 2 + offset.x,
+                    y, 0xFFFFFF, true);
+            y += mc.font.lineHeight + 2;
+        }
+
+        if (perception.showEnergyConsumption) {
+            Component text = Component.translatable(
+                    "gui.the_last_sword.perception_hud.total_consumption",
+                    DragonArmorEnergyStatus.getConsumptionPerTick());
+            gui.drawString(mc.font,
+                    text,
+                    gui.guiWidth() / 2 - mc.font.width(text) / 2 + offset.x,
+                    y, 0xFFFFFF, true);
+        }
     }
 }

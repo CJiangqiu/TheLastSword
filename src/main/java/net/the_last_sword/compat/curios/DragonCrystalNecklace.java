@@ -17,6 +17,7 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
+import net.the_last_sword.init.ModAttributes;
 import org.jetbrains.annotations.Nullable;
 import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.type.capability.ICurioItem;
@@ -28,6 +29,7 @@ import java.util.UUID;
 public class DragonCrystalNecklace extends Item implements ICurioItem {
 
     private static final UUID NECKLACE_UUID = UUID.fromString("a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d");
+    private static final UUID RECOVERY_SPEED_UUID = UUID.fromString("d9c8cfe2-311f-4e13-9497-d7452104dc5e");
 
     public DragonCrystalNecklace() {
         super(new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON).fireResistant());
@@ -41,6 +43,11 @@ public class DragonCrystalNecklace extends Item implements ICurioItem {
         modifiers.put(Attributes.MAX_HEALTH,
             new AttributeModifier(NECKLACE_UUID, "dragon_crystal_necklace_health", -10.0,
                 AttributeModifier.Operation.ADDITION));
+
+        //肃正防护恢复速度 +50%
+        modifiers.put(ModAttributes.JUSTIFIED_DEFENCE_RECOVERY_SPEED.get(),
+            new AttributeModifier(RECOVERY_SPEED_UUID, "dragon_crystal_necklace_recovery_speed", 0.5,
+                AttributeModifier.Operation.MULTIPLY_BASE));
 
         return modifiers;
     }

@@ -13,7 +13,7 @@ import net.minecraft.server.level.ServerPlayer;
 //网络包管理器
 public class NetworkHandler {
 
-    private static final String PROTOCOL_VERSION = "2";
+    private static final String PROTOCOL_VERSION = "4";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(TheLastSwordMod.MOD_ID, "main"),
@@ -30,6 +30,11 @@ public class NetworkHandler {
 
     //注册所有网络包
     public static void register() {
+        CHANNEL.messageBuilder(DangerousSkillPreviewPacket.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(DangerousSkillPreviewPacket::encode)
+                .decoder(DangerousSkillPreviewPacket::decode)
+                .consumerMainThread(DangerousSkillPreviewPacket::handle)
+                .add();
         CHANNEL.messageBuilder(ChangeModePacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
                 .encoder(ChangeModePacket::encode)
                 .decoder(ChangeModePacket::decode)
@@ -94,6 +99,13 @@ public class NetworkHandler {
                 .encoder(PerceptionScanPacket::encode)
                 .decoder(PerceptionScanPacket::decode)
                 .consumerMainThread(PerceptionScanPacket::handle)
+                .add();
+
+        //龙甲整套能量与耗电速率同步包
+        CHANNEL.messageBuilder(DragonArmorEnergyStatusPacket.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(DragonArmorEnergyStatusPacket::encode)
+                .decoder(DragonArmorEnergyStatusPacket::decode)
+                .consumerMainThread(DragonArmorEnergyStatusPacket::handle)
                 .add();
 
         //竞技场预览包

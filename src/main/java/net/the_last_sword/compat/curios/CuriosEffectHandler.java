@@ -1,5 +1,6 @@
 package net.the_last_sword.compat.curios;
 
+import net.eca.api.EcaAPI;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -26,6 +27,7 @@ import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
 import net.the_last_sword.init.ModEffects;
 import net.the_last_sword.init.ModItems;
+import net.the_last_sword.util.EntityUtil;
 import net.minecraftforge.registries.ForgeRegistries;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.type.inventory.IDynamicStackHandler;
@@ -79,6 +81,9 @@ public class CuriosEffectHandler {
         if (attacker.level().isClientSide) {
             return;
         }
+        if (!EntityUtil.canAttack(attacker, target)) {
+            return;
+        }
 
         applyRandomSharedNegativeEffect(attacker, target);
 
@@ -100,7 +105,9 @@ public class CuriosEffectHandler {
 
         try {
             APPLYING_GIVERS_PAIN_DAMAGE.set(true);
-            AbsoluteDestructionDamageSource.applyAbsoluteDestruction(target, attacker, absoluteDamage);
+            if (EntityUtil.canAttack(attacker, target)) {
+                EcaAPI.hurt(target, AbsoluteDestructionDamageSource.absoluteDestruction(attacker), absoluteDamage);
+            }
         } finally {
             APPLYING_GIVERS_PAIN_DAMAGE.set(false);
         }

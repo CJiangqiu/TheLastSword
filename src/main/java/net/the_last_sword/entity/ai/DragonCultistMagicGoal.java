@@ -9,6 +9,7 @@ import net.minecraft.world.entity.projectile.LargeFireball;
 import net.minecraft.world.phys.Vec3;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.entity.DragonCultistEntity;
+import net.the_last_sword.util.health.TrueHealthManager;
 
 import java.util.EnumSet;
 
@@ -16,6 +17,7 @@ import java.util.EnumSet;
 public class DragonCultistMagicGoal extends Goal {
     private static final int ANIMATION_LENGTH = 35;
     private static final int FIRE_TICK = 25;
+    private static final double MAGIC_MIN_DISTANCE = 8.0D;
     private static final double LOW_HP_RETREAT_DISTANCE = 3.0D;
     private static final double CHARGE_DISTANCE = 1.1D;
     private static final double MIN_CHARGE_RADIUS = 0.12D;
@@ -54,7 +56,7 @@ public class DragonCultistMagicGoal extends Goal {
         }
 
         // 高血量时只在远处用
-        return cultist.distanceTo(target) >= TheLastSwordConfiguration.getDragonCultistMagicMinDistanceSafely();
+        return cultist.distanceTo(target) >= MAGIC_MIN_DISTANCE;
     }
 
     @Override
@@ -163,9 +165,9 @@ public class DragonCultistMagicGoal extends Goal {
     }
 
     private float getHpRatio() {
-        float max = cultist.getWorldAnchorMax();
+        float max = TrueHealthManager.getMaxHealth(cultist);
         if (max <= 0) return 1.0f;
-        return cultist.getWorldAnchor() / max;
+        return TrueHealthManager.getHealth(cultist) / max;
     }
 
     private void spawnChargeParticles(LivingEntity target, int relativeFrame) {

@@ -62,8 +62,6 @@ public class LostWraithChaseTargetGoal extends Goal {
         }
 
         wraith.getLookControl().setLookAt(target, 30.0F, 30.0F);
-
-        //每tick更新路径，紧跟目标实时位置
         wraith.getNavigation().moveTo(target, 1.0);
     }
 

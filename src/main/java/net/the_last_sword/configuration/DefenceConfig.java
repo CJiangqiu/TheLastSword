@@ -12,7 +12,7 @@ public class DefenceConfig {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static DefenceConfigData data = new DefenceConfigData();
 
-    private static final int CURRENT_VERSION = 2;
+    private static final int CURRENT_VERSION = 5;
 
     //加载配置文件
     public static void load() {
@@ -51,6 +51,18 @@ public class DefenceConfig {
             patched = true;
         }
 
+        if (d.configVersion < 4) {
+            d.armor.dragonArmor.perception.showArmorEnergy = true;
+            d.armor.dragonArmor.perception.showEnergyConsumption = true;
+            patched = true;
+        }
+
+        if (d.armor.dragonArmor.perception.energyDisplayPosition == null) {
+            d.armor.dragonArmor.perception.energyDisplayPosition =
+                    defaults.armor.dragonArmor.perception.energyDisplayPosition;
+            patched = true;
+        }
+
         // 迁移旧版 hud.elements 中的肃正防御位置到 justifiedDefence
         DefenceConfigData.HudElement oldPos = d.hud.elements.remove("justified_defence_overlay");
         if (oldPos != null) {
@@ -78,6 +90,11 @@ public class DefenceConfig {
         }
         if (d.armor.dragonArmor.defence.dragonShield == null) {
             d.armor.dragonArmor.defence.dragonShield = defaults.armor.dragonArmor.defence.dragonShield;
+            patched = true;
+        }
+        if (d.armor.dragonArmor.defence.justifiedDefenceRecovery == null) {
+            d.armor.dragonArmor.defence.justifiedDefenceRecovery =
+                    defaults.armor.dragonArmor.defence.justifiedDefenceRecovery;
             patched = true;
         }
         if (d.armor.dragonArmor.defence.phasing.shieldEffect != null) {
@@ -120,6 +137,9 @@ public class DefenceConfig {
         if ("justified_defence_overlay".equals(elementId)) {
             return data.justifiedDefence.overlayPosition;
         }
+        if ("dragon_armor_energy_display".equals(elementId)) {
+            return data.armor.dragonArmor.perception.energyDisplayPosition;
+        }
         DefenceConfigData.HudElement element = data.hud.elements.get(elementId);
         if (element == null) {
             return new DefenceConfigData.HudOffset(0, 0);
@@ -132,6 +152,11 @@ public class DefenceConfig {
         if ("justified_defence_overlay".equals(elementId)) {
             data.justifiedDefence.overlayPosition.x = x;
             data.justifiedDefence.overlayPosition.y = y;
+            return;
+        }
+        if ("dragon_armor_energy_display".equals(elementId)) {
+            data.armor.dragonArmor.perception.energyDisplayPosition.x = x;
+            data.armor.dragonArmor.perception.energyDisplayPosition.y = y;
             return;
         }
         DefenceConfigData.HudElement element = data.hud.elements.get(elementId);
@@ -221,6 +246,10 @@ public class DefenceConfig {
 
     public static DefenceConfigData.DragonShieldModule getDragonShieldModule() {
         return data.armor.dragonArmor.defence.dragonShield;
+    }
+
+    public static DefenceConfigData.JustifiedDefenceRecoveryModule getJustifiedDefenceRecoveryModule() {
+        return data.armor.dragonArmor.defence.justifiedDefenceRecovery;
     }
 
     public static DefenceConfigData.DefenceModule getDragonArmorDefenceModule() {

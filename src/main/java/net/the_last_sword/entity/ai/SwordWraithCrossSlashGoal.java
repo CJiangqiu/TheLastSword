@@ -1,5 +1,6 @@
 package net.the_last_sword.entity.ai;
 
+import net.eca.api.EcaAPI;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -115,7 +116,7 @@ public class SwordWraithCrossSlashGoal extends Goal {
     //执行十字切攻击：传送到目标并攻击
     private void executeSlash() {
         LivingEntity target = wraith.getTarget();
-        if (target == null || !target.isAlive()) {
+        if (target == null || !target.isAlive() || !EntityUtil.canAttack(wraith, target)) {
             return;
         }
 
@@ -124,29 +125,37 @@ public class SwordWraithCrossSlashGoal extends Goal {
         double offsetX = Math.cos(angle) * 1.0;
         double offsetZ = Math.sin(angle) * 1.0;
 
-        wraith.level().playSound(null, wraith.getX(), wraith.getY(), wraith.getZ(),
-            SoundEvents.ENDERMAN_TELEPORT, wraith.getSoundSource(), 1.0F, 1.0F);
-        ParticleUtil.spawnCrossSlashTeleportParticles(wraith.level(), wraith.position(), wraith.getBbHeight());
+        Vec3 oldPosition = wraith.position();
+        Vec3 desiredPosition = new Vec3(target.getX() + offsetX, target.getY(), target.getZ() + offsetZ);
+        Vec3 teleportPosition = EntityUtil.theLastEndSafeTeleport(wraith, desiredPosition, 4);
+        if (teleportPosition != null) {
+            wraith.level().playSound(null, oldPosition.x, oldPosition.y, oldPosition.z,
+                SoundEvents.ENDERMAN_TELEPORT, wraith.getSoundSource(), 1.0F, 1.0F);
+            ParticleUtil.spawnCrossSlashTeleportParticles(
+                wraith.level(), oldPosition, wraith.getBbHeight());
+            ParticleUtil.spawnCrossSlashTeleportParticles(
+                wraith.level(), teleportPosition, wraith.getBbHeight());
+            EntityUtil.faceTarget(wraith, target);
+        }
 
-        Vec3 teleportPos = new Vec3(target.getX() + offsetX, target.getY(), target.getZ() + offsetZ);
-        EntityUtil.theLastEndTeleport(wraith, teleportPos.x, teleportPos.y, teleportPos.z);
+        //攻击前按当前位置重新校准朝向，传送失败时也能正常完成原地斩击
         EntityUtil.faceTarget(wraith, target);
-
-        ParticleUtil.spawnCrossSlashTeleportParticles(wraith.level(), teleportPos, wraith.getBbHeight());
 
         //攻击主目标
         double attackRange = TheLastSwordConfiguration.getSkillCrossSlashRangeSafely();
         float damageMultiplier = (float) TheLastSwordConfiguration.getSkillCrossSlashDamageMultiplierSafely();
         float damage = (float) wraith.getAttributeValue(Attributes.ATTACK_DAMAGE) * damageMultiplier;
 
-        AbsoluteDestructionDamageSource.applyAbsoluteDestruction(target, wraith, damage);
-        wraith.addEndMark();
+        if (EntityUtil.canAttack(wraith, target)) {
+            EcaAPI.hurt(target, AbsoluteDestructionDamageSource.absoluteDestruction(wraith), damage);
+            wraith.addEndMark();
+        }
 
         //攻击范围内的其他敌人
         List<LivingEntity> nearbyTargets = EntityUtil.getTargetsInHemisphere(wraith, attackRange);
         for (LivingEntity nearbyTarget : nearbyTargets) {
-            if (!nearbyTarget.equals(target)) {
-                AbsoluteDestructionDamageSource.applyAbsoluteDestruction(nearbyTarget, wraith, damage);
+            if (!nearbyTarget.equals(target) && EntityUtil.canAttack(wraith, nearbyTarget)) {
+                EcaAPI.hurt(nearbyTarget, AbsoluteDestructionDamageSource.absoluteDestruction(wraith), damage);
                 wraith.addEndMark();
             }
         }

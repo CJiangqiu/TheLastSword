@@ -10,6 +10,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.the_last_sword.util.EntityUtil;
+import net.the_last_sword.util.health.TrueHealthManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,8 +60,8 @@ public class DefenceCommand {
             String dimensionName = entity.level().dimension().location().toString();
 
             //获取真实生命值
-            float realHealth = EntityUtil.getWorldAnchor(entity);
-            float realMaxHealth = EntityUtil.getWorldAnchorMax(entity);
+            float realHealth = TrueHealthManager.getHealth(entity);
+            float realMaxHealth = TrueHealthManager.getMaxHealth(entity);
 
             final String displayInfo = String.format(
                 "  §7Entity: §f%s\n  §7UUID: §8%s\n  §7Dimension: §e%s\n  §7Real Health: §a%.1f§7/§a%.1f",

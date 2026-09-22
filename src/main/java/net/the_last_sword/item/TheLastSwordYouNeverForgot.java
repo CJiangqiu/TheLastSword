@@ -11,6 +11,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -182,24 +183,15 @@ public class TheLastSwordYouNeverForgot extends TheLastEndSwordItems {
         return ((int) (r * 255) << 16) | ((int) (g * 255) << 8) | (int) (b * 255);
     }
 
-    // 自定义攻击逻辑：记录血量 → 异常/致死则斩杀，正常则直接改血
+    //绝毁攻击统一进入 LivingEntity.hurt，由世界锚度系统处理
     public static void attack(LivingEntity target, Entity attacker, float damage) {
-        float originalHealth = target.getHealth();
-
-        // 异常血量直接斩杀
-        if (Float.isNaN(originalHealth) || Float.isInfinite(originalHealth) || originalHealth <= 0.0F) {
-            EntityUtil.theLastEndSetDead(target, AbsoluteDestructionDamageSource.absoluteDestruction(attacker));
+        if (attacker == null || !EntityUtil.canAttack(attacker, target)) {
             return;
         }
-
-        float expectedHealth = originalHealth - damage;
-        // 致死伤害走斩杀，避免ECA处理极端负血量导致卡服
-        if (expectedHealth <= 0) {
-            EntityUtil.theLastEndSetDead(target, AbsoluteDestructionDamageSource.absoluteDestruction(attacker));
-            return;
+        DamageSource source = AbsoluteDestructionDamageSource.absoluteDestruction(attacker);
+        if (EntityUtil.canAttack(attacker, target)) {
+            EcaAPI.hurt(target, source, damage);
         }
-
-        EntityUtil.theLastEndSetHealth(target, expectedHealth);
     }
 
     // 持有武器时添加ECA无敌、飞行、防御、免疫、无冷却，放下时全部移除
@@ -233,7 +225,7 @@ public class TheLastSwordYouNeverForgot extends TheLastEndSwordItems {
                     }
                 }
 
-                // 设置保护标记（触发mixin防踢/防清除/防实体移除，不设world anchor避免与ECA无敌重复）
+                //设置保护标记（触发 Mixin 防踢、防清除和防实体移除）
                 EntityUtil.setProtection(player, true);
                 player.getPersistentData().putBoolean(DEFENCE_TAG, true);
 

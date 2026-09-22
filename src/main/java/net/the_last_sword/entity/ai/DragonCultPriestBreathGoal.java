@@ -27,6 +27,7 @@ public class DragonCultPriestBreathGoal extends Goal {
     //吐息起止帧（0.65s / 1.5s）
     private static final int BREATH_START_TICK = 13;
     private static final int BREATH_END_TICK = 30;
+    private static final double MAX_DISTANCE = 3.0D;
 
     //粒子在网格点周围的随机散布幅度
     private static final double PARTICLE_SPREAD = 0.25;
@@ -56,7 +57,7 @@ public class DragonCultPriestBreathGoal extends Goal {
         if (target == null || !target.isAlive()) {
             return false;
         }
-        return priest.distanceTo(target) <= TheLastSwordConfiguration.getDragonCultPriestBreathMaxDistanceSafely();
+        return priest.distanceTo(target) <= MAX_DISTANCE;
     }
 
     @Override

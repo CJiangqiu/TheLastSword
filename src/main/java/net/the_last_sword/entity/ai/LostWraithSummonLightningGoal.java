@@ -23,6 +23,7 @@ public class LostWraithSummonLightningGoal extends Goal {
     private static final int ANIMATION_LENGTH = 60;
     private static final int MARK_TICK = 25;
     private static final int LIGHTNING_TICK = 40;
+    private static final double MIN_DISTANCE = 4.0;
 
     private final LostWraithEntity wraith;
     private int animationTick;
@@ -50,7 +51,7 @@ public class LostWraithSummonLightningGoal extends Goal {
         if (target == null || !target.isAlive()) {
             return false;
         }
-        return wraith.distanceTo(target) > TheLastSwordConfiguration.getLostWraithLightningMinDistanceSafely();
+        return wraith.distanceTo(target) > MIN_DISTANCE;
     }
 
     @Override

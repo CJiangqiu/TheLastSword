@@ -37,6 +37,7 @@ import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
 import net.the_last_sword.entity.ai.*;
 import net.the_last_sword.init.ModEffects;
 import net.the_last_sword.util.EntityUtil;
+import net.the_last_sword.util.health.TrueHealthManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -147,8 +148,8 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
             attackAttr.setBaseValue(newAttack);
         }
 
-        setWorldAnchorMax((float) newMaxHealth);
-        setWorldAnchor((float) newMaxHealth);
+        TrueHealthManager.setMaxHealth(this, (float) newMaxHealth);
+        TrueHealthManager.setHealth(this, (float) newMaxHealth);
     }
 
     @Override
@@ -183,7 +184,7 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
 
     @Override
     public String getWalkAnimationName() {
-        return "idle";
+        return "walk";
     }
 
     @Override
@@ -249,11 +250,8 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
             }
 
             float maxHealth = (float) getAttributeValue(Attributes.MAX_HEALTH);
-            setWorldAnchorMax(maxHealth);
-            setWorldAnchor(maxHealth);
-
             if (!EntityUtil.hasProtection(this)) {
-                EntityUtil.registerDefence(this, maxHealth);
+                TrueHealthManager.register(this, maxHealth);
             }
 
             setAnimationState(STATE_SPAWNING);
@@ -366,11 +364,11 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
                 List<LivingEntity> targets = EntityUtil.getTargetsInSphere(wraith, effectRange);
                 for (LivingEntity target : targets) {
                     float health = EntityUtil.hasProtection(target)
-                            ? EntityUtil.getWorldAnchor(target)
+                            ? TrueHealthManager.getHealth(target)
                             : target.getHealth();
                     float maxHealth = target.getMaxHealth();
-                    if (health > maxHealth * 0.5f) {
-                        AbsoluteDestructionDamageSource.applyAbsoluteDestruction(target, wraith, Float.MAX_VALUE);
+                    if (health > maxHealth * 0.5f && EntityUtil.canAttack(wraith, target)) {
+                        EcaAPI.hurt(target, AbsoluteDestructionDamageSource.absoluteDestruction(wraith), Float.MAX_VALUE);
                     }
                 }
             }
@@ -399,8 +397,10 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
                 //伤害 = 目标最大生命值 × (13% + 剩余标记%)
                 float maxHealthDamage = (float) ((0.13 + currentMark / 100.0) * target.getMaxHealth());
 
-                AbsoluteDestructionDamageSource.applyAbsoluteDestruction(target, wraith, maxHealthDamage);
-                clearPositiveEffects(target);
+                if (EntityUtil.canAttack(wraith, target)) {
+                    EcaAPI.hurt(target, AbsoluteDestructionDamageSource.absoluteDestruction(wraith), maxHealthDamage);
+                    clearPositiveEffects(target);
+                }
             }
         }
 

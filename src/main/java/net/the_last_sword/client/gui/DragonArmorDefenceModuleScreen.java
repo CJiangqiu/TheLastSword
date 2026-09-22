@@ -34,6 +34,16 @@ public class DragonArmorDefenceModuleScreen extends Screen {
         ).bounds(centerX - buttonWidth / 2, startY, buttonWidth, buttonHeight).build());
 
         this.addRenderableWidget(Button.builder(
+            Component.translatable("gui.the_last_sword.dragon_armor_module.justified_defence_recovery"),
+            button -> {
+                if (this.minecraft != null) {
+                    this.minecraft.setScreen(new DragonArmorModuleDetailScreen(
+                        this, DragonArmorModuleDetailScreen.ModuleType.JUSTIFIED_DEFENCE_RECOVERY));
+                }
+            }
+        ).bounds(centerX - buttonWidth / 2, startY + spacing, buttonWidth, buttonHeight).build());
+
+        this.addRenderableWidget(Button.builder(
             Component.translatable("gui.the_last_sword.dragon_armor_module.dragon_shield"),
             button -> {
                 if (this.minecraft != null) {
@@ -41,7 +51,7 @@ public class DragonArmorDefenceModuleScreen extends Screen {
                         this, DragonArmorModuleDetailScreen.ModuleType.DRAGON_SHIELD));
                 }
             }
-        ).bounds(centerX - buttonWidth / 2, startY + spacing, buttonWidth, buttonHeight).build());
+        ).bounds(centerX - buttonWidth / 2, startY + spacing * 2, buttonWidth, buttonHeight).build());
 
         this.addRenderableWidget(Button.builder(
             Component.translatable("gui.back"),
@@ -50,7 +60,7 @@ public class DragonArmorDefenceModuleScreen extends Screen {
                     this.minecraft.setScreen(parent);
                 }
             }
-        ).bounds(centerX - buttonWidth / 2, startY + spacing * 2 + 10, buttonWidth, buttonHeight).build());
+        ).bounds(centerX - buttonWidth / 2, startY + spacing * 3 + 10, buttonWidth, buttonHeight).build());
     }
 
     @Override

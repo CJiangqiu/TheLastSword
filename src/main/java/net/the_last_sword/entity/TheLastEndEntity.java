@@ -18,6 +18,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.FluidState;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.util.EntityUtil;
+import net.the_last_sword.util.health.TrueHealthManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoEntity;
@@ -38,7 +39,7 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
     public static final int STATE_SPAWNING = 1;
     public static final int STATE_IDLE = 2;
 
-    // 达到该终焉等级后交由 ECA 线程复活守护，只要世界锚度未清零就常驻
+    //达到该终焉等级后交由 ECA 线程复活守护，只要保护性真实血量未清零就常驻
     public static final int RESURRECTION_LEVEL = 13;
 
     // 同步字段
@@ -142,23 +143,6 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
         this.entityData.set(ALL_THINGS_END, value);
     }
 
-    // 自定义血量
-    public float getWorldAnchor() {
-        return EntityUtil.getWorldAnchor(this);
-    }
-
-    public void setWorldAnchor(float health) {
-        EntityUtil.setWorldAnchor(this, health);
-    }
-
-    public float getWorldAnchorMax() {
-        return EntityUtil.getWorldAnchorMax(this);
-    }
-
-    public void setWorldAnchorMax(float maxHealth) {
-        EntityUtil.setWorldAnchorMax(this, maxHealth);
-    }
-
     protected float getDamageLimit() {
         float maxHealth = (float) this.getAttributeValue(Attributes.MAX_HEALTH);
         float ratio = (float) TheLastSwordConfiguration.getDefenceCustomHealthDamageReductionSafely();
@@ -250,7 +234,7 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
         if (!level().isClientSide && tickCount == 1) {
             if (!EntityUtil.hasProtection(this)) {
                 float maxHealth = (float) this.getAttributeValue(Attributes.MAX_HEALTH);
-                EntityUtil.registerDefence(this, maxHealth);
+                TrueHealthManager.register(this, maxHealth);
             }
         }
 
@@ -327,9 +311,9 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
             damageSource = damageSources().generic();
         }
 
-        float previousMaxHealth = getWorldAnchorMax();
-        setWorldAnchor(0.0F);
-        EntityUtil.clearDefence(this);
+        float previousMaxHealth = TrueHealthManager.getMaxHealth(this);
+        TrueHealthManager.setHealth(this, 0.0F);
+        TrueHealthManager.clear(this);
         super.die(damageSource);
 
         if (this.dead) {
@@ -345,8 +329,8 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
         if (!Float.isFinite(restoredHealth) || restoredHealth <= 0.0F) {
             restoredHealth = restoredMaxHealth;
         }
-        setWorldAnchorMax(restoredMaxHealth);
-        setWorldAnchor(Math.min(restoredHealth, restoredMaxHealth));
+        TrueHealthManager.setMaxHealth(this, restoredMaxHealth);
+        TrueHealthManager.setHealth(this, Math.min(restoredHealth, restoredMaxHealth));
         EntityUtil.setProtection(this, true);
         deathDamageSource = null;
         setDeathTick(0);
@@ -370,8 +354,8 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
 
     public void safeRemove() {
         stopResurrectionTracking();
-        setWorldAnchor(0);
-        EntityUtil.clearDefence(this);
+        TrueHealthManager.setHealth(this, 0.0F);
+        TrueHealthManager.clear(this);
         EntityUtil.theLastEndRemove(this, RemovalReason.KILLED);
     }
 
@@ -447,7 +431,7 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
         }
 
         if (realDamage > 0) {
-            float currentHealth = getWorldAnchor();
+            float currentHealth = TrueHealthManager.getHealth(this);
             float newHealth = currentHealth - realDamage;
 
             //致死拦截：子类可在此消耗保命道具吃掉这次伤害
@@ -455,7 +439,7 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
                 return;
             }
 
-            setWorldAnchor(newHealth);
+            TrueHealthManager.setHealth(this, newHealth);
 
             if (newHealth <= 0 && !isDying()) {
                 triggerDeath(damageSource);
@@ -520,7 +504,7 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
     }
 
     private boolean hasPositiveRealHealth() {
-        float health = getWorldAnchor();
+        float health = TrueHealthManager.getHealth(this);
         return Float.isFinite(health) && health > 0.0F;
     }
 
@@ -551,7 +535,7 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
         if (!level().isClientSide) {
             float maxHealth = (float) getAttributeValue(Attributes.MAX_HEALTH);
             if (!EntityUtil.hasProtection(this)) {
-                EntityUtil.registerDefence(this, maxHealth);
+                TrueHealthManager.register(this, maxHealth);
             }
         }
     }

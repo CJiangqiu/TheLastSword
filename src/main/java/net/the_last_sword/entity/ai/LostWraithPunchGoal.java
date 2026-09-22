@@ -10,7 +10,6 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.UseAnim;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.entity.LostWraithEntity;
@@ -18,16 +17,18 @@ import net.the_last_sword.util.EntityUtil;
 import net.the_last_sword.util.ParticleUtil;
 
 import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 // 迷失战魂拳击技能Goal
 public class LostWraithPunchGoal extends Goal {
     private static final int ANIMATION_LENGTH = 30;
     private static final int SOUND_TICK = 10;
     private static final int DAMAGE_TICK = 15;
+    private static final double ATTACK_DISTANCE = 4.0;
     private static final double TELEPORT_DISTANCE = 2.0;
+    private static final double ATTACK_WIDTH = 3.0;
+    private static final double ATTACK_LENGTH = 4.0;
+    private static final double ATTACK_HEIGHT = 4.0;
 
     private final LostWraithEntity wraith;
     private int animationTick;
@@ -50,12 +51,9 @@ public class LostWraithPunchGoal extends Goal {
             return false;
         }
         double distance = wraith.distanceTo(target);
-        double distanceThreshold = TheLastSwordConfiguration.getLostWraithPunchAttackDistanceSafely();
-        //传送就绪：与远程技能一致的最小距离启动并突进；冷却中：保持原有近身启动
-        if (wraith.isPunchTeleportReady()) {
-            return distance > distanceThreshold;
-        }
-        return distance <= distanceThreshold;
+        // 传送就绪时远距离可突进，但近距离仍必须允许普通拳击；否则会与
+        // “大于4格才追击/释放远程技能”的条件形成没有任何Goal可运行的死区。
+        return wraith.isPunchTeleportReady() || distance <= ATTACK_DISTANCE;
     }
 
     @Override
@@ -68,8 +66,13 @@ public class LostWraithPunchGoal extends Goal {
         animationTick = ANIMATION_LENGTH;
         wraith.setAnimationState(LostWraithEntity.STATE_PUNCH);
         wraith.getNavigation().stop();
-        //传送就绪时突进，成功落地才进入冷却；冷却中原地出拳
-        if (wraith.isPunchTeleportReady() && teleportInFrontOfTarget()) {
+        // 仅远距离起手才使用传送；近距离直接出拳并保留传送就绪状态。
+        LivingEntity target = wraith.getTarget();
+        boolean shouldTeleport = wraith.isPunchTeleportReady()
+            && target != null
+            && target.isAlive()
+            && wraith.distanceTo(target) > ATTACK_DISTANCE;
+        if (shouldTeleport && teleportInFrontOfTarget()) {
             wraith.startPunchTeleportCooldown();
         }
     }
@@ -127,20 +130,6 @@ public class LostWraithPunchGoal extends Goal {
     }
 
     private void executePunchDamage() {
-        Vec3 forward = wraith.getLookAngle().multiply(1.0, 0.0, 1.0);
-        if (forward.lengthSqr() < 1.0E-6) {
-            LivingEntity target = wraith.getTarget();
-            if (target != null) {
-                forward = target.position().subtract(wraith.position()).multiply(1.0, 0.0, 1.0);
-            }
-        }
-        if (forward.lengthSqr() < 1.0E-6) {
-            return;
-        }
-        forward = forward.normalize();
-
-        Vec3 pos = wraith.position();
-        Vec3 right = new Vec3(-forward.z, 0.0, forward.x);
         float damage = (float) wraith.getAttributeValue(Attributes.ATTACK_DAMAGE);
 
         DamageSource damageSource = new DamageSource(
@@ -148,36 +137,17 @@ public class LostWraithPunchGoal extends Goal {
                 .getHolderOrThrow(DamageTypes.GENERIC),
             wraith, wraith);
 
-        int forwardSteps = TheLastSwordConfiguration.getLostWraithPunchForwardStepsSafely();
-        int sideHalfWidth = TheLastSwordConfiguration.getLostWraithPunchSideHalfWidthSafely();
-        Set<LivingEntity> targetsHit = new HashSet<>();
-        for (int i = 1; i <= forwardSteps; i++) {
-            for (int j = -sideHalfWidth; j <= sideHalfWidth; j++) {
-                Vec3 checkPos = pos.add(forward.scale(i)).add(right.scale(j));
-
-                AABB area = new AABB(
-                    checkPos.x - 0.75, pos.y - 0.5, checkPos.z - 0.75,
-                    checkPos.x + 0.75, pos.y + wraith.getBbHeight() + 0.5, checkPos.z + 0.75
-                );
-                List<LivingEntity> targets = wraith.level().getEntitiesOfClass(
-                    LivingEntity.class, area,
-                    entity1 -> EntityUtil.canAttack(wraith, entity1)
-                );
-
-                for (LivingEntity target : targets) {
-                    if (!targetsHit.add(target)) {
-                        continue;
-                    }
-                    if (isTargetBlocking(target)) {
-                        target.level().playSound(null, target.blockPosition(),
-                            SoundEvents.SHIELD_BLOCK, target.getSoundSource(),
-                            1.0F, 0.8F + target.level().random.nextFloat() * 0.4F);
-                        Vec3 knockbackDir = target.position().subtract(wraith.position()).normalize();
-                        target.knockback(0.5F, knockbackDir.x, knockbackDir.z);
-                    } else {
-                        target.hurt(damageSource, damage);
-                    }
-                }
+        List<LivingEntity> targets = EntityUtil.getTargetsInFrontBox(
+            wraith, ATTACK_WIDTH, ATTACK_LENGTH, ATTACK_HEIGHT);
+        for (LivingEntity target : targets) {
+            if (isTargetBlocking(target)) {
+                target.level().playSound(null, target.blockPosition(),
+                    SoundEvents.SHIELD_BLOCK, target.getSoundSource(),
+                    1.0F, 0.8F + target.level().random.nextFloat() * 0.4F);
+                Vec3 knockbackDir = target.position().subtract(wraith.position()).normalize();
+                target.knockback(0.5F, knockbackDir.x, knockbackDir.z);
+            } else {
+                target.hurt(damageSource, damage);
             }
         }
     }
@@ -201,12 +171,8 @@ public class LostWraithPunchGoal extends Goal {
 
         Vec3 oldPosition = wraith.position();
         Vec3 desiredPosition = target.position().add(direction.scale(TELEPORT_DISTANCE));
-        Vec3 teleportPosition = EntityUtil.findSafeTeleportPosition(wraith, desiredPosition, 4);
+        Vec3 teleportPosition = EntityUtil.theLastEndSafeTeleport(wraith, desiredPosition, 4);
         if (teleportPosition == null) {
-            return false;
-        }
-        if (!EntityUtil.theLastEndTeleport(
-                wraith, teleportPosition.x, teleportPosition.y, teleportPosition.z)) {
             return false;
         }
 

@@ -71,6 +71,10 @@ public final class ClientPacketHandler {
         PerceptionScanData.update(scannedEntities, glowDurationSeconds);
     }
 
+    public static void updateDragonArmorEnergyStatus(long currentEnergy, long maxEnergy, long consumptionPerTick) {
+        DragonArmorEnergyStatus.update(currentEnergy, maxEnergy, consumptionPerTick);
+    }
+
     public static void setArenaPreview(BlockPos minPos, BlockPos maxPos) {
         if (Minecraft.getInstance().level != null) {
             ClientEventHandler.setArenaPreview(minPos, maxPos);

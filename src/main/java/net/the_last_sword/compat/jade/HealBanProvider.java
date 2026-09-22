@@ -3,7 +3,7 @@ package net.the_last_sword.compat.jade;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.the_last_sword.TheLastSwordMod;
-import net.the_last_sword.util.EntityUtil;
+import net.the_last_sword.util.health.WorldAnchorManager;
 import snownee.jade.api.EntityAccessor;
 import snownee.jade.api.IEntityComponentProvider;
 import snownee.jade.api.ITooltip;
@@ -20,7 +20,7 @@ public enum HealBanProvider implements IEntityComponentProvider {
     public void appendTooltip(ITooltip tooltip, EntityAccessor accessor, IPluginConfig config) {
         if (!(accessor.getEntity() instanceof LivingEntity living)) return;
 
-        int remaining = EntityUtil.getHealBanTime(living);
+        int remaining = WorldAnchorManager.getHealBanTime(living);
         if (remaining <= 0) return;
 
         tooltip.add(new HealBanElement(remaining));

@@ -65,6 +65,7 @@ public class TheLastSwordConfiguration {
     public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_ARMOR_SATURATION_COST;
     public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_ARMOR_ICE_FIRE_IMMUNITY_COST;
     public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_ARMOR_PHASING_COST;
+    public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_ARMOR_JUSTIFIED_DEFENCE_RECOVERY_COST;
     public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_ARMOR_ENDER_CRYSTAL_CHARGE_RATE;
     public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_ARMOR_ENDER_CRYSTAL_RANGE;
     public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_ARMOR_PERCEPTION_GLOW_DURATION;
@@ -126,9 +127,9 @@ public class TheLastSwordConfiguration {
     // Entity Configuration | 实体配置
     // ═══════════════════════════════════════════════════════════════════════════════════
 
-    public static ForgeConfigSpec.ConfigValue<Boolean> ENTITY_ENABLE_DANGEROUS_SKILL_ALARM;
-
     // The Last End Entity | 终焉种族配置
+    public static ForgeConfigSpec.ConfigValue<Boolean> THE_LAST_END_ENTITY_ENABLE_DANGEROUS_SKILL_ALARM;
+    public static ForgeConfigSpec.ConfigValue<Boolean> THE_LAST_END_ENTITY_ENABLE_DANGEROUS_SKILL_RANGE_PREVIEW;
     public static ForgeConfigSpec.ConfigValue<Boolean> THE_LAST_END_ENTITY_ENABLE_ALL_THINGS_END;
 
     // The Last End Sword Wraith | 终焉剑灵配置
@@ -144,21 +145,15 @@ public class TheLastSwordConfiguration {
     public static ForgeConfigSpec.ConfigValue<Integer> LOST_WRAITH_ENCHANT_DURATION;
     public static ForgeConfigSpec.ConfigValue<Integer> LOST_WRAITH_ENCHANT_AMPLIFIER;
     // Dragon Fireball | 龙息弹
-    public static ForgeConfigSpec.ConfigValue<Double> LOST_WRAITH_DRAGON_FIREBALL_MIN_DISTANCE;
     public static ForgeConfigSpec.ConfigValue<Integer> LOST_WRAITH_DRAGON_FIREBALL_COOLDOWN;
     // Summon Lightning | 召唤闪电
-    public static ForgeConfigSpec.ConfigValue<Double> LOST_WRAITH_LIGHTNING_MIN_DISTANCE;
     public static ForgeConfigSpec.ConfigValue<Integer> LOST_WRAITH_LIGHTNING_COOLDOWN;
     public static ForgeConfigSpec.ConfigValue<Double> LOST_WRAITH_LIGHTNING_AOE_RADIUS;
     public static ForgeConfigSpec.ConfigValue<Double> LOST_WRAITH_LIGHTNING_DAMAGE_MULTIPLIER;
     // Punch | 拳击
-    public static ForgeConfigSpec.ConfigValue<Double> LOST_WRAITH_PUNCH_ATTACK_DISTANCE;
-    public static ForgeConfigSpec.ConfigValue<Integer> LOST_WRAITH_PUNCH_FORWARD_STEPS;
-    public static ForgeConfigSpec.ConfigValue<Integer> LOST_WRAITH_PUNCH_SIDE_HALF_WIDTH;
     public static ForgeConfigSpec.ConfigValue<Integer> LOST_WRAITH_PUNCH_TELEPORT_COOLDOWN;
     // End Strike | 终焉一击
     public static ForgeConfigSpec.ConfigValue<Integer> LOST_WRAITH_END_STRIKE_COOLDOWN;
-    public static ForgeConfigSpec.ConfigValue<Double> LOST_WRAITH_END_STRIKE_PULL_RADIUS;
     public static ForgeConfigSpec.ConfigValue<Double> LOST_WRAITH_END_STRIKE_DAMAGE_MULTIPLIER;
     public static ForgeConfigSpec.ConfigValue<Integer> LOST_WRAITH_END_STRIKE_SHIELD_COOLDOWN;
 
@@ -169,8 +164,6 @@ public class TheLastSwordConfiguration {
     // Guardian Skills | 守卫共享技能
     // Melee Attack | 近战攻击
     public static ForgeConfigSpec.ConfigValue<Double> GUARDIAN_MELEE_ATTACK_RANGE;
-    // Chase Target | 追击
-    public static ForgeConfigSpec.ConfigValue<Double> GUARDIAN_CHASE_APPROACH_DISTANCE;
     // Pickup Weapon | 拾取武器
     public static ForgeConfigSpec.ConfigValue<Double> GUARDIAN_PICKUP_DISTANCE;
     public static ForgeConfigSpec.ConfigValue<Integer> GUARDIAN_PICKUP_SCAN_INTERVAL;
@@ -178,16 +171,11 @@ public class TheLastSwordConfiguration {
     public static ForgeConfigSpec.ConfigValue<Double> GUARDIAN_ASSIST_ALLY_MAX_SEARCH_DISTANCE;
 
     // Guardian Saber | 剑士守卫
-    public static ForgeConfigSpec.ConfigValue<Double> GUARDIAN_SABER_BLOCK_RANGE;
     public static ForgeConfigSpec.ConfigValue<Integer> GUARDIAN_SABER_BLOCK_DURATION;
     public static ForgeConfigSpec.ConfigValue<Integer> GUARDIAN_SABER_BLOCK_COOLDOWN;
     public static ForgeConfigSpec.ConfigValue<Integer> GUARDIAN_SABER_SHIELD_DISABLE_TIME;
 
     // Guardian Archer | 弓箭守卫
-    public static ForgeConfigSpec.ConfigValue<Double> GUARDIAN_ARCHER_RANGED_MIN_DISTANCE;
-    public static ForgeConfigSpec.ConfigValue<Double> GUARDIAN_ARCHER_RANGED_MAX_DISTANCE;
-    public static ForgeConfigSpec.ConfigValue<Double> GUARDIAN_ARCHER_MAINTAIN_MIN_DISTANCE;
-    public static ForgeConfigSpec.ConfigValue<Double> GUARDIAN_ARCHER_MAINTAIN_MAX_DISTANCE;
     public static ForgeConfigSpec.ConfigValue<Double> GUARDIAN_ARCHER_TELEPORT_TRIGGER_DISTANCE;
     public static ForgeConfigSpec.ConfigValue<Double> GUARDIAN_ARCHER_TELEPORT_RANGE;
     public static ForgeConfigSpec.ConfigValue<Integer> GUARDIAN_ARCHER_TELEPORT_COOLDOWN;
@@ -200,7 +188,6 @@ public class TheLastSwordConfiguration {
     public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULTIST_DAMAGE_LIMIT;
     public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_CULTIST_HURT_RESIST_TIME;
     public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULTIST_MELEE_ATTACK_RANGE;
-    public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULTIST_MAGIC_MIN_DISTANCE;
     public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_CULTIST_MAGIC_COOLDOWN;
 
     // Dragon Cult Paladin | 拜龙教圣骑士
@@ -210,12 +197,10 @@ public class TheLastSwordConfiguration {
     public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PALADIN_ATTACK_RANGE;
     public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PALADIN_ATTACK_DAMAGE_MULTIPLIER;
     // Heavy Attack | 重击
-    public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PALADIN_HEAVY_ATTACK_RANGE;
     public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_CULT_PALADIN_HEAVY_ATTACK_COOLDOWN;
     public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PALADIN_HEAVY_ATTACK_DAMAGE_MULTIPLIER;
     public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_CULT_PALADIN_HEAVY_ATTACK_SHIELD_DISABLE_TIME;
     // Block | 格挡
-    public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PALADIN_BLOCK_RANGE;
     public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_CULT_PALADIN_BLOCK_COOLDOWN;
 
     // Dragon Cult Priest | 拜龙教祭司
@@ -225,7 +210,6 @@ public class TheLastSwordConfiguration {
     public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PRIEST_DEATH_EXPLOSION_POWER;
     public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PRIEST_HOVER_HEIGHT;
     // Breath | 龙息
-    public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PRIEST_BREATH_MAX_DISTANCE;
     public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_CULT_PRIEST_BREATH_COOLDOWN;
     public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PRIEST_BREATH_SIZE;
     public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PRIEST_BREATH_DAMAGE_MULTIPLIER;
@@ -239,8 +223,6 @@ public class TheLastSwordConfiguration {
     public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PRIEST_GUARD_SHIELD_GAIN;
     public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PRIEST_GUARD_LOW_HP_RATIO;
     // Keep Distance | 距离控制
-    public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PRIEST_KEEP_MIN_DISTANCE;
-    public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PRIEST_KEEP_MAX_DISTANCE;
     public static ForgeConfigSpec.ConfigValue<Double> DRAGON_CULT_PRIEST_RETREAT_SPEED;
 
     // Projectile | 弹射物配置
@@ -312,6 +294,8 @@ public class TheLastSwordConfiguration {
     // ═══════════════════════════════════════════════════════════════════════════════════
 
     // Absolute Destruction Damage | 绝对毁灭伤害配置
+    public static ForgeConfigSpec.ConfigValue<Double> ABSOLUTE_DESTRUCTION_WORLD_ANCHOR_DAMAGE_MULTIPLIER;
+    public static ForgeConfigSpec.ConfigValue<Boolean> ABSOLUTE_DESTRUCTION_DISPLAY_WORLD_ANCHOR_DAMAGE;
     public static ForgeConfigSpec.ConfigValue<Integer> ABSOLUTE_DESTRUCTION_HEAL_NEGATION_TIME;
     public static ForgeConfigSpec.ConfigValue<Integer> ABSOLUTE_DESTRUCTION_REVIVE_BAN_TIME;
     public static ForgeConfigSpec.ConfigValue<Boolean> ABSOLUTE_DESTRUCTION_DIE_MESSAGE;
@@ -322,7 +306,6 @@ public class TheLastSwordConfiguration {
     // Defence Configuration | 防御系统配置
     // ═══════════════════════════════════════════════════════════════════════════════════
 
-    public static ForgeConfigSpec.ConfigValue<Integer> JUSTIFIED_DEFENCE_RECOVERY_TICK;
     public static ForgeConfigSpec.ConfigValue<Double> DEFENCE_CUSTOM_HEALTH_DAMAGE_REDUCTION;
     public static ForgeConfigSpec.ConfigValue<Double> DEFENCE_MAX_DAMAGE_PER_HIT;
 
@@ -647,7 +630,13 @@ public class TheLastSwordConfiguration {
                 "Energy cost per piece per tick for Phasing effect (Phasing Module, full set)",
                 "虚化模块（穿戴全套）启动虚化时，每件装备每 tick 消耗的能量"
             )
-            .defineInRange("Phasing Cost Per Piece", 20, 0, Integer.MAX_VALUE);
+            .defineInRange("Phasing Cost Per Piece", 231, 0, Integer.MAX_VALUE);
+        DRAGON_ARMOR_JUSTIFIED_DEFENCE_RECOVERY_COST = BUILDER
+            .comment(
+                "Energy cost per piece per tick for +100% Justified Defence recovery speed (Recovery Module, full set)",
+                "肃正防御恢复模块（穿戴全套）提供 +100% 恢复速度时，每件装备每 tick 消耗的能量"
+            )
+            .defineInRange("Justified Defence Recovery Cost Per Piece", 20, 0, Integer.MAX_VALUE);
         DRAGON_ARMOR_ENDER_CRYSTAL_CHARGE_RATE = BUILDER
             .comment(
                 "Energy charge rate from End Crystals per tick (FE)",
@@ -986,15 +975,18 @@ public class TheLastSwordConfiguration {
         // ═══════════════════════════════════════════════════════════════════════════════
         BUILDER.push("Entity");
 
-        ENTITY_ENABLE_DANGEROUS_SKILL_ALARM = BUILDER
-            .comment(
-                "Enable alarm sounds for dangerous entity skills",
-                "启用实体高危险技能的警报声"
-            )
-            .define("Enable Dangerous Skill Alarm", true);
-
         // The Last End Entity Settings | 终焉实体设置
         BUILDER.push("The Last End Entity");
+        THE_LAST_END_ENTITY_ENABLE_DANGEROUS_SKILL_ALARM = BUILDER
+            .comment(
+                "Enable the warning sound played when a dangerous skill starts",
+                "启用危险技能启动时播放的警告音效"
+            )
+            .define("Enable Dangerous Skill Alarm", true);
+        THE_LAST_END_ENTITY_ENABLE_DANGEROUS_SKILL_RANGE_PREVIEW = BUILDER
+            .comment("Show dangerous skill range warnings on this client",
+                "在本客户端显示危险技能范围预警，与警告音效开关独立")
+            .define("Enable Dangerous Skill Range Preview", true);
         THE_LAST_END_ENTITY_ENABLE_ALL_THINGS_END = BUILDER
             .comment(
                 "Enable automatic All Things End state activation",
@@ -1185,12 +1177,6 @@ public class TheLastSwordConfiguration {
 
         // Dragon Fireball | 龙息弹
         BUILDER.push("Dragon Fireball");
-        LOST_WRAITH_DRAGON_FIREBALL_MIN_DISTANCE = BUILDER
-            .comment(
-                "Minimum distance to target before this skill can be used in blocks",
-                "释放此技能所需与目标的最小距离（格）"
-            )
-            .defineInRange("Min Distance", 4.0, 0.0, 32.0);
         LOST_WRAITH_DRAGON_FIREBALL_COOLDOWN = BUILDER
             .comment(
                 "Cooldown between uses in ticks (20 ticks = 1 second)",
@@ -1201,12 +1187,6 @@ public class TheLastSwordConfiguration {
 
         // Summon Lightning | 召唤闪电
         BUILDER.push("Summon Lightning");
-        LOST_WRAITH_LIGHTNING_MIN_DISTANCE = BUILDER
-            .comment(
-                "Minimum distance to target before this skill can be used in blocks",
-                "释放此技能所需与目标的最小距离（格）"
-            )
-            .defineInRange("Min Distance", 4.0, 0.0, 32.0);
         LOST_WRAITH_LIGHTNING_COOLDOWN = BUILDER
             .comment(
                 "Cooldown between uses in ticks (20 ticks = 1 second)",
@@ -1229,24 +1209,6 @@ public class TheLastSwordConfiguration {
 
         // Punch | 拳击
         BUILDER.push("Punch");
-        LOST_WRAITH_PUNCH_ATTACK_DISTANCE = BUILDER
-            .comment(
-                "Dynamic trigger range for the punch skill: while the punch teleport is on cooldown the skill triggers within this distance (same as before), once the teleport is ready the skill triggers beyond this distance and teleports to the target (same as the ranged skills)",
-                "拳击动态启动距离：传送冷却中在此距离内触发（与以往一致），传送就绪时在此距离外触发并突进传送（与远程技能一致）"
-            )
-            .defineInRange("Attack Distance", 4.0, 0.0, 32.0);
-        LOST_WRAITH_PUNCH_FORWARD_STEPS = BUILDER
-            .comment(
-                "Number of forward blocks checked for knockback",
-                "向前检测击退的格数"
-            )
-            .defineInRange("Forward Steps", 5, 1, 32);
-        LOST_WRAITH_PUNCH_SIDE_HALF_WIDTH = BUILDER
-            .comment(
-                "Half width of knockback cone (1 means 3-wide cone)",
-                "击退锥形的一半宽度（1 表示宽度为 3 的锥形）"
-            )
-            .defineInRange("Side Half Width", 1, 0, 32);
         LOST_WRAITH_PUNCH_TELEPORT_COOLDOWN = BUILDER
             .comment(
                 "Cooldown between punch teleports in ticks (20 ticks = 1 second)",
@@ -1263,12 +1225,6 @@ public class TheLastSwordConfiguration {
                 "技能正常的冷却时间（tick；600 tick = 30 秒）"
             )
             .defineInRange("Cooldown", 600, 0, Integer.MAX_VALUE);
-        LOST_WRAITH_END_STRIKE_PULL_RADIUS = BUILDER
-            .comment(
-                "Radius within which entities are pulled in blocks",
-                "拉拽实体的范围半径（格）"
-            )
-            .defineInRange("Pull Radius", 2.0, 0.0, 32.0);
         LOST_WRAITH_END_STRIKE_DAMAGE_MULTIPLIER = BUILDER
             .comment(
                 "Damage as a percentage of caster's lost health (0.1 = 10% lost health)",
@@ -1315,16 +1271,6 @@ public class TheLastSwordConfiguration {
             .defineInRange("Attack Range", 3.0, 0.0, 32.0);
         BUILDER.pop();
 
-        // Chase Target | 追击
-        BUILDER.push("Chase Target");
-        GUARDIAN_CHASE_APPROACH_DISTANCE = BUILDER
-            .comment(
-                "Start chasing when target is beyond this distance in blocks",
-                "目标距离超过此值（格）时开始追击"
-            )
-            .defineInRange("Approach Distance", 2.5, 0.0, 32.0);
-        BUILDER.pop();
-
         // Pickup Weapon | 拾取武器
         BUILDER.push("Pickup Weapon");
         GUARDIAN_PICKUP_DISTANCE = BUILDER
@@ -1357,12 +1303,6 @@ public class TheLastSwordConfiguration {
         BUILDER.push("Guardian Saber");
         BUILDER.push("Skills");
         BUILDER.push("Block");
-        GUARDIAN_SABER_BLOCK_RANGE = BUILDER
-            .comment(
-                "Maximum distance to target to attempt blocking in blocks",
-                "尝试格挡所需与目标的最大距离（格）"
-            )
-            .defineInRange("Trigger Range", 3.0, 0.0, 32.0);
         GUARDIAN_SABER_BLOCK_DURATION = BUILDER
             .comment(
                 "How long the saber guardian keeps its shield raised in ticks (20 ticks = 1 second)",
@@ -1390,38 +1330,6 @@ public class TheLastSwordConfiguration {
 
         // Skills Configuration | 技能配置
         BUILDER.push("Skills");
-
-        // Ranged Attack | 远程攻击
-        BUILDER.push("Ranged Attack");
-        GUARDIAN_ARCHER_RANGED_MIN_DISTANCE = BUILDER
-            .comment(
-                "Minimum distance to target to use ranged attack in blocks",
-                "使用远程攻击所需与目标的最小距离（格）"
-            )
-            .defineInRange("Min Distance", 4.0, 0.0, 64.0);
-        GUARDIAN_ARCHER_RANGED_MAX_DISTANCE = BUILDER
-            .comment(
-                "Maximum distance to target to use ranged attack in blocks",
-                "使用远程攻击所需与目标的最大距离（格）"
-            )
-            .defineInRange("Max Distance", 16.0, 0.0, 64.0);
-        BUILDER.pop();
-
-        // Maintain Distance | 保持距离
-        BUILDER.push("Maintain Distance");
-        GUARDIAN_ARCHER_MAINTAIN_MIN_DISTANCE = BUILDER
-            .comment(
-                "Retreat when target is closer than this distance in blocks",
-                "目标距离小于此值（格）时撤退"
-            )
-            .defineInRange("Min Distance", 4.0, 0.0, 64.0);
-        GUARDIAN_ARCHER_MAINTAIN_MAX_DISTANCE = BUILDER
-            .comment(
-                "Approach when target is beyond this distance in blocks",
-                "目标距离超过此值（格）时靠近"
-            )
-            .defineInRange("Max Distance", 16.0, 0.0, 64.0);
-        BUILDER.pop();
 
         // Teleport | 瞬移
         BUILDER.push("Teleport");
@@ -1497,12 +1405,6 @@ public class TheLastSwordConfiguration {
         BUILDER.pop();
 
         BUILDER.push("Magic");
-        DRAGON_CULTIST_MAGIC_MIN_DISTANCE = BUILDER
-            .comment(
-                "Minimum distance to target to cast fireball in blocks",
-                "施放火球所需与目标的最小距离（格）"
-            )
-            .defineInRange("Min Distance", 8.0, 0.0, 64.0);
         DRAGON_CULTIST_MAGIC_COOLDOWN = BUILDER
             .comment(
                 "Cooldown between casts in ticks (20 ticks = 1 second)",
@@ -1547,12 +1449,6 @@ public class TheLastSwordConfiguration {
         BUILDER.pop();
 
         BUILDER.push("Heavy Attack");
-        DRAGON_CULT_PALADIN_HEAVY_ATTACK_RANGE = BUILDER
-            .comment(
-                "Heavy attack range in blocks",
-                "重击范围（格）"
-            )
-            .defineInRange("Attack Range", 4.0, 0.0, 32.0);
         DRAGON_CULT_PALADIN_HEAVY_ATTACK_COOLDOWN = BUILDER
             .comment(
                 "Cooldown between heavy attacks in ticks (20 ticks = 1 second)",
@@ -1574,12 +1470,6 @@ public class TheLastSwordConfiguration {
         BUILDER.pop();
 
         BUILDER.push("Block");
-        DRAGON_CULT_PALADIN_BLOCK_RANGE = BUILDER
-            .comment(
-                "Maximum distance to target to start blocking in blocks",
-                "触发格挡所需与目标的最大距离（格）"
-            )
-            .defineInRange("Trigger Range", 4.0, 0.0, 32.0);
         DRAGON_CULT_PALADIN_BLOCK_COOLDOWN = BUILDER
             .comment(
                 "Cooldown between blocks in ticks (20 ticks = 1 second)",
@@ -1627,12 +1517,6 @@ public class TheLastSwordConfiguration {
         BUILDER.push("Skills");
 
         BUILDER.push("Breath");
-        DRAGON_CULT_PRIEST_BREATH_MAX_DISTANCE = BUILDER
-            .comment(
-                "Maximum distance to target to use breath in blocks",
-                "使用龙息所需与目标的最大距离（格）"
-            )
-            .defineInRange("Max Distance", 3.0, 0.0, 64.0);
         DRAGON_CULT_PRIEST_BREATH_COOLDOWN = BUILDER
             .comment(
                 "Cooldown between breaths in ticks (20 ticks = 1 second)",
@@ -1702,18 +1586,6 @@ public class TheLastSwordConfiguration {
         BUILDER.pop();
 
         BUILDER.push("Keep Distance");
-        DRAGON_CULT_PRIEST_KEEP_MIN_DISTANCE = BUILDER
-            .comment(
-                "Retreat when target is closer than this distance in blocks",
-                "目标距离小于此值（格）时后撤"
-            )
-            .defineInRange("Min Distance", 3.0, 0.0, 64.0);
-        DRAGON_CULT_PRIEST_KEEP_MAX_DISTANCE = BUILDER
-            .comment(
-                "Approach when target is beyond this distance in blocks",
-                "目标距离超过此值（格）时靠近"
-            )
-            .defineInRange("Max Distance", 8.0, 0.0, 64.0);
         DRAGON_CULT_PRIEST_RETREAT_SPEED = BUILDER
             .comment(
                 "Retreat movement per tick in blocks while facing the target",
@@ -1836,6 +1708,18 @@ public class TheLastSwordConfiguration {
 
         // Absolute Destruction Damage Settings | 绝毁伤害设置
         BUILDER.push("Absolute Destruction Damage");
+        ABSOLUTE_DESTRUCTION_WORLD_ANCHOR_DAMAGE_MULTIPLIER = BUILDER
+            .comment(
+                "World anchor damage multiplier applied to the incoming absolute destruction damage amount",
+                "绝毁伤害数值转换为世界锚度损伤时使用的倍率"
+            )
+            .defineInRange("World Anchor Damage Multiplier", 0.10, 0.0, Double.MAX_VALUE);
+        ABSOLUTE_DESTRUCTION_DISPLAY_WORLD_ANCHOR_DAMAGE = BUILDER
+            .comment(
+                "Display lost world anchor as purple hearts on the player health HUD",
+                "在玩家生命值界面上以紫色心形显示已损失的世界锚度"
+            )
+            .define("Display World Anchor Damage", true);
         ABSOLUTE_DESTRUCTION_HEAL_NEGATION_TIME = BUILDER
             .comment(
                 "Time (in seconds) to prevent healing. Set to 0 to disable heal negation",
@@ -1874,13 +1758,6 @@ public class TheLastSwordConfiguration {
         // Defence Configuration | 防御系统配置
         // ═══════════════════════════════════════════════════════════════════════════════
         BUILDER.push("Defence");
-
-        JUSTIFIED_DEFENCE_RECOVERY_TICK = BUILDER
-            .comment(
-                "Recovery interval for Justified Defence Shield in ticks (100 ticks = 5 seconds)",
-                "肃正防御护盾的恢复间隔（tick；100 tick = 5 秒）"
-            )
-            .defineInRange("Justified Defence Recovery Tick", 100, 1, Integer.MAX_VALUE);
 
         DEFENCE_CUSTOM_HEALTH_DAMAGE_REDUCTION = BUILDER
             .comment(
@@ -2264,7 +2141,11 @@ public class TheLastSwordConfiguration {
     }
 
     public static int getDragonArmorPhasingCostSafely() {
-        return safeGet(DRAGON_ARMOR_PHASING_COST, 20);
+        return safeGet(DRAGON_ARMOR_PHASING_COST, 231);
+    }
+
+    public static int getDragonArmorJustifiedDefenceRecoveryCostSafely() {
+        return safeGet(DRAGON_ARMOR_JUSTIFIED_DEFENCE_RECOVERY_COST, 20);
     }
 
     public static int getDragonArmorEnderCrystalChargeRateSafely() {
@@ -2303,10 +2184,6 @@ public class TheLastSwordConfiguration {
     }
 
     //防御系统配置
-    public static int getJustifiedDefenceRecoveryTickSafely() {
-        return safeGet(JUSTIFIED_DEFENCE_RECOVERY_TICK, 100);
-    }
-
     public static double getDefenceCustomHealthDamageReductionSafely() {
         return safeGet(DEFENCE_CUSTOM_HEALTH_DAMAGE_REDUCTION, 0.05);
     }
@@ -2353,6 +2230,14 @@ public class TheLastSwordConfiguration {
     }
 
     //绝对毁灭伤害配置
+    public static double getAbsoluteDestructionWorldAnchorDamageMultiplierSafely() {
+        return safeGet(ABSOLUTE_DESTRUCTION_WORLD_ANCHOR_DAMAGE_MULTIPLIER, 0.10);
+    }
+
+    public static boolean getDisplayWorldAnchorDamageSafely() {
+        return safeGet(ABSOLUTE_DESTRUCTION_DISPLAY_WORLD_ANCHOR_DAMAGE, true);
+    }
+
     public static int getHealNegationTimeSafely() {
         return safeGet(ABSOLUTE_DESTRUCTION_HEAL_NEGATION_TIME, 30);
     }
@@ -2388,7 +2273,11 @@ public class TheLastSwordConfiguration {
 
     //迷失战魂配置
     public static boolean getEntityDangerousSkillAlarmEnabledSafely() {
-        return safeGet(ENTITY_ENABLE_DANGEROUS_SKILL_ALARM, true);
+        return safeGet(THE_LAST_END_ENTITY_ENABLE_DANGEROUS_SKILL_ALARM, true);
+    }
+
+    public static boolean getEntityDangerousSkillRangePreviewEnabledSafely() {
+        return safeGet(THE_LAST_END_ENTITY_ENABLE_DANGEROUS_SKILL_RANGE_PREVIEW, true);
     }
 
     public static boolean getLostWraithEnableCustomBossBarSafely() {
@@ -2414,19 +2303,11 @@ public class TheLastSwordConfiguration {
     }
 
     //龙息弹
-    public static double getLostWraithDragonFireballMinDistanceSafely() {
-        return safeGet(LOST_WRAITH_DRAGON_FIREBALL_MIN_DISTANCE, 4.0);
-    }
-
     public static int getLostWraithDragonFireballCooldownSafely() {
         return safeGet(LOST_WRAITH_DRAGON_FIREBALL_COOLDOWN, 100);
     }
 
     //召唤闪电
-    public static double getLostWraithLightningMinDistanceSafely() {
-        return safeGet(LOST_WRAITH_LIGHTNING_MIN_DISTANCE, 4.0);
-    }
-
     public static int getLostWraithLightningCooldownSafely() {
         return safeGet(LOST_WRAITH_LIGHTNING_COOLDOWN, 80);
     }
@@ -2440,18 +2321,6 @@ public class TheLastSwordConfiguration {
     }
 
     //拳击
-    public static double getLostWraithPunchAttackDistanceSafely() {
-        return safeGet(LOST_WRAITH_PUNCH_ATTACK_DISTANCE, 4.0);
-    }
-
-    public static int getLostWraithPunchForwardStepsSafely() {
-        return safeGet(LOST_WRAITH_PUNCH_FORWARD_STEPS, 5);
-    }
-
-    public static int getLostWraithPunchSideHalfWidthSafely() {
-        return safeGet(LOST_WRAITH_PUNCH_SIDE_HALF_WIDTH, 1);
-    }
-
     public static int getLostWraithPunchTeleportCooldownSafely() {
         return safeGet(LOST_WRAITH_PUNCH_TELEPORT_COOLDOWN, 240);
     }
@@ -2459,10 +2328,6 @@ public class TheLastSwordConfiguration {
     //终焉一击
     public static int getLostWraithEndStrikeCooldownSafely() {
         return safeGet(LOST_WRAITH_END_STRIKE_COOLDOWN, 600);
-    }
-
-    public static double getLostWraithEndStrikePullRadiusSafely() {
-        return safeGet(LOST_WRAITH_END_STRIKE_PULL_RADIUS, 2.0);
     }
 
     public static double getLostWraithEndStrikeDamageMultiplierSafely() {
@@ -2487,10 +2352,6 @@ public class TheLastSwordConfiguration {
         return safeGet(GUARDIAN_MELEE_ATTACK_RANGE, 3.0);
     }
 
-    public static double getGuardianChaseApproachDistanceSafely() {
-        return safeGet(GUARDIAN_CHASE_APPROACH_DISTANCE, 2.5);
-    }
-
     public static double getGuardianPickupDistanceSafely() {
         return safeGet(GUARDIAN_PICKUP_DISTANCE, 8.0);
     }
@@ -2504,10 +2365,6 @@ public class TheLastSwordConfiguration {
     }
 
     //剑士守卫配置
-    public static double getGuardianSaberBlockRangeSafely() {
-        return safeGet(GUARDIAN_SABER_BLOCK_RANGE, 3.0);
-    }
-
     public static int getGuardianSaberBlockDurationSafely() {
         return safeGet(GUARDIAN_SABER_BLOCK_DURATION, 40);
     }
@@ -2521,22 +2378,6 @@ public class TheLastSwordConfiguration {
     }
 
     //弓箭守卫配置
-    public static double getGuardianArcherRangedMinDistanceSafely() {
-        return safeGet(GUARDIAN_ARCHER_RANGED_MIN_DISTANCE, 4.0);
-    }
-
-    public static double getGuardianArcherRangedMaxDistanceSafely() {
-        return safeGet(GUARDIAN_ARCHER_RANGED_MAX_DISTANCE, 16.0);
-    }
-
-    public static double getGuardianArcherMaintainMinDistanceSafely() {
-        return safeGet(GUARDIAN_ARCHER_MAINTAIN_MIN_DISTANCE, 4.0);
-    }
-
-    public static double getGuardianArcherMaintainMaxDistanceSafely() {
-        return safeGet(GUARDIAN_ARCHER_MAINTAIN_MAX_DISTANCE, 16.0);
-    }
-
     public static double getGuardianArcherTeleportTriggerDistanceSafely() {
         return safeGet(GUARDIAN_ARCHER_TELEPORT_TRIGGER_DISTANCE, 3.0);
     }
@@ -2571,10 +2412,6 @@ public class TheLastSwordConfiguration {
         return safeGet(DRAGON_CULTIST_MELEE_ATTACK_RANGE, 2.0);
     }
 
-    public static double getDragonCultistMagicMinDistanceSafely() {
-        return safeGet(DRAGON_CULTIST_MAGIC_MIN_DISTANCE, 8.0);
-    }
-
     public static int getDragonCultistMagicCooldownSafely() {
         return safeGet(DRAGON_CULTIST_MAGIC_COOLDOWN, 240);
     }
@@ -2596,10 +2433,6 @@ public class TheLastSwordConfiguration {
         return safeGet(DRAGON_CULT_PALADIN_ATTACK_DAMAGE_MULTIPLIER, 1.0);
     }
 
-    public static double getDragonCultPaladinHeavyAttackRangeSafely() {
-        return safeGet(DRAGON_CULT_PALADIN_HEAVY_ATTACK_RANGE, 4.0);
-    }
-
     public static int getDragonCultPaladinHeavyAttackCooldownSafely() {
         return safeGet(DRAGON_CULT_PALADIN_HEAVY_ATTACK_COOLDOWN, 180);
     }
@@ -2610,10 +2443,6 @@ public class TheLastSwordConfiguration {
 
     public static int getDragonCultPaladinHeavyAttackShieldDisableTimeSafely() {
         return safeGet(DRAGON_CULT_PALADIN_HEAVY_ATTACK_SHIELD_DISABLE_TIME, 60);
-    }
-
-    public static double getDragonCultPaladinBlockRangeSafely() {
-        return safeGet(DRAGON_CULT_PALADIN_BLOCK_RANGE, 4.0);
     }
 
     public static int getDragonCultPaladinBlockCooldownSafely() {
@@ -2639,10 +2468,6 @@ public class TheLastSwordConfiguration {
 
     public static double getDragonCultPriestHoverHeightSafely() {
         return safeGet(DRAGON_CULT_PRIEST_HOVER_HEIGHT, 1.0);
-    }
-
-    public static double getDragonCultPriestBreathMaxDistanceSafely() {
-        return safeGet(DRAGON_CULT_PRIEST_BREATH_MAX_DISTANCE, 3.0);
     }
 
     public static int getDragonCultPriestBreathCooldownSafely() {
@@ -2683,14 +2508,6 @@ public class TheLastSwordConfiguration {
 
     public static double getDragonCultPriestGuardLowHpRatioSafely() {
         return safeGet(DRAGON_CULT_PRIEST_GUARD_LOW_HP_RATIO, 0.6);
-    }
-
-    public static double getDragonCultPriestKeepMinDistanceSafely() {
-        return safeGet(DRAGON_CULT_PRIEST_KEEP_MIN_DISTANCE, 3.0);
-    }
-
-    public static double getDragonCultPriestKeepMaxDistanceSafely() {
-        return safeGet(DRAGON_CULT_PRIEST_KEEP_MAX_DISTANCE, 8.0);
     }
 
     public static double getDragonCultPriestRetreatSpeedSafely() {

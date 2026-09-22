@@ -11,6 +11,8 @@ import java.util.EnumSet;
 
 // 祭司距离控制Goal，维持在目标 3~8 格，过近则面向目标倒退后撤
 public class DragonCultPriestKeepDistanceGoal extends Goal {
+    private static final double MIN_DISTANCE = 3.0D;
+    private static final double MAX_DISTANCE = 8.0D;
 
     //靠近时的每tick位移，比后撤快才能拉近距离
     private static final double APPROACH_SPEED = 0.16;
@@ -45,9 +47,9 @@ public class DragonCultPriestKeepDistanceGoal extends Goal {
         priest.getLookControl().setLookAt(target, 30.0F, 30.0F);
 
         double distance = priest.distanceTo(target);
-        if (distance < TheLastSwordConfiguration.getDragonCultPriestKeepMinDistanceSafely()) {
+        if (distance < MIN_DISTANCE) {
             retreatFrom(target);
-        } else if (distance > TheLastSwordConfiguration.getDragonCultPriestKeepMaxDistanceSafely()) {
+        } else if (distance > MAX_DISTANCE) {
             approachTarget(target);
         } else {
             priest.getNavigation().stop();
@@ -77,8 +79,7 @@ public class DragonCultPriestKeepDistanceGoal extends Goal {
             return false;
         }
         double distance = priest.distanceTo(target);
-        return distance < TheLastSwordConfiguration.getDragonCultPriestKeepMinDistanceSafely()
-            || distance > TheLastSwordConfiguration.getDragonCultPriestKeepMaxDistanceSafely();
+        return distance < MIN_DISTANCE || distance > MAX_DISTANCE;
     }
 
     //面朝目标倒退：直接给位移而非寻路，避免转身把后背露给对手

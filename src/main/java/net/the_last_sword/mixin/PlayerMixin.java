@@ -1,6 +1,7 @@
 package net.the_last_sword.mixin;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -9,6 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.init.ModAttributes;
 import net.the_last_sword.util.EntityUtil;
+import net.the_last_sword.util.health.WorldAnchorManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -51,11 +53,9 @@ public class PlayerMixin {
     private void tls$saveWorldAnchor(CompoundTag tag, CallbackInfo ci) {
         Player player = (Player) (Object) this;
         CompoundTag pd = player.getPersistentData();
-        if (pd.contains("tlsWorldAnchor")) {
-            tag.putString("tlsWorldAnchor", pd.getString("tlsWorldAnchor"));
-        }
-        if (pd.contains("tlsWorldAnchorMax")) {
-            tag.putString("tlsWorldAnchorMax", pd.getString("tlsWorldAnchorMax"));
+        if (pd.contains(WorldAnchorManager.NBT_ABSOLUTE_DESTRUCTION_WORLD_ANCHOR, Tag.TAG_ANY_NUMERIC)) {
+            tag.putFloat(WorldAnchorManager.NBT_ABSOLUTE_DESTRUCTION_WORLD_ANCHOR,
+                    pd.getFloat(WorldAnchorManager.NBT_ABSOLUTE_DESTRUCTION_WORLD_ANCHOR));
         }
         if (pd.contains("tlsIsProtected")) {
             tag.putBoolean("tlsIsProtected", pd.getBoolean("tlsIsProtected"));
@@ -76,12 +76,11 @@ public class PlayerMixin {
     private void tls$loadWorldAnchor(CompoundTag tag, CallbackInfo ci) {
         Player player = (Player) (Object) this;
         CompoundTag pd = player.getPersistentData();
-        if (tag.contains("tlsWorldAnchor")) {
-            pd.putString("tlsWorldAnchor", tag.getString("tlsWorldAnchor"));
+        if (tag.contains(WorldAnchorManager.NBT_ABSOLUTE_DESTRUCTION_WORLD_ANCHOR, Tag.TAG_ANY_NUMERIC)) {
+            pd.putFloat(WorldAnchorManager.NBT_ABSOLUTE_DESTRUCTION_WORLD_ANCHOR,
+                    tag.getFloat(WorldAnchorManager.NBT_ABSOLUTE_DESTRUCTION_WORLD_ANCHOR));
         }
-        if (tag.contains("tlsWorldAnchorMax")) {
-            pd.putString("tlsWorldAnchorMax", tag.getString("tlsWorldAnchorMax"));
-        }
+        WorldAnchorManager.syncWorldAnchor(player);
         if (tag.contains("tlsIsProtected")) {
             pd.putBoolean("tlsIsProtected", tag.getBoolean("tlsIsProtected"));
         }

@@ -1,5 +1,6 @@
 package net.the_last_sword.item;
 
+import net.eca.api.EcaAPI;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.registries.Registries;
@@ -28,6 +29,7 @@ import net.the_last_sword.entity.TheLastEndSwordProjectile;
 import net.the_last_sword.init.ModKeyMappings;
 import net.the_last_sword.summon.WraithSummonManager;
 import net.the_last_sword.util.EntityUtil;
+import net.the_last_sword.util.health.TrueHealthManager;
 import net.the_last_sword.util.nbt.ItemLevelHelper;
 import net.the_last_sword.util.nbt.ItemModeHelper;
 import net.the_last_sword.event.ServerEventHandler;
@@ -107,9 +109,9 @@ public class TheLastSword extends TheLastEndSwordItems implements ISummonableIte
             float extraDamage = baseDamage + percentageDamage;
             if (extraDamage > 0) {
                 target.invulnerableTime = 0;
-                if (mode == 0) {
+                if (mode == 0 && EntityUtil.canAttack(attacker, target)) {
                     //模式0：物理伤害 + 绝毁伤害
-                    AbsoluteDestructionDamageSource.applyAbsoluteDestruction(target, attacker, stack, extraDamage);
+                    EcaAPI.hurt(target, AbsoluteDestructionDamageSource.absoluteDestruction(attacker, stack), extraDamage);
                 } else if (mode == 1 || mode == 2) {
                     //模式1和2：物理伤害 + 虚空伤害
                     DamageSource voidDamageSource = new DamageSource(
@@ -213,8 +215,8 @@ public class TheLastSword extends TheLastEndSwordItems implements ISummonableIte
                 target.hurt(player.damageSources().playerAttack(player), basePhysicalDamage);
 
                 //再造成绝毁伤害
-                if (extraDamage > 0) {
-                    AbsoluteDestructionDamageSource.applyAbsoluteDestruction(target, player, stack, extraDamage);
+                if (extraDamage > 0 && EntityUtil.canAttack(player, target)) {
+                    EcaAPI.hurt(target, AbsoluteDestructionDamageSource.absoluteDestruction(player, stack), extraDamage);
                 }
             }
         }
@@ -402,11 +404,11 @@ public class TheLastSword extends TheLastEndSwordItems implements ISummonableIte
 
             //防御逻辑
             if (hasSword) {
-                EntityUtil.registerDefence(player, player.getMaxHealth());
+                TrueHealthManager.register(player, player.getMaxHealth());
                 player.getPersistentData().putBoolean("TheLastSwordDefence", true);
             } else {
                 if (player.getPersistentData().getBoolean("TheLastSwordDefence")) {
-                    EntityUtil.clearDefence(player);
+                    TrueHealthManager.clear(player);
                     player.getPersistentData().remove("TheLastSwordDefence");
                 }
             }

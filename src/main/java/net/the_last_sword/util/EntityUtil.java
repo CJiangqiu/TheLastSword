@@ -34,6 +34,8 @@ import net.the_last_sword.item.DragonArmorItem;
 import net.the_last_sword.item.TheLastSword;
 import net.the_last_sword.item.TheLastSwordYouNeverForgot;
 import net.the_last_sword.summon.WraithSummonManager;
+import net.the_last_sword.util.health.TrueHealthManager;
+import net.the_last_sword.util.health.WorldAnchorManager;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,9 +44,6 @@ import java.util.Map;
 
 public class EntityUtil {
 
-    private static final String NBT_WORLD_ANCHOR = "tlsWorldAnchor";
-    private static final String NBT_WORLD_ANCHOR_MAX = "tlsWorldAnchorMax";
-    private static final String NBT_HEAL_BAN_TIME = "tlsHealBanTime";
     private static final String NBT_IS_PROTECTED = "tlsIsProtected";
 
     //临时护盾标记：不设上限、不参与回复，打光即失效
@@ -52,113 +51,8 @@ public class EntityUtil {
 
     // ==================== TLS 实体数据定义（由 LivingEntityMixin 的 <clinit> 注入初始化） ====================
 
-    //禁疗时间（tick）
-    public static EntityDataAccessor<Integer> HEAL_BAN_TIME;
-
     //防御保护状态
     public static EntityDataAccessor<Boolean> IS_PROTECTED;
-
-    // ==================== 实体数据 API ====================
-
-    //获取真实血量
-    public static float getWorldAnchor(LivingEntity entity) {
-        if (entity == null) return 0.0f;
-        Float lockedHealth = EcaAPI.getLockedHealth(entity);
-        return lockedHealth != null ? lockedHealth : EcaAPI.getRealHealth(entity);
-    }
-
-    //设置真实血量
-    public static void setWorldAnchor(LivingEntity entity, float anchor) {
-        if (entity == null) return;
-        entity.getPersistentData().remove(NBT_WORLD_ANCHOR);
-        if (Float.isFinite(anchor) && anchor > 0.0f) {
-            EcaAPI.lockHealth(entity, anchor);
-        } else {
-            EcaAPI.unlockHealth(entity);
-            if (Float.isFinite(anchor)) {
-                EcaAPI.setHealth(entity, 0.0f);
-            }
-        }
-    }
-
-    //获取最大真实血量上限
-    public static float getWorldAnchorMax(LivingEntity entity) {
-        if (entity == null) return 0.0f;
-        Float lockedMaxHealth = EcaAPI.getLockedMaxHealth(entity);
-        return lockedMaxHealth != null ? lockedMaxHealth : entity.getMaxHealth();
-    }
-
-    //设置最大真实血量上限
-    public static void setWorldAnchorMax(LivingEntity entity, float maxAnchor) {
-        if (entity == null) return;
-        entity.getPersistentData().remove(NBT_WORLD_ANCHOR_MAX);
-        if (Float.isFinite(maxAnchor) && maxAnchor > 0.0f) {
-            EcaAPI.lockMaxHealth(entity, maxAnchor);
-        } else {
-            EcaAPI.unlockMaxHealth(entity);
-        }
-    }
-
-    //获取禁疗时间（tick）
-    public static int getHealBanTime(LivingEntity entity) {
-        if (entity == null) return 0;
-        if (HEAL_BAN_TIME != null) {
-            try {
-                return entity.getEntityData().get(HEAL_BAN_TIME);
-            } catch (Exception ignored) {
-            }
-        }
-        return entity.getPersistentData().getInt(NBT_HEAL_BAN_TIME);
-    }
-
-    //设置禁疗时间（tick）
-    public static void setHealBanTime(LivingEntity entity, int ticks) {
-        if (entity == null) return;
-        int safeTicks = Math.max(0, ticks);
-        if (HEAL_BAN_TIME != null) {
-            try {
-                entity.getEntityData().set(HEAL_BAN_TIME, safeTicks);
-                return;
-            } catch (Exception ignored) {
-            }
-        }
-        entity.getPersistentData().putInt(NBT_HEAL_BAN_TIME, safeTicks);
-    }
-
-    //检查是否处于禁疗状态
-    public static boolean isHealBanned(LivingEntity entity) {
-        return getHealBanTime(entity) > 0;
-    }
-
-    //减少禁疗时间（每 tick 调用）
-    public static void tickHealBanTime(LivingEntity entity) {
-        if (entity == null) return;
-        if (entity.tickCount % 20 != 0) {
-            return;
-        }
-        int current = getHealBanTime(entity);
-        if (current > 0) {
-            int newTime = current - 1;
-            setHealBanTime(entity, newTime);
-            //禁疗结束时，解除 ECA 禁疗
-            if (newTime == 0) {
-                EcaAPI.unbanHealing(entity);
-            }
-        }
-    }
-
-    //清除禁疗状态
-    public static void clearHealBan(LivingEntity entity) {
-        setHealBanTime(entity, 0);
-        EcaAPI.unbanHealing(entity);
-    }
-
-    //清除真实血量
-    public static void clearWorldAnchor(LivingEntity entity) {
-        if (entity == null) return;
-        setWorldAnchor(entity, 0.0f);
-        setWorldAnchorMax(entity, 0.0f);
-    }
 
     // ==================== 防御保护 API ====================
 
@@ -211,40 +105,6 @@ public class EntityUtil {
         entity.getPersistentData().putBoolean(NBT_IS_PROTECTED, value);
     }
 
-    //注册防御（如果没有保护才设置）
-    public static void registerDefence(LivingEntity entity, float maxHealth) {
-        if (entity == null) return;
-
-        //已有保护，不重复注册
-        if (hasProtection(entity)) {
-            return;
-        }
-
-        Float savedMaxHealth = EcaAPI.getLockedMaxHealth(entity);
-        Float savedHealth = EcaAPI.getLockedHealth(entity);
-        float lockedMaxHealth = savedMaxHealth != null ? savedMaxHealth : maxHealth;
-        float lockedHealth = savedHealth != null ? savedHealth : lockedMaxHealth;
-
-        setWorldAnchorMax(entity, lockedMaxHealth);
-        setWorldAnchor(entity, Math.min(lockedHealth, lockedMaxHealth));
-        setProtection(entity, true);
-    }
-
-    //清除防御数据
-    public static void clearDefence(LivingEntity entity) {
-        if (entity == null) return;
-
-        float currentHealth = getWorldAnchor(entity);
-        setProtection(entity, false);
-        entity.getPersistentData().remove(NBT_WORLD_ANCHOR);
-        entity.getPersistentData().remove(NBT_WORLD_ANCHOR_MAX);
-        EcaAPI.unlockHealth(entity);
-        EcaAPI.unlockMaxHealth(entity);
-        if (Float.isFinite(currentHealth) && currentHealth > 0.0f) {
-            EcaAPI.setHealth(entity, currentHealth);
-        }
-    }
-
     //强化免疫：清除火焰、冰冻和非增益效果（不清除生命吸收）
     public static void applyImmunity(LivingEntity entity) {
         if (entity == null) return;
@@ -274,25 +134,6 @@ public class EntityUtil {
 
     // ==================== 生命值模块 ====================
 
-    //获取实体真实生命值
-    public static float TheLastEndGetHealth(LivingEntity entity) {
-        return getWorldAnchor(entity);
-    }
-
-    public static boolean theLastEndSetHealth(LivingEntity entity, float expectedHealth) {
-        if (entity == null) return false;
-
-        try {
-            if (!Float.isFinite(expectedHealth)) return false;
-            float normalizedHealth = Math.max(0.0f, expectedHealth);
-            setWorldAnchor(entity, normalizedHealth);
-            return EcaAPI.setHealth(entity, normalizedHealth);
-
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
     // ==================== 死亡模块 ====================
 
     //设置实体死亡状态
@@ -317,7 +158,7 @@ public class EntityUtil {
             sendDeathMessage(entity, damageSource);
         }
         //清除防御系统，防止 die/tickDeath 被保护拦截
-        clearDefence(entity);
+        TrueHealthManager.clear(entity);
         var shieldAttr = entity.getAttribute(ModAttributes.JUSTIFIED_DEFENCE.get());
         if (shieldAttr != null) {
             shieldAttr.setBaseValue(0.0);
@@ -329,6 +170,10 @@ public class EntityUtil {
         entity.getPersistentData().remove(NBT_TEMP_JUSTIFIED_DEFENCE);
 
         EcaAPI.kill(entity, damageSource);
+        // 强制斩杀可能绕过常规死亡回调，确认死亡后补齐玩家损伤清理。
+        if (!entity.level().isClientSide && entity instanceof Player && entity.dead) {
+            WorldAnchorManager.resetWorldAnchor(entity);
+        }
     }
 
     public static void theLastEndRevive(LivingEntity entity) {
@@ -402,7 +247,38 @@ public class EntityUtil {
     // ==================== 传送模块 ====================
 
     public static boolean theLastEndTeleport(Entity entity, double x, double y, double z) {
+        return theLastEndTeleport(entity, x, y, z, false);
+    }
+
+    public static boolean theLastEndTeleport(
+            Entity entity, double x, double y, double z, boolean useVanillaMovement) {
+        if (entity == null
+                || !Double.isFinite(x)
+                || !Double.isFinite(y)
+                || !Double.isFinite(z)) {
+            return false;
+        }
+
+        // 两条路径必须互斥，否则手工传送包仍会干扰原版移动追踪基准。
+        if (useVanillaMovement) {
+            entity.moveTo(x, y, z, entity.getYRot(), entity.getXRot());
+            return Math.abs(entity.getX() - x) < 1.0E-6
+                    && Math.abs(entity.getY() - y) < 1.0E-6
+                    && Math.abs(entity.getZ() - z) < 1.0E-6;
+        }
+
         return EcaAPI.teleport(entity, x, y, z);
+    }
+
+    //仅在找到可站立的实际落点且底层传送成功时返回该落点
+    public static Vec3 theLastEndSafeTeleport(
+            Entity entity, Vec3 desiredPosition, int verticalSearchRange) {
+        Vec3 safePosition = findSafeTeleportPosition(entity, desiredPosition, verticalSearchRange);
+        if (safePosition == null
+                || !theLastEndTeleport(entity, safePosition.x, safePosition.y, safePosition.z)) {
+            return null;
+        }
+        return safePosition;
     }
 
     //在目标XZ附近上下搜索安全落脚高度：身体空间无方块碰撞，脚下存在碰撞支撑
@@ -515,6 +391,72 @@ public class EntityUtil {
                 if (dotProduct > 0 && canAttack(attacker, livingEntity)) {
                     validTargets.add(livingEntity);
                 }
+            }
+        }
+
+        return validTargets;
+    }
+
+    // 获取实体朝向前方的长方体区域内，可被攻击且碰撞箱与区域相交的目标。
+    public static List<LivingEntity> getTargetsInFrontBox(
+            LivingEntity attacker, double width, double length, double height) {
+        return getTargetsInFrontBox(
+                attacker, attacker.position(), attacker.getLookAngle(), width, length, height);
+    }
+
+    // 使用锁定的起点与方向检测长方体，避免蓄力期间实体变换改变技能判定。
+    public static List<LivingEntity> getTargetsInFrontBox(
+            LivingEntity attacker, Vec3 origin, Vec3 direction,
+            double width, double length, double height) {
+        List<LivingEntity> validTargets = new ArrayList<>();
+        if (width <= 0.0 || length <= 0.0 || height <= 0.0) {
+            return validTargets;
+        }
+
+        Vec3 forward = direction.multiply(1.0, 0.0, 1.0);
+        if (forward.lengthSqr() < 1.0E-6) {
+            return validTargets;
+        }
+        forward = forward.normalize();
+        Vec3 right = new Vec3(-forward.z, 0.0, forward.x);
+
+        double halfWidth = width * 0.5;
+        double searchRadius = Math.sqrt(length * length + halfWidth * halfWidth);
+        double minY = origin.y;
+        double maxY = minY + height;
+        AABB searchBox = new AABB(
+                origin.x - searchRadius, minY, origin.z - searchRadius,
+                origin.x + searchRadius, maxY, origin.z + searchRadius
+        );
+
+        List<LivingEntity> nearbyEntities = attacker.level().getEntitiesOfClass(
+                LivingEntity.class,
+                searchBox,
+                target -> target != attacker && canAttack(attacker, target)
+        );
+
+        for (LivingEntity target : nearbyEntities) {
+            AABB targetBox = target.getBoundingBox();
+            double centerX = (targetBox.minX + targetBox.maxX) * 0.5 - origin.x;
+            double centerZ = (targetBox.minZ + targetBox.maxZ) * 0.5 - origin.z;
+            double halfX = targetBox.getXsize() * 0.5;
+            double halfZ = targetBox.getZsize() * 0.5;
+
+            double forwardCenter = centerX * forward.x + centerZ * forward.z;
+            double forwardExtent = Math.abs(forward.x) * halfX + Math.abs(forward.z) * halfZ;
+            if (forwardCenter + forwardExtent < 0.0
+                    || forwardCenter - forwardExtent > length) {
+                continue;
+            }
+
+            double sideCenter = centerX * right.x + centerZ * right.z;
+            double sideExtent = Math.abs(right.x) * halfX + Math.abs(right.z) * halfZ;
+            if (Math.abs(sideCenter) > halfWidth + sideExtent) {
+                continue;
+            }
+
+            if (targetBox.maxY >= minY && targetBox.minY <= maxY) {
+                validTargets.add(target);
             }
         }
 

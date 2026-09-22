@@ -1,9 +1,11 @@
 package net.the_last_sword.entity.ai;
 
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.phys.Vec3;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
+import net.the_last_sword.entity.TheLastEndEntity;
 import net.the_last_sword.entity.TheLastEndSwordWraithEntity;
 import net.the_last_sword.util.ParticleUtil;
 
@@ -13,9 +15,18 @@ import java.util.EnumSet;
 public class SwordWraithEndOfAllThingsGoal extends Goal {
     private final TheLastEndSwordWraithEntity wraith;
     private int animationTick;
+    private double startY;
+    private boolean previousNoGravity;
+    private boolean airborne;
 
     private static final int ANIMATION_LENGTH = 190;
     private static final int ACTIVATE_TICK = 20;
+    private static final int ASCENT_START_TICK = 80;
+    private static final int ASCENT_END_TICK = 85;
+    private static final int DESCENT_START_TICK = 120;
+    private static final int DESCENT_END_TICK = 125;
+    private static final double JUMP_HEIGHT = 8.0D;
+    private static final double VERTICAL_STEP = JUMP_HEIGHT / (ASCENT_END_TICK - ASCENT_START_TICK);
 
     // 粒子圆环时间点（animationTick倒计时值）
     private static final int CIRCLE_1S = ANIMATION_LENGTH - 20;   // 170
@@ -38,6 +49,12 @@ public class SwordWraithEndOfAllThingsGoal extends Goal {
         if (wraith.getAnimationState() != TheLastEndSwordWraithEntity.STATE_IDLE) {
             return false;
         }
+        if (wraith.isAllThingsEnd()) {
+            return false;
+        }
+        if (wraith.getTheLastEndLevel() < TheLastEndEntity.RESURRECTION_LEVEL) {
+            return false;
+        }
 
         //自身终焉标记≥13时触发
         return wraith.getEndMark() >= TheLastEndSwordWraithEntity.END_MARK_THRESHOLD;
@@ -48,6 +65,9 @@ public class SwordWraithEndOfAllThingsGoal extends Goal {
         animationTick = ANIMATION_LENGTH;
         wraith.setAnimationState(TheLastEndSwordWraithEntity.STATE_END_OF_ALL_THINGS);
         wraith.getNavigation().stop();
+        startY = wraith.getY();
+        previousNoGravity = wraith.isNoGravity();
+        airborne = false;
     }
 
     @Override
@@ -62,6 +82,17 @@ public class SwordWraithEndOfAllThingsGoal extends Goal {
             TheLastEndSwordWraithEntity.AllThingsEndActiveEffect.start(wraith);
         }
 
+        int relativeFrame = ANIMATION_LENGTH - animationTick;
+        if (relativeFrame >= ASCENT_START_TICK && relativeFrame < ASCENT_END_TICK) {
+            ascend();
+        } else if (relativeFrame >= ASCENT_END_TICK && relativeFrame < DESCENT_START_TICK) {
+            hover();
+        } else if (relativeFrame >= DESCENT_START_TICK && relativeFrame < DESCENT_END_TICK) {
+            descend();
+        } else if (relativeFrame == DESCENT_END_TICK) {
+            finishAirMovement();
+        }
+
         //动画阶段粒子效果
         spawnAnimationParticles();
 
@@ -73,6 +104,7 @@ public class SwordWraithEndOfAllThingsGoal extends Goal {
         }
 
         if (animationTick == 0) {
+            finishAirMovement();
             wraith.setAnimationState(TheLastEndSwordWraithEntity.STATE_IDLE);
         }
     }
@@ -107,6 +139,7 @@ public class SwordWraithEndOfAllThingsGoal extends Goal {
     @Override
     public void stop() {
         animationTick = 0;
+        finishAirMovement();
         if (wraith.getAnimationState() == TheLastEndSwordWraithEntity.STATE_END_OF_ALL_THINGS) {
             wraith.setAnimationState(TheLastEndSwordWraithEntity.STATE_IDLE);
         }
@@ -115,5 +148,49 @@ public class SwordWraithEndOfAllThingsGoal extends Goal {
     @Override
     public boolean requiresUpdateEveryTick() {
         return true;
+    }
+
+    //手动控制垂直阶段，避免重力使动画中的滞空位置持续下坠
+    private void ascend() {
+        beginAirMovement();
+        double remainingHeight = startY + JUMP_HEIGHT - wraith.getY();
+        if (remainingHeight > 0.0D) {
+            wraith.move(MoverType.SELF, new Vec3(0.0D, Math.min(VERTICAL_STEP, remainingHeight), 0.0D));
+        }
+        wraith.setDeltaMovement(Vec3.ZERO);
+        wraith.fallDistance = 0.0F;
+    }
+
+    private void hover() {
+        beginAirMovement();
+        wraith.setDeltaMovement(Vec3.ZERO);
+        wraith.fallDistance = 0.0F;
+    }
+
+    private void descend() {
+        beginAirMovement();
+        double remainingHeight = wraith.getY() - startY;
+        if (remainingHeight > 0.0D) {
+            wraith.move(MoverType.SELF, new Vec3(0.0D, -Math.min(VERTICAL_STEP, remainingHeight), 0.0D));
+        }
+        wraith.setDeltaMovement(Vec3.ZERO);
+        wraith.fallDistance = 0.0F;
+    }
+
+    private void beginAirMovement() {
+        if (!airborne) {
+            airborne = true;
+            wraith.setNoGravity(true);
+        }
+    }
+
+    private void finishAirMovement() {
+        if (!airborne) {
+            return;
+        }
+        airborne = false;
+        wraith.setNoGravity(previousNoGravity);
+        wraith.setDeltaMovement(Vec3.ZERO);
+        wraith.fallDistance = 0.0F;
     }
 }

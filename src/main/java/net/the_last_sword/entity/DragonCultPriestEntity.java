@@ -60,6 +60,7 @@ import net.the_last_sword.init.ModItems;
 import net.the_last_sword.init.ModEntities;
 import net.the_last_sword.util.DragonCultDisguise;
 import net.the_last_sword.util.EntityUtil;
+import net.the_last_sword.util.health.TrueHealthManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -306,11 +307,8 @@ public class DragonCultPriestEntity extends TheLastEndEntity {
             syncNamedVariant(true);
 
             float maxHealth = (float) getAttributeValue(Attributes.MAX_HEALTH);
-            setWorldAnchorMax(maxHealth);
-            setWorldAnchor(maxHealth);
-
             if (!EntityUtil.hasProtection(this)) {
-                EntityUtil.registerDefence(this, maxHealth);
+                TrueHealthManager.register(this, maxHealth);
             }
 
             setTheLastEndLevel(1);
@@ -382,8 +380,9 @@ public class DragonCultPriestEntity extends TheLastEndEntity {
             summonCultist(serverLevel);
         } else if (variant == NamedPriestVariant.KONAHRIK) {
             if (skill == PriestSkill.GUARD && getRandom().nextFloat() < 0.10F) {
-                float healed = Math.min(getWorldAnchorMax(), getWorldAnchor() + getWorldAnchorMax() * 0.5F);
-                EntityUtil.theLastEndSetHealth(this, healed);
+                float maxHealth = TrueHealthManager.getMaxHealth(this);
+                float healed = Math.min(maxHealth, TrueHealthManager.getHealth(this) + maxHealth * 0.5F);
+                TrueHealthManager.setHealth(this, healed);
             }
             if (getRandom().nextFloat() < 0.01F) {
                 summonPriest(serverLevel);
@@ -421,8 +420,8 @@ public class DragonCultPriestEntity extends TheLastEndEntity {
             return;
         }
 
-        float oldMax = Math.max(1.0F, getWorldAnchorMax());
-        float healthRatio = Math.max(0.0F, Math.min(1.0F, getWorldAnchor() / oldMax));
+        float oldMax = Math.max(1.0F, TrueHealthManager.getMaxHealth(this));
+        float healthRatio = Math.max(0.0F, Math.min(1.0F, TrueHealthManager.getHealth(this) / oldMax));
         removeNamedModifier(Attributes.MAX_HEALTH, NAMED_HEALTH_MODIFIER_ID);
         removeNamedModifier(Attributes.ATTACK_DAMAGE, NAMED_ATTACK_MODIFIER_ID);
         removeNamedModifier(Attributes.ARMOR, NAMED_ARMOR_MODIFIER_ID);
@@ -453,10 +452,10 @@ public class DragonCultPriestEntity extends TheLastEndEntity {
             setSharedFlag(5, false);
         }
 
-        if (getWorldAnchorMax() > 0.0F) {
+        if (TrueHealthManager.getMaxHealth(this) > 0.0F) {
             float newMax = (float) getAttributeValue(Attributes.MAX_HEALTH);
-            setWorldAnchorMax(newMax);
-            setWorldAnchor(newMax * healthRatio);
+            TrueHealthManager.setMaxHealth(this, newMax);
+            TrueHealthManager.setHealth(this, newMax * healthRatio);
         }
     }
 

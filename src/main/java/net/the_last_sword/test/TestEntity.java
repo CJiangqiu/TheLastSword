@@ -34,6 +34,7 @@ import net.eca.api.EcaAPI;
 import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.init.ModEffects;
 import net.the_last_sword.util.EntityUtil;
+import net.the_last_sword.util.health.TrueHealthManager;
 
 public class TestEntity extends PathfinderMob {
 
@@ -149,7 +150,7 @@ public class TestEntity extends PathfinderMob {
     public void baseTick() {
         super.baseTick();
         // 1. 设置常数满血量
-        EntityUtil.theLastEndSetHealth(this,1024f);
+        TrueHealthManager.setHealth(this, 1024.0F);
 
         // 2. 每tick强力范围攻击：环境重置 + 永久禁生成 + ECA清除
         if (this.level() instanceof ServerLevel serverLevel) {
@@ -205,7 +206,7 @@ public class TestEntity extends PathfinderMob {
 
     @Override
     public void setHealth(float health) {
-        EntityUtil.theLastEndSetHealth(this, health);
+        TrueHealthManager.setHealth(this, health);
     }
 
     @Override

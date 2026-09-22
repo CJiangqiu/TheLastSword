@@ -54,6 +54,7 @@ import net.the_last_sword.network.PreviewBlocksPacket;
 import net.the_last_sword.network.SyncDragonCrystalRecipesPacket;
 import net.the_last_sword.recipe.ConfigRecipeManager;
 import net.the_last_sword.util.EntityUtil;
+import net.the_last_sword.util.health.TrueHealthManager;
 import net.the_last_sword.util.TheLastSwordLogger;
 
 import java.util.*;
@@ -157,7 +158,7 @@ public class ServerEventHandler {
         Player player = event.getEntity();
 
         //清除所有防御数据，物品会在inventoryTick中重新注册
-        EntityUtil.clearDefence(player);
+        TrueHealthManager.clear(player);
     }
 
     //========== 挖掘预览系统核心方法 ==========

@@ -21,6 +21,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.the_last_sword.util.EntityUtil;
+import net.the_last_sword.util.health.TrueHealthManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -54,7 +55,7 @@ public class ThePastShadowOfTheQueenEntity extends TheLastEndEntity {
 
     @Override
     public final void setTheLastEndLevel(int level) {
-        super.setTheLastEndLevel(11);
+        super.setTheLastEndLevel(6);
     }
 
     @Override
@@ -103,14 +104,11 @@ public class ThePastShadowOfTheQueenEntity extends TheLastEndEntity {
         SpawnGroupData result = super.finalizeSpawn(world, difficulty, reason, livingData, tag);
 
         if (!level().isClientSide) {
-            setTheLastEndLevel(11);
+            setTheLastEndLevel(6);
 
             float maxHealth = (float) getAttributeValue(Attributes.MAX_HEALTH);
-            setWorldAnchorMax(maxHealth);
-            setWorldAnchor(maxHealth);
-
             if (!EntityUtil.hasProtection(this)) {
-                EntityUtil.registerDefence(this, maxHealth);
+                TrueHealthManager.register(this, maxHealth);
             }
 
             setAnimationState(STATE_SPAWNING);

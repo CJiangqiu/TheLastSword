@@ -32,6 +32,8 @@ import net.the_last_sword.item.ISummonableItem;
 import net.the_last_sword.entity.TheLastEndEntity;
 import net.the_last_sword.entity.TheLastEndSwordWraithEntity;
 import net.the_last_sword.util.EntityUtil;
+import net.the_last_sword.util.health.TrueHealthManager;
+import net.the_last_sword.util.health.WorldAnchorManager;
 import net.the_last_sword.util.TheLastSwordLogger;
 import net.the_last_sword.util.nbt.ItemLevelHelper;
 
@@ -118,7 +120,7 @@ public class WraithSummonManager {
         if (wraith.level() instanceof ServerLevel sl) {
             EcaAPI.setForceLoading(wraith, sl, false);
         }
-        EntityUtil.clearDefence(wraith);
+        TrueHealthManager.clear(wraith);
 
         //3.5. 强制结束万物终焉状态
         if (wraith instanceof TheLastEndSwordWraithEntity swordWraith && swordWraith.isAllThingsEnd()) {
@@ -131,12 +133,12 @@ public class WraithSummonManager {
         removeBonusFromEntity(wraith, healthBonus, attackBonus);
 
         //4.5. 清除禁疗状态（防止快照把禁疗带入魂石，且确保下一步 setHealth 不被禁疗拦截）
-        EntityUtil.clearHealBan(wraith);
+        WorldAnchorManager.clearHealBan(wraith);
 
         //5. 设置生命值为最大生命值（避免保存错误血量导致永远死亡）
         AttributeInstance maxHealthAttr = wraith.getAttribute(Attributes.MAX_HEALTH);
         if (maxHealthAttr != null) {
-            EntityUtil.theLastEndSetHealth(wraith, (float) maxHealthAttr.getValue());
+            EcaAPI.setHealth(wraith, (float) maxHealthAttr.getValue());
         }
 
         //6. 保存当前状态NBT到魂石
@@ -222,7 +224,7 @@ public class WraithSummonManager {
                 if (wraith.level() instanceof ServerLevel sl) {
                     EcaAPI.setForceLoading(wraith, sl, false);
                 }
-                EntityUtil.clearDefence(wraith);
+                TrueHealthManager.clear(wraith);
                 EntityUtil.theLastEndRemove(wraith, Entity.RemovalReason.DISCARDED);
 
                 //重新入营：ECA 对销毁类移除会自动退营，而绑定需跨登出保留
@@ -348,19 +350,19 @@ public class WraithSummonManager {
         //4.5. 终焉种实体初始化
         if (wraith instanceof TheLastEndEntity theLastEnd) {
             float maxHealth = (float) wraith.getAttributeValue(Attributes.MAX_HEALTH);
-            theLastEnd.setWorldAnchorMax(maxHealth);
-            theLastEnd.setWorldAnchor(maxHealth);
+            TrueHealthManager.setMaxHealth(theLastEnd, maxHealth);
+            TrueHealthManager.setHealth(theLastEnd, maxHealth);
             theLastEnd.setAnimationState(theLastEnd.hasSpawnAnimation()
                 ? TheLastEndEntity.STATE_SPAWNING : TheLastEndEntity.STATE_IDLE);
         }
 
         //4.6. 清除禁疗状态（防止旧魂石或 entity_nbt 里残留的禁疗拦截 setHealth）
-        EntityUtil.clearHealBan(wraith);
+        WorldAnchorManager.clearHealBan(wraith);
 
         //5. 设置生命值为最大生命值（实体刚生成后立即设置满血）
         AttributeInstance maxHealthAttr = wraith.getAttribute(Attributes.MAX_HEALTH);
         if (maxHealthAttr != null) {
-            EntityUtil.theLastEndSetHealth(wraith, (float) maxHealthAttr.getValue());
+            TrueHealthManager.setHealth(wraith, (float) maxHealthAttr.getValue());
         }
 
         //6. 清除Boss血条
@@ -378,7 +380,7 @@ public class WraithSummonManager {
         //10. 设置生命值为最大生命值（保存NBT前确保满血）
         AttributeInstance maxHealthAttrBeforeSave = wraith.getAttribute(Attributes.MAX_HEALTH);
         if (maxHealthAttrBeforeSave != null) {
-            EntityUtil.theLastEndSetHealth(wraith, (float) maxHealthAttrBeforeSave.getValue());
+            TrueHealthManager.setHealth(wraith, (float) maxHealthAttrBeforeSave.getValue());
         }
 
         //11. 保存基础NBT到魂石（此时没有加成污染）
@@ -444,7 +446,7 @@ public class WraithSummonManager {
             LivingEntity existingWraith = findEntityByUUID(serverLevel, wraitheUUID);
             if (existingWraith != null) {
                 //先清除保护状态，否则 Mixin 会阻止移除
-                EntityUtil.clearDefence(existingWraith);
+                TrueHealthManager.clear(existingWraith);
                 EntityUtil.theLastEndRemove(existingWraith, Entity.RemovalReason.DISCARDED);
 
                 //2.5. 强制发送客户端删除包（确保客户端旧实体被正确清除）
@@ -470,19 +472,19 @@ public class WraithSummonManager {
         //4.5. 终焉种实体初始化
         if (wraith instanceof TheLastEndEntity theLastEnd) {
             float maxHealth = (float) wraith.getAttributeValue(Attributes.MAX_HEALTH);
-            theLastEnd.setWorldAnchorMax(maxHealth);
-            theLastEnd.setWorldAnchor(maxHealth);
+            TrueHealthManager.setMaxHealth(theLastEnd, maxHealth);
+            TrueHealthManager.setHealth(theLastEnd, maxHealth);
             theLastEnd.setAnimationState(theLastEnd.hasSpawnAnimation()
                 ? TheLastEndEntity.STATE_SPAWNING : TheLastEndEntity.STATE_IDLE);
         }
 
         //4.6. 清除禁疗状态（从 entity_nbt 恢复时会带回旧的禁疗，必须清掉后再 setHealth）
-        EntityUtil.clearHealBan(wraith);
+        WorldAnchorManager.clearHealBan(wraith);
 
         //5. 设置生命值为最大生命值（实体刚生成后立即设置满血）
         AttributeInstance maxHealthAttr = wraith.getAttribute(Attributes.MAX_HEALTH);
         if (maxHealthAttr != null) {
-            EntityUtil.theLastEndSetHealth(wraith, (float) maxHealthAttr.getValue());
+            TrueHealthManager.setHealth(wraith, (float) maxHealthAttr.getValue());
         }
 
         //6. 清除Boss血条
@@ -645,8 +647,8 @@ public class WraithSummonManager {
                 healthAttr.setBaseValue(newMaxHealth);
 
                 //同步真实生命值（必须用 newMaxHealth，因为 getMaxHealth 会返回旧值）
-                EntityUtil.setWorldAnchor(entity, (float) newMaxHealth);
-                EntityUtil.setWorldAnchorMax(entity, (float) newMaxHealth);
+                TrueHealthManager.setMaxHealth(entity, (float) newMaxHealth);
+                TrueHealthManager.setHealth(entity, (float) newMaxHealth);
 
                 entity.setHealth((float) newMaxHealth);
             }
@@ -670,8 +672,8 @@ public class WraithSummonManager {
                 healthAttr.setBaseValue(newMaxHealth);
 
                 //同步真实生命值（必须用 newMaxHealth，因为 getMaxHealth 会返回旧值）
-                EntityUtil.setWorldAnchor(entity, (float) newMaxHealth);
-                EntityUtil.setWorldAnchorMax(entity, (float) newMaxHealth);
+                TrueHealthManager.setMaxHealth(entity, (float) newMaxHealth);
+                TrueHealthManager.setHealth(entity, (float) newMaxHealth);
 
                 entity.setHealth((float) newMaxHealth);
             }
@@ -734,7 +736,7 @@ public class WraithSummonManager {
 
         //注册防御追踪
         if (TheLastSwordConfiguration.getSwordWraithAsTheLastEndEntitySafely()) {
-            EntityUtil.registerDefence(wraith, wraith.getMaxHealth());
+            TrueHealthManager.register(wraith, wraith.getMaxHealth());
         }
     }
 
@@ -863,8 +865,8 @@ public class WraithSummonManager {
             float absoluteDestructionDamage = (float) (attackDamage * damageMultiplier);
 
             //应用额外绝毁伤害
-            if (absoluteDestructionDamage > 0) {
-                AbsoluteDestructionDamageSource.applyAbsoluteDestruction(target, attacker, absoluteDestructionDamage);
+            if (absoluteDestructionDamage > 0 && EntityUtil.canAttack(attacker, target)) {
+                EcaAPI.hurt(target, AbsoluteDestructionDamageSource.absoluteDestruction(attacker), absoluteDestructionDamage);
             }
         } catch (Throwable t) {
             try {

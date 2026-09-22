@@ -31,7 +31,9 @@ import net.the_last_sword.client.gui.DefenceConfigScreen;
 import net.the_last_sword.client.recipe.ClientDragonCrystalRecipeCache;
 import net.the_last_sword.client.overlay.DragonArmorOverlay;
 import net.the_last_sword.client.overlay.JustifiedDefenceOverlay;
+import net.the_last_sword.client.overlay.WorldAnchorHealthOverlay;
 import net.the_last_sword.client.renderer.DragonShieldRenderer;
+import net.the_last_sword.client.renderer.DangerousSkillPreviewRenderer;
 import net.the_last_sword.client.shader.TheLastEndEffect;
 import net.the_last_sword.configuration.DefenceConfig;
 import net.the_last_sword.network.DefenceConfigPacket;
@@ -172,6 +174,7 @@ public class ClientEventHandler {
     //断开服务器后清空服务端配方，避免切换服务器期间沿用上一台服务器的数据
     @SubscribeEvent
     public static void onPlayerLogout(ClientPlayerNetworkEvent.LoggingOut event) {
+        DangerousSkillPreviewRenderer.clear();
         ClientDragonCrystalRecipeCache.clear();
     }
 
@@ -231,6 +234,7 @@ public class ClientEventHandler {
     //HUD 渲染事件（Post）- 龙之盔甲叠加层
     @SubscribeEvent
     public static void onRenderGuiOverlayPost(RenderGuiOverlayEvent.Post event) {
+        WorldAnchorHealthOverlay.onRenderGuiOverlay(event);
         DragonArmorOverlay.onRenderGuiOverlay(event);
     }
 
@@ -238,6 +242,7 @@ public class ClientEventHandler {
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase == TickEvent.Phase.END) {
+            DangerousSkillPreviewRenderer.tick();
             Minecraft mc = Minecraft.getInstance();
 
             //检查防御配置按键
@@ -285,6 +290,8 @@ public class ClientEventHandler {
                 renderArenaPreview(event.getPoseStack(), event.getCamera());
             }
         }
+
+        DangerousSkillPreviewRenderer.render(event.getPoseStack(), event.getCamera(), event.getPartialTick());
 
         //渲染龙魂灯笼范围
         renderDragonSoulLanternRanges(event.getPoseStack(), event.getCamera(), mc.level);

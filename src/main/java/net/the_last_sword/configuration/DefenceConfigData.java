@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DefenceConfigData {
-    public int configVersion = 2;
+    public int configVersion = 5;
     public HudSettings hud = new HudSettings();
     public ArmorSettings armor = new ArmorSettings();
     public JustifiedDefenceSettings justifiedDefence = new JustifiedDefenceSettings();
@@ -129,6 +129,11 @@ public class DefenceConfigData {
     public static class DefenceModule {
         public PhasingModule phasing = new PhasingModule();
         public DragonShieldModule dragonShield = new DragonShieldModule();
+        public JustifiedDefenceRecoveryModule justifiedDefenceRecovery = new JustifiedDefenceRecoveryModule();
+    }
+
+    public static class JustifiedDefenceRecoveryModule {
+        public boolean enabled = true;
     }
 
     public static class PhasingModule {
@@ -162,6 +167,9 @@ public class DefenceConfigData {
     // 感知模块
     public static class PerceptionModule {
         public boolean enableHud = true;
+        public boolean showArmorEnergy = true;
+        public boolean showEnergyConsumption = true;
+        public HudOffset energyDisplayPosition = new HudOffset(0, 0);
         public boolean scanEntities = false;
         public int scanIntervalSeconds = 5;
         public int scanRange = 32;

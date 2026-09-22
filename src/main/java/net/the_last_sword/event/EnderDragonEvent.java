@@ -44,6 +44,7 @@ import net.the_last_sword.init.ModAttributes;
 import net.the_last_sword.init.ModEffects;
 import net.the_last_sword.init.ModEntities;
 import net.the_last_sword.util.EntityUtil;
+import net.the_last_sword.util.health.TrueHealthManager;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -436,7 +437,7 @@ public class EnderDragonEvent {
         }
 
         if (dragon.getRandom().nextInt(100) == 0) {
-            EntityUtil.theLastEndSetHealth(dragon, dragon.getMaxHealth());
+            TrueHealthManager.setHealth(dragon, dragon.getMaxHealth());
             long nextAvailableTime = gameTime + AKATOSH_HEAL_COOLDOWN;
             data.putLong(AKATOSH_HEAL_COOLDOWN_END_KEY, nextAvailableTime);
             data.putLong(NEXT_AKATOSH_HEAL_CHECK_KEY, nextAvailableTime);

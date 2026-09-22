@@ -21,6 +21,7 @@ import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MobType;
@@ -31,7 +32,6 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -46,9 +46,12 @@ import net.the_last_sword.entity.ai.LostWraithDragonFireBallGoal;
 import net.the_last_sword.entity.ai.LostWraithChaseTargetGoal;
 import net.the_last_sword.entity.ai.LostWraithEnchantGoal;
 import net.the_last_sword.entity.ai.LostWraithEndStrikeGoal;
+import net.the_last_sword.entity.ai.LostWraithHurtByTargetGoal;
 import net.the_last_sword.entity.ai.LostWraithPunchGoal;
 import net.the_last_sword.entity.ai.LostWraithSummonLightningGoal;
+import net.the_last_sword.faction.DragonCultFaction;
 import net.the_last_sword.util.EntityUtil;
+import net.the_last_sword.util.health.TrueHealthManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -111,10 +114,15 @@ public class LostWraithEntity extends TheLastEndEntity {
         this.goalSelector.addGoal(9, new LookAtPlayerGoal(this, Player.class, 8.0F));
         this.goalSelector.addGoal(10, new RandomLookAroundGoal(this));
 
-        this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
+        this.targetSelector.addGoal(1, new LostWraithHurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false,
-            entity -> entity instanceof Player player && !player.isCreative() && !player.isSpectator()));
-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, GuardianOfSealedSpireEntity.class, true));
+            entity -> entity instanceof Player player
+                && !player.isCreative()
+                && !player.isSpectator()
+                && EntityUtil.canAttack(this, player)));
+        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, LivingEntity.class, 10, true, false,
+            entity -> DragonCultFaction.ID.equals(EcaAPI.getEntityFaction(entity))
+                && EntityUtil.canAttack(this, entity)));
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -140,7 +148,7 @@ public class LostWraithEntity extends TheLastEndEntity {
 
     @Override
     public String getWalkAnimationName() {
-        return "idle";
+        return "walk";
     }
 
     @Override
@@ -223,11 +231,8 @@ public class LostWraithEntity extends TheLastEndEntity {
             setTheLastEndLevel(1);
 
             float maxHealth = (float) getAttributeValue(Attributes.MAX_HEALTH);
-            setWorldAnchorMax(maxHealth);
-            setWorldAnchor(maxHealth);
-
             if (!EntityUtil.hasProtection(this)) {
-                EntityUtil.registerDefence(this, maxHealth);
+                TrueHealthManager.register(this, maxHealth);
             }
 
             faceNearestPlayer();

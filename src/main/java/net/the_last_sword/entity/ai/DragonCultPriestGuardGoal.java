@@ -4,6 +4,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.entity.DragonCultPriestEntity;
+import net.the_last_sword.util.health.TrueHealthManager;
 import net.the_last_sword.entity.util.PriestGuardEffect;
 
 import java.util.EnumSet;
@@ -88,10 +89,10 @@ public class DragonCultPriestGuardGoal extends Goal {
     }
 
     private float getHpRatio() {
-        float max = priest.getWorldAnchorMax();
+        float max = TrueHealthManager.getMaxHealth(priest);
         if (max <= 0) {
             return 1.0f;
         }
-        return priest.getWorldAnchor() / max;
+        return TrueHealthManager.getHealth(priest) / max;
     }
 }

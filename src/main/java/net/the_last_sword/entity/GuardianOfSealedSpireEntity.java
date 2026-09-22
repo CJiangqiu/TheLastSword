@@ -1,5 +1,6 @@
 package net.the_last_sword.entity;
 
+import net.eca.api.EcaAPI;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -39,8 +40,10 @@ import net.the_last_sword.entity.ai.GuardianAssistAllyTargetGoal;
 import net.the_last_sword.entity.ai.GuardianChaseTargetGoal;
 import net.the_last_sword.entity.ai.GuardianMeleeAttackGoal;
 import net.the_last_sword.entity.ai.GuardianPickupWeaponGoal;
+import net.the_last_sword.faction.DragonCultFaction;
 import net.the_last_sword.init.ModEntities;
 import net.the_last_sword.util.EntityUtil;
+import net.the_last_sword.util.health.TrueHealthManager;
 import java.util.function.Predicate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -181,17 +184,16 @@ public class GuardianOfSealedSpireEntity extends TheLastEndEntity {
 
         if (!level().isClientSide) {
             float maxHealth = (float) getAttributeValue(Attributes.MAX_HEALTH);
-            setWorldAnchorMax(maxHealth);
-            setWorldAnchor(maxHealth);
-
             if (!EntityUtil.hasProtection(this)) {
-                EntityUtil.registerDefence(this, maxHealth);
+                TrueHealthManager.register(this, maxHealth);
             }
 
             setTheLastEndLevel(1);
 
             // 守卫没有生成动画，直接进入IDLE状态
             setAnimationState(STATE_IDLE);
+
+            EcaAPI.joinFaction(this, DragonCultFaction.ID);
 
             equipNetheriteArmor();
         }

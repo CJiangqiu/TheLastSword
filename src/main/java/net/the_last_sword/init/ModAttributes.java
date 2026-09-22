@@ -35,6 +35,17 @@ public class ModAttributes {
         ).setSyncable(true)
     );
 
+    //肃正防护恢复速度（点/tick）
+    public static final RegistryObject<Attribute> JUSTIFIED_DEFENCE_RECOVERY_SPEED = ATTRIBUTES.register(
+        "justified_defence_recovery_speed",
+        () -> new RangedAttribute(
+            "attribute.the_last_sword.justified_defence_recovery_speed",
+            0.01,
+            0.0,
+            Double.MAX_VALUE
+        ).setSyncable(true)
+    );
+
     public static void register(IEventBus eventBus) {
         ATTRIBUTES.register(eventBus);
     }

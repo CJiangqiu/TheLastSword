@@ -1,5 +1,6 @@
 package net.the_last_sword.entity;
 
+import net.eca.api.EcaAPI;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
@@ -156,7 +157,9 @@ public class TheLastEndSwordProjectile extends TheLastEndSwordItemsProjectile {
     protected void applyExtraDamage(Entity target) {
         if (!(this.getOwner() instanceof LivingEntity owner) || snapshotExtraDamage <= 0) return;
         if (target instanceof LivingEntity living) {
-            AbsoluteDestructionDamageSource.applyAbsoluteDestruction(living, owner, snapshotExtraDamage);
+            if (EntityUtil.canAttack(owner, living)) {
+                EcaAPI.hurt(living, AbsoluteDestructionDamageSource.absoluteDestruction(owner), snapshotExtraDamage);
+            }
         } else {
             //非 LivingEntity（如末影龙部件）：由目标自身的 hurt 方法转发到父实体处理
             DamageSource source = AbsoluteDestructionDamageSource.absoluteDestruction(owner);

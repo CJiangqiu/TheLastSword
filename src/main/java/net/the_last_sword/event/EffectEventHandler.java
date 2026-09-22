@@ -14,9 +14,10 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
-import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
 import net.the_last_sword.init.ModEffects;
+import net.the_last_sword.init.TheLastSwordDamageTypes;
 import net.the_last_sword.util.EntityUtil;
+import net.the_last_sword.util.health.TrueHealthManager;
 import net.the_last_sword.util.TheLastSwordLogger;
 
 //Effect 事件处理器 - 处理所有 MobEffect 相关的事件逻辑
@@ -42,7 +43,7 @@ public class EffectEventHandler {
 
         if (entity.hasEffect(ModEffects.PHASING.get())) {
             event.setCanceled(true);
-            EntityUtil.theLastEndSetHealth(entity, entity.getMaxHealth());
+            TrueHealthManager.setHealth(entity, entity.getMaxHealth());
         }
     }
 
@@ -66,7 +67,7 @@ public class EffectEventHandler {
         }
 
         //防止与剑灵绝毁伤害形成递归
-        if (damageSource instanceof AbsoluteDestructionDamageSource) {
+        if (damageSource.is(TheLastSwordDamageTypes.ABSOLUTE_DESTRUCTION)) {
             return;
         }
 

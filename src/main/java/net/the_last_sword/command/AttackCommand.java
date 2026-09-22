@@ -12,6 +12,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.the_last_sword.util.EntityUtil;
+import net.the_last_sword.util.health.WorldAnchorManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,7 +64,7 @@ public class AttackCommand {
 
         for (ServerLevel level : server.getAllLevels()) {
             for (Entity entity : level.getAllEntities()) {
-                if (entity instanceof LivingEntity living && EntityUtil.isHealBanned(living)) {
+                if (entity instanceof LivingEntity living && WorldAnchorManager.isHealBanned(living)) {
                     healNegatedEntities.add(living);
                 }
             }
@@ -80,7 +81,7 @@ public class AttackCommand {
             String entityName = entity.getName().getString();
             String dimensionName = entity.level().dimension().location().toString();
 
-            int remainingTime = EntityUtil.getHealBanTime(entity);
+            int remainingTime = WorldAnchorManager.getHealBanTime(entity);
 
             int minutes = remainingTime / 60;
             int seconds = remainingTime % 60;
