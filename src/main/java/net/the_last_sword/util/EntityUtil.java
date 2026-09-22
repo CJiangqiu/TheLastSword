@@ -17,6 +17,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.item.BowItem;
@@ -30,6 +31,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.init.ModAttributes;
+import net.the_last_sword.init.ModEffects;
 import net.the_last_sword.item.DragonArmorItem;
 import net.the_last_sword.item.TheLastSword;
 import net.the_last_sword.item.TheLastSwordYouNeverForgot;
@@ -122,7 +124,8 @@ public class EntityUtil {
             ArrayList<MobEffect> effectsToRemove = new ArrayList<>();
             for (MobEffectInstance effectInstance : activeEffects) {
                 MobEffect effect = effectInstance.getEffect();
-                if (!effect.isBeneficial() && effect != MobEffects.ABSORPTION) {
+                if (!effect.isBeneficial() && effect != MobEffects.ABSORPTION
+                        && effect != ModEffects.WORLD_SEVERANCE.get()) {
                     effectsToRemove.add(effect);
                 }
             }
@@ -169,11 +172,10 @@ public class EntityUtil {
         }
         entity.getPersistentData().remove(NBT_TEMP_JUSTIFIED_DEFENCE);
 
-        EcaAPI.kill(entity, damageSource);
-        // 强制斩杀可能绕过常规死亡回调，确认死亡后补齐玩家损伤清理。
-        if (!entity.level().isClientSide && entity instanceof Player && entity.dead) {
-            WorldAnchorManager.resetWorldAnchor(entity);
+        if (entity instanceof ServerPlayer player) {
+            WorldAnchorManager.resetPlayerWorldAnchorBeforeKill(player);
         }
+        EcaAPI.kill(entity, damageSource);
     }
 
     public static void theLastEndRevive(LivingEntity entity) {

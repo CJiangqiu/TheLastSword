@@ -90,6 +90,8 @@
   "death.attack.absolute_destruction.player": "%1$s tried to escape from %2$s but failed, vanishing into nothingness",
   "effect.the_last_sword.phasing": "§7Phasing",
   "effect.the_last_sword.phasing.description": "Entity cannot be targeted and can pass through walls.",
+  "effect.the_last_sword.world_severance": "World Severance",
+  "effect.the_last_sword.world_severance.description": "Absolute Destruction damage reduces your World Anchor. While this effect lasts, healing is capped at the remaining World Anchor. Depleting it triggers execution. Expiration removes the healing restriction but does not restore lost World Anchor. Health lock protection takes priority over this restriction.",
   "effect.the_last_sword.void_enchanting": "§5Void Enchanting",
   "effect.the_last_sword.void_enchanting.description": "Enchanting weapons with void power. Each attack deals additional Out of World Damage equal to buff level × 20% of attack damage.",
   "entity.the_last_end_sword_wraith.purple_lighting": "Purple Lighting",

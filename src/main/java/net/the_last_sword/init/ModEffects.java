@@ -8,6 +8,7 @@ import net.minecraftforge.registries.RegistryObject;
 import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.effect.PhasingEffect;
 import net.the_last_sword.effect.VoidEnchantingEffect;
+import net.the_last_sword.effect.WorldSeveranceEffect;
 
 public class ModEffects {
 
@@ -24,6 +25,10 @@ public class ModEffects {
     public static final RegistryObject<MobEffect> PHASING = EFFECTS.register(
         "phasing",
         PhasingEffect::new
+    );
+
+    public static final RegistryObject<MobEffect> WORLD_SEVERANCE = EFFECTS.register(
+        "world_severance", WorldSeveranceEffect::new
     );
 
     public static void register(IEventBus eventBus) {

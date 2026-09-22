@@ -1,5 +1,7 @@
 package net.the_last_sword.mixin;
 
+import net.the_last_sword.init.ModEffects;
+
 import net.eca.api.EcaAPI;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -234,7 +236,8 @@ public class LivingEntityMixin {
 
             for (MobEffectInstance effectInstance : activeEffects) {
                 MobEffect effect = effectInstance.getEffect();
-                if (!effect.isBeneficial() && effect != MobEffects.ABSORPTION) {
+                if (!effect.isBeneficial() && effect != MobEffects.ABSORPTION
+                        && effect != ModEffects.WORLD_SEVERANCE.get()) {
                     effectsToRemove.add(effect);
                 }
             }

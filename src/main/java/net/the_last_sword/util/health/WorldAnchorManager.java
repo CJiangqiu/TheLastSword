@@ -3,13 +3,23 @@ package net.the_last_sword.util.health;
 import net.eca.api.EcaAPI;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.the_last_sword.init.ModEffects;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.summon.WraithSummonManager;
 import net.the_last_sword.util.EntityUtil;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static net.eca.util.EntityUtil.HEAL_BAN_VALUE;
 
 /**
  * 管理所有生物的世界锚度。
@@ -82,6 +92,22 @@ public final class WorldAnchorManager {
         entity.getPersistentData().remove(NBT_ABSOLUTE_DESTRUCTION_WORLD_ANCHOR);
         setSyncedWorldAnchor(entity, UNSET_WORLD_ANCHOR);
         clearHealBan(entity);
+    }
+
+    public static void resetPlayerWorldAnchorBeforeKill(ServerPlayer player) {
+        resetWorldAnchor(player);
+        // 默认值也必须主动发送，不能等待实体移除后的追踪更新。
+        List<SynchedEntityData.DataValue<?>> values = new ArrayList<>();
+        if (WORLD_ANCHOR != null) {
+            values.add(SynchedEntityData.DataValue.create(WORLD_ANCHOR, ""));
+        }
+        if (HEAL_BAN_TIME != null) {
+            values.add(SynchedEntityData.DataValue.create(HEAL_BAN_TIME, 0));
+        }
+        if (HEAL_BAN_VALUE != null) {
+            values.add(SynchedEntityData.DataValue.create(HEAL_BAN_VALUE, ""));
+        }
+        player.connection.send(new ClientboundSetEntityDataPacket(player.getId(), values));
     }
 
     public static void syncWorldAnchor(LivingEntity entity) {
@@ -183,12 +209,19 @@ public final class WorldAnchorManager {
     }
 
     public static void tickHealBanTime(LivingEntity entity) {
-        if (entity == null || entity.tickCount % 20 != 0) {
+        if (entity == null || entity.level().isClientSide) {
             return;
         }
 
         int currentTime = getHealBanTime(entity);
         if (currentTime <= 0) {
+            if (entity.hasEffect(ModEffects.WORLD_SEVERANCE.get())) {
+                entity.removeEffect(ModEffects.WORLD_SEVERANCE.get());
+            }
+            return;
+        }
+        if (entity.tickCount % 20 != 0) {
+            syncSeveranceEffect(entity, currentTime);
             return;
         }
 
@@ -196,6 +229,9 @@ public final class WorldAnchorManager {
         setHealBanTime(entity, remainingTime);
         if (remainingTime == 0) {
             EcaAPI.unbanHealing(entity);
+            entity.removeEffect(ModEffects.WORLD_SEVERANCE.get());
+        } else {
+            syncSeveranceEffect(entity, remainingTime);
         }
     }
 
@@ -206,6 +242,7 @@ public final class WorldAnchorManager {
         setHealBanTime(entity, 0);
         entity.getPersistentData().remove(NBT_HEAL_BAN_TIME);
         EcaAPI.unbanHealing(entity);
+        entity.removeEffect(ModEffects.WORLD_SEVERANCE.get());
     }
 
     private static void applyHealBan(LivingEntity entity, float worldAnchor) {
@@ -215,6 +252,17 @@ public final class WorldAnchorManager {
         }
         setHealBanTime(entity, banTime);
         EcaAPI.banHealing(entity, worldAnchor);
+        syncSeveranceEffect(entity, banTime);
+    }
+
+    private static void syncSeveranceEffect(LivingEntity entity, int seconds) {
+        // 秒计时按实体 tick 对齐，显示效果不能自行延长真实禁疗。
+        int duration = (int) Math.min(Integer.MAX_VALUE, (long) seconds * 20 - entity.tickCount % 20);
+        MobEffectInstance current = entity.getEffect(ModEffects.WORLD_SEVERANCE.get());
+        if (current == null || Math.abs((long) current.getDuration() - duration) > 2) {
+            entity.forceAddEffect(new MobEffectInstance(ModEffects.WORLD_SEVERANCE.get(),
+                    duration, 0, false, false, true), null);
+        }
     }
 
     private static void setHealBanTime(LivingEntity entity, int seconds) {

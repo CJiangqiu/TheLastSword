@@ -90,6 +90,8 @@
   "death.attack.absolute_destruction.player": "%1$s 想要逃离 %2$s 时没有成功，不幸化为乌有",
   "effect.the_last_sword.phasing": "§7虚化",
   "effect.the_last_sword.phasing.description": "实体无法选中，并可以穿透墙壁。",
+  "effect.the_last_sword.world_severance": "现世剥离",
+  "effect.the_last_sword.world_severance.description": "绝毁伤害会削减世界锚度。此状态持续期间，生命值恢复受剩余世界锚度限制；世界锚度耗尽时将触发斩杀。状态结束后解除恢复限制，但不会修复世界锚度损伤。锁血保护优先于此限制。",
   "effect.the_last_sword.void_enchanting": "§5虚空附魔",
   "effect.the_last_sword.void_enchanting.description": "以虚空之力附魔武器。每次攻击造成相当于buff等级*攻击力20%的额外虚空伤害。",
   "entity.the_last_end_sword_wraith.purple_lighting": "紫色闪电",
