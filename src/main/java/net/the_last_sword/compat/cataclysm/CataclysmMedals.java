@@ -140,7 +140,7 @@ public class CataclysmMedals {
 
         private MobEffect getCurseOfDesertEffect() {
             try {
-                return ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation("cataclysm", "curse_of_desert"));
+                return ForgeRegistries.MOB_EFFECTS.getValue(ResourceLocation.fromNamespaceAndPath("cataclysm", "curse_of_desert"));
             } catch (Exception ignored) {
                 return null;
             }
@@ -148,7 +148,7 @@ public class CataclysmMedals {
 
         private MobEffect getStunEffect() {
             try {
-                return ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation("cataclysm", "stun"));
+                return ForgeRegistries.MOB_EFFECTS.getValue(ResourceLocation.fromNamespaceAndPath("cataclysm", "stun"));
             } catch (Exception ignored) {
                 return null;
             }
@@ -457,7 +457,7 @@ public class CataclysmMedals {
 
         private MobEffect getMoistureEffect() {
             try {
-                return ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation("cataclysm", "wetness"));
+                return ForgeRegistries.MOB_EFFECTS.getValue(ResourceLocation.fromNamespaceAndPath("cataclysm", "wetness"));
             } catch (Exception ignored) {
                 return null;
             }

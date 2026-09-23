@@ -54,6 +54,9 @@ public class PriestStaffItem extends Item {
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
+        if (player.getCooldowns().isOnCooldown(this)) {
+            return InteractionResultHolder.fail(stack);
+        }
 
         if (!level.isClientSide) {
             if (player.isShiftKeyDown()) {
@@ -63,6 +66,10 @@ public class PriestStaffItem extends Item {
                     TheLastSwordConfiguration.getPriestStaffGuardShieldGainSafely()
                 );
                 consumeDurability(stack, player, hand, 2);
+                player.getCooldowns().addCooldown(
+                    this,
+                    TheLastSwordConfiguration.getPriestStaffGuardCooldownSafely()
+                );
             } else {
                 float damage = (float) (player.getAttributeValue(Attributes.ATTACK_DAMAGE)
                     * TheLastSwordConfiguration.getPriestStaffProjectileDamageMultiplierSafely());
@@ -87,7 +94,8 @@ public class PriestStaffItem extends Item {
         tooltip.add(Component.translatable(
             "item_tooltip.the_last_sword.priest_staff.guard",
             formatValue(TheLastSwordConfiguration.getPriestStaffGuardRadiusSafely()),
-            formatValue(TheLastSwordConfiguration.getPriestStaffGuardShieldGainSafely())
+            formatValue(TheLastSwordConfiguration.getPriestStaffGuardShieldGainSafely()),
+            formatValue(TheLastSwordConfiguration.getPriestStaffGuardCooldownSafely() / 20.0)
         ));
         tooltip.add(Component.translatable("item_tooltip_lore.the_last_sword.priest_staff")
             .withStyle(ChatFormatting.GRAY));

@@ -13,6 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.the_last_sword.init.ModEffects;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
+import net.the_last_sword.entity.TheLastEndEntity;
 import net.the_last_sword.summon.WraithSummonManager;
 import net.the_last_sword.util.EntityUtil;
 
@@ -158,6 +159,25 @@ public final class WorldAnchorManager {
         float remainingAnchor = Double.isInfinite(worldAnchorDamage)
                 ? 0.0F
                 : Math.max(0.0F, (float) (currentAnchor - worldAnchorDamage));
+
+        if (entity instanceof TheLastEndEntity) {
+            float currentHealth = TrueHealthManager.getHealth(entity);
+            boolean lethalHealthDamage = Float.isFinite(currentHealth)
+                    && currentHealth > 0.0F && amount >= currentHealth;
+            if (lethalHealthDamage || remainingAnchor <= 0.0F) {
+                setWorldAnchor(entity, remainingAnchor);
+                if (remainingAnchor <= 0.0F) {
+                    clearHealBan(entity);
+                    WraithSummonManager.tryForceCapture(entity);
+                } else {
+                    applyHealBan(entity, remainingAnchor);
+                }
+                EntityUtil.theLastEndSetDead(entity, source);
+                return true;
+            }
+        }
+
+        boolean healthDepleted = applyExpectedHealthDamage(entity, amount);
         setWorldAnchor(entity, remainingAnchor);
 
         if (remainingAnchor <= 0.0F) {
@@ -166,29 +186,36 @@ public final class WorldAnchorManager {
             if (TheLastSwordConfiguration.getEnableTheLastEndSetDeadSafely()) {
                 EntityUtil.theLastEndSetDead(entity, source);
             } else {
+                TrueHealthManager.clear(entity);
                 EcaAPI.setHealth(entity, 0.0F);
+                entity.die(source);
             }
             return true;
         }
 
-        applyExpectedHealthDamage(entity, amount);
-        // 扣血可能同步完成死亡并重置锚度，不能随后重新挂上禁疗。
-        if (entity instanceof Player && !entity.getPersistentData().contains(
-                NBT_ABSOLUTE_DESTRUCTION_WORLD_ANCHOR, Tag.TAG_ANY_NUMERIC)) {
-            return true;
-        }
         applyHealBan(entity, remainingAnchor);
+        if (healthDepleted) {
+            entity.die(source);
+        }
         return true;
     }
 
-    private static void applyExpectedHealthDamage(LivingEntity entity, float amount) {
-        float currentHealth = EcaAPI.getRealHealth(entity);
+    private static boolean applyExpectedHealthDamage(LivingEntity entity, float amount) {
+        float currentHealth = TrueHealthManager.getHealth(entity);
         if (!Float.isFinite(currentHealth) || currentHealth <= 0.0F) {
-            return;
+            return false;
         }
 
         double expectedHealth = Math.max(0.0D, (double) currentHealth - amount);
-        EcaAPI.setHealth(entity, (float) expectedHealth);
+        if (EntityUtil.hasProtection(entity)) {
+            TrueHealthManager.setHealth(entity, (float) expectedHealth);
+            if (expectedHealth <= 0.0D) {
+                TrueHealthManager.clear(entity);
+            }
+        } else {
+            EcaAPI.setHealth(entity, (float) expectedHealth);
+        }
+        return expectedHealth <= 0.0D;
     }
 
     public static int getHealBanTime(LivingEntity entity) {

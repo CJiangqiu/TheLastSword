@@ -120,7 +120,7 @@ public class DragonCrystalSwordProjectile extends TheLastEndSwordItemsProjectile
         world.playSound(
             null,
             entity.getX(), entity.getY(), entity.getZ(),
-            ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation("entity.arrow.shoot")),
+            ForgeRegistries.SOUND_EVENTS.getValue(ResourceLocation.parse("entity.arrow.shoot")),
             SoundSource.PLAYERS,
             1,
             1f / (random.nextFloat() * 0.5f + 1) + 0.5f

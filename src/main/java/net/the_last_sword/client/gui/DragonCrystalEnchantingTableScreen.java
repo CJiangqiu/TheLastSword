@@ -39,8 +39,8 @@ public class DragonCrystalEnchantingTableScreen extends AbstractContainerScreen<
     private final int x, y, z;
     private final Player entity;
 
-    private static final ResourceLocation texture = new ResourceLocation("the_last_sword", "textures/screens/dragon_crystal_enchanting_table_gui.png");
-    private static final ResourceLocation barTexture = new ResourceLocation("the_last_sword", "textures/screens/dragon_crystal_enchanting_table_gui_bar.png");
+    private static final ResourceLocation texture = ResourceLocation.fromNamespaceAndPath("the_last_sword", "textures/screens/dragon_crystal_enchanting_table_gui.png");
+    private static final ResourceLocation barTexture = ResourceLocation.fromNamespaceAndPath("the_last_sword", "textures/screens/dragon_crystal_enchanting_table_gui_bar.png");
 
     // 附魔系统
     private final List<EnchantmentOption> enchantmentOptions = new ArrayList<>();

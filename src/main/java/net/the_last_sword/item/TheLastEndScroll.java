@@ -35,7 +35,7 @@ public class TheLastEndScroll extends Item {
     private static final int RUINED_VILLAGE_SEARCH_RADIUS = 256;
     private static final TagKey<Structure> RUINED_VILLAGE = TagKey.create(
         Registries.STRUCTURE,
-        new ResourceLocation(TheLastSwordMod.MOD_ID, "ruined_village")
+        ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "ruined_village")
     );
 
     public TheLastEndScroll() {

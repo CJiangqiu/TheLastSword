@@ -279,12 +279,19 @@ public class LivingEntityMixin {
         }
     }
 
-    //hurt：护盾吸收 + 剑灵绝毁附加（盟友判断由 ECA 阵营接管）
+    //绝毁先排除友方，避免误消耗肃正防御
     @Inject(method = "hurt", at = @At("HEAD"), cancellable = true)
     private void onLivingEntityHurt(DamageSource damageSource, float damageAmount, CallbackInfoReturnable<Boolean> cir) {
         LivingEntity entity = (LivingEntity) (Object) this;
 
         if (entity.level().isClientSide) {
+            return;
+        }
+
+        if (the_last_sword$isAbsoluteDestructionDamage(damageSource)
+                && damageSource.getEntity() != null
+                && !EntityUtil.canAttack(damageSource.getEntity(), entity)) {
+            cir.setReturnValue(false);
             return;
         }
 
@@ -300,7 +307,7 @@ public class LivingEntityMixin {
 
         the_last_sword$applyTheLastEndLevelBonus(entity, damageSource, damageAmount);
 
-        //绝毁由世界锚度完整接管，不再进入原版扣血流程
+        //绝毁自行结算真实生命值与世界锚度，避免原版再次扣血
         if (the_last_sword$isAbsoluteDestructionDamage(damageSource)) {
             cir.setReturnValue(WorldAnchorManager.handleAbsoluteDestructionDamage(entity, damageSource, damageAmount));
             return;
@@ -377,7 +384,13 @@ public class LivingEntityMixin {
                 float currentHealth = TrueHealthManager.getHealth(entity);
                 float maxHealth = (float) entity.getAttributeValue(Attributes.MAX_HEALTH);
                 float newHealth = Math.min(currentHealth + healAmount, maxHealth);
-                TrueHealthManager.setHealth(entity, newHealth);
+                Float healLimit = EcaAPI.getHealBanValue(entity);
+                if (healLimit != null) {
+                    newHealth = Math.min(newHealth, healLimit);
+                }
+                if (newHealth > currentHealth) {
+                    TrueHealthManager.setHealth(entity, newHealth);
+                }
             }
             ci.cancel();
         }
@@ -397,7 +410,13 @@ public class LivingEntityMixin {
             if (health > currentHealth) {
                 float maxHealth = (float) entity.getAttributeValue(Attributes.MAX_HEALTH);
                 float newHealth = Math.min(health, maxHealth);
-                TrueHealthManager.setHealth(entity, newHealth);
+                Float healLimit = EcaAPI.getHealBanValue(entity);
+                if (healLimit != null) {
+                    newHealth = Math.min(newHealth, healLimit);
+                }
+                if (newHealth > currentHealth) {
+                    TrueHealthManager.setHealth(entity, newHealth);
+                }
             }
             ci.cancel();
         }

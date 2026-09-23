@@ -429,7 +429,7 @@ public class ServerEventHandler {
     }
 
     //========== 竞技场预览系统 ==========
-    private static final ResourceLocation ARENA_STRUCTURE = new ResourceLocation(TheLastSwordMod.MOD_ID, "the_last_end_arena");
+    private static final ResourceLocation ARENA_STRUCTURE = ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "the_last_end_arena");
     private static final Map<UUID, ArenaPreview> arenaPreviewMap = new HashMap<>();
 
     //根据玩家水平朝向获取旋转

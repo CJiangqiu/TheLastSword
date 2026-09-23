@@ -24,7 +24,7 @@ public class TheLastEndScrollScreen extends Screen {
 
     //卷轴背景纹理
     private static final ResourceLocation SCROLL_TEXTURE =
-        new ResourceLocation(TheLastSwordMod.MOD_ID, "textures/screens/scroll_background.png");
+        ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "textures/screens/scroll_background.png");
 
     //卷轴引用真实配方ID，不再维护配方截图
     private static final ResourceLocation DRAGON_CRYSTAL_RECIPE = recipeId("dragon_crystal_recipe");
@@ -147,11 +147,11 @@ public class TheLastEndScrollScreen extends Screen {
     private final List<PaperNoteEntry> collectedNotes;
 
     private static ResourceLocation recipeId(String path) {
-        return new ResourceLocation(TheLastSwordMod.MOD_ID, path);
+        return ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, path);
     }
 
     private static ResourceLocation configRecipeId(String path) {
-        return new ResourceLocation(TheLastSwordMod.MOD_ID, "config/" + path);
+        return ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "config/" + path);
     }
 
     public TheLastEndScrollScreen(boolean hasRuinedVillageLocation, int ruinedVillageX, int ruinedVillageZ,

@@ -16,7 +16,7 @@ import net.the_last_sword.util.health.WorldAnchorManager;
 //把不可恢复的生命区间覆盖到原有生命值槽位，避免增加额外 HUD 行
 public final class WorldAnchorHealthOverlay {
 
-    private static final ResourceLocation ICON = new ResourceLocation(
+    private static final ResourceLocation ICON = ResourceLocation.fromNamespaceAndPath(
             TheLastSwordMod.MOD_ID, "textures/screens/world_anchor_full.png");
     private static final int ICON_SIZE = 9;
     private static final int ICON_SPACING = 8;

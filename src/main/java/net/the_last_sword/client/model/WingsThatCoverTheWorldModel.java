@@ -17,7 +17,7 @@ import net.minecraft.world.entity.LivingEntity;
 public class WingsThatCoverTheWorldModel<T extends LivingEntity> extends AgeableListModel<T> {
 
     public static final ModelLayerLocation LAYER_LOCATION =
-        new ModelLayerLocation(new ResourceLocation("the_last_sword", "wings_that_cover_the_world"), "main");
+        new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath("the_last_sword", "wings_that_cover_the_world"), "main");
 
     private final ModelPart wingsThatCoverTheWorld;
 

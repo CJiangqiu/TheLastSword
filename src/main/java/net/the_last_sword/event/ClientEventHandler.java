@@ -59,7 +59,7 @@ import java.util.Set;
 public class ClientEventHandler {
 
     //万物终焉渲染相关
-    private static final ResourceLocation END_PORTAL_TEXTURE = new ResourceLocation("textures/entity/end_portal.png");
+    private static final ResourceLocation END_PORTAL_TEXTURE = ResourceLocation.parse("textures/entity/end_portal.png");
     private static final double EFFECT_RADIUS = 32.0;
     private static float rotation = 0.0f;
 

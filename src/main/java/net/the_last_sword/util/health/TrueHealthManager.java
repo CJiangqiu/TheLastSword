@@ -28,6 +28,11 @@ public final class TrueHealthManager {
         }
 
         float normalizedHealth = Math.max(0.0F, health);
+        Float healLimit = EcaAPI.getHealBanValue(entity);
+        float currentHealth = getHealth(entity);
+        if (healLimit != null && normalizedHealth > currentHealth) {
+            normalizedHealth = Math.max(currentHealth, Math.min(normalizedHealth, healLimit));
+        }
         if (normalizedHealth > 0.0F) {
             EcaAPI.lockHealth(entity, normalizedHealth);
             Float lockedHealth = EcaAPI.getLockedHealth(entity);

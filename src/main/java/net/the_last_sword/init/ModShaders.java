@@ -23,7 +23,7 @@ public class ModShaders {
         //注册 The Last End 着色器
         ShaderInstance shader = TheLastEndShaderInstance.create(
             event.getResourceProvider(),
-            new ResourceLocation(TheLastSwordMod.MOD_ID, "the_last_end"),
+            ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "the_last_end"),
             DefaultVertexFormat.BLOCK
         );
         event.registerShader(shader, TheLastEndEffect::setShader);

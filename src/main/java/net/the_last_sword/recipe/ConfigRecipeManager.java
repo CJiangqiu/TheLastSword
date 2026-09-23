@@ -99,10 +99,10 @@ public class ConfigRecipeManager {
     private static ResourceLocation createRecipeId(String relativePath) {
         // "encoded" is reserved for escaped paths so that a normal path cannot collide with one.
         if (isValidResourcePath(relativePath) && !relativePath.startsWith("encoded/")) {
-            return new ResourceLocation(TheLastSwordMod.MOD_ID, "config/" + relativePath);
+            return ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "config/" + relativePath);
         }
 
-        return new ResourceLocation(TheLastSwordMod.MOD_ID,
+        return ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID,
                 "config/encoded/" + sha256(relativePath));
     }
 

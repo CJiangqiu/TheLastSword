@@ -15,7 +15,7 @@ import top.theillusivec4.curios.api.client.ICurioRenderer;
 public class WingsThatCoverTheWorldRenderer implements ICurioRenderer.ModelRender<WingsThatCoverTheWorldModel<LivingEntity>> {
 
     private static final ResourceLocation TEXTURE =
-        new ResourceLocation("the_last_sword", "textures/entity/curios/wings_that_cover_the_world.png");
+        ResourceLocation.fromNamespaceAndPath("the_last_sword", "textures/entity/curios/wings_that_cover_the_world.png");
 
     private final WingsThatCoverTheWorldModel<LivingEntity> model;
 

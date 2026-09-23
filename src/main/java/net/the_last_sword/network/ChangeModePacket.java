@@ -70,7 +70,7 @@ public class ChangeModePacket {
             );
 
             //播放音效
-            ResourceLocation snd = new ResourceLocation("entity.ender_dragon.flap");
+            ResourceLocation snd = ResourceLocation.parse("entity.ender_dragon.flap");
             player.level().playSound(null, player.blockPosition(),
                     ForgeRegistries.SOUND_EVENTS.getValue(snd),
                     SoundSource.PLAYERS, 1f, 1f);

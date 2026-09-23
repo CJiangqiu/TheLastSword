@@ -403,7 +403,7 @@ public class TheLastSword extends TheLastEndSwordItems implements ISummonableIte
             }
 
             //防御逻辑
-            if (hasSword) {
+            if (hasSword && !player.dead && player.getHealth() > 0.0F) {
                 TrueHealthManager.register(player, player.getMaxHealth());
                 player.getPersistentData().putBoolean("TheLastSwordDefence", true);
             } else {

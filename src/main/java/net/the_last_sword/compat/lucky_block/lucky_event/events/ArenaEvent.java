@@ -36,7 +36,7 @@ import java.util.Optional;
 //终焉竞技场事件 - 放置 the_last_end_arena 结构, 扫描红石块/青金石块作为玩家/对手出生点; 1s 后发欢迎, 4s 后生成随机对手并公布名字
 public class ArenaEvent extends LuckyEvent {
 
-    private static final ResourceLocation STRUCTURE_ID = new ResourceLocation(TheLastSwordMod.MOD_ID, "the_last_end_arena");
+    private static final ResourceLocation STRUCTURE_ID = ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "the_last_end_arena");
     private static final String LOAD_FAILED_KEY = "message.the_last_sword.arena.load_failed";
     private static final String ANCHOR_MISSING_KEY = "message.the_last_sword.arena.anchor_missing";
     private static final String INTRO_KEY = "message.the_last_sword.lucky_block.arena_intro";

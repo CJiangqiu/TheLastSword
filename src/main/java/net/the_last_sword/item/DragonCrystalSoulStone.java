@@ -81,7 +81,7 @@ public class DragonCrystalSoulStone extends Item {
             String entityId = entityData.getString("id");
             if (!entityId.isEmpty()) {
                 try {
-                    ResourceLocation rl = new ResourceLocation(entityId);
+                    ResourceLocation rl = ResourceLocation.parse(entityId);
                     EntityType<?> entityType = ForgeRegistries.ENTITY_TYPES.getValue(rl);
                     if (entityType != null) {
                         return entityType.getDescriptionId();

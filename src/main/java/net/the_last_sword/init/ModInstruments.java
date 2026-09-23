@@ -27,7 +27,7 @@ public final class ModInstruments {
     //号角物品可用的乐器池
     public static final TagKey<Instrument> DRAGON_CULT_HORNS =
             TagKey.create(Registries.INSTRUMENT,
-                    new ResourceLocation(TheLastSwordMod.MOD_ID, "dragon_cult_horns"));
+                    ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "dragon_cult_horns"));
 
     private ModInstruments() {
     }

@@ -16,7 +16,7 @@ public class NetworkHandler {
     private static final String PROTOCOL_VERSION = "4";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
-            new ResourceLocation(TheLastSwordMod.MOD_ID, "main"),
+            ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "main"),
             () -> PROTOCOL_VERSION,
             PROTOCOL_VERSION::equals,
             PROTOCOL_VERSION::equals

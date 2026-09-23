@@ -30,7 +30,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.Consumer;
 
-//拜龙教圣骑士战甲，护甲与耐久取原版铁甲档次，另加每件2点韧性
+//圣骑士以更高护甲抵挡正面攻击，耐久仍维持铁甲档次
 public abstract class DragonCultPaladinArmorItem extends ArmorItem implements GeoItem {
 
     private static final String TEXTURE = "the_last_sword:textures/item/dragon_cult_paladin_armor.png";
@@ -41,7 +41,7 @@ public abstract class DragonCultPaladinArmorItem extends ArmorItem implements Ge
     private static final int[] DURABILITY_PER_TYPE = {13, 15, 16, 11};
     private static final int DURABILITY_MULTIPLIER = 15;
     //护甲值按 [靴子, 护腿, 胸甲, 头盔] 排列
-    private static final int[] DEFENSE_PER_TYPE = {2, 5, 6, 2};
+    private static final int[] DEFENSE_PER_TYPE = {3, 6, 8, 3};
 
     private static final ArmorMaterial MATERIAL = new ArmorMaterial() {
         @Override

@@ -35,7 +35,7 @@ public class ModAttributes {
         ).setSyncable(true)
     );
 
-    //肃正防护恢复速度（点/tick）
+    //肃正防御恢复速度（点/tick）
     public static final RegistryObject<Attribute> JUSTIFIED_DEFENCE_RECOVERY_SPEED = ATTRIBUTES.register(
         "justified_defence_recovery_speed",
         () -> new RangedAttribute(

@@ -44,7 +44,7 @@ public class DragonCrystalNecklace extends Item implements ICurioItem {
             new AttributeModifier(NECKLACE_UUID, "dragon_crystal_necklace_health", -10.0,
                 AttributeModifier.Operation.ADDITION));
 
-        //肃正防护恢复速度 +50%
+        //肃正防御恢复速度 +50%
         modifiers.put(ModAttributes.JUSTIFIED_DEFENCE_RECOVERY_SPEED.get(),
             new AttributeModifier(RECOVERY_SPEED_UUID, "dragon_crystal_necklace_recovery_speed", 0.5,
                 AttributeModifier.Operation.MULTIPLY_BASE));

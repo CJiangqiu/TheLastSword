@@ -15,23 +15,23 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> THE_LAST_END_SWORD_WRAITH =
             SOUNDS.register("the_last_end_sword_wraith",
                     () -> SoundEvent.createVariableRangeEvent(
-                            new ResourceLocation(TheLastSwordMod.MOD_ID, "the_last_end_sword_wraith")));
+                            ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "the_last_end_sword_wraith")));
 
     //迷失战魂战斗音乐
     public static final RegistryObject<SoundEvent> LOST_WRAITH =
             SOUNDS.register("lost_wraith",
                     () -> SoundEvent.createVariableRangeEvent(
-                            new ResourceLocation(TheLastSwordMod.MOD_ID, "lost_wraith")));
+                            ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "lost_wraith")));
 
     //拜龙教袭击开始音乐
     public static final RegistryObject<SoundEvent> DRAGON_CULT_IS_COMING =
             SOUNDS.register("dragon_cult_is_coming",
                     () -> SoundEvent.createFixedRangeEvent(
-                            new ResourceLocation(TheLastSwordMod.MOD_ID, "dragon_cult_is_coming"), 64.0F));
+                            ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "dragon_cult_is_coming"), 64.0F));
 
     //危险技能提醒音效
     public static final RegistryObject<SoundEvent> ALARM =
             SOUNDS.register("alarm",
                     () -> SoundEvent.createVariableRangeEvent(
-                            new ResourceLocation(TheLastSwordMod.MOD_ID, "alarm")));
+                            ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "alarm")));
 }

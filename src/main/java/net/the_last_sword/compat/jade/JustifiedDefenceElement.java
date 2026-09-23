@@ -17,7 +17,7 @@ import java.text.DecimalFormat;
 public class JustifiedDefenceElement extends Element {
 
     //复用 HUD 叠加层的护盾图标
-    private static final ResourceLocation ICON = new ResourceLocation(TheLastSwordMod.MOD_ID, "textures/screens/justified_defence_full.png");
+    private static final ResourceLocation ICON = ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "textures/screens/justified_defence_full.png");
     private static final int ICON_SIZE = 9;
     private static final int LINE_HEIGHT = 10;
 

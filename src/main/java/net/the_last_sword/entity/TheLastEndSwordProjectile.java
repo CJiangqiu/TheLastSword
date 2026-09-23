@@ -223,7 +223,7 @@ public class TheLastEndSwordProjectile extends TheLastEndSwordItemsProjectile {
         applySnapshot(projectile, shooter);
         world.addFreshEntity(projectile);
         world.playSound(null, shooter.getX(), shooter.getY(), shooter.getZ(),
-                ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation("entity.ender_dragon.shoot")),
+                ForgeRegistries.SOUND_EVENTS.getValue(ResourceLocation.parse("entity.ender_dragon.shoot")),
                 SoundSource.PLAYERS, 1,
                 1f / (random.nextFloat() * 0.5f + 1) + (power / 2));
         return projectile;
@@ -239,7 +239,7 @@ public class TheLastEndSwordProjectile extends TheLastEndSwordItemsProjectile {
         applySnapshot(projectile, shooter);
         shooter.level().addFreshEntity(projectile);
         shooter.level().playSound(null, shooter.getX(), shooter.getY(), shooter.getZ(),
-                ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation("entity.ender_dragon.shoot")),
+                ForgeRegistries.SOUND_EVENTS.getValue(ResourceLocation.parse("entity.ender_dragon.shoot")),
                 SoundSource.PLAYERS, 1,
                 1f / (RandomSource.create().nextFloat() * 0.5f + 1));
         return projectile;

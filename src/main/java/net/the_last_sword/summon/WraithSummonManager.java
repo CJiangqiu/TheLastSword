@@ -601,7 +601,7 @@ public class WraithSummonManager {
     //从字符串获取实体类型
     private static EntityType<?> getEntityTypeFromString(String entityTypeStr) {
         try {
-            ResourceLocation rl = new ResourceLocation(entityTypeStr);
+            ResourceLocation rl = ResourceLocation.parse(entityTypeStr);
             return ForgeRegistries.ENTITY_TYPES.getValue(rl);
         } catch (Exception e) {
             return null;

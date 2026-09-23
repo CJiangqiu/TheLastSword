@@ -50,14 +50,14 @@ public class TheLastSwordQuestHandler {
     private static final String MOD_NAME_KEY = "item_group." + TheLastSwordMod.MOD_ID + ".the_last_sword_tab";
     private static final String PREFIX_KEY = "message.the_last_sword.quest_prefix";
 
-    private static final ResourceLocation WELCOME = new ResourceLocation(TheLastSwordMod.MOD_ID, "the_last_sword_welcome");
-    private static final ResourceLocation TROUBLED_BLACKSMITH = new ResourceLocation(TheLastSwordMod.MOD_ID, "troubled_blacksmith");
-    private static final ResourceLocation DRAGON_CULT_RAID = new ResourceLocation(TheLastSwordMod.MOD_ID, "dragon_cult_raid");
+    private static final ResourceLocation WELCOME = ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "the_last_sword_welcome");
+    private static final ResourceLocation TROUBLED_BLACKSMITH = ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "troubled_blacksmith");
+    private static final ResourceLocation DRAGON_CULT_RAID = ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "dragon_cult_raid");
     public static final ResourceLocation DRAGON_CULT_RAID_VICTORY =
-            new ResourceLocation(TheLastSwordMod.MOD_ID, "dragon_cult_raid_victory");
+            ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "dragon_cult_raid_victory");
     private static final ResourceLocation NETHER_TRAVELER_OUTPOST =
-            new ResourceLocation(TheLastSwordMod.MOD_ID, "nether_traveler_outpost");
-    private static final ResourceLocation LIBERATOR = new ResourceLocation(TheLastSwordMod.MOD_ID, "liberator");
+            ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "nether_traveler_outpost");
+    private static final ResourceLocation LIBERATOR = ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "liberator");
 
     private static final int CHECK_INTERVAL = 40;
     private static final int VILLAGE_HINT_DELAY = 60;

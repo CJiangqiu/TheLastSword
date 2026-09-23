@@ -18,9 +18,9 @@ public class JustifiedDefenceOverlay {
 
     //护盾图标材质
     public static final ResourceLocation ICON_FULL =
-        new ResourceLocation(TheLastSwordMod.MOD_ID, "textures/screens/justified_defence_full.png");
+        ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "textures/screens/justified_defence_full.png");
     public static final ResourceLocation ICON_EMPTY =
-        new ResourceLocation(TheLastSwordMod.MOD_ID, "textures/screens/justified_defence_empty.png");
+        ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "textures/screens/justified_defence_empty.png");
 
     //图标配置
     private static final int ICON_SIZE = 9;          // 图标大小 9x9

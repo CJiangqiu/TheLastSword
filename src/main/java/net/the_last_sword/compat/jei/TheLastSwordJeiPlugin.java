@@ -26,7 +26,7 @@ import java.util.List;
 @JeiPlugin
 public class TheLastSwordJeiPlugin implements IModPlugin {
 
-    private static final ResourceLocation PLUGIN_UID = new ResourceLocation(TheLastSwordMod.MOD_ID, "jei_plugin");
+    private static final ResourceLocation PLUGIN_UID = ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "jei_plugin");
     private static IJeiRuntime runtime;
     private static List<DragonCrystalSmithingRecipe> displayedRecipes = List.of();
 

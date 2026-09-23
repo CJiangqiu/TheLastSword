@@ -13,17 +13,17 @@ public class DragonCultPriestModel extends GeoModel<DragonCultPriestEntity> {
 
     @Override
     public ResourceLocation getAnimationResource(DragonCultPriestEntity entity) {
-        return new ResourceLocation("the_last_sword", "animations/dragon_cult_priest.animation.json");
+        return ResourceLocation.fromNamespaceAndPath("the_last_sword", "animations/dragon_cult_priest.animation.json");
     }
 
     @Override
     public ResourceLocation getModelResource(DragonCultPriestEntity entity) {
-        return new ResourceLocation("the_last_sword", "geo/dragon_cult_priest.geo.json");
+        return ResourceLocation.fromNamespaceAndPath("the_last_sword", "geo/dragon_cult_priest.geo.json");
     }
 
     @Override
     public ResourceLocation getTextureResource(DragonCultPriestEntity entity) {
-        return new ResourceLocation("the_last_sword", "textures/entities/dragon_cult_priest.png");
+        return ResourceLocation.fromNamespaceAndPath("the_last_sword", "textures/entities/dragon_cult_priest.png");
     }
 
     @Override

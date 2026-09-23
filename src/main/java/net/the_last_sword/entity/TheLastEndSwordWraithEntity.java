@@ -313,7 +313,7 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
         private static final Map<UUID, Integer> ACTIVE_EFFECTS = new ConcurrentHashMap<>();
         private static final int DURATION = 260;  //13秒
 
-        private static final ResourceLocation THE_LAST_END_PRESET = new ResourceLocation("eca", "the_last_end");
+        private static final ResourceLocation THE_LAST_END_PRESET = ResourceLocation.fromNamespaceAndPath("eca", "the_last_end");
 
         public static void start(TheLastEndSwordWraithEntity wraith) {
             ACTIVE_EFFECTS.put(wraith.getUUID(), 0);

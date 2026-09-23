@@ -19,7 +19,7 @@ import net.the_last_sword.init.ModEntities;
 public class TestEntityExtension extends EntityExtension {
 
     private static final ResourceLocation TEST_ENTITY_TEXTURE =
-        new ResourceLocation(TheLastSwordMod.MOD_ID, "textures/entities/test_entity.png");
+        ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "textures/entities/test_entity.png");
 
     static {
         EntityExtensionManager.register(new TestEntityExtension());

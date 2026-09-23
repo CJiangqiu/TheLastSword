@@ -24,7 +24,7 @@ public class DragonArmorOverlay {
 
     //叠加层材质
     public static final ResourceLocation OVERLAY_TEXTURE =
-        new ResourceLocation(TheLastSwordMod.MOD_ID, "textures/screens/dragon_armor_overlay.png");
+        ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "textures/screens/dragon_armor_overlay.png");
 
     //在所有原版 HUD 渲染之后渲染叠加层
     public static void onRenderGuiOverlay(RenderGuiOverlayEvent.Post event) {

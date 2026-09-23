@@ -26,7 +26,7 @@ public class TravelersHoldStructure extends Structure {
 
     private static final ResourceKey<StructureTemplatePool> START_POOL = ResourceKey.create(
             Registries.TEMPLATE_POOL,
-            new ResourceLocation(TheLastSwordMod.MOD_ID, "travelers_hold"));
+            ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "travelers_hold"));
     private static final int MAX_SEARCH_Y = 112;
     private static final int MIN_SEARCH_Y = 32;
     // 模板本身高 26 格；只有整座据点上方空间足够时才接受这个地表。

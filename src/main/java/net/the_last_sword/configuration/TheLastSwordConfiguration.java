@@ -21,6 +21,7 @@ public class TheLastSwordConfiguration {
     public static ForgeConfigSpec.ConfigValue<Double> PRIEST_STAFF_PROJECTILE_DAMAGE_MULTIPLIER;
     public static ForgeConfigSpec.ConfigValue<Double> PRIEST_STAFF_GUARD_RADIUS;
     public static ForgeConfigSpec.ConfigValue<Double> PRIEST_STAFF_GUARD_SHIELD_GAIN;
+    public static ForgeConfigSpec.ConfigValue<Integer> PRIEST_STAFF_GUARD_COOLDOWN;
 
     // Armor Generic | 盔甲类通用配置（等级区间）
     public static ForgeConfigSpec.ConfigValue<Double> ARMOR_INCREASE_LOW_LEVEL;    // < 6级
@@ -417,6 +418,12 @@ public class TheLastSwordConfiguration {
                 "为每个友方增加的肃正防御护盾值"
             )
             .defineInRange("Guard Shield Gain", 1.0, 0.0, 100.0);
+        PRIEST_STAFF_GUARD_COOLDOWN = BUILDER
+            .comment(
+                "Guard ability cooldown in ticks (100 ticks = 5 seconds)",
+                "守护能力的冷却时间（刻，100刻 = 5秒）"
+            )
+            .defineInRange("Guard Cooldown", 100, 0, 72000);
         BUILDER.pop();
 
         BUILDER.push("Dragon Crystal Sword");
@@ -2015,6 +2022,10 @@ public class TheLastSwordConfiguration {
 
     public static double getPriestStaffGuardShieldGainSafely() {
         return safeGet(PRIEST_STAFF_GUARD_SHIELD_GAIN, 1.0);
+    }
+
+    public static int getPriestStaffGuardCooldownSafely() {
+        return safeGet(PRIEST_STAFF_GUARD_COOLDOWN, 100);
     }
 
     //盔甲类通用配置（等级区间）

@@ -84,7 +84,7 @@ public class LostWraithEntity extends TheLastEndEntity {
 
     // 激活演出BossShow的注册id
     private static final ResourceLocation BOSS_SHOW_ID =
-            new ResourceLocation("the_last_sword", "lost_wraith");
+            ResourceLocation.fromNamespaceAndPath("the_last_sword", "lost_wraith");
 
     public LostWraithEntity(EntityType<? extends LostWraithEntity> type, Level world) {
         super(type, world);
@@ -341,7 +341,7 @@ public class LostWraithEntity extends TheLastEndEntity {
 
                 // 通过ECA API播放战斗音乐
                 MusicData musicData = new MusicData(
-                    new ResourceLocation("the_last_sword", "lost_wraith"),
+                    ResourceLocation.fromNamespaceAndPath("the_last_sword", "lost_wraith"),
                     SoundSource.MUSIC.ordinal(),
                     1.0f, 1.0f, true, true
                 );

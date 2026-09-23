@@ -17,7 +17,7 @@ public class JourneyLogsScreen extends Screen {
 
     //与卷轴GUI共用统一背景
     private static final ResourceLocation SCROLL_TEXTURE =
-        new ResourceLocation(TheLastSwordMod.MOD_ID, "textures/screens/scroll_background.png");
+        ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "textures/screens/scroll_background.png");
 
     private static final int GUI_WIDTH = 430;
     private static final int GUI_HEIGHT = 200;

@@ -12,7 +12,7 @@ import software.bernie.geckolib.renderer.GeoRenderer;
 import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
 
 public class TheLastEndSwordWraithLayer extends GeoRenderLayer<TheLastEndSwordWraithEntity> {
-    private static final ResourceLocation LAYER = new ResourceLocation("the_last_sword", "textures/entities/the_last_end_sword_wraith_light.png");
+    private static final ResourceLocation LAYER = ResourceLocation.fromNamespaceAndPath("the_last_sword", "textures/entities/the_last_end_sword_wraith_light.png");
 
     public TheLastEndSwordWraithLayer(GeoRenderer<TheLastEndSwordWraithEntity> entityRenderer) {
         super(entityRenderer);

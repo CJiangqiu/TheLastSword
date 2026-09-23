@@ -12,7 +12,7 @@ import net.the_last_sword.client.gui.menu.DragonCrystalSmithingTableMenu;
 public class DragonCrystalSmithingTableScreen extends AbstractContainerScreen<DragonCrystalSmithingTableMenu> {
 
     private static final ResourceLocation TEXTURE =
-        new ResourceLocation(TheLastSwordMod.MOD_ID, "textures/screens/dragon_crystal_smithing_table_gui.png");
+        ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "textures/screens/dragon_crystal_smithing_table_gui.png");
 
     public DragonCrystalSmithingTableScreen(DragonCrystalSmithingTableMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);

@@ -30,6 +30,7 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
+import net.the_last_sword.entity.TheLastEndEntity;
 import net.the_last_sword.init.ModAttributes;
 import net.the_last_sword.init.ModEffects;
 import net.the_last_sword.item.DragonArmorItem;
@@ -143,8 +144,9 @@ public class EntityUtil {
     public static void theLastEndSetDead(LivingEntity entity, DamageSource damageSource) {
         if (entity == null || damageSource == null) return;
 
-        //添加实体类型到 ECA 禁生成表（玩家除外）
-        if (!(entity instanceof Player) && entity.level() instanceof ServerLevel serverLevel) {
+        //终焉种需要留在世界中完成死亡动画与掉落结算
+        if (!(entity instanceof Player) && !(entity instanceof TheLastEndEntity)
+                && entity.level() instanceof ServerLevel serverLevel) {
             int banTime = TheLastSwordConfiguration.getReviveBanTimeSafely();
             if (banTime > 0) {
                 EcaAPI.banSpawn(serverLevel, entity.getType(), banTime);
@@ -160,6 +162,9 @@ public class EntityUtil {
         if (TheLastSwordConfiguration.getDieMessageSafely()) {
             sendDeathMessage(entity, damageSource);
         }
+        if (entity instanceof TheLastEndEntity) {
+            TrueHealthManager.setHealth(entity, 0.0F);
+        }
         //清除防御系统，防止 die/tickDeath 被保护拦截
         TrueHealthManager.clear(entity);
         var shieldAttr = entity.getAttribute(ModAttributes.JUSTIFIED_DEFENCE.get());
@@ -174,6 +179,10 @@ public class EntityUtil {
 
         if (entity instanceof ServerPlayer player) {
             WorldAnchorManager.resetPlayerWorldAnchorBeforeKill(player);
+        }
+        if (entity instanceof TheLastEndEntity theLastEnd) {
+            theLastEnd.triggerDeath(damageSource);
+            return;
         }
         EcaAPI.kill(entity, damageSource);
     }

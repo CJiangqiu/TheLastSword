@@ -183,7 +183,7 @@ public class CataclysmEventHandler {
     //获取炽热烙印效果
     private static MobEffect getBlazingBrandEffect() {
         try {
-            return ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation("cataclysm", "blazing_brand"));
+            return ForgeRegistries.MOB_EFFECTS.getValue(ResourceLocation.fromNamespaceAndPath("cataclysm", "blazing_brand"));
         } catch (Exception ignored) {
             return null;
         }
@@ -192,7 +192,7 @@ public class CataclysmEventHandler {
     //检查目标是否已经处于眩晕状态
     private static boolean isAlreadyStunned(LivingEntity target) {
         try {
-            MobEffect stunEffect = ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation("cataclysm", "stun"));
+            MobEffect stunEffect = ForgeRegistries.MOB_EFFECTS.getValue(ResourceLocation.fromNamespaceAndPath("cataclysm", "stun"));
             return stunEffect != null && target.hasEffect(stunEffect);
         } catch (Exception ignored) {
             return false;
@@ -225,7 +225,7 @@ public class CataclysmEventHandler {
     //应用灾变的眩晕效果
     private static void applyCataclysmStunEffect(LivingEntity target, int durationTicks) {
         try {
-            MobEffect stunEffect = ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation("cataclysm", "stun"));
+            MobEffect stunEffect = ForgeRegistries.MOB_EFFECTS.getValue(ResourceLocation.fromNamespaceAndPath("cataclysm", "stun"));
             if (stunEffect != null) {
                 target.addEffect(new MobEffectInstance(stunEffect, durationTicks, 0));
             }
@@ -270,7 +270,7 @@ public class CataclysmEventHandler {
     //获取深渊烧灼效果
     private static MobEffect getAbyssalBurnEffect() {
         try {
-            return ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation("cataclysm", "abyssal_burn"));
+            return ForgeRegistries.MOB_EFFECTS.getValue(ResourceLocation.fromNamespaceAndPath("cataclysm", "abyssal_burn"));
         } catch (Exception ignored) {
             return null;
         }

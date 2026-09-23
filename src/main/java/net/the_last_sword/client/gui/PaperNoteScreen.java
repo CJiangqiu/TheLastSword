@@ -17,7 +17,7 @@ public class PaperNoteScreen extends Screen {
 
     //纸条背景纹理（512高清贴图渲染到256逻辑尺寸）
     private static final ResourceLocation PAPER_TEXTURE =
-        new ResourceLocation(TheLastSwordMod.MOD_ID, "textures/screens/elder_paper_gui.png");
+        ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "textures/screens/elder_paper_gui.png");
 
     private static final int GUI_WIDTH = 256;
     private static final int GUI_HEIGHT = 256;

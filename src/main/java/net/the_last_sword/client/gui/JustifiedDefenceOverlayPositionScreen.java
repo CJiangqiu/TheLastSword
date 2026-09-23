@@ -14,7 +14,7 @@ import net.the_last_sword.network.NetworkHandler;
 
 public class JustifiedDefenceOverlayPositionScreen extends Screen {
     private static final ResourceLocation ICON_FULL =
-        new ResourceLocation(TheLastSwordMod.MOD_ID, "textures/screens/justified_defence_full.png");
+        ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "textures/screens/justified_defence_full.png");
 
     private static final int ICON_SIZE = 9;
     private static final int ICON_SPACING = -8;

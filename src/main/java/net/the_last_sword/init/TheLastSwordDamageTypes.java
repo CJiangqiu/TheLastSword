@@ -19,7 +19,7 @@ public final class TheLastSwordDamageTypes {
     private static ResourceKey<DamageType> create(String name) {
         return ResourceKey.create(
                 Registries.DAMAGE_TYPE,
-                new ResourceLocation(TheLastSwordMod.MOD_ID, name)
+                ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, name)
         );
     }
 }

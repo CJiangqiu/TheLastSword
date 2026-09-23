@@ -29,7 +29,7 @@ public class SummonWraithGuiScreen extends AbstractContainerScreen<SummonWraithG
         this.imageHeight = 240;
     }
 
-    private static final ResourceLocation texture = new ResourceLocation("the_last_sword:textures/screens/summon_wraith_gui.png");
+    private static final ResourceLocation texture = ResourceLocation.parse("the_last_sword:textures/screens/summon_wraith_gui.png");
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
@@ -45,7 +45,7 @@ public class SummonWraithGuiScreen extends AbstractContainerScreen<SummonWraithG
         RenderSystem.defaultBlendFunc();
         guiGraphics.blit(texture, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight, this.imageWidth, this.imageHeight);
 
-        guiGraphics.blit(new ResourceLocation("the_last_sword:textures/screens/summon_wraith_gui_background.png"), this.leftPos + 28, this.topPos + -38, 0, 0, 120, 186, 120, 186);
+        guiGraphics.blit(ResourceLocation.parse("the_last_sword:textures/screens/summon_wraith_gui_background.png"), this.leftPos + 28, this.topPos + -38, 0, 0, 120, 186, 120, 186);
 
         RenderSystem.disableBlend();
     }

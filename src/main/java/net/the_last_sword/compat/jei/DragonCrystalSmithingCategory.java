@@ -23,12 +23,12 @@ import java.util.Arrays;
 //龙晶锻造JEI配方类别
 public class DragonCrystalSmithingCategory implements IRecipeCategory<DragonCrystalSmithingRecipe> {
 
-    public static final ResourceLocation UID = new ResourceLocation(TheLastSwordMod.MOD_ID, "dragon_crystal_smithing");
+    public static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "dragon_crystal_smithing");
     public static final RecipeType<DragonCrystalSmithingRecipe> RECIPE_TYPE =
         RecipeType.create(TheLastSwordMod.MOD_ID, "dragon_crystal_smithing", DragonCrystalSmithingRecipe.class);
 
     //箭头贴图（32x32 灰底深色箭头）
-    private static final ResourceLocation ARROW_TEXTURE = new ResourceLocation(TheLastSwordMod.MOD_ID, "textures/screens/arrow.png");
+    private static final ResourceLocation ARROW_TEXTURE = ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "textures/screens/arrow.png");
 
     //画布尺寸 132x44; 透明底, 槽框由 JEI 自绘, 箭头用贴图
     private final IDrawable background;

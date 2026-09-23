@@ -14,7 +14,7 @@ public enum HealBanProvider implements IEntityComponentProvider {
 
     INSTANCE;
 
-    public static final ResourceLocation UID = new ResourceLocation(TheLastSwordMod.MOD_ID, "heal_ban");
+    public static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "heal_ban");
 
     @Override
     public void appendTooltip(ITooltip tooltip, EntityAccessor accessor, IPluginConfig config) {

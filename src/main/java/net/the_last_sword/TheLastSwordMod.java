@@ -11,7 +11,6 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -54,9 +53,9 @@ public class TheLastSwordMod {
         }
     }
 
-    public TheLastSwordMod() {
+    public TheLastSwordMod(FMLJavaModLoadingContext context) {
 
-        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        IEventBus modEventBus = context.getModEventBus();
         ModAttributes.register(modEventBus);
         ModEffects.register(modEventBus);
         ModItems.register(modEventBus);
@@ -80,7 +79,7 @@ public class TheLastSwordMod {
         //注册网络包
         NetworkHandler.register();
 
-        ModLoadingContext.get().registerConfig(
+        context.registerConfig(
                 ModConfig.Type.COMMON,
                 TheLastSwordConfiguration.SPEC,
                 "TheLastSword-common.toml"

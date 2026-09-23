@@ -25,7 +25,7 @@ import java.util.Deque;
 @OnlyIn(Dist.CLIENT)
 public class TheLastEndSwordProjectileRenderer extends EntityRenderer<TheLastEndSwordProjectile> {
 
-    private static final ResourceLocation END_CRYSTAL_LOCATION = new ResourceLocation("textures/entity/end_crystal/end_crystal.png");
+    private static final ResourceLocation END_CRYSTAL_LOCATION = ResourceLocation.parse("textures/entity/end_crystal/end_crystal.png");
     private static final RenderType RENDER_TYPE = RenderType.entityCutoutNoCull(END_CRYSTAL_LOCATION);
     private static final float SIN_45 = (float) Math.sin(0.7853981633974483);
 

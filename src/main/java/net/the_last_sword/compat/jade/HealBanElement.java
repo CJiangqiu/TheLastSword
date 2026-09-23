@@ -13,7 +13,7 @@ import snownee.jade.api.ui.IDisplayHelper;
 public class HealBanElement extends Element {
 
     private static final ResourceLocation ICON =
-            new ResourceLocation("the_last_sword", "textures/screens/world_anchor_full.png");
+            ResourceLocation.fromNamespaceAndPath("the_last_sword", "textures/screens/world_anchor_full.png");
     private static final int ICON_SIZE = 9;
     private static final int LINE_HEIGHT = 10;
 

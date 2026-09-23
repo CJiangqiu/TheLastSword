@@ -8,16 +8,16 @@ public class DragonCrystalEnchantingTableDisplayModel extends GeoModel<DragonCry
 
     @Override
     public ResourceLocation getAnimationResource(DragonCrystalEnchantingTableDisplayItem animatable) {
-        return new ResourceLocation("the_last_sword", "animations/dragon_crystal_enchanting_table.animation.json");
+        return ResourceLocation.fromNamespaceAndPath("the_last_sword", "animations/dragon_crystal_enchanting_table.animation.json");
     }
 
     @Override
     public ResourceLocation getModelResource(DragonCrystalEnchantingTableDisplayItem animatable) {
-        return new ResourceLocation("the_last_sword", "geo/dragon_crystal_enchanting_table.geo.json");
+        return ResourceLocation.fromNamespaceAndPath("the_last_sword", "geo/dragon_crystal_enchanting_table.geo.json");
     }
 
     @Override
     public ResourceLocation getTextureResource(DragonCrystalEnchantingTableDisplayItem animatable) {
-        return new ResourceLocation("the_last_sword", "textures/block/dragon_crystal_enchanting_table.png");
+        return ResourceLocation.fromNamespaceAndPath("the_last_sword", "textures/block/dragon_crystal_enchanting_table.png");
     }
 }

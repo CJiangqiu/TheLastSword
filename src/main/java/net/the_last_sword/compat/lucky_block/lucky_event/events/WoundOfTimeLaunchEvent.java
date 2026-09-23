@@ -23,7 +23,7 @@ import java.util.Optional;
 //时间之伤发射事件 - 以幸运方块位置为锚, 其上方 64 格随机四向放置 wound_of_time 结构; 有玩家时再做 5..1 倒计时并给漂浮 V
 public class WoundOfTimeLaunchEvent extends LuckyEvent {
 
-    private static final ResourceLocation STRUCTURE_ID = new ResourceLocation(TheLastSwordMod.MOD_ID, "wound_of_time");
+    private static final ResourceLocation STRUCTURE_ID = ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "wound_of_time");
     private static final String LIFTOFF_KEY = "message.the_last_sword.lucky_block.liftoff";
     private static final String LOAD_FAILED_KEY = "message.the_last_sword.arena.load_failed";
     private static final int TICKS_PER_SECOND = 20;
