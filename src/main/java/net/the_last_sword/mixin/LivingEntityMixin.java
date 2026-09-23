@@ -30,7 +30,7 @@ import net.the_last_sword.network.NetworkHandler;
 import net.the_last_sword.summon.WraithSummonManager;
 import net.the_last_sword.util.EntityUtil;
 import net.the_last_sword.util.health.TrueHealthManager;
-import net.the_last_sword.util.health.WorldAnchorManager;
+import net.the_last_sword.util.health.PresentWorldAnchorManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -50,8 +50,8 @@ public class LivingEntityMixin {
     //静态初始化注入：在原版 defineId 调用后紧接着定义我们的 EntityDataAccessor
     @Inject(method = "<clinit>", at = @At("TAIL"))
     private static void the_last_sword$onClinit(CallbackInfo ci) {
-        WorldAnchorManager.WORLD_ANCHOR = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.STRING);
-        WorldAnchorManager.HEAL_BAN_TIME = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.INT);
+        PresentWorldAnchorManager.PRESENT_WORLD_ANCHOR = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.STRING);
+        PresentWorldAnchorManager.HEAL_BAN_TIME = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.INT);
         EntityUtil.IS_PROTECTED = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.BOOLEAN);
     }
 
@@ -59,15 +59,15 @@ public class LivingEntityMixin {
     @Inject(method = "defineSynchedData", at = @At("TAIL"))
     private void the_last_sword$onDefineSynchedData(CallbackInfo ci) {
         LivingEntity entity = (LivingEntity) (Object) this;
-        entity.getEntityData().define(WorldAnchorManager.WORLD_ANCHOR, "");
-        entity.getEntityData().define(WorldAnchorManager.HEAL_BAN_TIME, 0);
+        entity.getEntityData().define(PresentWorldAnchorManager.PRESENT_WORLD_ANCHOR, "");
+        entity.getEntityData().define(PresentWorldAnchorManager.HEAL_BAN_TIME, 0);
         entity.getEntityData().define(EntityUtil.IS_PROTECTED, false);
     }
 
     //读档完成后恢复同步值，避免为所有生物增加逐 tick 轮询
     @Inject(method = "readAdditionalSaveData", at = @At("TAIL"))
-    private void the_last_sword$syncWorldAnchorAfterLoad(CompoundTag tag, CallbackInfo ci) {
-        WorldAnchorManager.syncWorldAnchor((LivingEntity) (Object) this);
+    private void the_last_sword$syncPresentWorldAnchorAfterLoad(CompoundTag tag, CallbackInfo ci) {
+        PresentWorldAnchorManager.syncPresentWorldAnchor((LivingEntity) (Object) this);
     }
 
     //检查是否是绝对毁灭伤害源
@@ -78,26 +78,33 @@ public class LivingEntityMixin {
 
     //等级附伤重入时不得再次派生自身
     @Unique
-    private boolean the_last_sword$isTheLastEndLevelBonus(DamageSource source) {
+    private boolean the_last_sword$isLevelBonus(DamageSource source) {
         return source instanceof AbsoluteDestructionDamageSource absoluteDamage
-                && absoluteDamage.isTheLastEndLevelBonus();
+                && absoluteDamage.isLevelBonus();
     }
 
     @Unique
-    private void the_last_sword$applyTheLastEndLevelBonus(LivingEntity target, DamageSource source,
+    private void the_last_sword$applyLevelBonus(LivingEntity target, DamageSource source,
                                                            float damageAmount) {
-        if (the_last_sword$isTheLastEndLevelBonus(source)
-                || !(source.getEntity() instanceof TheLastEndEntity attacker)
-                || attacker.getTheLastEndLevel() < 6
+        if (the_last_sword$isLevelBonus(source)
+                || !(source.getEntity() instanceof LivingEntity attacker)
                 || !Float.isFinite(damageAmount)
                 || damageAmount <= 0.0F
                 || !EntityUtil.canAttack(attacker, target)) {
             return;
         }
 
-        float bonusDamage = damageAmount * attacker.getTheLastEndLevel() / 100.0F;
+        int level = attacker instanceof TheLastEndEntity endEntity
+                ? endEntity.getTheLastEndLevel()
+                : TheLastSwordConfiguration.getSwordWraithAsTheLastEndEntitySafely()
+                && TheLastSwordConfiguration.getSwordWraithAbsoluteDestructionDamageSafely()
+                ? WraithSummonManager.getWraithLevel(attacker) : 0;
+        if (level < 6) {
+            return;
+        }
+        float bonusDamage = damageAmount * level / 100.0F;
         if (Float.isFinite(bonusDamage) && bonusDamage > 0.0F) {
-            EcaAPI.hurt(target, AbsoluteDestructionDamageSource.theLastEndLevelBonus(attacker), bonusDamage);
+            EcaAPI.hurt(target, AbsoluteDestructionDamageSource.levelBonus(attacker), bonusDamage);
         }
     }
 
@@ -262,7 +269,7 @@ public class LivingEntityMixin {
         the_last_sword$handleJustifiedDefenceProtection(entity);
 
         //每 tick 更新禁疗计时器
-        WorldAnchorManager.tickHealBanTime(entity);
+        PresentWorldAnchorManager.tickHealBanTime(entity);
 
     }
 
@@ -305,18 +312,12 @@ public class LivingEntityMixin {
             return;
         }
 
-        the_last_sword$applyTheLastEndLevelBonus(entity, damageSource, damageAmount);
+        the_last_sword$applyLevelBonus(entity, damageSource, damageAmount);
 
-        //绝毁自行结算真实生命值与世界锚度，避免原版再次扣血
+        //绝毁自行结算真实生命值与现世锚度，避免原版再次扣血
         if (the_last_sword$isAbsoluteDestructionDamage(damageSource)) {
-            cir.setReturnValue(WorldAnchorManager.handleAbsoluteDestructionDamage(entity, damageSource, damageAmount));
+            cir.setReturnValue(PresentWorldAnchorManager.handleAbsoluteDestructionDamage(entity, damageSource, damageAmount));
             return;
-        }
-
-        //剑灵附加绝毁伤害（Mixin检测，绕过事件取消问题）
-        if (!the_last_sword$isAbsoluteDestructionDamage(damageSource)
-                && damageSource.getEntity() instanceof LivingEntity wraithAttacker) {
-            WraithSummonManager.handleWraithDamage(entity, wraithAttacker);
         }
 
         //终焉侧伤害统一清目标无敌帧，须排在绝毁附加之后：绝毁会重入 hurt 并把无敌帧设回 20
@@ -361,6 +362,7 @@ public class LivingEntityMixin {
             float newHealth = currentHealth - realDamage;
             TrueHealthManager.setHealth(entity, newHealth);
             if (newHealth <= 0.0f) {
+                WraithSummonManager.stopWraithResurrection(entity);
                 TrueHealthManager.clear(entity);
                 EcaAPI.setHealth(entity, 0.0f);
             }
@@ -377,6 +379,8 @@ public class LivingEntityMixin {
         if (entity.level().isClientSide) {
             return;
         }
+
+        PresentWorldAnchorManager.restorePresentWorldAnchorFromHeal(entity, healAmount);
 
         //检查是否受保护
         if (EntityUtil.hasProtection(entity)) {
@@ -441,7 +445,7 @@ public class LivingEntityMixin {
     @Inject(method = "die", at = @At("RETURN"))
     private void onLivingEntityDieReturn(DamageSource damageSource, CallbackInfo ci) {
         LivingEntity entity = (LivingEntity) (Object) this;
-        WorldAnchorManager.clearHealBan(entity);
+        PresentWorldAnchorManager.clearHealBan(entity);
     }
 
 

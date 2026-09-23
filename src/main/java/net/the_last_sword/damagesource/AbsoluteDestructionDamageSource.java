@@ -15,25 +15,25 @@ import net.the_last_sword.init.TheLastSwordDamageTypes;
 public class AbsoluteDestructionDamageSource extends DamageSource {
 
     private final ItemStack weapon;
-    private final boolean theLastEndLevelBonus;
+    private final boolean levelBonus;
 
     public AbsoluteDestructionDamageSource(Holder<DamageType> damageType, Entity attacker, ItemStack weapon) {
         this(damageType, attacker, weapon, false);
     }
 
     private AbsoluteDestructionDamageSource(Holder<DamageType> damageType, Entity attacker, ItemStack weapon,
-                                            boolean theLastEndLevelBonus) {
+                                            boolean levelBonus) {
         super(damageType, attacker, attacker);
         this.weapon = weapon;
-        this.theLastEndLevelBonus = theLastEndLevelBonus;
+        this.levelBonus = levelBonus;
     }
 
     public ItemStack getWeapon() {
         return weapon;
     }
 
-    public boolean isTheLastEndLevelBonus() {
-        return theLastEndLevelBonus;
+    public boolean isLevelBonus() {
+        return levelBonus;
     }
 
     // ==================== 工厂方法 ====================
@@ -56,7 +56,7 @@ public class AbsoluteDestructionDamageSource extends DamageSource {
     }
 
     //等级附伤使用独立标记，阻止伤害重入时再次派生自身
-    public static DamageSource theLastEndLevelBonus(LivingEntity attacker) {
+    public static DamageSource levelBonus(LivingEntity attacker) {
         Registry<DamageType> reg = attacker.level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE);
         Holder<DamageType> holder = reg.getHolderOrThrow(TheLastSwordDamageTypes.ABSOLUTE_DESTRUCTION);
         return new AbsoluteDestructionDamageSource(holder, attacker, attacker.getMainHandItem(), true);

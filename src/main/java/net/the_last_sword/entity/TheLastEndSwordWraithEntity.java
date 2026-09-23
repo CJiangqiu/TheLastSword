@@ -1,6 +1,8 @@
 package net.the_last_sword.entity;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -32,6 +34,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.eca.api.EcaAPI;
 import net.eca.network.EntityExtensionOverridePacket.SkyboxData;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
 import net.the_last_sword.entity.ai.*;
@@ -175,6 +178,42 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
         this.targetSelector.addGoal(2, new SwordWraithOwnerHurtByTargetGoal(this));
         this.targetSelector.addGoal(3, new SwordWraithOwnerHurtTargetGoal(this));
         this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, Monster.class, true));
+    }
+
+    @Override
+    public void setTarget(@Nullable LivingEntity target) {
+        LivingEntity previousTarget = getTarget();
+        super.setTarget(target);
+
+        LivingEntity currentTarget = getTarget();
+        if (level().isClientSide || currentTarget == null || currentTarget == previousTarget
+                || !TheLastSwordConfiguration.getSwordWraithBossTalkSafely()) {
+            return;
+        }
+
+        ResourceLocation targetId = ForgeRegistries.ENTITY_TYPES.getKey(currentTarget.getType());
+        if (targetId == null || !"cataclysm".equals(targetId.getNamespace())) {
+            return;
+        }
+
+        String dialogueId = switch (targetId.getPath()) {
+            case "ancient_remnant", "ender_guardian", "ignis", "maledictus",
+                    "netherite_monstrosity", "scylla", "the_harbinger", "the_leviathan" -> targetId.getPath();
+            default -> null;
+        };
+        if (dialogueId == null) {
+            return;
+        }
+
+        Component message = Component.literal("[")
+                .append(Component.translatable("entity.the_last_sword.the_last_end_sword_wraith"))
+                .append(Component.literal("] "))
+                .withStyle(ChatFormatting.DARK_PURPLE)
+                .append(Component.translatable("talk.the_last_end_sword_wraith." + dialogueId)
+                        .withStyle(ChatFormatting.WHITE));
+        for (Player player : level().getEntitiesOfClass(Player.class, getBoundingBox().inflate(32.0))) {
+            player.sendSystemMessage(message);
+        }
     }
 
     @Override

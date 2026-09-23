@@ -23,84 +23,100 @@ import java.util.List;
 import static net.eca.util.EntityUtil.HEAL_BAN_VALUE;
 
 /**
- * 管理所有生物的世界锚度。
- * 世界锚度是绝毁系统使用的攻击性生命条：未写入时默认等于实体最大生命值，
+ * 管理所有生物的现世锚度。
+ * 现世锚度是绝毁系统使用的攻击性生命条：未写入时默认等于实体最大生命值，
  * 绝毁伤害会削减该值，并将剩余值作为 ECA 禁疗上限。
  */
-public final class WorldAnchorManager {
+public final class PresentWorldAnchorManager {
 
-    public static final String NBT_ABSOLUTE_DESTRUCTION_WORLD_ANCHOR =
+    public static final String NBT_ABSOLUTE_DESTRUCTION_PRESENT_WORLD_ANCHOR =
             "tlsAbsoluteDestructionWorldAnchor";
     private static final String NBT_HEAL_BAN_TIME = "tlsHealBanTime";
-    private static final float UNSET_WORLD_ANCHOR = -1.0F;
+    private static final float UNSET_PRESENT_WORLD_ANCHOR = -1.0F;
 
-    public static EntityDataAccessor<String> WORLD_ANCHOR;
+    public static EntityDataAccessor<String> PRESENT_WORLD_ANCHOR;
     public static EntityDataAccessor<Integer> HEAL_BAN_TIME;
 
-    private WorldAnchorManager() {
+    private PresentWorldAnchorManager() {
     }
 
-    public static float getWorldAnchor(LivingEntity entity) {
+    public static float getPresentWorldAnchor(LivingEntity entity) {
         if (entity == null) {
             return 0.0F;
         }
 
         if (entity.level().isClientSide) {
-            float syncedAnchor = getSyncedWorldAnchor(entity);
+            float syncedAnchor = getSyncedPresentWorldAnchor(entity);
             if (syncedAnchor >= 0.0F) {
                 return syncedAnchor;
             }
         }
 
-        if (!entity.getPersistentData().contains(NBT_ABSOLUTE_DESTRUCTION_WORLD_ANCHOR, Tag.TAG_ANY_NUMERIC)) {
+        if (!entity.getPersistentData().contains(NBT_ABSOLUTE_DESTRUCTION_PRESENT_WORLD_ANCHOR, Tag.TAG_ANY_NUMERIC)) {
             float maxHealth = entity.getMaxHealth();
             return Float.isFinite(maxHealth) ? Math.max(0.0F, maxHealth) : 0.0F;
         }
 
-        float worldAnchor = entity.getPersistentData().getFloat(NBT_ABSOLUTE_DESTRUCTION_WORLD_ANCHOR);
-        return Float.isFinite(worldAnchor) ? Math.max(0.0F, worldAnchor) : 0.0F;
+        float presentWorldAnchor = entity.getPersistentData().getFloat(NBT_ABSOLUTE_DESTRUCTION_PRESENT_WORLD_ANCHOR);
+        return Float.isFinite(presentWorldAnchor) ? Math.max(0.0F, presentWorldAnchor) : 0.0F;
     }
 
-    public static float getSyncedWorldAnchor(LivingEntity entity) {
-        if (entity == null || WORLD_ANCHOR == null) {
-            return UNSET_WORLD_ANCHOR;
+    public static float getSyncedPresentWorldAnchor(LivingEntity entity) {
+        if (entity == null || PRESENT_WORLD_ANCHOR == null) {
+            return UNSET_PRESENT_WORLD_ANCHOR;
         }
         try {
-            String syncedValue = entity.getEntityData().get(WORLD_ANCHOR);
+            String syncedValue = entity.getEntityData().get(PRESENT_WORLD_ANCHOR);
             if (syncedValue == null || syncedValue.isEmpty()) {
-                return UNSET_WORLD_ANCHOR;
+                return UNSET_PRESENT_WORLD_ANCHOR;
             }
-            float worldAnchor = Float.parseFloat(syncedValue);
-            return Float.isFinite(worldAnchor) ? worldAnchor : UNSET_WORLD_ANCHOR;
+            float presentWorldAnchor = Float.parseFloat(syncedValue);
+            return Float.isFinite(presentWorldAnchor) ? presentWorldAnchor : UNSET_PRESENT_WORLD_ANCHOR;
         } catch (RuntimeException ignored) {
-            return UNSET_WORLD_ANCHOR;
+            return UNSET_PRESENT_WORLD_ANCHOR;
         }
     }
 
-    public static void setWorldAnchor(LivingEntity entity, float worldAnchor) {
-        if (entity == null || !Float.isFinite(worldAnchor)) {
+    public static void setPresentWorldAnchor(LivingEntity entity, float presentWorldAnchor) {
+        if (entity == null || !Float.isFinite(presentWorldAnchor)) {
             return;
         }
-        float safeAnchor = Math.max(0.0F, worldAnchor);
-        entity.getPersistentData().putFloat(NBT_ABSOLUTE_DESTRUCTION_WORLD_ANCHOR, safeAnchor);
-        setSyncedWorldAnchor(entity, safeAnchor);
+        float safeAnchor = Math.max(0.0F, presentWorldAnchor);
+        entity.getPersistentData().putFloat(NBT_ABSOLUTE_DESTRUCTION_PRESENT_WORLD_ANCHOR, safeAnchor);
+        setSyncedPresentWorldAnchor(entity, safeAnchor);
     }
 
-    public static void resetWorldAnchor(LivingEntity entity) {
+    public static void restorePresentWorldAnchorFromHeal(LivingEntity entity, float healAmount) {
+        if (entity == null || entity.level().isClientSide || !Float.isFinite(healAmount)
+                || healAmount <= 0.0F || isHealBanned(entity)) {
+            return;
+        }
+
+        float maxHealth = entity.getMaxHealth();
+        float currentAnchor = getPresentWorldAnchor(entity);
+        if (!Float.isFinite(maxHealth) || maxHealth <= 0.0F || currentAnchor >= maxHealth) {
+            return;
+        }
+
+        float restoredAnchor = (float) Math.min((double) maxHealth, (double) currentAnchor + healAmount);
+        setPresentWorldAnchor(entity, restoredAnchor);
+    }
+
+    public static void resetPresentWorldAnchor(LivingEntity entity) {
         if (entity == null) {
             return;
         }
-        entity.getPersistentData().remove(NBT_ABSOLUTE_DESTRUCTION_WORLD_ANCHOR);
-        setSyncedWorldAnchor(entity, UNSET_WORLD_ANCHOR);
+        entity.getPersistentData().remove(NBT_ABSOLUTE_DESTRUCTION_PRESENT_WORLD_ANCHOR);
+        setSyncedPresentWorldAnchor(entity, UNSET_PRESENT_WORLD_ANCHOR);
         clearHealBan(entity);
     }
 
-    public static void resetPlayerWorldAnchorBeforeKill(ServerPlayer player) {
-        resetWorldAnchor(player);
+    public static void resetPlayerPresentWorldAnchorBeforeKill(ServerPlayer player) {
+        resetPresentWorldAnchor(player);
         // 默认值也必须主动发送，不能等待实体移除后的追踪更新。
         List<SynchedEntityData.DataValue<?>> values = new ArrayList<>();
-        if (WORLD_ANCHOR != null) {
-            values.add(SynchedEntityData.DataValue.create(WORLD_ANCHOR, ""));
+        if (PRESENT_WORLD_ANCHOR != null) {
+            values.add(SynchedEntityData.DataValue.create(PRESENT_WORLD_ANCHOR, ""));
         }
         if (HEAL_BAN_TIME != null) {
             values.add(SynchedEntityData.DataValue.create(HEAL_BAN_TIME, 0));
@@ -111,29 +127,29 @@ public final class WorldAnchorManager {
         player.connection.send(new ClientboundSetEntityDataPacket(player.getId(), values));
     }
 
-    public static void syncWorldAnchor(LivingEntity entity) {
+    public static void syncPresentWorldAnchor(LivingEntity entity) {
         if (entity == null || entity.level().isClientSide) {
             return;
         }
-        float syncedAnchor = UNSET_WORLD_ANCHOR;
+        float syncedAnchor = UNSET_PRESENT_WORLD_ANCHOR;
         if (entity.getPersistentData().contains(
-                NBT_ABSOLUTE_DESTRUCTION_WORLD_ANCHOR, Tag.TAG_ANY_NUMERIC)) {
+                NBT_ABSOLUTE_DESTRUCTION_PRESENT_WORLD_ANCHOR, Tag.TAG_ANY_NUMERIC)) {
             float storedAnchor = entity.getPersistentData()
-                    .getFloat(NBT_ABSOLUTE_DESTRUCTION_WORLD_ANCHOR);
+                    .getFloat(NBT_ABSOLUTE_DESTRUCTION_PRESENT_WORLD_ANCHOR);
             if (Float.isFinite(storedAnchor)) {
                 syncedAnchor = Math.max(0.0F, storedAnchor);
             }
         }
-        setSyncedWorldAnchor(entity, syncedAnchor);
+        setSyncedPresentWorldAnchor(entity, syncedAnchor);
     }
 
-    private static void setSyncedWorldAnchor(LivingEntity entity, float worldAnchor) {
-        if (WORLD_ANCHOR == null) {
+    private static void setSyncedPresentWorldAnchor(LivingEntity entity, float presentWorldAnchor) {
+        if (PRESENT_WORLD_ANCHOR == null) {
             return;
         }
         try {
-            String syncedValue = worldAnchor < 0.0F ? "" : Float.toString(worldAnchor);
-            entity.getEntityData().set(WORLD_ANCHOR, syncedValue);
+            String syncedValue = presentWorldAnchor < 0.0F ? "" : Float.toString(presentWorldAnchor);
+            entity.getEntityData().set(PRESENT_WORLD_ANCHOR, syncedValue);
         } catch (Exception ignored) {
         }
     }
@@ -149,23 +165,23 @@ public final class WorldAnchorManager {
         }
 
         double multiplier = TheLastSwordConfiguration
-                .getAbsoluteDestructionWorldAnchorDamageMultiplierSafely();
-        double worldAnchorDamage = amount * multiplier;
-        if (Double.isNaN(worldAnchorDamage) || worldAnchorDamage < 0.0D) {
+                .getAbsoluteDestructionPresentWorldAnchorDamageMultiplierSafely();
+        double presentWorldAnchorDamage = amount * multiplier;
+        if (Double.isNaN(presentWorldAnchorDamage) || presentWorldAnchorDamage < 0.0D) {
             return false;
         }
 
-        float currentAnchor = getWorldAnchor(entity);
-        float remainingAnchor = Double.isInfinite(worldAnchorDamage)
+        float currentAnchor = getPresentWorldAnchor(entity);
+        float remainingAnchor = Double.isInfinite(presentWorldAnchorDamage)
                 ? 0.0F
-                : Math.max(0.0F, (float) (currentAnchor - worldAnchorDamage));
+                : Math.max(0.0F, (float) (currentAnchor - presentWorldAnchorDamage));
 
         if (entity instanceof TheLastEndEntity) {
             float currentHealth = TrueHealthManager.getHealth(entity);
             boolean lethalHealthDamage = Float.isFinite(currentHealth)
                     && currentHealth > 0.0F && amount >= currentHealth;
             if (lethalHealthDamage || remainingAnchor <= 0.0F) {
-                setWorldAnchor(entity, remainingAnchor);
+                setPresentWorldAnchor(entity, remainingAnchor);
                 if (remainingAnchor <= 0.0F) {
                     clearHealBan(entity);
                     WraithSummonManager.tryForceCapture(entity);
@@ -178,9 +194,10 @@ public final class WorldAnchorManager {
         }
 
         boolean healthDepleted = applyExpectedHealthDamage(entity, amount);
-        setWorldAnchor(entity, remainingAnchor);
+        setPresentWorldAnchor(entity, remainingAnchor);
 
         if (remainingAnchor <= 0.0F) {
+            WraithSummonManager.stopWraithResurrection(entity);
             clearHealBan(entity);
             WraithSummonManager.tryForceCapture(entity);
             if (TheLastSwordConfiguration.getEnableTheLastEndSetDeadSafely()) {
@@ -210,6 +227,7 @@ public final class WorldAnchorManager {
         if (EntityUtil.hasProtection(entity)) {
             TrueHealthManager.setHealth(entity, (float) expectedHealth);
             if (expectedHealth <= 0.0D) {
+                WraithSummonManager.stopWraithResurrection(entity);
                 TrueHealthManager.clear(entity);
             }
         } else {
@@ -272,13 +290,13 @@ public final class WorldAnchorManager {
         entity.removeEffect(ModEffects.WORLD_SEVERANCE.get());
     }
 
-    private static void applyHealBan(LivingEntity entity, float worldAnchor) {
+    private static void applyHealBan(LivingEntity entity, float presentWorldAnchor) {
         int banTime = TheLastSwordConfiguration.getHealNegationTimeSafely();
         if (banTime <= 0) {
             return;
         }
         setHealBanTime(entity, banTime);
-        EcaAPI.banHealing(entity, worldAnchor);
+        EcaAPI.banHealing(entity, presentWorldAnchor);
         syncSeveranceEffect(entity, banTime);
     }
 

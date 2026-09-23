@@ -10,7 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.init.ModAttributes;
 import net.the_last_sword.util.EntityUtil;
-import net.the_last_sword.util.health.WorldAnchorManager;
+import net.the_last_sword.util.health.PresentWorldAnchorManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -48,14 +48,14 @@ public class PlayerMixin {
         }
     }
 
-    // 持久化世界锚度血量到磁盘
+    // 持久化现世锚度血量到磁盘
     @Inject(method = "addAdditionalSaveData", at = @At("TAIL"))
-    private void tls$saveWorldAnchor(CompoundTag tag, CallbackInfo ci) {
+    private void tls$savePresentWorldAnchor(CompoundTag tag, CallbackInfo ci) {
         Player player = (Player) (Object) this;
         CompoundTag pd = player.getPersistentData();
-        if (pd.contains(WorldAnchorManager.NBT_ABSOLUTE_DESTRUCTION_WORLD_ANCHOR, Tag.TAG_ANY_NUMERIC)) {
-            tag.putFloat(WorldAnchorManager.NBT_ABSOLUTE_DESTRUCTION_WORLD_ANCHOR,
-                    pd.getFloat(WorldAnchorManager.NBT_ABSOLUTE_DESTRUCTION_WORLD_ANCHOR));
+        if (pd.contains(PresentWorldAnchorManager.NBT_ABSOLUTE_DESTRUCTION_PRESENT_WORLD_ANCHOR, Tag.TAG_ANY_NUMERIC)) {
+            tag.putFloat(PresentWorldAnchorManager.NBT_ABSOLUTE_DESTRUCTION_PRESENT_WORLD_ANCHOR,
+                    pd.getFloat(PresentWorldAnchorManager.NBT_ABSOLUTE_DESTRUCTION_PRESENT_WORLD_ANCHOR));
         }
         if (pd.contains("tlsIsProtected")) {
             tag.putBoolean("tlsIsProtected", pd.getBoolean("tlsIsProtected"));
@@ -68,16 +68,16 @@ public class PlayerMixin {
         tag.remove("tlsMaxJustifiedDefence");
     }
 
-    // 从磁盘恢复世界锚度血量
+    // 从磁盘恢复现世锚度血量
     @Inject(method = "readAdditionalSaveData", at = @At("TAIL"))
-    private void tls$loadWorldAnchor(CompoundTag tag, CallbackInfo ci) {
+    private void tls$loadPresentWorldAnchor(CompoundTag tag, CallbackInfo ci) {
         Player player = (Player) (Object) this;
         CompoundTag pd = player.getPersistentData();
-        if (tag.contains(WorldAnchorManager.NBT_ABSOLUTE_DESTRUCTION_WORLD_ANCHOR, Tag.TAG_ANY_NUMERIC)) {
-            pd.putFloat(WorldAnchorManager.NBT_ABSOLUTE_DESTRUCTION_WORLD_ANCHOR,
-                    tag.getFloat(WorldAnchorManager.NBT_ABSOLUTE_DESTRUCTION_WORLD_ANCHOR));
+        if (tag.contains(PresentWorldAnchorManager.NBT_ABSOLUTE_DESTRUCTION_PRESENT_WORLD_ANCHOR, Tag.TAG_ANY_NUMERIC)) {
+            pd.putFloat(PresentWorldAnchorManager.NBT_ABSOLUTE_DESTRUCTION_PRESENT_WORLD_ANCHOR,
+                    tag.getFloat(PresentWorldAnchorManager.NBT_ABSOLUTE_DESTRUCTION_PRESENT_WORLD_ANCHOR));
         }
-        WorldAnchorManager.syncWorldAnchor(player);
+        PresentWorldAnchorManager.syncPresentWorldAnchor(player);
         if (tag.contains("tlsIsProtected")) {
             pd.putBoolean("tlsIsProtected", tag.getBoolean("tlsIsProtected"));
         }

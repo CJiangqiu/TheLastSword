@@ -23,6 +23,16 @@ public class ModSounds {
                     () -> SoundEvent.createVariableRangeEvent(
                             ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "lost_wraith")));
 
+    public static final RegistryObject<SoundEvent> THE_PAST_SHADOW_OF_THE_QUEEN =
+            SOUNDS.register("the_past_shadow_of_the_queen",
+                    () -> SoundEvent.createVariableRangeEvent(
+                            ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "the_past_shadow_of_the_queen")));
+
+    public static final RegistryObject<SoundEvent> WOUND_OF_TIME =
+            SOUNDS.register("wound_of_time",
+                    () -> SoundEvent.createVariableRangeEvent(
+                            ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "wound_of_time")));
+
     //拜龙教袭击开始音乐
     public static final RegistryObject<SoundEvent> DRAGON_CULT_IS_COMING =
             SOUNDS.register("dragon_cult_is_coming",

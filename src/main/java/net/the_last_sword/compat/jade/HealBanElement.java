@@ -9,7 +9,7 @@ import snownee.jade.api.theme.IThemeHelper;
 import snownee.jade.api.ui.Element;
 import snownee.jade.api.ui.IDisplayHelper;
 
-//实体信息浮标中的禁疗剩余时间使用世界锚度图标，便于区分普通负面效果
+//实体信息浮标中的禁疗剩余时间使用现世锚度图标，便于区分普通负面效果
 public class HealBanElement extends Element {
 
     private static final ResourceLocation ICON =

@@ -11,10 +11,10 @@ import net.minecraftforge.client.gui.overlay.ForgeGui;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
-import net.the_last_sword.util.health.WorldAnchorManager;
+import net.the_last_sword.util.health.PresentWorldAnchorManager;
 
 //把不可恢复的生命区间覆盖到原有生命值槽位，避免增加额外 HUD 行
-public final class WorldAnchorHealthOverlay {
+public final class PresentWorldAnchorHealthOverlay {
 
     private static final ResourceLocation ICON = ResourceLocation.fromNamespaceAndPath(
             TheLastSwordMod.MOD_ID, "textures/screens/world_anchor_full.png");
@@ -22,12 +22,12 @@ public final class WorldAnchorHealthOverlay {
     private static final int ICON_SPACING = 8;
     private static final int HEARTS_PER_ROW = 10;
 
-    private WorldAnchorHealthOverlay() {
+    private PresentWorldAnchorHealthOverlay() {
     }
 
     public static void onRenderGuiOverlay(RenderGuiOverlayEvent.Post event) {
         if (!event.getOverlay().id().equals(VanillaGuiOverlay.PLAYER_HEALTH.id())
-                || !TheLastSwordConfiguration.getDisplayWorldAnchorDamageSafely()) {
+                || !TheLastSwordConfiguration.getDisplayPresentWorldAnchorDamageSafely()) {
             return;
         }
 
@@ -37,27 +37,27 @@ public final class WorldAnchorHealthOverlay {
             return;
         }
 
-        float worldAnchor = WorldAnchorManager.getSyncedWorldAnchor(player);
-        if (worldAnchor < 0.0F) {
+        float presentWorldAnchor = PresentWorldAnchorManager.getSyncedPresentWorldAnchor(player);
+        if (presentWorldAnchor < 0.0F) {
             return;
         }
 
         float maxHealth = player.getMaxHealth();
-        if (!Float.isFinite(maxHealth) || maxHealth <= 0.0F || !Float.isFinite(worldAnchor)) {
+        if (!Float.isFinite(maxHealth) || maxHealth <= 0.0F || !Float.isFinite(presentWorldAnchor)) {
             return;
         }
 
         int maxHealthPoints = Mth.ceil(maxHealth);
-        int availableHealthPoints = Mth.clamp(Mth.ceil(worldAnchor), 0, maxHealthPoints);
+        int availableHealthPoints = Mth.clamp(Mth.ceil(presentWorldAnchor), 0, maxHealthPoints);
         if (availableHealthPoints >= maxHealthPoints) {
             return;
         }
 
-        renderLostWorldAnchor(
+        renderLostPresentWorldAnchor(
                 event.getGuiGraphics(), minecraft, player, maxHealthPoints, availableHealthPoints);
     }
 
-    private static void renderLostWorldAnchor(GuiGraphics guiGraphics, Minecraft minecraft, Player player,
+    private static void renderLostPresentWorldAnchor(GuiGraphics guiGraphics, Minecraft minecraft, Player player,
                                                int maxHealthPoints, int availableHealthPoints) {
         int absorption = Mth.ceil(player.getAbsorptionAmount());
         int healthRows = Mth.ceil((maxHealthPoints + absorption) / 20.0F);

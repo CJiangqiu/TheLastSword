@@ -38,7 +38,7 @@ import net.the_last_sword.item.TheLastSword;
 import net.the_last_sword.item.TheLastSwordYouNeverForgot;
 import net.the_last_sword.summon.WraithSummonManager;
 import net.the_last_sword.util.health.TrueHealthManager;
-import net.the_last_sword.util.health.WorldAnchorManager;
+import net.the_last_sword.util.health.PresentWorldAnchorManager;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -165,6 +165,7 @@ public class EntityUtil {
         if (entity instanceof TheLastEndEntity) {
             TrueHealthManager.setHealth(entity, 0.0F);
         }
+        WraithSummonManager.stopWraithResurrection(entity);
         //清除防御系统，防止 die/tickDeath 被保护拦截
         TrueHealthManager.clear(entity);
         var shieldAttr = entity.getAttribute(ModAttributes.JUSTIFIED_DEFENCE.get());
@@ -178,7 +179,7 @@ public class EntityUtil {
         entity.getPersistentData().remove(NBT_TEMP_JUSTIFIED_DEFENCE);
 
         if (entity instanceof ServerPlayer player) {
-            WorldAnchorManager.resetPlayerWorldAnchorBeforeKill(player);
+            PresentWorldAnchorManager.resetPlayerPresentWorldAnchorBeforeKill(player);
         }
         if (entity instanceof TheLastEndEntity theLastEnd) {
             theLastEnd.triggerDeath(damageSource);

@@ -135,6 +135,7 @@ public class TheLastSwordConfiguration {
 
     // The Last End Sword Wraith | 终焉剑灵配置
     public static ForgeConfigSpec.ConfigValue<Boolean> THE_LAST_END_SWORD_WRAITH_ENABLE_BATTLE_MUSIC;
+    public static ForgeConfigSpec.ConfigValue<Boolean> THE_LAST_END_SWORD_WRAITH_ENABLE_SUMMON_TALK;
 
     // Lost Wraith | 迷失战魂配置
     public static ForgeConfigSpec.ConfigValue<Boolean> LOST_WRAITH_ENABLE_CUSTOM_BOSS_BAR;
@@ -272,9 +273,7 @@ public class TheLastSwordConfiguration {
     public static ForgeConfigSpec.ConfigValue<Double> SWORD_WRAITH_ATTACK_PER_HIGH_LEVEL;
     public static ForgeConfigSpec.ConfigValue<Boolean> SWORD_WRAITH_AS_THE_LAST_END_ENTITY;
     public static ForgeConfigSpec.ConfigValue<Boolean> SWORD_WRAITH_ABSOLUTE_DESTRUCTION_DAMAGE;
-    public static ForgeConfigSpec.ConfigValue<Double> SWORD_WRAITH_ABSOLUTE_DESTRUCTION_MULTIPLIER_LOW;
-    public static ForgeConfigSpec.ConfigValue<Double> SWORD_WRAITH_ABSOLUTE_DESTRUCTION_MULTIPLIER_MID;
-    public static ForgeConfigSpec.ConfigValue<Double> SWORD_WRAITH_ABSOLUTE_DESTRUCTION_MULTIPLIER_HIGH;
+    public static ForgeConfigSpec.ConfigValue<String> SWORD_WRAITH_CAPTURE_BLACKLIST;
 
     // ═══════════════════════════════════════════════════════════════════════════════════
     // Block Configuration | 方块配置
@@ -295,8 +294,8 @@ public class TheLastSwordConfiguration {
     // ═══════════════════════════════════════════════════════════════════════════════════
 
     // Absolute Destruction Damage | 绝对毁灭伤害配置
-    public static ForgeConfigSpec.ConfigValue<Double> ABSOLUTE_DESTRUCTION_WORLD_ANCHOR_DAMAGE_MULTIPLIER;
-    public static ForgeConfigSpec.ConfigValue<Boolean> ABSOLUTE_DESTRUCTION_DISPLAY_WORLD_ANCHOR_DAMAGE;
+    public static ForgeConfigSpec.ConfigValue<Double> ABSOLUTE_DESTRUCTION_PRESENT_WORLD_ANCHOR_DAMAGE_MULTIPLIER;
+    public static ForgeConfigSpec.ConfigValue<Boolean> ABSOLUTE_DESTRUCTION_DISPLAY_PRESENT_WORLD_ANCHOR_DAMAGE;
     public static ForgeConfigSpec.ConfigValue<Integer> ABSOLUTE_DESTRUCTION_HEAL_NEGATION_TIME;
     public static ForgeConfigSpec.ConfigValue<Integer> ABSOLUTE_DESTRUCTION_REVIVE_BAN_TIME;
     public static ForgeConfigSpec.ConfigValue<Boolean> ABSOLUTE_DESTRUCTION_DIE_MESSAGE;
@@ -338,6 +337,7 @@ public class TheLastSwordConfiguration {
 
     // Compat Mods | 联动Mod配置
     public static ForgeConfigSpec.ConfigValue<Boolean> COMPAT_CATACLYSM_ENABLE;
+    public static ForgeConfigSpec.ConfigValue<Boolean> COMPAT_ENABLE_SWORD_WRAITH_BOSS_TALK;
 
     // Lucky Block | 幸运方块事件权重（键为事件 id）
     public static final Map<String, ForgeConfigSpec.ConfigValue<Integer>> LUCKY_EVENT_WEIGHTS = new HashMap<>();
@@ -1010,6 +1010,12 @@ public class TheLastSwordConfiguration {
                 "终焉剑灵进入战斗时启用战斗音乐"
             )
             .define("Enable Spawn Music", true);
+        THE_LAST_END_SWORD_WRAITH_ENABLE_SUMMON_TALK = BUILDER
+            .comment(
+                "Enable a random line when the sword wraith is summoned",
+                "终焉剑灵被召唤时随机发送一条台词"
+            )
+            .define("Enable Summon Talk", true);
 
         // Skills Configuration | 技能配置
         BUILDER.push("Skills");
@@ -1685,24 +1691,12 @@ public class TheLastSwordConfiguration {
                 "为剑灵启用绝毁伤害"
             )
             .define("Sword Wraith Absolute Destruction Damage", true);
-        SWORD_WRAITH_ABSOLUTE_DESTRUCTION_MULTIPLIER_LOW = BUILDER
+        SWORD_WRAITH_CAPTURE_BLACKLIST = BUILDER
             .comment(
-                "Absolute destruction damage multiplier for weapon levels 1-5",
-                "武器等级 1-5 时的绝毁伤害乘数"
+                "Comma-separated entity IDs whose souls cannot be captured by a soul stone",
+                "无法捕获到魂石的实体 ID，使用英文逗号分隔"
             )
-            .defineInRange("Absolute Destruction Multiplier (Lv1-5)", 0.10, 0.0, 10.0);
-        SWORD_WRAITH_ABSOLUTE_DESTRUCTION_MULTIPLIER_MID = BUILDER
-            .comment(
-                "Absolute destruction damage multiplier for weapon levels 6-12",
-                "武器等级 6-12 时的绝毁伤害乘数"
-            )
-            .defineInRange("Absolute Destruction Multiplier (Lv6-12)", 0.50, 0.0, 10.0);
-        SWORD_WRAITH_ABSOLUTE_DESTRUCTION_MULTIPLIER_HIGH = BUILDER
-            .comment(
-                "Absolute destruction damage multiplier for weapon level 13+",
-                "武器等级 13 级及以上时的绝毁伤害乘数"
-            )
-            .defineInRange("Absolute Destruction Multiplier (Lv13+)", 1.00, 0.0, 10.0);
+            .define("Soul Capture Blacklist", "minecraft:creeper,minecraft:warden,minecraft:wither,minecraft:ender_dragon");
         BUILDER.pop();
 
         BUILDER.pop(); // End Entity
@@ -1715,16 +1709,16 @@ public class TheLastSwordConfiguration {
 
         // Absolute Destruction Damage Settings | 绝毁伤害设置
         BUILDER.push("Absolute Destruction Damage");
-        ABSOLUTE_DESTRUCTION_WORLD_ANCHOR_DAMAGE_MULTIPLIER = BUILDER
+        ABSOLUTE_DESTRUCTION_PRESENT_WORLD_ANCHOR_DAMAGE_MULTIPLIER = BUILDER
             .comment(
-                "World anchor damage multiplier applied to the incoming absolute destruction damage amount",
-                "绝毁伤害数值转换为世界锚度损伤时使用的倍率"
+                "Present World Anchor damage multiplier applied to the incoming absolute destruction damage amount",
+                "绝毁伤害数值转换为现世锚度损伤时使用的倍率"
             )
             .defineInRange("World Anchor Damage Multiplier", 0.10, 0.0, Double.MAX_VALUE);
-        ABSOLUTE_DESTRUCTION_DISPLAY_WORLD_ANCHOR_DAMAGE = BUILDER
+        ABSOLUTE_DESTRUCTION_DISPLAY_PRESENT_WORLD_ANCHOR_DAMAGE = BUILDER
             .comment(
-                "Display lost world anchor as purple hearts on the player health HUD",
-                "在玩家生命值界面上以紫色心形显示已损失的世界锚度"
+                "Display lost Present World Anchor as purple hearts on the player health HUD",
+                "在玩家生命值界面上以紫色心形显示已损失的现世锚度"
             )
             .define("Display World Anchor Damage", true);
         ABSOLUTE_DESTRUCTION_HEAL_NEGATION_TIME = BUILDER
@@ -1911,6 +1905,12 @@ public class TheLastSwordConfiguration {
                 "启用与 Cataclysm 模组的兼容"
             )
             .define("Enable Cataclysm Compat", true);
+        COMPAT_ENABLE_SWORD_WRAITH_BOSS_TALK = BUILDER
+            .comment(
+                "Enable sword wraith dialogue when targeting a supported boss",
+                "终焉剑灵锁定对应首领时发送专属台词"
+            )
+            .define("Enable Sword Wraith Boss Talk", true);
         BUILDER.pop();
 
         BUILDER
@@ -2204,6 +2204,14 @@ public class TheLastSwordConfiguration {
     }
 
     //剑灵配置
+    public static boolean getTheLastEndSwordWraithSummonTalkSafely() {
+        return safeGet(THE_LAST_END_SWORD_WRAITH_ENABLE_SUMMON_TALK, true);
+    }
+
+    public static boolean getSwordWraithBossTalkSafely() {
+        return safeGet(COMPAT_ENABLE_SWORD_WRAITH_BOSS_TALK, true);
+    }
+
     public static double getSwordWraithHealthPerLevelSafely() {
         return safeGet(SWORD_WRAITH_HEALTH_PER_LEVEL, 100.0);
     }
@@ -2228,25 +2236,18 @@ public class TheLastSwordConfiguration {
         return safeGet(SWORD_WRAITH_ABSOLUTE_DESTRUCTION_DAMAGE, true);
     }
 
-    public static double getSwordWraithAbsoluteDestructionMultiplierLowSafely() {
-        return safeGet(SWORD_WRAITH_ABSOLUTE_DESTRUCTION_MULTIPLIER_LOW, 0.10);
-    }
-
-    public static double getSwordWraithAbsoluteDestructionMultiplierMidSafely() {
-        return safeGet(SWORD_WRAITH_ABSOLUTE_DESTRUCTION_MULTIPLIER_MID, 0.50);
-    }
-
-    public static double getSwordWraithAbsoluteDestructionMultiplierHighSafely() {
-        return safeGet(SWORD_WRAITH_ABSOLUTE_DESTRUCTION_MULTIPLIER_HIGH, 1.00);
+    public static String getSwordWraithCaptureBlacklistSafely() {
+        return safeGet(SWORD_WRAITH_CAPTURE_BLACKLIST,
+                "minecraft:creeper,minecraft:warden,minecraft:wither,minecraft:ender_dragon");
     }
 
     //绝对毁灭伤害配置
-    public static double getAbsoluteDestructionWorldAnchorDamageMultiplierSafely() {
-        return safeGet(ABSOLUTE_DESTRUCTION_WORLD_ANCHOR_DAMAGE_MULTIPLIER, 0.10);
+    public static double getAbsoluteDestructionPresentWorldAnchorDamageMultiplierSafely() {
+        return safeGet(ABSOLUTE_DESTRUCTION_PRESENT_WORLD_ANCHOR_DAMAGE_MULTIPLIER, 0.10);
     }
 
-    public static boolean getDisplayWorldAnchorDamageSafely() {
-        return safeGet(ABSOLUTE_DESTRUCTION_DISPLAY_WORLD_ANCHOR_DAMAGE, true);
+    public static boolean getDisplayPresentWorldAnchorDamageSafely() {
+        return safeGet(ABSOLUTE_DESTRUCTION_DISPLAY_PRESENT_WORLD_ANCHOR_DAMAGE, true);
     }
 
     public static int getHealNegationTimeSafely() {

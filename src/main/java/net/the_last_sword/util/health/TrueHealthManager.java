@@ -7,7 +7,7 @@ import net.the_last_sword.util.EntityUtil;
 /**
  * 统一管理受保护实体的权威生命值。
  * 真实血量属于防御语义，底层直接使用 ECA 的生命值与最大生命值锁定能力，
- * 不与承担绝毁攻击语义的世界锚度共享状态。
+ * 不与承担绝毁攻击语义的现世锚度共享状态。
  */
 public final class TrueHealthManager {
 

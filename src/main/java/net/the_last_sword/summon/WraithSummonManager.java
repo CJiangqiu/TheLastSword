@@ -22,7 +22,6 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.core.BlockPos;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.eca.network.NetworkHandler;
-import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.compat.curios.CuriosEffectHandler;
 import net.the_last_sword.init.ModBlocks;
@@ -33,7 +32,7 @@ import net.the_last_sword.entity.TheLastEndEntity;
 import net.the_last_sword.entity.TheLastEndSwordWraithEntity;
 import net.the_last_sword.util.EntityUtil;
 import net.the_last_sword.util.health.TrueHealthManager;
-import net.the_last_sword.util.health.WorldAnchorManager;
+import net.the_last_sword.util.health.PresentWorldAnchorManager;
 import net.the_last_sword.util.TheLastSwordLogger;
 import net.the_last_sword.util.nbt.ItemLevelHelper;
 
@@ -45,6 +44,9 @@ public class WraithSummonManager {
     // ============ 魂石存储键 ============
 
     private static final String SOUL_STONE_KEY = "the_last_sword_soul_stone";
+    private static final String WRAITH_OWNER_KEY = "the_last_sword_wraith_owner";
+    private static final String WRAITH_OWNER_NAME_KEY = "the_last_sword_wraith_owner_name";
+    private static final String WRAITH_LEVEL_KEY = "the_last_sword_wraith_level";
 
     //剑灵与主人的最大距离（传送阈值）
     private static final double MAX_OWNER_DISTANCE = 32.0;
@@ -120,6 +122,7 @@ public class WraithSummonManager {
         if (wraith.level() instanceof ServerLevel sl) {
             EcaAPI.setForceLoading(wraith, sl, false);
         }
+        stopWraithResurrection(wraith);
         TrueHealthManager.clear(wraith);
 
         //3.5. 强制结束万物终焉状态
@@ -133,7 +136,7 @@ public class WraithSummonManager {
         removeBonusFromEntity(wraith, healthBonus, attackBonus);
 
         //4.5. 清除禁疗状态（防止快照把禁疗带入魂石，且确保下一步 setHealth 不被禁疗拦截）
-        WorldAnchorManager.clearHealBan(wraith);
+        PresentWorldAnchorManager.clearHealBan(wraith);
 
         //5. 设置生命值为最大生命值（避免保存错误血量导致永远死亡）
         AttributeInstance maxHealthAttr = wraith.getAttribute(Attributes.MAX_HEALTH);
@@ -224,6 +227,7 @@ public class WraithSummonManager {
                 if (wraith.level() instanceof ServerLevel sl) {
                     EcaAPI.setForceLoading(wraith, sl, false);
                 }
+                stopWraithResurrection(wraith);
                 TrueHealthManager.clear(wraith);
                 EntityUtil.theLastEndRemove(wraith, Entity.RemovalReason.DISCARDED);
 
@@ -335,6 +339,7 @@ public class WraithSummonManager {
         //2. 生成新UUID并设置
         UUID wraitheUUID = UUID.randomUUID();
         wraith.setUUID(wraitheUUID);
+        storeWraithIdentity(wraith, player, ItemLevelHelper.getLevel(weaponStack));
 
         //3. 设置位置
         Vec3 spawnPos = findSafeSpawnPosition(player);
@@ -357,7 +362,7 @@ public class WraithSummonManager {
         }
 
         //4.6. 清除禁疗状态（防止旧魂石或 entity_nbt 里残留的禁疗拦截 setHealth）
-        WorldAnchorManager.clearHealBan(wraith);
+        PresentWorldAnchorManager.clearHealBan(wraith);
 
         //5. 设置生命值为最大生命值（实体刚生成后立即设置满血）
         AttributeInstance maxHealthAttr = wraith.getAttribute(Attributes.MAX_HEALTH);
@@ -413,6 +418,7 @@ public class WraithSummonManager {
 
         //16. 加入主人的剑灵阵营（建营 + 设首领 + 绑定成员）
         WraithFaction.bind(player, wraitheUUID, wraith.getType(), level);
+        syncWraithResurrection(wraith);
 
         //17. 保存魂石到玩家数据
         saveSoulStoneToPlayer(player, soulStone);
@@ -440,12 +446,14 @@ public class WraithSummonManager {
 
         //1.5. 强制设置UUID为魂石中记录的UUID（避免UUID不匹配）
         wraith.setUUID(wraitheUUID);
+        storeWraithIdentity(wraith, player, ItemLevelHelper.getLevel(weaponStack));
 
         //2. 全局搜索是否有重复UUID的实体，如果有则清除
         for (ServerLevel serverLevel : ((ServerLevel) level).getServer().getAllLevels()) {
             LivingEntity existingWraith = findEntityByUUID(serverLevel, wraitheUUID);
             if (existingWraith != null) {
                 //先清除保护状态，否则 Mixin 会阻止移除
+                stopWraithResurrection(existingWraith);
                 TrueHealthManager.clear(existingWraith);
                 EntityUtil.theLastEndRemove(existingWraith, Entity.RemovalReason.DISCARDED);
 
@@ -479,7 +487,7 @@ public class WraithSummonManager {
         }
 
         //4.6. 清除禁疗状态（从 entity_nbt 恢复时会带回旧的禁疗，必须清掉后再 setHealth）
-        WorldAnchorManager.clearHealBan(wraith);
+        PresentWorldAnchorManager.clearHealBan(wraith);
 
         //5. 设置生命值为最大生命值（实体刚生成后立即设置满血）
         AttributeInstance maxHealthAttr = wraith.getAttribute(Attributes.MAX_HEALTH);
@@ -512,6 +520,7 @@ public class WraithSummonManager {
 
         //10.6. 确保阵营绑定（清理同UUID旧实体时 ECA 会自动退营）
         WraithFaction.bind(player, wraitheUUID, wraith.getType(), level);
+        syncWraithResurrection(wraith);
 
         //11. 更新魂石加成记录
         nbt.putFloat("health_bonus", healthBonus);
@@ -744,6 +753,18 @@ public class WraithSummonManager {
     private static void sendSummonMessage(Player player, LivingEntity entity) {
         Component entityName = entity.hasCustomName() ? entity.getCustomName() : entity.getDisplayName();
         player.sendSystemMessage(Component.translatable("message.the_last_sword.summon_success", entityName));
+
+        if (entity instanceof TheLastEndSwordWraithEntity
+                && TheLastSwordConfiguration.getTheLastEndSwordWraithSummonTalkSafely()) {
+            int dialogueIndex = entity.getRandom().nextInt(3) + 1;
+            Component message = Component.literal("[")
+                .append(Component.translatable("entity.the_last_sword.the_last_end_sword_wraith"))
+                .append(Component.literal("] "))
+                .withStyle(ChatFormatting.DARK_PURPLE)
+                .append(Component.translatable("talk.the_last_end_sword_wraith.spawn_" + dialogueIndex)
+                    .withStyle(ChatFormatting.WHITE));
+            player.sendSystemMessage(message);
+        }
     }
 
     //应用冷却（创造模式不添加冷却）
@@ -803,6 +824,10 @@ public class WraithSummonManager {
             return;
         }
 
+        if (!(entity instanceof TheLastEndEntity)) {
+            syncWraithResurrection(entity);
+        }
+
         //获取主人
         Player owner = entity.level().getServer().getPlayerList().getPlayer(ownerUUID);
         if (owner == null) {
@@ -815,75 +840,95 @@ public class WraithSummonManager {
         }
     }
 
-    //剑灵造成伤害：添加绝毁伤害
-    public static void handleWraithDamage(LivingEntity target, LivingEntity attacker) {
-        try {
-            //检查攻击者是否为剑灵
-            if (!isWraith(attacker)) {
+    private static void storeWraithIdentity(LivingEntity wraith, Player owner, int level) {
+        CompoundTag data = wraith.getPersistentData();
+        data.putUUID(WRAITH_OWNER_KEY, owner.getUUID());
+        data.putString(WRAITH_OWNER_NAME_KEY, owner.getGameProfile().getName());
+        data.putInt(WRAITH_LEVEL_KEY, level);
+    }
+
+    public static int getWraithLevel(LivingEntity wraith) {
+        if (wraith instanceof TheLastEndEntity) {
+            return 0;
+        }
+        UUID ownerUUID = getOwnerByWraith(wraith.getUUID());
+        if (ownerUUID == null) {
+            return 0;
+        }
+        CompoundTag data = wraith.getPersistentData();
+        if (data.hasUUID(WRAITH_OWNER_KEY) && ownerUUID.equals(data.getUUID(WRAITH_OWNER_KEY))
+                && data.contains(WRAITH_LEVEL_KEY)) {
+            return data.getInt(WRAITH_LEVEL_KEY);
+        }
+        Player owner = wraith.level().getServer().getPlayerList().getPlayer(ownerUUID);
+        if (owner == null) {
+            return 0;
+        }
+        CompoundTag soulStone = getSoulStoneFromPlayer(owner).getTag();
+        if (soulStone == null || !wraith.getUUID().toString().equals(soulStone.getString("wraith_uuid"))) {
+            return 0;
+        }
+        int level = soulStone.getInt("weapon_level");
+        storeWraithIdentity(wraith, owner, level);
+        return level;
+    }
+
+    public static void handleEntityJoinLevel(Entity entity, Level level) {
+        if (!(entity instanceof LivingEntity wraith) || !(level instanceof ServerLevel serverLevel)
+                || !wraith.getPersistentData().hasUUID(WRAITH_OWNER_KEY)) {
+            return;
+        }
+        UUID ownerUUID = wraith.getPersistentData().getUUID(WRAITH_OWNER_KEY);
+        Player owner = serverLevel.getServer().getPlayerList().getPlayer(ownerUUID);
+        ItemStack soulStone = ItemStack.EMPTY;
+        CompoundTag stoneData = null;
+        if (owner != null) {
+            soulStone = getSoulStoneFromPlayer(owner);
+            stoneData = soulStone.getTag();
+            if (stoneData == null || !wraith.getUUID().toString().equals(stoneData.getString("wraith_uuid"))) {
                 return;
             }
-
-            //检查配置
-            if (!TheLastSwordConfiguration.getSwordWraithAsTheLastEndEntitySafely() ||
-                !TheLastSwordConfiguration.getSwordWraithAbsoluteDestructionDamageSafely()) {
-                return;
+            WraithFaction.ensureFaction(owner, level);
+        } else {
+            WraithFaction.ensureFaction(ownerUUID,
+                    wraith.getPersistentData().getString(WRAITH_OWNER_NAME_KEY), level);
+        }
+        ResourceLocation typeId = ForgeRegistries.ENTITY_TYPES.getKey(wraith.getType());
+        if (typeId != null && WraithFaction.bind(ownerUUID, wraith.getUUID(), typeId.toString(), level)) {
+            if (owner != null) {
+                stoneData.putBoolean("is_summoned", true);
+                saveSoulStoneToPlayer(owner, soulStone);
             }
-
-            //获取剑灵的武器等级（从魂石读取）
-            UUID ownerUUID = getOwnerUUID(attacker.getUUID());
-            if (ownerUUID == null) {
-                return;
-            }
-
-            Player owner = attacker.level().getServer().getPlayerList().getPlayer(ownerUUID);
-            if (owner == null) {
-                return;
-            }
-
-            ItemStack soulStone = getSoulStoneFromPlayer(owner);
-            CompoundTag nbt = soulStone.getTag();
-            if (nbt == null) {
-                return;
-            }
-
-            int weaponLevel = nbt.getInt("weapon_level");
-
-            //根据武器等级计算绝毁伤害倍率
-            double damageMultiplier = calculateAbsoluteDestructionMultiplier(weaponLevel);
-            if (damageMultiplier <= 0) {
-                return;
-            }
-
-            //获取剑灵的攻击力
-            AttributeInstance attackAttr = attacker.getAttribute(Attributes.ATTACK_DAMAGE);
-            if (attackAttr == null) {
-                return;
-            }
-            double attackDamage = attackAttr.getValue();
-
-            //计算额外绝毁伤害
-            float absoluteDestructionDamage = (float) (attackDamage * damageMultiplier);
-
-            //应用额外绝毁伤害
-            if (absoluteDestructionDamage > 0 && EntityUtil.canAttack(attacker, target)) {
-                EcaAPI.hurt(target, AbsoluteDestructionDamageSource.absoluteDestruction(attacker), absoluteDestructionDamage);
-            }
-        } catch (Throwable t) {
-            try {
-                TheLastSwordLogger.error("Wraith damage handler error", t);
-            } catch (Throwable ignored) {
-            }
+            syncWraithResurrection(wraith);
         }
     }
 
-    //计算绝毁伤害倍率
-    private static double calculateAbsoluteDestructionMultiplier(int weaponLevel) {
-        if (weaponLevel <= 5) {
-            return TheLastSwordConfiguration.getSwordWraithAbsoluteDestructionMultiplierLowSafely();
-        } else if (weaponLevel <= 12) {
-            return TheLastSwordConfiguration.getSwordWraithAbsoluteDestructionMultiplierMidSafely();
+    private static void syncWraithResurrection(LivingEntity wraith) {
+        if (wraith instanceof TheLastEndEntity || !isWraith(wraith)) {
+            return;
+        }
+        if (wraith.isDeadOrDying() || wraith.isRemoved() || TrueHealthManager.getHealth(wraith) <= 0.0F) {
+            stopWraithResurrection(wraith);
+            return;
+        }
+        boolean enabled = TheLastSwordConfiguration.getSwordWraithAsTheLastEndEntitySafely();
+        if (enabled && !EntityUtil.hasProtection(wraith)) {
+            TrueHealthManager.register(wraith, wraith.getMaxHealth());
+        }
+        if (enabled && getWraithLevel(wraith) >= TheLastEndEntity.RESURRECTION_LEVEL
+                && TrueHealthManager.getHealth(wraith) > 0.0F) {
+            if (!EcaAPI.isResurrectionTracked(wraith)) {
+                EcaAPI.startResurrection();
+                EcaAPI.addResurrectionTarget(wraith);
+            }
         } else {
-            return TheLastSwordConfiguration.getSwordWraithAbsoluteDestructionMultiplierHighSafely();
+            stopWraithResurrection(wraith);
+        }
+    }
+
+    public static void stopWraithResurrection(LivingEntity wraith) {
+        if (!(wraith instanceof TheLastEndEntity) && EcaAPI.isResurrectionTracked(wraith)) {
+            EcaAPI.removeResurrectionTarget(wraith);
         }
     }
 
@@ -1027,6 +1072,7 @@ public class WraithSummonManager {
 
     //成功捕获后写入实体的去重标记键
     private static final String SOUL_CAPTURED_KEY = "the_last_sword_soul_captured";
+    private static final String SOUL_CAPTURE_REJECTED_KEY = "the_last_sword_soul_capture_rejected";
 
     //死亡线捕获：已知击杀者，检查其龙魂灯条件后存入魂石
     public static void tryCaptureOnDeath(LivingEntity victim, Player killer) {
@@ -1073,6 +1119,15 @@ public class WraithSummonManager {
         if (entityId == null) {
             return false;
         }
+        if (isSoulCaptureBlacklisted(entityId)) {
+            if (!victim.getPersistentData().getBoolean(SOUL_CAPTURE_REJECTED_KEY)) {
+                owner.sendSystemMessage(Component.translatable(
+                        "message.the_last_sword.dragon_soul_lantern.capture_blacklisted")
+                        .withStyle(ChatFormatting.RED));
+                victim.getPersistentData().putBoolean(SOUL_CAPTURE_REJECTED_KEY, true);
+            }
+            return false;
+        }
 
         CompoundTag nbt = emptySoulStone.getOrCreateTag();
         nbt.putString("wraith_entity_id", entityId.toString());
@@ -1093,6 +1148,17 @@ public class WraithSummonManager {
         owner.sendSystemMessage(Component.translatable(
             "message.the_last_sword.dragon_soul_lantern.stored_success", entityName));
         return true;
+    }
+
+    private static boolean isSoulCaptureBlacklisted(ResourceLocation entityId) {
+        String entries = TheLastSwordConfiguration.getSwordWraithCaptureBlacklistSafely();
+        for (String entry : entries.split(",")) {
+            ResourceLocation configuredId = ResourceLocation.tryParse(entry.trim());
+            if (entityId.equals(configuredId)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     //判断玩家相对死亡点是否满足龙魂灯捕获条件（hasPlaced 由外层预算）

@@ -17,6 +17,24 @@
       }
     ]
   },
+  "the_past_shadow_of_the_queen": {
+    "subtitle": "subtitles.the_past_shadow_of_the_queen",
+    "sounds": [
+      {
+        "name": "the_last_sword:the_past_shadow_of_the_queen",
+        "stream": true
+      }
+    ]
+  },
+  "wound_of_time": {
+    "subtitle": "subtitles.wound_of_time",
+    "sounds": [
+      {
+        "name": "the_last_sword:wound_of_time",
+        "stream": true
+      }
+    ]
+  },
   "dragon_cult_is_coming": {
     "subtitle": "subtitles.dragon_cult_is_coming",
     "sounds": [

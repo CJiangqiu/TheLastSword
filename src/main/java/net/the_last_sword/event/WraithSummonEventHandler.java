@@ -4,6 +4,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -60,6 +61,14 @@ public class WraithSummonEventHandler {
             return;
         }
         WraithSummonManager.handleEntityLeaveLevel(event.getEntity(), event.getLevel());
+    }
+
+    //复活后的新实体需要恢复主人绑定
+    @SubscribeEvent
+    public static void onEntityJoinLevel(EntityJoinLevelEvent event) {
+        if (!event.getLevel().isClientSide()) {
+            WraithSummonManager.handleEntityJoinLevel(event.getEntity(), event.getLevel());
+        }
     }
 
     //实体Tick处理剑灵AI

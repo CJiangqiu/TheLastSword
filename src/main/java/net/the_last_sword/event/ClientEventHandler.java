@@ -8,6 +8,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -16,7 +17,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
-import net.the_last_sword.init.ModBlocks;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.InputEvent;
@@ -31,13 +31,16 @@ import net.the_last_sword.client.gui.DefenceConfigScreen;
 import net.the_last_sword.client.recipe.ClientDragonCrystalRecipeCache;
 import net.the_last_sword.client.overlay.DragonArmorOverlay;
 import net.the_last_sword.client.overlay.JustifiedDefenceOverlay;
-import net.the_last_sword.client.overlay.WorldAnchorHealthOverlay;
+import net.the_last_sword.client.overlay.PresentWorldAnchorHealthOverlay;
 import net.the_last_sword.client.renderer.DragonShieldRenderer;
 import net.the_last_sword.client.renderer.DangerousSkillPreviewRenderer;
 import net.the_last_sword.client.shader.TheLastEndEffect;
 import net.the_last_sword.configuration.DefenceConfig;
 import net.the_last_sword.network.DefenceConfigPacket;
 import net.the_last_sword.init.ModKeyMappings;
+import net.the_last_sword.init.ModBlocks;
+import net.the_last_sword.init.ModItems;
+import net.the_last_sword.item.DragonCrystalSoulStone;
 import net.the_last_sword.item.TheLastSword;
 import net.the_last_sword.test.UltraTestSwordItem;
 import net.the_last_sword.network.CancelPreviewPacket;
@@ -159,6 +162,9 @@ public class ClientEventHandler {
             event.enqueueWork(() -> {
                 //加载防御配置
                 DefenceConfig.load();
+                ItemProperties.register(ModItems.DRAGON_CRYSTAL_SOUL_STONE.get(),
+                        ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "dragon_crystal_soul_stone_full"),
+                        (stack, level, entity, seed) -> DragonCrystalSoulStone.hasStoredEntity(stack) ? 1.0F : 0.0F);
             });
         }
     }
@@ -234,7 +240,7 @@ public class ClientEventHandler {
     //HUD 渲染事件（Post）- 龙之盔甲叠加层
     @SubscribeEvent
     public static void onRenderGuiOverlayPost(RenderGuiOverlayEvent.Post event) {
-        WorldAnchorHealthOverlay.onRenderGuiOverlay(event);
+        PresentWorldAnchorHealthOverlay.onRenderGuiOverlay(event);
         DragonArmorOverlay.onRenderGuiOverlay(event);
     }
 

@@ -183,7 +183,7 @@ public class TheLastSwordYouNeverForgot extends TheLastEndSwordItems {
         return ((int) (r * 255) << 16) | ((int) (g * 255) << 8) | (int) (b * 255);
     }
 
-    //绝毁攻击统一进入 LivingEntity.hurt，由世界锚度系统处理
+    //绝毁攻击统一进入 LivingEntity.hurt，由现世锚度系统处理
     public static void attack(LivingEntity target, Entity attacker, float damage) {
         if (attacker == null || !EntityUtil.canAttack(attacker, target)) {
             return;
