@@ -184,7 +184,7 @@ public final class PresentWorldAnchorManager {
                 setPresentWorldAnchor(entity, remainingAnchor);
                 if (remainingAnchor <= 0.0F) {
                     clearHealBan(entity);
-                    WraithSummonManager.tryForceCapture(entity);
+                    tryCaptureBeforeForcedDeath(entity, source);
                 } else {
                     applyHealBan(entity, remainingAnchor);
                 }
@@ -199,7 +199,7 @@ public final class PresentWorldAnchorManager {
         if (remainingAnchor <= 0.0F) {
             WraithSummonManager.stopWraithResurrection(entity);
             clearHealBan(entity);
-            WraithSummonManager.tryForceCapture(entity);
+            tryCaptureBeforeForcedDeath(entity, source);
             if (TheLastSwordConfiguration.getEnableTheLastEndSetDeadSafely()) {
                 EntityUtil.theLastEndSetDead(entity, source);
             } else {
@@ -215,6 +215,14 @@ public final class PresentWorldAnchorManager {
             entity.die(source);
         }
         return true;
+    }
+
+    private static void tryCaptureBeforeForcedDeath(LivingEntity victim, DamageSource source) {
+        Player owner = WraithSummonManager.getWraithOwnerFromDamageSource(source, victim.level());
+        if (owner != null) {
+            WraithSummonManager.tryCaptureOnDeath(victim, owner);
+        }
+        WraithSummonManager.tryForceCapture(victim);
     }
 
     private static boolean applyExpectedHealthDamage(LivingEntity entity, float amount) {

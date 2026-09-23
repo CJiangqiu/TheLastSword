@@ -336,7 +336,6 @@ public class TheLastSwordConfiguration {
     public static ForgeConfigSpec.ConfigValue<Double> ENDER_DRAGON_ATTACK_INCREASE_VALUE_HIGH_LEVEL;
 
     // Compat Mods | 联动Mod配置
-    public static ForgeConfigSpec.ConfigValue<Boolean> COMPAT_CATACLYSM_ENABLE;
     public static ForgeConfigSpec.ConfigValue<Boolean> COMPAT_ENABLE_SWORD_WRAITH_BOSS_TALK;
 
     // Lucky Block | 幸运方块事件权重（键为事件 id）
@@ -1899,12 +1898,6 @@ public class TheLastSwordConfiguration {
         // Compat Mods Configuration | 联动Mod配置
         BUILDER.push("Compat Mods");
         BUILDER.push("Cataclysm");
-        COMPAT_CATACLYSM_ENABLE = BUILDER
-            .comment(
-                "Enable Cataclysm mod compatibility",
-                "启用与 Cataclysm 模组的兼容"
-            )
-            .define("Enable Cataclysm Compat", true);
         COMPAT_ENABLE_SWORD_WRAITH_BOSS_TALK = BUILDER
             .comment(
                 "Enable sword wraith dialogue when targeting a supported boss",

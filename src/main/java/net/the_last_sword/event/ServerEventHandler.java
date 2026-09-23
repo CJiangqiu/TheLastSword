@@ -72,7 +72,9 @@ public class ServerEventHandler {
         if (event.getEntity().level().isClientSide) {
             return;
         }
-        if (!(event.getSource().getEntity() instanceof Player killer)) {
+        Player killer = event.getSource().getEntity() instanceof Player player ? player
+                : WraithSummonManager.getWraithOwnerFromDamageSource(event.getSource(), event.getEntity().level());
+        if (killer == null) {
             return;
         }
         WraithSummonManager.tryCaptureOnDeath(event.getEntity(), killer);

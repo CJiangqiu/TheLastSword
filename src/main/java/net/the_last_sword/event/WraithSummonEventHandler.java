@@ -3,9 +3,11 @@ package net.the_last_sword.event;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -53,6 +55,18 @@ public class WraithSummonEventHandler {
     }
 
     // ========== 剑灵实体事件 ==========
+
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void onWraithKill(LivingDeathEvent event) {
+        if (event.getEntity().level().isClientSide()) {
+            return;
+        }
+        Player owner = WraithSummonManager.getWraithOwnerFromDamageSource(
+                event.getSource(), event.getEntity().level());
+        if (owner != null) {
+            event.getEntity().setLastHurtByPlayer(owner);
+        }
+    }
 
     //实体离开世界时更新剑灵状态（须先于 ECA 的自动退营执行，否则查不到主人）
     @SubscribeEvent(priority = EventPriority.HIGH)

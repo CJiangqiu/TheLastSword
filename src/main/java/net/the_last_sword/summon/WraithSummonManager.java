@@ -8,6 +8,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -578,6 +579,24 @@ public class WraithSummonManager {
             return serverLevel.getServer().getPlayerList().getPlayer(ownerUUID);
         }
         return null;
+    }
+
+    public static LivingEntity getWraithFromDamageSource(DamageSource source) {
+        if (source == null) {
+            return null;
+        }
+        if (source.getDirectEntity() instanceof LivingEntity direct && isWraith(direct)) {
+            return direct;
+        }
+        if (source.getEntity() instanceof LivingEntity attacker && isWraith(attacker)) {
+            return attacker;
+        }
+        return null;
+    }
+
+    public static Player getWraithOwnerFromDamageSource(DamageSource source, Level level) {
+        LivingEntity wraith = getWraithFromDamageSource(source);
+        return wraith == null ? null : getOwner(wraith, level);
     }
 
     // ============ 内部工具方法 ============
