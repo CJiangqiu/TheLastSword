@@ -21,6 +21,7 @@ import net.the_last_sword.configuration.DefenceConfig;
 import net.the_last_sword.configuration.DefenceConfigData;
 import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
 import net.the_last_sword.entity.TheLastEndEntity;
+import net.the_last_sword.entity.TheLastEndSwordWraithEntity;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.init.ModAttributes;
 import net.the_last_sword.init.TheLastSwordDamageTypes;
@@ -405,6 +406,12 @@ public class LivingEntityMixin {
         LivingEntity entity = (LivingEntity) (Object) this;
 
         if (entity.level().isClientSide) {
+            return;
+        }
+
+        if (entity instanceof TheLastEndSwordWraithEntity && EntityUtil.hasProtection(entity)
+                && health > TrueHealthManager.getHealth(entity)) {
+            ci.cancel();
             return;
         }
 

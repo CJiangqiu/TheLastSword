@@ -1,5 +1,6 @@
 package net.the_last_sword.entity.ai;
 
+import net.eca.api.EcaAPI;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -10,6 +11,7 @@ import net.minecraft.world.phys.Vec3;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.entity.TheLastEndSwordWraithEntity;
 import net.the_last_sword.util.EntityUtil;
+import net.the_last_sword.util.health.TrueHealthManager;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -56,6 +58,12 @@ public class SwordWraithBlockGoal extends Goal {
         wraith.setAnimationState(TheLastEndSwordWraithEntity.STATE_BLOCK);
         wraith.getNavigation().stop();
         lastUseTime = wraith.level().getGameTime();
+        if (!wraith.level().isClientSide) {
+            float currentHealth = TrueHealthManager.getHealth(wraith);
+            if (Float.isFinite(currentHealth) && currentHealth > 0.0F) {
+                EcaAPI.lockHealth(wraith, currentHealth);
+            }
+        }
     }
 
     @Override
@@ -113,8 +121,9 @@ public class SwordWraithBlockGoal extends Goal {
                 knockbackDir.x * KNOCKBACK_STRENGTH, 0.1, knockbackDir.z * KNOCKBACK_STRENGTH
             ));
 
-            target.hurt(wraith.damageSources().mobAttack(wraith), damage);
-            wraith.addEndMark();
+            if (target.hurt(wraith.damageSources().mobAttack(wraith), wraith.getDamageWithEndMark(target, damage))) {
+                wraith.addEndMark();
+            }
         }
     }
 

@@ -66,34 +66,40 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
 
     public static final EntityDataAccessor<String> TEXTURE =
             SynchedEntityData.defineId(TheLastEndSwordWraithEntity.class, EntityDataSerializers.STRING);
+    private static final EntityDataAccessor<Integer> END_MARK_COUNT =
+            SynchedEntityData.defineId(TheLastEndSwordWraithEntity.class, EntityDataSerializers.INT);
 
     public final List<LivingEntity> targetList = new ArrayList<>();
 
     private int spawnTick = 0;
 
     public static final int END_MARK_THRESHOLD = 13;
-    private int endMarkCount = 0;
 
     //增加自身终焉标记
     public void addEndMark() {
-        endMarkCount++;
+        this.entityData.set(END_MARK_COUNT, getEndMark() + 1);
     }
 
     //获取自身终焉标记
     public int getEndMark() {
-        return endMarkCount;
+        return this.entityData.get(END_MARK_COUNT);
     }
 
     //消耗自身终焉标记
     public void reduceEndMark() {
-        if (endMarkCount > 0) {
-            endMarkCount--;
+        int currentMark = getEndMark();
+        if (currentMark > 0) {
+            this.entityData.set(END_MARK_COUNT, currentMark - 1);
         }
     }
 
     //重置终焉标记
     public void resetEndMark() {
-        endMarkCount = 0;
+        this.entityData.set(END_MARK_COUNT, 0);
+    }
+
+    public float getDamageWithEndMark(LivingEntity target, float baseDamage) {
+        return baseDamage + target.getMaxHealth() * getEndMark() / 100.0f;
     }
 
     public TheLastEndSwordWraithEntity(EntityType<? extends TheLastEndSwordWraithEntity> type, Level world) {
@@ -107,6 +113,7 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(TEXTURE, "the_last_end_sword_wraith");
+        this.entityData.define(END_MARK_COUNT, 0);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -279,6 +286,26 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
     }
 
     @Override
+    public void heal(float healAmount) {
+    }
+
+    @Override
+    public boolean hurt(@NotNull DamageSource damageSource, float damageAmount) {
+        if (getAnimationState() == STATE_BLOCK) {
+            return false;
+        }
+        return super.hurt(damageSource, damageAmount);
+    }
+
+    @Override
+    public void actuallyHurt(@NotNull DamageSource damageSource, float damageAmount) {
+        if (getAnimationState() == STATE_BLOCK) {
+            return;
+        }
+        super.actuallyHurt(damageSource, damageAmount);
+    }
+
+    @Override
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor world, DifficultyInstance difficulty,
             MobSpawnType reason, @Nullable SpawnGroupData livingdata, @Nullable CompoundTag tag) {
         SpawnGroupData result = super.finalizeSpawn(world, difficulty, reason, livingdata, tag);
@@ -427,7 +454,6 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
 
             //每秒消耗一层标记
             int currentMark = wraith.getEndMark();
-            wraith.reduceEndMark();
 
             double effectRange = TheLastSwordConfiguration.getSkillEndOfAllThingsRangeSafely();
             List<LivingEntity> targets = EntityUtil.getTargetsInSphere(wraith, effectRange);
@@ -437,10 +463,12 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
                 float maxHealthDamage = (float) ((0.13 + currentMark / 100.0) * target.getMaxHealth());
 
                 if (EntityUtil.canAttack(wraith, target)) {
-                    EcaAPI.hurt(target, AbsoluteDestructionDamageSource.absoluteDestruction(wraith), maxHealthDamage);
+                    EcaAPI.hurt(target, AbsoluteDestructionDamageSource.absoluteDestruction(wraith),
+                            wraith.getDamageWithEndMark(target, maxHealthDamage));
                     clearPositiveEffects(target);
                 }
             }
+            wraith.reduceEndMark();
         }
 
         private static void clearPositiveEffects(LivingEntity target) {

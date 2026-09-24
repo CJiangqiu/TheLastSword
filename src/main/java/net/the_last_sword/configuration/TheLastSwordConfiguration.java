@@ -1091,10 +1091,10 @@ public class TheLastSwordConfiguration {
         BUILDER.push("Moon Light Strike");
         SKILL_MOON_LIGHT_STRIKE_DAMAGE_MULTIPLIER = BUILDER
             .comment(
-                "Damage multiplier (1.5 = 150% attack damage)",
-                "伤害乘数（1.5 = 攻击力的 150%）"
+                "Damage multiplier (3.0 = 300% attack damage)",
+                "伤害乘数（3.0 = 攻击力的 300%）"
             )
-            .defineInRange("Damage Multiplier", 1.5, 0.0, 10.0);
+            .defineInRange("Damage Multiplier", 3.0, 0.0, 10.0);
         SKILL_MOON_LIGHT_STRIKE_RANGE = BUILDER
             .comment(
                 "Attack range in blocks (sphere radius)",
@@ -2571,7 +2571,7 @@ public class TheLastSwordConfiguration {
     }
 
     public static double getSkillMoonLightStrikeDamageMultiplierSafely() {
-        return safeGet(SKILL_MOON_LIGHT_STRIKE_DAMAGE_MULTIPLIER, 1.5);
+        return safeGet(SKILL_MOON_LIGHT_STRIKE_DAMAGE_MULTIPLIER, 3.0);
     }
 
     public static double getSkillMoonLightStrikeRangeSafely() {

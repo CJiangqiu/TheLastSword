@@ -2,10 +2,12 @@ package net.the_last_sword.client.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.the_last_sword.client.layer.TheLastEndSwordWraithLayer;
 import net.the_last_sword.client.layer.TheLastEndSwordWraithTheLastEndLayer;
@@ -39,6 +41,23 @@ public class TheLastEndSwordWraithRenderer extends GeoEntityRenderer<TheLastEndS
     @Override
     protected float getDeathMaxRotation(TheLastEndSwordWraithEntity entityLivingBaseIn) {
         return 0.0F;
+    }
+
+    @Override
+    public boolean shouldShowName(TheLastEndSwordWraithEntity entity) {
+        return true;
+    }
+
+    @Override
+    protected void renderNameTag(TheLastEndSwordWraithEntity entity, Component name, PoseStack poseStack,
+                                 MultiBufferSource bufferSource, int packedLight) {
+        super.renderNameTag(entity, name, poseStack, bufferSource, packedLight);
+        poseStack.pushPose();
+        poseStack.translate(0.0D, 0.28D, 0.0D);
+        Component marks = Component.translatable("entity.the_last_sword.the_last_end_sword_wraith.end_mark",
+                entity.getEndMark()).withStyle(ChatFormatting.DARK_PURPLE);
+        super.renderNameTag(entity, marks, poseStack, bufferSource, packedLight);
+        poseStack.popPose();
     }
 
     //受伤变红效果

@@ -173,10 +173,13 @@ public class SwordWraithMoonLightStrikeGoal extends Goal {
 
         List<LivingEntity> targets = EntityUtil.getTargetsInSphere(wraith, strikeRange);
         for (LivingEntity target : targets) {
-            target.hurt(wraith.damageSources().mobAttack(wraith), damage);
+            boolean damaged = target.hurt(wraith.damageSources().mobAttack(wraith),
+                    wraith.getDamageWithEndMark(target, damage));
             target.setDeltaMovement(target.getDeltaMovement().add(0, LAUNCH_STRENGTH, 0));
             target.playSound(SoundEvents.PLAYER_ATTACK_CRIT, 1.0F, 1.0F);
-            wraith.addEndMark();
+            if (damaged) {
+                wraith.addEndMark();
+            }
         }
     }
 }

@@ -133,8 +133,9 @@ public class SwordWraithSwiftDashGoal extends Goal {
 
         List<LivingEntity> targets = EntityUtil.getTargetsInHemisphere(wraith, attackRange);
         for (LivingEntity target : targets) {
-            target.hurt(wraith.damageSources().mobAttack(wraith), damage);
-            wraith.addEndMark();
+            if (target.hurt(wraith.damageSources().mobAttack(wraith), wraith.getDamageWithEndMark(target, damage))) {
+                wraith.addEndMark();
+            }
         }
 
         wraith.level().playSound(null, wraith.getX(), wraith.getY(), wraith.getZ(),

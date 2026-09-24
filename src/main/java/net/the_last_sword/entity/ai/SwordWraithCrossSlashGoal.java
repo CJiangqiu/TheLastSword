@@ -147,16 +147,20 @@ public class SwordWraithCrossSlashGoal extends Goal {
         float damage = (float) wraith.getAttributeValue(Attributes.ATTACK_DAMAGE) * damageMultiplier;
 
         if (EntityUtil.canAttack(wraith, target)) {
-            EcaAPI.hurt(target, AbsoluteDestructionDamageSource.absoluteDestruction(wraith), damage);
-            wraith.addEndMark();
+            if (EcaAPI.hurt(target, AbsoluteDestructionDamageSource.absoluteDestruction(wraith),
+                    wraith.getDamageWithEndMark(target, damage))) {
+                wraith.addEndMark();
+            }
         }
 
         //攻击范围内的其他敌人
         List<LivingEntity> nearbyTargets = EntityUtil.getTargetsInHemisphere(wraith, attackRange);
         for (LivingEntity nearbyTarget : nearbyTargets) {
             if (!nearbyTarget.equals(target) && EntityUtil.canAttack(wraith, nearbyTarget)) {
-                EcaAPI.hurt(nearbyTarget, AbsoluteDestructionDamageSource.absoluteDestruction(wraith), damage);
-                wraith.addEndMark();
+                if (EcaAPI.hurt(nearbyTarget, AbsoluteDestructionDamageSource.absoluteDestruction(wraith),
+                        wraith.getDamageWithEndMark(nearbyTarget, damage))) {
+                    wraith.addEndMark();
+                }
             }
         }
     }
