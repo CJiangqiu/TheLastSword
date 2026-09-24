@@ -15,7 +15,7 @@ import net.the_last_sword.util.ParticleUtil;
 import java.util.EnumSet;
 import java.util.List;
 
-//双重打击技能Goal
+//双连斩技能Goal
 public class SwordWraithDoubleStrikeGoal extends Goal {
     private final TheLastEndSwordWraithEntity wraith;
     private int animationTick;
@@ -24,7 +24,6 @@ public class SwordWraithDoubleStrikeGoal extends Goal {
     private static final int ANIMATION_LENGTH = 27;
     private static final int FIRST_STRIKE_TICK = 17;
     private static final int SECOND_STRIKE_TICK = 7;
-    private static final int COOLDOWN = 100; // 5秒
 
     public SwordWraithDoubleStrikeGoal(TheLastEndSwordWraithEntity wraith) {
         this.wraith = wraith;
@@ -48,7 +47,7 @@ public class SwordWraithDoubleStrikeGoal extends Goal {
         if (wraith.distanceTo(target) > 4.0) {
             return false;
         }
-        return wraith.level().getGameTime() - lastUseTime >= COOLDOWN;
+        return wraith.level().getGameTime() - lastUseTime >= TheLastSwordConfiguration.getSkillDoubleStrikeCooldownSafely();
     }
 
     @Override

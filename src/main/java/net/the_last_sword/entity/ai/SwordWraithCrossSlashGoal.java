@@ -25,7 +25,6 @@ public class SwordWraithCrossSlashGoal extends Goal {
     private static final int ANVIL_SOUND_TICK = 65;
     private static final int FIRST_SLASH_TICK = 25;
     private static final int SECOND_SLASH_TICK = 5;
-    private static final int COOLDOWN = 200; // 10秒
 
     public SwordWraithCrossSlashGoal(TheLastEndSwordWraithEntity wraith) {
         this.wraith = wraith;
@@ -53,7 +52,7 @@ public class SwordWraithCrossSlashGoal extends Goal {
         }
 
         //常规触发：无距离限制 + 冷却结束
-        return wraith.level().getGameTime() - lastUseTime >= COOLDOWN;
+        return wraith.level().getGameTime() - lastUseTime >= TheLastSwordConfiguration.getSkillCrossSlashCooldownSafely();
     }
 
     @Override

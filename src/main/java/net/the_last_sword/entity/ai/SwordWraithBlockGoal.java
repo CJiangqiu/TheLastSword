@@ -24,7 +24,6 @@ public class SwordWraithBlockGoal extends Goal {
 
     private static final int ANIMATION_LENGTH = 15;
     private static final double KNOCKBACK_STRENGTH = 0.4;
-    private static final int COOLDOWN = 200; // 10秒
 
     public SwordWraithBlockGoal(TheLastEndSwordWraithEntity wraith) {
         this.wraith = wraith;
@@ -49,7 +48,7 @@ public class SwordWraithBlockGoal extends Goal {
             return false;
         }
 
-        return wraith.level().getGameTime() - lastUseTime >= COOLDOWN;
+        return wraith.level().getGameTime() - lastUseTime >= TheLastSwordConfiguration.getSkillBlockCooldownSafely();
     }
 
     @Override

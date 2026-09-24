@@ -12,7 +12,7 @@ import net.the_last_sword.util.EntityUtil;
 import java.util.EnumSet;
 import java.util.List;
 
-//疾速突进技能Goal
+//迅捷突刺技能Goal
 public class SwordWraithSwiftDashGoal extends Goal {
     private final TheLastEndSwordWraithEntity wraith;
     private int animationTick;
@@ -25,7 +25,6 @@ public class SwordWraithSwiftDashGoal extends Goal {
     private static final double DASH_SPEED = 1.5;
     private static final double TRIGGER_DISTANCE = 6.0;
     private static final double DASH_SUCCESS_DISTANCE = 4.0;
-    private static final int COOLDOWN = 200; // 10秒
 
     public SwordWraithSwiftDashGoal(TheLastEndSwordWraithEntity wraith) {
         this.wraith = wraith;
@@ -49,7 +48,7 @@ public class SwordWraithSwiftDashGoal extends Goal {
         if (wraith.distanceTo(target) <= TRIGGER_DISTANCE) {
             return false;
         }
-        return wraith.level().getGameTime() - lastUseTime >= COOLDOWN;
+        return wraith.level().getGameTime() - lastUseTime >= TheLastSwordConfiguration.getSkillSwiftDashCooldownSafely();
     }
 
     @Override
@@ -125,7 +124,7 @@ public class SwordWraithSwiftDashGoal extends Goal {
         );
     }
 
-    //执行突刺最后一击
+    //执行迅捷突刺最后一击
     private void executeFinalStrike() {
         double attackRange = TheLastSwordConfiguration.getSkillSwiftDashRangeSafely();
         float damageMultiplier = (float) TheLastSwordConfiguration.getSkillSwiftDashDamageMultiplierSafely();

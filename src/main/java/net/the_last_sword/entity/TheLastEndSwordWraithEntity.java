@@ -408,7 +408,7 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
 
             int newTick = currentTick + 1;
 
-            //每秒执行一次伤害+消耗标记
+            //每秒结算一次范围伤害
             if (newTick % 20 == 0) {
                 executeAllThingsEndEffect(wraith);
             }
@@ -452,23 +452,20 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
                 return;
             }
 
-            //每秒消耗一层标记
-            int currentMark = wraith.getEndMark();
-
             double effectRange = TheLastSwordConfiguration.getSkillEndOfAllThingsRangeSafely();
             List<LivingEntity> targets = EntityUtil.getTargetsInSphere(wraith, effectRange);
+            float baseDamage = (float) (wraith.getAttributeValue(Attributes.ATTACK_DAMAGE)
+                    * TheLastSwordConfiguration.getSkillEndOfAllThingsDamageMultiplierSafely());
 
             for (LivingEntity target : targets) {
-                //伤害 = 目标最大生命值 × (13% + 剩余标记%)
-                float maxHealthDamage = (float) ((0.13 + currentMark / 100.0) * target.getMaxHealth());
-
                 if (EntityUtil.canAttack(wraith, target)) {
-                    EcaAPI.hurt(target, AbsoluteDestructionDamageSource.absoluteDestruction(wraith),
-                            wraith.getDamageWithEndMark(target, maxHealthDamage));
-                    clearPositiveEffects(target);
+                    float damage = wraith.getDamageWithEndMark(target, baseDamage);
+                    if (EcaAPI.hurt(target, AbsoluteDestructionDamageSource.absoluteDestruction(wraith), damage)) {
+                        clearPositiveEffects(target);
+                        wraith.reduceEndMark();
+                    }
                 }
             }
-            wraith.reduceEndMark();
         }
 
         private static void clearPositiveEffects(LivingEntity target) {

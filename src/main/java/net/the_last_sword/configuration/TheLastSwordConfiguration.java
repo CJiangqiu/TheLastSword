@@ -237,25 +237,30 @@ public class TheLastSwordConfiguration {
     public static ForgeConfigSpec.ConfigValue<Double> THE_LAST_END_SWORD_PROJECTILE_AOE_RADIUS;
 
     // The Last End Sword Wraith Skills | 终焉剑灵技能配置
-    // Swift Dash | 突刺
+    // Swift Thrust | 迅捷突刺
     public static ForgeConfigSpec.ConfigValue<Double> SKILL_SWIFT_DASH_DAMAGE_MULTIPLIER;
     public static ForgeConfigSpec.ConfigValue<Double> SKILL_SWIFT_DASH_RANGE;
+    public static ForgeConfigSpec.ConfigValue<Integer> SKILL_SWIFT_DASH_COOLDOWN;
 
-    // Double Strike | 双连击
+    // Double Slash | 双连斩
     public static ForgeConfigSpec.ConfigValue<Double> SKILL_DOUBLE_STRIKE_DAMAGE_MULTIPLIER;
     public static ForgeConfigSpec.ConfigValue<Double> SKILL_DOUBLE_STRIKE_RANGE;
+    public static ForgeConfigSpec.ConfigValue<Integer> SKILL_DOUBLE_STRIKE_COOLDOWN;
 
     // Cross Slash | 十字切
     public static ForgeConfigSpec.ConfigValue<Double> SKILL_CROSS_SLASH_DAMAGE_MULTIPLIER;
     public static ForgeConfigSpec.ConfigValue<Double> SKILL_CROSS_SLASH_RANGE;
+    public static ForgeConfigSpec.ConfigValue<Integer> SKILL_CROSS_SLASH_COOLDOWN;
 
     // Block | 格挡
     public static ForgeConfigSpec.ConfigValue<Double> SKILL_BLOCK_DAMAGE_MULTIPLIER;
     public static ForgeConfigSpec.ConfigValue<Double> SKILL_BLOCK_RANGE;
+    public static ForgeConfigSpec.ConfigValue<Integer> SKILL_BLOCK_COOLDOWN;
 
-    // Moon Light Strike | 月华
+    // Moonlit Strike | 月华一击
     public static ForgeConfigSpec.ConfigValue<Double> SKILL_MOON_LIGHT_STRIKE_DAMAGE_MULTIPLIER;
     public static ForgeConfigSpec.ConfigValue<Double> SKILL_MOON_LIGHT_STRIKE_RANGE;
+    public static ForgeConfigSpec.ConfigValue<Integer> SKILL_MOON_LIGHT_STRIKE_COOLDOWN;
 
     // Enchant | 虚空附魔
     public static ForgeConfigSpec.ConfigValue<Integer> SKILL_ENCHANT_DURATION;
@@ -263,7 +268,6 @@ public class TheLastSwordConfiguration {
 
     // End of All Things | 万物终焉
     public static ForgeConfigSpec.ConfigValue<Double> SKILL_END_OF_ALL_THINGS_DAMAGE_MULTIPLIER;
-    public static ForgeConfigSpec.ConfigValue<Double> SKILL_END_OF_ALL_THINGS_MAX_HEALTH_PERCENTAGE;
     public static ForgeConfigSpec.ConfigValue<Double> SKILL_END_OF_ALL_THINGS_RANGE;
 
     // Sword Wraith Generic | 通用剑灵配置
@@ -1019,7 +1023,7 @@ public class TheLastSwordConfiguration {
         // Skills Configuration | 技能配置
         BUILDER.push("Skills");
 
-        // Swift Dash | 突刺
+        // Swift Thrust | 迅捷突刺
         BUILDER.push("Swift Dash");
         BUILDER.comment(
             "Automatically used when distance to target > 6 blocks (no weight config needed)",
@@ -1037,9 +1041,12 @@ public class TheLastSwordConfiguration {
                 "最后一击的攻击范围（格）"
             )
             .defineInRange("Range", 4.0, 0.0, 32.0);
+        SKILL_SWIFT_DASH_COOLDOWN = BUILDER
+            .comment("Skill cooldown in ticks (200 ticks = 10 seconds)", "技能冷却时间（tick；200 tick = 10 秒）")
+            .defineInRange("Cooldown", 200, 0, Integer.MAX_VALUE);
         BUILDER.pop();
 
-        // Double Strike | 双连击
+        // Double Slash | 双连斩
         BUILDER.push("Double Strike");
         SKILL_DOUBLE_STRIKE_DAMAGE_MULTIPLIER = BUILDER
             .comment(
@@ -1053,6 +1060,9 @@ public class TheLastSwordConfiguration {
                 "攻击范围（格）"
             )
             .defineInRange("Range", 4.0, 0.0, 32.0);
+        SKILL_DOUBLE_STRIKE_COOLDOWN = BUILDER
+            .comment("Skill cooldown in ticks (100 ticks = 5 seconds)", "技能冷却时间（tick；100 tick = 5 秒）")
+            .defineInRange("Cooldown", 100, 0, Integer.MAX_VALUE);
         BUILDER.pop();
 
         // Cross Slash | 十字切
@@ -1069,6 +1079,9 @@ public class TheLastSwordConfiguration {
                 "攻击范围（格）"
             )
             .defineInRange("Range", 6.0, 0.0, 32.0);
+        SKILL_CROSS_SLASH_COOLDOWN = BUILDER
+            .comment("Normal skill cooldown in ticks (200 ticks = 10 seconds)", "常规触发的技能冷却时间（tick；200 tick = 10 秒）")
+            .defineInRange("Cooldown", 200, 0, Integer.MAX_VALUE);
         BUILDER.pop();
 
         // Block | 格挡
@@ -1085,9 +1098,12 @@ public class TheLastSwordConfiguration {
                 "击退及弹射物反弹的范围（格）"
             )
             .defineInRange("Range", 5.0, 0.0, 32.0);
+        SKILL_BLOCK_COOLDOWN = BUILDER
+            .comment("Skill cooldown in ticks (200 ticks = 10 seconds)", "技能冷却时间（tick；200 tick = 10 秒）")
+            .defineInRange("Cooldown", 200, 0, Integer.MAX_VALUE);
         BUILDER.pop();
 
-        // Moon Light Strike | 月华
+        // Moonlit Strike | 月华一击
         BUILDER.push("Moon Light Strike");
         SKILL_MOON_LIGHT_STRIKE_DAMAGE_MULTIPLIER = BUILDER
             .comment(
@@ -1101,6 +1117,9 @@ public class TheLastSwordConfiguration {
                 "攻击范围（格；球形半径）"
             )
             .defineInRange("Range", 6.0, 0.0, 32.0);
+        SKILL_MOON_LIGHT_STRIKE_COOLDOWN = BUILDER
+            .comment("Skill cooldown in ticks (200 ticks = 10 seconds)", "技能冷却时间（tick；200 tick = 10 秒）")
+            .defineInRange("Cooldown", 200, 0, Integer.MAX_VALUE);
         BUILDER.pop();
 
         // Enchant | 虚空附魔
@@ -1127,12 +1146,6 @@ public class TheLastSwordConfiguration {
                 "周期性伤害的乘数（1.0 = 每秒攻击力的 100%）"
             )
             .defineInRange("Damage Multiplier", 1.0, 0.0, 10.0);
-        SKILL_END_OF_ALL_THINGS_MAX_HEALTH_PERCENTAGE = BUILDER
-            .comment(
-                "Additional damage as percentage of target's max health (0.05 = 5% max health per second)",
-                "按目标最大生命值百分比追加的伤害（0.05 = 每秒最大生命值的 5%）"
-            )
-            .defineInRange("Max Health Percentage Damage", 0.05, 0.0, 1.0);
         SKILL_END_OF_ALL_THINGS_RANGE = BUILDER
             .comment(
                 "Effect range in blocks (sphere radius)",
@@ -2537,13 +2550,17 @@ public class TheLastSwordConfiguration {
     }
 
     //终焉剑灵技能配置
-    //突刺
+    //迅捷突刺
     public static double getSkillSwiftDashDamageMultiplierSafely() {
         return safeGet(SKILL_SWIFT_DASH_DAMAGE_MULTIPLIER, 0.5);
     }
 
     public static double getSkillSwiftDashRangeSafely() {
         return safeGet(SKILL_SWIFT_DASH_RANGE, 4.0);
+    }
+
+    public static int getSkillSwiftDashCooldownSafely() {
+        return safeGet(SKILL_SWIFT_DASH_COOLDOWN, 200);
     }
 
     public static double getSkillDoubleStrikeDamageMultiplierSafely() {
@@ -2554,12 +2571,20 @@ public class TheLastSwordConfiguration {
         return safeGet(SKILL_DOUBLE_STRIKE_RANGE, 4.0);
     }
 
+    public static int getSkillDoubleStrikeCooldownSafely() {
+        return safeGet(SKILL_DOUBLE_STRIKE_COOLDOWN, 100);
+    }
+
     public static double getSkillCrossSlashDamageMultiplierSafely() {
         return safeGet(SKILL_CROSS_SLASH_DAMAGE_MULTIPLIER, 1.5);
     }
 
     public static double getSkillCrossSlashRangeSafely() {
         return safeGet(SKILL_CROSS_SLASH_RANGE, 6.0);
+    }
+
+    public static int getSkillCrossSlashCooldownSafely() {
+        return safeGet(SKILL_CROSS_SLASH_COOLDOWN, 200);
     }
 
     public static double getSkillBlockDamageMultiplierSafely() {
@@ -2570,12 +2595,20 @@ public class TheLastSwordConfiguration {
         return safeGet(SKILL_BLOCK_RANGE, 5.0);
     }
 
+    public static int getSkillBlockCooldownSafely() {
+        return safeGet(SKILL_BLOCK_COOLDOWN, 200);
+    }
+
     public static double getSkillMoonLightStrikeDamageMultiplierSafely() {
         return safeGet(SKILL_MOON_LIGHT_STRIKE_DAMAGE_MULTIPLIER, 3.0);
     }
 
     public static double getSkillMoonLightStrikeRangeSafely() {
         return safeGet(SKILL_MOON_LIGHT_STRIKE_RANGE, 6.0);
+    }
+
+    public static int getSkillMoonLightStrikeCooldownSafely() {
+        return safeGet(SKILL_MOON_LIGHT_STRIKE_COOLDOWN, 200);
     }
 
     public static int getSkillEnchantDurationSafely() {
@@ -2588,10 +2621,6 @@ public class TheLastSwordConfiguration {
 
     public static double getSkillEndOfAllThingsDamageMultiplierSafely() {
         return safeGet(SKILL_END_OF_ALL_THINGS_DAMAGE_MULTIPLIER, 1.0);
-    }
-
-    public static double getSkillEndOfAllThingsMaxHealthPercentageSafely() {
-        return safeGet(SKILL_END_OF_ALL_THINGS_MAX_HEALTH_PERCENTAGE, 0.05);
     }
 
     public static double getSkillEndOfAllThingsRangeSafely() {

@@ -13,7 +13,7 @@ import net.the_last_sword.util.EntityUtil;
 import java.util.EnumSet;
 import java.util.List;
 
-//月光打击技能Goal
+//月华一击技能Goal
 public class SwordWraithMoonLightStrikeGoal extends Goal {
     private final TheLastEndSwordWraithEntity wraith;
     private int animationTick;
@@ -30,7 +30,6 @@ public class SwordWraithMoonLightStrikeGoal extends Goal {
     private static final double JUMP_HEIGHT = 8.0D;
     private static final double VERTICAL_STEP = JUMP_HEIGHT / (ASCENT_END_TICK - ASCENT_START_TICK);
     private static final double LAUNCH_STRENGTH = 1.2;
-    private static final int COOLDOWN = 200; // 10秒
 
     public SwordWraithMoonLightStrikeGoal(TheLastEndSwordWraithEntity wraith) {
         this.wraith = wraith;
@@ -55,7 +54,7 @@ public class SwordWraithMoonLightStrikeGoal extends Goal {
             return false;
         }
 
-        return wraith.level().getGameTime() - lastUseTime >= COOLDOWN;
+        return wraith.level().getGameTime() - lastUseTime >= TheLastSwordConfiguration.getSkillMoonLightStrikeCooldownSafely();
     }
 
     @Override
@@ -165,7 +164,7 @@ public class SwordWraithMoonLightStrikeGoal extends Goal {
         wraith.fallDistance = 0.0F;
     }
 
-    //执行月光打击
+    //执行月华一击
     private void executeMoonLightStrike() {
         double strikeRange = TheLastSwordConfiguration.getSkillMoonLightStrikeRangeSafely();
         float damageMultiplier = (float) TheLastSwordConfiguration.getSkillMoonLightStrikeDamageMultiplierSafely();
