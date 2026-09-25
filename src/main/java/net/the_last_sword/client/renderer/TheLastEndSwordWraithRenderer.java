@@ -45,7 +45,7 @@ public class TheLastEndSwordWraithRenderer extends GeoEntityRenderer<TheLastEndS
 
     @Override
     public boolean shouldShowName(TheLastEndSwordWraithEntity entity) {
-        return true;
+        return !entity.isAppearancePreview();
     }
 
     @Override

@@ -2,15 +2,18 @@ package net.the_last_sword.client;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.ItemStackHandler;
 import net.the_last_sword.client.gui.PaperNoteScreen;
+import net.the_last_sword.client.gui.SwordWraithAppearanceScreen;
 import net.the_last_sword.client.gui.TheLastEndScrollScreen;
 import net.the_last_sword.client.gui.menu.DragonCrystalEnchantingTableMenu;
 import net.the_last_sword.client.gui.menu.SummonWraithGuiMenu;
 import net.the_last_sword.client.recipe.ClientDragonCrystalRecipeCache;
 import net.the_last_sword.client.renderer.DragonShieldRenderer;
+import net.the_last_sword.entity.SwordWraithAppearance;
 import net.the_last_sword.event.ClientEventHandler;
 import net.the_last_sword.network.OpenLastEndScrollPacket.PaperNoteEntry;
 import net.the_last_sword.network.PerceptionScanPacket.ScanType;
@@ -97,5 +100,9 @@ public final class ClientPacketHandler {
 
     public static void openPaperNote(String noteId, String nameKey, String guiContentKey, boolean collected) {
         Minecraft.getInstance().setScreen(new PaperNoteScreen(noteId, nameKey, guiContentKey, collected));
+    }
+
+    public static void openWraithAppearanceScreen(InteractionHand hand, SwordWraithAppearance appearance) {
+        Minecraft.getInstance().setScreen(new SwordWraithAppearanceScreen(hand, appearance));
     }
 }

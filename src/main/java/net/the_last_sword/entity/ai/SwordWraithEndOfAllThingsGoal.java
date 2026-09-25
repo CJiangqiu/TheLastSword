@@ -18,6 +18,7 @@ public class SwordWraithEndOfAllThingsGoal extends Goal {
     private double startY;
     private boolean previousNoGravity;
     private boolean airborne;
+    private Vec3 effectCenter;
 
     private static final int ANIMATION_LENGTH = 190;
     private static final int ACTIVATE_TICK = 20;
@@ -68,6 +69,7 @@ public class SwordWraithEndOfAllThingsGoal extends Goal {
         startY = wraith.getY();
         previousNoGravity = wraith.isNoGravity();
         airborne = false;
+        effectCenter = null;
     }
 
     @Override
@@ -78,8 +80,9 @@ public class SwordWraithEndOfAllThingsGoal extends Goal {
 
         //激活万物终焉状态并启动持续效果
         if (animationTick == ACTIVATE_TICK) {
+            effectCenter = wraith.getBoundingBox().getCenter();
             wraith.setAllThingsEnd(true);
-            TheLastEndSwordWraithEntity.AllThingsEndActiveEffect.start(wraith);
+            TheLastEndSwordWraithEntity.AllThingsEndActiveEffect.start(wraith, effectCenter);
         }
 
         int relativeFrame = ANIMATION_LENGTH - animationTick;
@@ -111,7 +114,7 @@ public class SwordWraithEndOfAllThingsGoal extends Goal {
 
     private void spawnAnimationParticles() {
         double radius = TheLastSwordConfiguration.getSkillEndOfAllThingsRangeSafely();
-        Vec3 centerPos = wraith.position();
+        Vec3 centerPos = effectCenter != null ? effectCenter : wraith.position();
 
         //收束阶段：8.5秒起，每4tick生成收束粒子
         if (animationTick <= SHRINK_START) {

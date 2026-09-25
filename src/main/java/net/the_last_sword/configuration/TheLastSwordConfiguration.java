@@ -269,6 +269,7 @@ public class TheLastSwordConfiguration {
     // End of All Things | 万物终焉
     public static ForgeConfigSpec.ConfigValue<Double> SKILL_END_OF_ALL_THINGS_DAMAGE_MULTIPLIER;
     public static ForgeConfigSpec.ConfigValue<Double> SKILL_END_OF_ALL_THINGS_RANGE;
+    public static ForgeConfigSpec.ConfigValue<Double> SKILL_END_OF_ALL_THINGS_EXECUTION_HEALTH_THRESHOLD;
 
     // Sword Wraith Generic | 通用剑灵配置
     public static ForgeConfigSpec.ConfigValue<Double> SWORD_WRAITH_HEALTH_PER_LEVEL;
@@ -1152,6 +1153,12 @@ public class TheLastSwordConfiguration {
                 "效果范围（格；球形半径）"
             )
             .defineInRange("Range", 32.0, 0.0, 128.0);
+        SKILL_END_OF_ALL_THINGS_EXECUTION_HEALTH_THRESHOLD = BUILDER
+            .comment(
+                "Execute targets above this health ratio when the skill ends (0.5 = 50%)",
+                "技能结束时斩杀生命值比例高于此值的目标（0.5 = 50%）"
+            )
+            .defineInRange("Execution Health Threshold", 0.5, 0.0, 1.0);
         BUILDER.pop();
 
         BUILDER.pop(); // End Skills
@@ -2625,6 +2632,10 @@ public class TheLastSwordConfiguration {
 
     public static double getSkillEndOfAllThingsRangeSafely() {
         return safeGet(SKILL_END_OF_ALL_THINGS_RANGE, 32.0);
+    }
+
+    public static double getSkillEndOfAllThingsExecutionHealthThresholdSafely() {
+        return safeGet(SKILL_END_OF_ALL_THINGS_EXECUTION_HEALTH_THRESHOLD, 0.5);
     }
 
     //龙水晶附魔台配置

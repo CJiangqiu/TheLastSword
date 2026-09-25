@@ -10,6 +10,8 @@ import net.minecraft.world.phys.Vec3;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
 import net.the_last_sword.entity.LostWraithEntity;
+import net.the_last_sword.network.LostWraithEndStrikeEffectPacket;
+import net.the_last_sword.network.NetworkHandler;
 import net.the_last_sword.util.health.TrueHealthManager;
 import net.the_last_sword.util.EntityUtil;
 
@@ -32,6 +34,11 @@ public class LostWraithEndStrikeGoal extends DangerousSkillGoal<LostWraithEntity
     private int animationTick;
     private long cooldownEnd;
     private final List<TargetPositionData> pullTargets = new ArrayList<>();
+    private Vec3 effectPosition;
+    private long effectStartTick;
+    private long effectDamageTick;
+    private long effectEndTick;
+    private boolean effectActive;
 
     public LostWraithEndStrikeGoal(LostWraithEntity wraith) {
         super(wraith, TARGET_WIDTH, TARGET_LENGTH, TARGET_HEIGHT, PULL_START_TICK);
@@ -68,6 +75,7 @@ public class LostWraithEndStrikeGoal extends DangerousSkillGoal<LostWraithEntity
         wraith.setAnimationState(LostWraithEntity.STATE_END_STRIKE);
         wraith.getNavigation().stop();
         pullTargets.clear();
+        effectActive = false;
         EntityUtil.faceTarget(wraith, wraith.getTarget());
     }
 
@@ -81,6 +89,9 @@ public class LostWraithEndStrikeGoal extends DangerousSkillGoal<LostWraithEntity
 
         if (relativeFrame == PULL_START_TICK) {
             markPullTargets();
+            startEndStrikeEffect();
+        } else if (effectActive && relativeFrame < ANIMATION_LENGTH && relativeFrame % 5 == 0) {
+            syncEndStrikeEffect(true);
         }
 
         if (relativeFrame > PULL_START_TICK && relativeFrame < PULL_END_TICK) {
@@ -102,6 +113,7 @@ public class LostWraithEndStrikeGoal extends DangerousSkillGoal<LostWraithEntity
 
     @Override
     protected void onDangerousSkillStop() {
+        stopEndStrikeEffect();
         animationTick = 0;
         pullTargets.clear();
         if (wraith.getAnimationState() == LostWraithEntity.STATE_END_STRIKE) {
@@ -122,6 +134,32 @@ public class LostWraithEndStrikeGoal extends DangerousSkillGoal<LostWraithEntity
                 pullTargets.add(new TargetPositionData(target, safePullTarget));
             }
         }
+    }
+
+    private void startEndStrikeEffect() {
+        Vec3 forward = getDangerousSkillForward();
+        effectPosition = getDangerousSkillOrigin()
+                .add(0.0, wraith.getBbHeight() * 0.5, 0.0)
+                .add(forward);
+        effectStartTick = wraith.level().getGameTime();
+        effectDamageTick = effectStartTick + DAMAGE_TICK - PULL_START_TICK;
+        effectEndTick = effectStartTick + ANIMATION_LENGTH - PULL_START_TICK;
+        effectActive = true;
+        syncEndStrikeEffect(true);
+    }
+
+    private void stopEndStrikeEffect() {
+        if (!effectActive) {
+            return;
+        }
+        syncEndStrikeEffect(false);
+        effectActive = false;
+    }
+
+    private void syncEndStrikeEffect(boolean active) {
+        NetworkHandler.sendToTrackingClients(new LostWraithEndStrikeEffectPacket(
+                wraith.level().dimension().location(), wraith.getId(), wraith.getUUID(),
+                effectPosition, effectStartTick, effectDamageTick, effectEndTick, active), wraith);
     }
 
     private void updatePull() {

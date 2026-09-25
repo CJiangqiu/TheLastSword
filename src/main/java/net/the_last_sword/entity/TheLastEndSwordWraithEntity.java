@@ -32,6 +32,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.phys.Vec3;
 import net.eca.api.EcaAPI;
 import net.eca.network.EntityExtensionOverridePacket.SkyboxData;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -43,6 +44,7 @@ import net.the_last_sword.util.EntityUtil;
 import net.the_last_sword.util.health.TrueHealthManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import software.bernie.geckolib.core.animation.AnimationController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,6 +74,7 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
     public final List<LivingEntity> targetList = new ArrayList<>();
 
     private int spawnTick = 0;
+    private boolean appearancePreview;
 
     public static final int END_MARK_THRESHOLD = 13;
 
@@ -258,11 +261,41 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
     }
 
     public void setTexture(String texture) {
-        this.entityData.set(TEXTURE, texture);
+        this.entityData.set(TEXTURE, SwordWraithAppearance.fromId(texture).getId());
     }
 
     public String getTexture() {
         return this.entityData.get(TEXTURE);
+    }
+
+    public void setAppearance(SwordWraithAppearance appearance) {
+        this.entityData.set(TEXTURE, appearance.getId());
+    }
+
+    public SwordWraithAppearance getAppearance() {
+        return SwordWraithAppearance.fromId(this.entityData.get(TEXTURE));
+    }
+
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> dataAccessor) {
+        super.onSyncedDataUpdated(dataAccessor);
+        if (TEXTURE.equals(dataAccessor) && level().isClientSide) {
+            AnimationController<?> controller = getAnimatableInstanceCache()
+                    .getManagerForId(getId())
+                    .getAnimationControllers()
+                    .get("main");
+            if (controller != null) {
+                controller.forceAnimationReset();
+            }
+        }
+    }
+
+    public void setAppearancePreview(boolean appearancePreview) {
+        this.appearancePreview = appearancePreview;
+    }
+
+    public boolean isAppearancePreview() {
+        return appearancePreview;
     }
 
     @Override
@@ -376,13 +409,13 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
 
     //万物终焉持续效果
     public static class AllThingsEndActiveEffect {
-        private static final Map<UUID, Integer> ACTIVE_EFFECTS = new ConcurrentHashMap<>();
+        private static final Map<UUID, ActiveEffectData> ACTIVE_EFFECTS = new ConcurrentHashMap<>();
         private static final int DURATION = 260;  //13秒
 
         private static final ResourceLocation THE_LAST_END_PRESET = ResourceLocation.fromNamespaceAndPath("eca", "the_last_end");
 
-        public static void start(TheLastEndSwordWraithEntity wraith) {
-            ACTIVE_EFFECTS.put(wraith.getUUID(), 0);
+        public static void start(TheLastEndSwordWraithEntity wraith, Vec3 center) {
+            ACTIVE_EFFECTS.put(wraith.getUUID(), new ActiveEffectData(0, center));
             if (wraith.level() instanceof ServerLevel serverLevel) {
                 SkyboxData skyboxData = new SkyboxData(
                         false, null,
@@ -396,9 +429,9 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
 
         public static void handleTick(TheLastEndSwordWraithEntity wraith) {
             UUID id = wraith.getUUID();
-            Integer currentTick = ACTIVE_EFFECTS.get(id);
+            ActiveEffectData effectData = ACTIVE_EFFECTS.get(id);
 
-            if (currentTick == null) {
+            if (effectData == null) {
                 //存档恢复后状态残留，强制结束
                 if (wraith.isAllThingsEnd()) {
                     end(wraith);
@@ -406,34 +439,37 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
                 return;
             }
 
-            int newTick = currentTick + 1;
+            int newTick = effectData.tick() + 1;
 
             //每秒结算一次范围伤害
             if (newTick % 20 == 0) {
-                executeAllThingsEndEffect(wraith);
+                executeAllThingsEndEffect(wraith, effectData.center());
             }
 
             if (newTick >= DURATION) {
                 end(wraith);
             } else {
-                ACTIVE_EFFECTS.put(id, newTick);
+                ACTIVE_EFFECTS.put(id, new ActiveEffectData(newTick, effectData.center()));
             }
         }
 
         public static void end(TheLastEndSwordWraithEntity wraith) {
-            ACTIVE_EFFECTS.remove(wraith.getUUID());
+            ActiveEffectData effectData = ACTIVE_EFFECTS.remove(wraith.getUUID());
+            Vec3 center = effectData != null ? effectData.center() : wraith.getBoundingBox().getCenter();
             wraith.setAllThingsEnd(false);
 
-            //终焉审判：生命值 > 50%最大生命值的目标直接击杀
+            //技能结束后再结算终焉审判，避免持续阶段提前斩杀
             if (!wraith.level().isClientSide) {
                 double effectRange = TheLastSwordConfiguration.getSkillEndOfAllThingsRangeSafely();
-                List<LivingEntity> targets = EntityUtil.getTargetsInSphere(wraith, effectRange);
+                double executionHealthThreshold = TheLastSwordConfiguration
+                        .getSkillEndOfAllThingsExecutionHealthThresholdSafely();
+                List<LivingEntity> targets = EntityUtil.getTargetsIntersectingSphere(wraith, center, effectRange);
                 for (LivingEntity target : targets) {
                     float health = EntityUtil.hasProtection(target)
                             ? TrueHealthManager.getHealth(target)
                             : target.getHealth();
                     float maxHealth = target.getMaxHealth();
-                    if (health > maxHealth * 0.5f && EntityUtil.canAttack(wraith, target)) {
+                    if (health > maxHealth * executionHealthThreshold && EntityUtil.canAttack(wraith, target)) {
                         EcaAPI.hurt(target, AbsoluteDestructionDamageSource.absoluteDestruction(wraith), Float.MAX_VALUE);
                     }
                 }
@@ -447,13 +483,13 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
             }
         }
 
-        private static void executeAllThingsEndEffect(TheLastEndSwordWraithEntity wraith) {
+        private static void executeAllThingsEndEffect(TheLastEndSwordWraithEntity wraith, Vec3 center) {
             if (wraith.level().isClientSide) {
                 return;
             }
 
             double effectRange = TheLastSwordConfiguration.getSkillEndOfAllThingsRangeSafely();
-            List<LivingEntity> targets = EntityUtil.getTargetsInSphere(wraith, effectRange);
+            List<LivingEntity> targets = EntityUtil.getTargetsIntersectingSphere(wraith, center, effectRange);
             float baseDamage = (float) (wraith.getAttributeValue(Attributes.ATTACK_DAMAGE)
                     * TheLastSwordConfiguration.getSkillEndOfAllThingsDamageMultiplierSafely());
 
@@ -475,6 +511,9 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
                     target.removeEffect(effect.getEffect());
                 }
             }
+        }
+
+        private record ActiveEffectData(int tick, Vec3 center) {
         }
 
     }

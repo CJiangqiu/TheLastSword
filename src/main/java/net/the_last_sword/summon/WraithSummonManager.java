@@ -29,6 +29,7 @@ import net.the_last_sword.init.ModBlocks;
 import net.the_last_sword.init.ModItems;
 import net.the_last_sword.item.DragonCrystalSoulStone;
 import net.the_last_sword.item.ISummonableItem;
+import net.the_last_sword.item.SwordSoulStone;
 import net.the_last_sword.entity.TheLastEndEntity;
 import net.the_last_sword.entity.TheLastEndSwordWraithEntity;
 import net.the_last_sword.util.EntityUtil;
@@ -336,6 +337,7 @@ public class WraithSummonManager {
             }
             wraith = (LivingEntity) entity;
         }
+        applySoulStoneAppearance(soulStone, wraith);
 
         //2. 生成新UUID并设置
         UUID wraitheUUID = UUID.randomUUID();
@@ -444,6 +446,7 @@ public class WraithSummonManager {
             return false;
         }
         LivingEntity wraith = (LivingEntity) entity;
+        applySoulStoneAppearance(soulStone, wraith);
 
         //1.5. 强制设置UUID为魂石中记录的UUID（避免UUID不匹配）
         wraith.setUUID(wraitheUUID);
@@ -536,6 +539,13 @@ public class WraithSummonManager {
         sendSummonMessage(player, wraith);
 
         return true;
+    }
+
+    private static void applySoulStoneAppearance(ItemStack soulStone, LivingEntity wraith) {
+        if (soulStone.getItem() instanceof SwordSoulStone
+                && wraith instanceof TheLastEndSwordWraithEntity swordWraith) {
+            swordWraith.setAppearance(SwordSoulStone.getAppearance(soulStone));
+        }
     }
 
     // ============ 绑定查询（底层为 ECA 阵营） ============
@@ -717,9 +727,11 @@ public class WraithSummonManager {
     }
 
     //设置剑灵自定义名称
-    private static void setWraithCustomName(LivingEntity wraith, Player owner) {
+    public static void setWraithCustomName(LivingEntity wraith, Player owner) {
         try {
-            Component originalName = wraith.getType().getDescription();
+            Component originalName = wraith instanceof TheLastEndSwordWraithEntity swordWraith
+                    ? Component.translatable(swordWraith.getAppearance().getEntityNameKey())
+                    : wraith.getType().getDescription();
 
             Component newName = Component.translatable(
                 "entity.the_last_sword.sword_wraith",

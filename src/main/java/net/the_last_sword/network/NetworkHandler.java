@@ -13,7 +13,7 @@ import net.minecraft.server.level.ServerPlayer;
 //网络包管理器
 public class NetworkHandler {
 
-    private static final String PROTOCOL_VERSION = "4";
+    private static final String PROTOCOL_VERSION = "6";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "main"),
@@ -30,10 +30,25 @@ public class NetworkHandler {
 
     //注册所有网络包
     public static void register() {
+        CHANNEL.messageBuilder(OpenWraithAppearanceScreenPacket.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(OpenWraithAppearanceScreenPacket::encode)
+                .decoder(OpenWraithAppearanceScreenPacket::decode)
+                .consumerMainThread(OpenWraithAppearanceScreenPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(SetWraithAppearancePacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
+                .encoder(SetWraithAppearancePacket::encode)
+                .decoder(SetWraithAppearancePacket::decode)
+                .consumerMainThread(SetWraithAppearancePacket::handle)
+                .add();
         CHANNEL.messageBuilder(DangerousSkillPreviewPacket.class, id(), NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(DangerousSkillPreviewPacket::encode)
                 .decoder(DangerousSkillPreviewPacket::decode)
                 .consumerMainThread(DangerousSkillPreviewPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(LostWraithEndStrikeEffectPacket.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(LostWraithEndStrikeEffectPacket::encode)
+                .decoder(LostWraithEndStrikeEffectPacket::decode)
+                .consumerMainThread(LostWraithEndStrikeEffectPacket::handle)
                 .add();
         CHANNEL.messageBuilder(ChangeModePacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
                 .encoder(ChangeModePacket::encode)

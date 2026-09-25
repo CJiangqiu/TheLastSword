@@ -12,17 +12,17 @@ import software.bernie.geckolib.model.data.EntityModelData;
 public class TheLastEndSwordWraithModel extends GeoModel<TheLastEndSwordWraithEntity> {
     @Override
     public ResourceLocation getAnimationResource(TheLastEndSwordWraithEntity entity) {
-        return ResourceLocation.fromNamespaceAndPath("the_last_sword", "animations/the_last_end_sword_wraith.animation.json");
+        return entity.getAppearance().getAnimation();
     }
 
     @Override
     public ResourceLocation getModelResource(TheLastEndSwordWraithEntity entity) {
-        return ResourceLocation.fromNamespaceAndPath("the_last_sword", "geo/the_last_end_sword_wraith.geo.json");
+        return entity.getAppearance().getModel();
     }
 
     @Override
     public ResourceLocation getTextureResource(TheLastEndSwordWraithEntity entity) {
-        return ResourceLocation.fromNamespaceAndPath("the_last_sword", "textures/entities/" + entity.getTexture() + ".png");
+        return entity.getAppearance().getTexture();
     }
 
     @Override

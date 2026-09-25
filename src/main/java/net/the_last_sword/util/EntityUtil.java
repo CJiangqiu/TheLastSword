@@ -525,6 +525,27 @@ public class EntityUtil {
         return validTargets;
     }
 
+    //按碰撞箱与球体的实际相交关系筛选目标，避免大型实体或高度差造成漏判
+    public static List<LivingEntity> getTargetsIntersectingSphere(
+            LivingEntity attacker, Vec3 center, double radius) {
+        if (radius < 0.0) {
+            return new ArrayList<>();
+        }
+
+        AABB searchBox = new AABB(
+                center.x - radius, center.y - radius, center.z - radius,
+                center.x + radius, center.y + radius, center.z + radius
+        );
+        double radiusSquared = radius * radius;
+        return attacker.level().getEntitiesOfClass(
+                LivingEntity.class,
+                searchBox,
+                target -> target != attacker
+                        && target.getBoundingBox().distanceToSqr(center) <= radiusSquared
+                        && canAttack(attacker, target)
+        );
+    }
+
     //发射附魔弓箭
     public static void shootArrow(LivingEntity shooter, LivingEntity target, ItemStack bow) {
         if (shooter == null || target == null || bow.isEmpty()) return;

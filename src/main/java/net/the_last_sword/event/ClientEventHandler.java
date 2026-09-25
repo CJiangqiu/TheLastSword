@@ -34,6 +34,7 @@ import net.the_last_sword.client.overlay.JustifiedDefenceOverlay;
 import net.the_last_sword.client.overlay.PresentWorldAnchorHealthOverlay;
 import net.the_last_sword.client.renderer.DragonShieldRenderer;
 import net.the_last_sword.client.renderer.DangerousSkillPreviewRenderer;
+import net.the_last_sword.client.renderer.LostWraithEndStrikeEffectRenderer;
 import net.the_last_sword.client.shader.TheLastEndEffect;
 import net.the_last_sword.configuration.DefenceConfig;
 import net.the_last_sword.network.DefenceConfigPacket;
@@ -181,6 +182,7 @@ public class ClientEventHandler {
     @SubscribeEvent
     public static void onPlayerLogout(ClientPlayerNetworkEvent.LoggingOut event) {
         DangerousSkillPreviewRenderer.clear();
+        LostWraithEndStrikeEffectRenderer.clear();
         ClientDragonCrystalRecipeCache.clear();
     }
 
@@ -249,6 +251,7 @@ public class ClientEventHandler {
     public static void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase == TickEvent.Phase.END) {
             DangerousSkillPreviewRenderer.tick();
+            LostWraithEndStrikeEffectRenderer.tick();
             Minecraft mc = Minecraft.getInstance();
 
             //检查防御配置按键
@@ -298,6 +301,7 @@ public class ClientEventHandler {
         }
 
         DangerousSkillPreviewRenderer.render(event.getPoseStack(), event.getCamera(), event.getPartialTick());
+        LostWraithEndStrikeEffectRenderer.render(event.getPoseStack(), event.getCamera(), event.getPartialTick());
 
         //渲染龙魂灯笼范围
         renderDragonSoulLanternRanges(event.getPoseStack(), event.getCamera(), mc.level);
