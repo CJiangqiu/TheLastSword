@@ -23,7 +23,6 @@ import java.util.List;
 public class LostWraithEndStrikeGoal extends DangerousSkillGoal<LostWraithEntity> {
     private static final int ANIMATION_LENGTH = 80;
     private static final int PULL_START_TICK = 30;
-    private static final int PULL_END_TICK = 70;
     private static final int DAMAGE_TICK = 70;
     private static final double ATTACK_DISTANCE = 4.0;
     private static final double TARGET_WIDTH = 5.0;
@@ -33,7 +32,7 @@ public class LostWraithEndStrikeGoal extends DangerousSkillGoal<LostWraithEntity
     private final LostWraithEntity wraith;
     private int animationTick;
     private long cooldownEnd;
-    private final List<TargetPositionData> pullTargets = new ArrayList<>();
+    private final List<LivingEntity> pullTargets = new ArrayList<>();
     private Vec3 effectPosition;
     private long effectStartTick;
     private long effectDamageTick;
@@ -94,10 +93,6 @@ public class LostWraithEndStrikeGoal extends DangerousSkillGoal<LostWraithEntity
             syncEndStrikeEffect(true);
         }
 
-        if (relativeFrame > PULL_START_TICK && relativeFrame < PULL_END_TICK) {
-            updatePull();
-        }
-
         if (relativeFrame == DAMAGE_TICK) {
             dealDamage();
         }
@@ -131,7 +126,8 @@ public class LostWraithEndStrikeGoal extends DangerousSkillGoal<LostWraithEntity
         for (LivingEntity target : targets) {
             Vec3 safePullTarget = EntityUtil.findSafeTeleportPosition(target, pullTarget, 2);
             if (safePullTarget != null) {
-                pullTargets.add(new TargetPositionData(target, safePullTarget));
+                pullTargets.add(target);
+                lockDangerousSkillTarget(target, safePullTarget);
             }
         }
     }
@@ -162,38 +158,32 @@ public class LostWraithEndStrikeGoal extends DangerousSkillGoal<LostWraithEntity
                 effectPosition, effectStartTick, effectDamageTick, effectEndTick, active), wraith);
     }
 
-    private void updatePull() {
-        pullTargets.removeIf(data -> !data.target.isAlive() || !EntityUtil.canAttack(wraith, data.target));
-        for (TargetPositionData data : pullTargets) {
-            data.target.teleportTo(data.position.x, data.position.y, data.position.z);
-        }
-    }
-
     private void dealDamage() {
         float lostHealth = TrueHealthManager.getMaxHealth(wraith) - TrueHealthManager.getHealth(wraith);
         float damage = lostHealth * (float) TheLastSwordConfiguration.getLostWraithEndStrikeDamageMultiplierSafely();
 
-        for (TargetPositionData data : pullTargets) {
-            if (data.target.isAlive() && EntityUtil.canAttack(wraith, data.target)) {
-                if (isTargetBlocking(data.target)) {
-                    data.target.level().playSound(null, data.target.blockPosition(),
-                        SoundEvents.SHIELD_BLOCK, data.target.getSoundSource(),
-                        1.0F, 0.8F + data.target.level().random.nextFloat() * 0.4F);
+        for (LivingEntity target : pullTargets) {
+            if (target.isAlive() && EntityUtil.canAttack(wraith, target)) {
+                if (isTargetBlocking(target)) {
+                    target.level().playSound(null, target.blockPosition(),
+                        SoundEvents.SHIELD_BLOCK, target.getSoundSource(),
+                        1.0F, 0.8F + target.level().random.nextFloat() * 0.4F);
 
-                    if (data.target instanceof Player player) {
-                        player.getCooldowns().addCooldown(data.target.getUseItem().getItem(),
+                    if (target instanceof Player player) {
+                        player.getCooldowns().addCooldown(target.getUseItem().getItem(),
                             TheLastSwordConfiguration.getLostWraithEndStrikeShieldCooldownSafely());
                     }
 
-                    Vec3 knockback = getDangerousSkillOrigin().subtract(data.target.position()).normalize().scale(-0.3);
-                    data.target.setDeltaMovement(data.target.getDeltaMovement().add(knockback));
+                    Vec3 knockback = getDangerousSkillOrigin().subtract(target.position()).normalize().scale(-0.3);
+                    target.setDeltaMovement(target.getDeltaMovement().add(knockback));
                 } else {
-                    if (EntityUtil.canAttack(wraith, data.target)) {
-                        EcaAPI.hurt(data.target, AbsoluteDestructionDamageSource.absoluteDestruction(wraith), damage);
+                    if (EntityUtil.canAttack(wraith, target)) {
+                        EcaAPI.hurt(target, AbsoluteDestructionDamageSource.absoluteDestruction(wraith), damage);
                     }
                 }
             }
         }
+        unlockAllDangerousSkillTargets();
         pullTargets.clear();
     }
 
@@ -224,13 +214,4 @@ public class LostWraithEndStrikeGoal extends DangerousSkillGoal<LostWraithEntity
         return dotProduct > 0;
     }
 
-    private static class TargetPositionData {
-        public final LivingEntity target;
-        public final Vec3 position;
-
-        public TargetPositionData(LivingEntity target, Vec3 position) {
-            this.target = target;
-            this.position = position;
-        }
-    }
 }

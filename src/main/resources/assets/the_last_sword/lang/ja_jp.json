@@ -540,5 +540,11 @@
   "named_priest.the_last_sword.vokun": "ヴォクン",
   "named_priest.the_last_sword.volsung": "ヴォルサング",
   "named_priest.the_last_sword.konahrik": "コナヒリク",
-  "named_priest.the_last_sword.miraak": "ミラーク"
+  "named_priest.the_last_sword.miraak": "ミラーク",
+  "item.the_last_sword.lightning_spear": "稲妻の槍",
+  "item_tooltip.the_last_sword.lightning_spear.skill": "雷霆の裁き：右クリックを%1$s秒間長押ししてチャージし、最大%2$sブロック飛行する稲妻の槍を放つ。エンティティまたはブロックに命中すると雷が炸裂し、%3$s×%3$s×%3$sブロックの範囲内にいる攻撃可能なエンティティへ%4$sの雷撃ダメージを与え、移動速度低下%5$sを%6$s秒間付与する。クールダウン：%7$s秒。",
+  "item_tooltip_lore.the_last_sword.lightning_spear": "ドラゴンクリスタルの特性から、ドラゴンは雷に対して特別な親和性を持つらしい。伝説によれば、彼らは雷さえ槍へと変え、投げ放つことができるという。",
+  "bossshow.the_last_sword.the_past_shadow_of_the_queen.subtitle_1": "ん？「虚空の下」に属さぬ冒険者か。",
+  "bossshow.the_last_sword.the_past_shadow_of_the_queen.subtitle_2": "お前の目から、力への渇望が見える。よかろう、私の試練を受けてみよ！",
+  "message.the_last_sword.location_locked": "移動できません！"
 }

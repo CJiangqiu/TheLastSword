@@ -261,19 +261,19 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
     }
 
     public void setTexture(String texture) {
-        this.entityData.set(TEXTURE, SwordWraithAppearance.fromId(texture).getId());
+        this.entityData.set(TEXTURE, TheLastEndSwordWraithAppearance.fromId(texture).getId());
     }
 
     public String getTexture() {
         return this.entityData.get(TEXTURE);
     }
 
-    public void setAppearance(SwordWraithAppearance appearance) {
+    public void setAppearance(TheLastEndSwordWraithAppearance appearance) {
         this.entityData.set(TEXTURE, appearance.getId());
     }
 
-    public SwordWraithAppearance getAppearance() {
-        return SwordWraithAppearance.fromId(this.entityData.get(TEXTURE));
+    public TheLastEndSwordWraithAppearance getAppearance() {
+        return TheLastEndSwordWraithAppearance.fromId(this.entityData.get(TEXTURE));
     }
 
     @Override

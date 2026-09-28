@@ -540,5 +540,11 @@
   "named_priest.the_last_sword.vokun": "Vokun",
   "named_priest.the_last_sword.volsung": "Volsung",
   "named_priest.the_last_sword.konahrik": "Konahrik",
-  "named_priest.the_last_sword.miraak": "Miraak"
+  "named_priest.the_last_sword.miraak": "Miraak",
+  "item.the_last_sword.lightning_spear": "Lightning Spear",
+  "item_tooltip.the_last_sword.lightning_spear.skill": "Thunder Judgment: Hold right-click for %1$s seconds to launch a lightning spear up to %2$s blocks. Hitting an entity or block detonates the lightning, dealing %4$s lightning damage to attackable entities in a %3$s×%3$s×%3$s-block area and applying Slowness %5$s for %6$s seconds. Cooldown: %7$s seconds.",
+  "item_tooltip_lore.the_last_sword.lightning_spear": "From the properties of dragon crystals, we can infer that dragons seem to possess a unique affinity for lightning. Legends say They can even shape lightning into spears and hurl them.",
+  "bossshow.the_last_sword.the_past_shadow_of_the_queen.subtitle_1": "Hm? An adventurer who does not belong to the Under Void.",
+  "bossshow.the_last_sword.the_past_shadow_of_the_queen.subtitle_2": "I see the hunger for power in your eyes. Very well. Come and face my challenge!",
+  "message.the_last_sword.location_locked": "You cannot move!"
 }

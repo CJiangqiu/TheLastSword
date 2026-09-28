@@ -15,6 +15,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.the_last_sword.configuration.DefenceConfig;
@@ -30,6 +31,8 @@ import net.the_last_sword.network.DragonShieldPacket;
 import net.the_last_sword.network.NetworkHandler;
 import net.the_last_sword.summon.WraithSummonManager;
 import net.the_last_sword.util.EntityUtil;
+import net.the_last_sword.util.damage.AdvancedEquipmentDamageHandler;
+import net.the_last_sword.util.damage.AdvancedEquipmentDamageHandler.DamageResult;
 import net.the_last_sword.util.health.TrueHealthManager;
 import net.the_last_sword.util.health.PresentWorldAnchorManager;
 import org.spongepowered.asm.mixin.Mixin;
@@ -126,6 +129,17 @@ public class LivingEntityMixin {
         if (shieldAttr == null || shieldAttr.getValue() <= 0) return false;
         shieldAttr.setBaseValue(Math.max(0.0, shieldAttr.getValue() - cost));
         return true;
+    }
+
+    @Unique
+    private void the_last_sword$showShieldEffect(LivingEntity entity, DamageSource source) {
+        if (entity instanceof ServerPlayer serverPlayer
+                && DragonArmorItem.isFullSet(serverPlayer)
+                && DragonArmorItem.hasEnergyFullSet(serverPlayer)
+                && DefenceConfig.getDragonShieldModule().shieldEffect
+                != DefenceConfigData.ShieldEffectMode.DISABLED) {
+            NetworkHandler.sendToPlayer(DragonShieldPacket.fromDamageSource(serverPlayer, source), serverPlayer);
+        }
     }
 
 
@@ -264,10 +278,14 @@ public class LivingEntityMixin {
             return;
         }
 
-        the_last_sword$handleShieldRegeneration(entity);
+        if (entity instanceof Player player && (player.dead || player.deathTime > 0)) {
+            the_last_sword$justifiedDefenceRecoveryProgress = 0.0;
+        } else {
+            the_last_sword$handleShieldRegeneration(entity);
 
-        //肃正防御存在时自动注册保护
-        the_last_sword$handleJustifiedDefenceProtection(entity);
+            //肃正防御存在时自动注册保护
+            the_last_sword$handleJustifiedDefenceProtection(entity);
+        }
 
         //每 tick 更新禁疗计时器
         PresentWorldAnchorManager.tickHealBanTime(entity);
@@ -287,7 +305,7 @@ public class LivingEntityMixin {
         }
     }
 
-    //绝毁先排除友方，避免误消耗肃正防御
+    //底层系统必须先于原版免疫帧和事件完成绝毁、肃正防御与终焉附伤
     @Inject(method = "hurt", at = @At("HEAD"), cancellable = true)
     private void onLivingEntityHurt(DamageSource damageSource, float damageAmount, CallbackInfoReturnable<Boolean> cir) {
         LivingEntity entity = (LivingEntity) (Object) this;
@@ -296,38 +314,46 @@ public class LivingEntityMixin {
             return;
         }
 
-        if (the_last_sword$isAbsoluteDestructionDamage(damageSource)
-                && damageSource.getEntity() != null
-                && !EntityUtil.canAttack(damageSource.getEntity(), entity)) {
-            cir.setReturnValue(false);
-            return;
-        }
-
-        //肃正防御护盾优先吸收（受伤 -1, 彻底无敌式抵挡）
-        if (the_last_sword$consumeShield(entity, 1)) {
-            if (entity instanceof ServerPlayer sp && DragonArmorItem.isFullSet(sp) && DragonArmorItem.hasEnergyFullSet(sp)
-                    && DefenceConfig.getDragonShieldModule().shieldEffect != DefenceConfigData.ShieldEffectMode.DISABLED) {
-                NetworkHandler.sendToPlayer(DragonShieldPacket.fromDamageSource(sp, damageSource), sp);
-            }
-            cir.setReturnValue(false);
-            return;
-        }
-
-        the_last_sword$applyLevelBonus(entity, damageSource, damageAmount);
-
-        //绝毁自行结算真实生命值与现世锚度，避免原版再次扣血
         if (the_last_sword$isAbsoluteDestructionDamage(damageSource)) {
-            cir.setReturnValue(PresentWorldAnchorManager.handleAbsoluteDestructionDamage(entity, damageSource, damageAmount));
+            Entity attacker = damageSource.getEntity();
+            if (attacker != null && !EntityUtil.canAttack(attacker, entity)) {
+                cir.setReturnValue(false);
+                return;
+            }
+
+            if (the_last_sword$consumeShield(entity, 1)) {
+                the_last_sword$showShieldEffect(entity, damageSource);
+                cir.setReturnValue(false);
+                return;
+            }
+
+            DamageResult result = AdvancedEquipmentDamageHandler.process(entity, damageSource, damageAmount);
+            if (result.canceled()) {
+                cir.setReturnValue(result.handledResult());
+                return;
+            }
+
+            cir.setReturnValue(PresentWorldAnchorManager.handleAbsoluteDestructionDamage(
+                    entity, damageSource, result.amount()));
             return;
         }
 
-        //终焉侧伤害统一清目标无敌帧，须排在绝毁附加之后：绝毁会重入 hurt 并把无敌帧设回 20
+        if (the_last_sword$consumeShield(entity, 1)) {
+            the_last_sword$showShieldEffect(entity, damageSource);
+            cir.setReturnValue(false);
+            return;
+        }
+
+        if (!AdvancedEquipmentDamageHandler.isConvertingDamage()) {
+            the_last_sword$applyLevelBonus(entity, damageSource, damageAmount);
+        }
+
         if (the_last_sword$isTheLastEndAttacker(damageSource)) {
             entity.invulnerableTime = 0;
         }
     }
 
-    //actuallyHurt：护盾吸收 + 限伤逻辑
+    //普通保护和非终焉种剑灵共用真实生命结算，终焉种保留自身覆写
     @Inject(method = "actuallyHurt", at = @At("HEAD"), cancellable = true)
     private void onLivingEntityActuallyHurt(DamageSource damageSource, float damageAmount, CallbackInfo ci) {
         LivingEntity entity = (LivingEntity) (Object) this;
@@ -336,40 +362,48 @@ public class LivingEntityMixin {
             return;
         }
 
-        //肃正防御护盾优先吸收 (兜底直接调 actuallyHurt 绕过 hurt 的路径)
-        if (the_last_sword$consumeShield(entity, 1)) {
-            if (entity instanceof ServerPlayer sp && DragonArmorItem.isFullSet(sp) && DragonArmorItem.hasEnergyFullSet(sp)
-                    && DefenceConfig.getDragonShieldModule().shieldEffect != DefenceConfigData.ShieldEffectMode.DISABLED) {
-                NetworkHandler.sendToPlayer(DragonShieldPacket.fromDamageSource(sp, damageSource), sp);
+        if (entity instanceof TheLastEndEntity) {
+            return;
+        }
+
+        boolean ordinaryWraith = TheLastSwordConfiguration.getSwordWraithAsTheLastEndEntitySafely()
+                && WraithSummonManager.isWraith(entity);
+        if (!ordinaryWraith && !EntityUtil.hasProtection(entity)) {
+            return;
+        }
+
+        float realDamage = damageAmount;
+        if (ordinaryWraith) {
+            float maxHealth = (float) entity.getAttributeValue(Attributes.MAX_HEALTH);
+            float ratio = (float) TheLastSwordConfiguration.getDefenceCustomHealthDamageReductionSafely();
+            float maxDamage = (float) TheLastSwordConfiguration.getDefenceMaxDamagePerHitSafely();
+            float damageLimit = Math.min(maxHealth * ratio, maxDamage);
+            int level = WraithSummonManager.getWraithLevel(entity);
+            if (level <= 5) {
+                realDamage = Math.min(realDamage, damageLimit);
+            } else if (realDamage > damageLimit) {
+                ci.cancel();
+                return;
             }
+        }
+
+        DamageResult equipmentResult = AdvancedEquipmentDamageHandler.processThenPostEvent(
+                entity, damageSource, realDamage);
+        if (equipmentResult.canceled()) {
             ci.cancel();
             return;
         }
+        realDamage = equipmentResult.amount();
 
-        if (!EntityUtil.hasProtection(entity)) {
-            return;
+        float currentHealth = TrueHealthManager.getHealth(entity);
+        float newHealth = currentHealth - realDamage;
+        TrueHealthManager.setHealth(entity, newHealth);
+        if (newHealth <= 0.0F) {
+            WraithSummonManager.stopWraithResurrection(entity);
+            TrueHealthManager.clear(entity);
+            EcaAPI.setHealth(entity, 0.0F);
         }
 
-        //限伤计算
-        float maxHealth = (float) entity.getAttributeValue(Attributes.MAX_HEALTH);
-        float damageReductionRatio = (float) TheLastSwordConfiguration.getDefenceCustomHealthDamageReductionSafely();
-        float maxDamagePerHit = (float) TheLastSwordConfiguration.getDefenceMaxDamagePerHitSafely();
-        float damageLimit = Math.min(maxHealth * damageReductionRatio, maxDamagePerHit);
-        float realDamage = Math.min(damageAmount, damageLimit);
-
-        //扣除自定义血量
-        if (realDamage > 0.0f) {
-            float currentHealth = TrueHealthManager.getHealth(entity);
-            float newHealth = currentHealth - realDamage;
-            TrueHealthManager.setHealth(entity, newHealth);
-            if (newHealth <= 0.0f) {
-                WraithSummonManager.stopWraithResurrection(entity);
-                TrueHealthManager.clear(entity);
-                EcaAPI.setHealth(entity, 0.0f);
-            }
-        }
-
-        //取消原版扣血
         ci.cancel();
     }
 

@@ -540,5 +540,11 @@
   "named_priest.the_last_sword.vokun": "沃坤",
   "named_priest.the_last_sword.volsung": "沃爾遜",
   "named_priest.the_last_sword.konahrik": "科納瑞克",
-  "named_priest.the_last_sword.miraak": "秘拉克"
+  "named_priest.the_last_sword.miraak": "秘拉克",
+  "item.the_last_sword.lightning_spear": "閃電長矛",
+  "item_tooltip.the_last_sword.lightning_spear.skill": "雷霆裁決：按住右鍵蓄力%1$s秒，發射最遠飛行%2$s格的閃電長矛。命中實體或方塊後引爆雷霆，對%3$s×%3$s×%3$s格範圍內可攻擊的實體造成%4$s點閃電傷害，並施加緩慢%5$s，持續%6$s秒。冷卻%7$s秒。",
+  "item_tooltip_lore.the_last_sword.lightning_spear": "從龍水晶的特性中我們可以發現，龍似乎對閃電有著獨特的親和力，傳說中祂們甚至可以將閃電化為長矛擲出。",
+  "bossshow.the_last_sword.the_past_shadow_of_the_queen.subtitle_1": "嗯？一位不屬於虛空之下的冒險者。",
+  "bossshow.the_last_sword.the_past_shadow_of_the_queen.subtitle_2": "我從你的眼中看見了對力量的渴望。很好，來迎接我的挑戰吧！",
+  "message.the_last_sword.location_locked": "你無法移動！"
 }

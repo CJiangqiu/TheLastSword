@@ -12,7 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
-import net.the_last_sword.entity.SwordWraithAppearance;
+import net.the_last_sword.entity.TheLastEndSwordWraithAppearance;
 import net.the_last_sword.entity.TheLastEndEntity;
 import net.the_last_sword.entity.TheLastEndSwordWraithEntity;
 import net.the_last_sword.network.NetworkHandler;
@@ -50,21 +50,21 @@ public class SwordSoulStone extends DragonCrystalSoulStone {
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
     }
 
-    public static SwordWraithAppearance getAppearance(ItemStack stack) {
+    public static TheLastEndSwordWraithAppearance getAppearance(ItemStack stack) {
         CompoundTag tag = stack.getTag();
         if (tag == null) {
-            return SwordWraithAppearance.DEFAULT;
+            return TheLastEndSwordWraithAppearance.DEFAULT;
         }
         if (tag.contains(APPEARANCE_KEY)) {
-            return SwordWraithAppearance.fromId(tag.getString(APPEARANCE_KEY));
+            return TheLastEndSwordWraithAppearance.fromId(tag.getString(APPEARANCE_KEY));
         }
         if (tag.contains("entity_nbt")) {
-            return SwordWraithAppearance.fromId(tag.getCompound("entity_nbt").getString("TEXTURE"));
+            return TheLastEndSwordWraithAppearance.fromId(tag.getCompound("entity_nbt").getString("TEXTURE"));
         }
-        return SwordWraithAppearance.DEFAULT;
+        return TheLastEndSwordWraithAppearance.DEFAULT;
     }
 
-    public static void setAppearance(ItemStack stack, SwordWraithAppearance appearance) {
+    public static void setAppearance(ItemStack stack, TheLastEndSwordWraithAppearance appearance) {
         CompoundTag tag = stack.getOrCreateTag();
         tag.putString(APPEARANCE_KEY, appearance.getId());
         if (tag.contains("entity_nbt")) {

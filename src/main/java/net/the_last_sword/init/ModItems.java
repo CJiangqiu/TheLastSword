@@ -142,6 +142,10 @@ public class ModItems {
         TheLastSword::new
     );
 
+    public static final RegistryObject<Item> LIGHTNING_SPEAR = ITEMS.register("lightning_spear",
+        () -> new LightningSpearItem(new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON).fireResistant())
+    );
+
     public static final RegistryObject<Item> THE_LAST_SWORD_YOU_NEVER_FORGOT = ITEMS.register("the_last_sword_you_never_forgot",
         TheLastSwordYouNeverForgot::new
     );

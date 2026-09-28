@@ -1,6 +1,7 @@
 package net.the_last_sword.entity;
 
 import net.eca.api.EcaAPI;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -12,12 +13,18 @@ import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.phys.Vec3;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.util.EntityUtil;
+import net.the_last_sword.util.damage.AdvancedEquipmentDamageHandler;
+import net.the_last_sword.util.damage.AdvancedEquipmentDamageHandler.DamageResult;
 import net.the_last_sword.util.health.TrueHealthManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -68,6 +75,13 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
     // 强加载是否由复活追踪开启，避免退出追踪时误关其他系统开启的强加载
     private boolean resurrectionForceLoaded;
 
+    private static final int VOID_RESCUE_RETRY_TICKS = 40;
+    private static final int VOID_RESCUE_SEARCH_RADIUS = 8;
+    private Vec3 lastSafePosition;
+    private String lastSafeDimension = "";
+    private boolean voidRescueActive;
+    private int voidRescueRetryTicks;
+
     protected TheLastEndEntity(EntityType<? extends TamableAnimal> entityType, Level level) {
         super(entityType, level);
     }
@@ -100,7 +114,7 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
     }
 
     public boolean canAct() {
-        return getAnimationState() >= STATE_IDLE;
+        return !voidRescueActive && getAnimationState() >= STATE_IDLE;
     }
 
     // 无敌帧
@@ -249,8 +263,15 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
 
         // 死亡状态
         if (isDying()) {
+            voidRescueActive = false;
             handleDeathTick();
+            setDeltaMovement(Vec3.ZERO);
+            super.tick();
             return;
+        }
+
+        if (!level().isClientSide) {
+            tickVoidRescue();
         }
 
         // 未生成状态
@@ -275,6 +296,122 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
         }
     }
 
+    private void tickVoidRescue() {
+        String dimension = level().dimension().location().toString();
+        if (!dimension.equals(lastSafeDimension)) {
+            lastSafePosition = null;
+            lastSafeDimension = dimension;
+            voidRescueActive = false;
+        }
+        if (!TheLastSwordConfiguration.getEntityVoidRescueEnabledSafely()) {
+            voidRescueActive = false;
+            voidRescueRetryTicks = 0;
+            return;
+        }
+
+        if (!voidRescueActive && getY() < level().getMinBuildHeight() - 16.0) {
+            voidRescueActive = true;
+            voidRescueRetryTicks = 0;
+            // 必须让正在运行的 Goal 释放自己的位置锁定，再选择传送落点。
+            goalSelector.getRunningGoals().toList().forEach(WrappedGoal::stop);
+            getNavigation().stop();
+            if (getAnimationState() > STATE_IDLE) {
+                setAnimationState(STATE_IDLE);
+            }
+            setDeltaMovement(Vec3.ZERO);
+            fallDistance = 0;
+        }
+
+        if (voidRescueActive) {
+            getNavigation().stop();
+            setDeltaMovement(Vec3.ZERO);
+            fallDistance = 0;
+            if (voidRescueRetryTicks-- > 0) return;
+            voidRescueRetryTicks = VOID_RESCUE_RETRY_TICKS;
+            Vec3 destination = findVoidRescuePosition();
+            if (destination != null && EntityUtil.theLastEndTeleport(
+                    this, destination.x, destination.y, destination.z)) {
+                voidRescueActive = false;
+                lastSafePosition = destination;
+                setDeltaMovement(Vec3.ZERO);
+                fallDistance = 0;
+            } else if (getY() < level().getMinBuildHeight() - 8.0) {
+                // 无落点时停在建筑范围下方的空域，不修改实体原有的重力模式。
+                EntityUtil.theLastEndTeleport(this, getX(), level().getMinBuildHeight() - 8.0, getZ());
+            }
+            return;
+        }
+
+        if (onGround() && !noPhysics && tickCount % 10 == 0) {
+            Vec3 safePosition = checkVoidRescuePosition(position(), 0);
+            if (safePosition != null) lastSafePosition = safePosition;
+        }
+    }
+
+    @Nullable
+    private Vec3 findVoidRescuePosition() {
+        // 主人召回或外部传送已经把实体送回地面时，直接结束悬浮。
+        Vec3 currentSafePosition = checkVoidRescuePosition(position(), 0);
+        if (currentSafePosition != null) return currentSafePosition;
+        if (lastSafePosition != null) {
+            Vec3 position = checkVoidRescuePosition(lastSafePosition, 4);
+            if (position != null) return position;
+            position = findNearbyVoidRescuePosition(lastSafePosition);
+            if (position != null) return position;
+        }
+        return findNearbyVoidRescuePosition(position());
+    }
+
+    @Nullable
+    private Vec3 findNearbyVoidRescuePosition(Vec3 center) {
+        BlockPos origin = BlockPos.containing(center);
+        // 有界、低频搜索，避免在虚空中生成新区块或逐 tick 扫描地形。
+        for (int radius = 0; radius <= VOID_RESCUE_SEARCH_RADIUS; radius++) {
+            for (int dx = -radius; dx <= radius; dx++) {
+                for (int dz = -radius; dz <= radius; dz++) {
+                    if (Math.max(Math.abs(dx), Math.abs(dz)) != radius) continue;
+                    int x = origin.getX() + dx;
+                    int z = origin.getZ() + dz;
+                    if (!level().hasChunkAt(new BlockPos(x, level().getMinBuildHeight(), z))) continue;
+                    int y = level().getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+                    Vec3 safePosition = checkVoidRescuePosition(new Vec3(x + 0.5, y, z + 0.5), 2);
+                    if (safePosition != null) return safePosition;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    private Vec3 checkVoidRescuePosition(Vec3 position, int verticalRange) {
+        // 检查完整碰撞体覆盖的区块，不能只检查中心所在区块。
+        double margin = getBbWidth() / 2.0 + 1.0;
+        if (!level().hasChunksAt(BlockPos.containing(position.x - margin, position.y, position.z - margin),
+                BlockPos.containing(position.x + margin, position.y, position.z + margin))) return null;
+        Vec3 safePosition = EntityUtil.findSafeTeleportPosition(this, position, verticalRange);
+        if (safePosition == null) return null;
+        if (!level().getWorldBorder().isWithinBounds(BlockPos.containing(safePosition))) return null;
+        if (level().containsAnyLiquid(getBoundingBox().move(safePosition.subtract(position())))) return null;
+        return safePosition;
+    }
+
+    @Override
+    public void move(@NotNull MoverType type, @NotNull Vec3 movement) {
+        if (!level().isClientSide && voidRescueActive) {
+            setDeltaMovement(Vec3.ZERO);
+            fallDistance = 0;
+            return;
+        }
+        super.move(type, movement);
+    }
+
+    @Override
+    protected void onBelowWorld() {
+        if (!level().isClientSide && voidRescueActive
+                && TheLastSwordConfiguration.getEntityVoidRescueEnabledSafely()) return;
+        super.onBelowWorld();
+    }
+
     protected void onUnspawnedTick() {
     }
 
@@ -282,6 +419,7 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
     }
 
     private void handleDeathTick() {
+        hurtTime = 0;
         int deathTick = getDeathTick();
 
         if (deathTick == 0) {
@@ -430,6 +568,13 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
             realDamage = damageAmount;
         }
 
+        DamageResult equipmentResult = AdvancedEquipmentDamageHandler.processThenPostEvent(
+                this, damageSource, realDamage);
+        if (equipmentResult.canceled()) {
+            return;
+        }
+        realDamage = equipmentResult.amount();
+
         if (realDamage > 0) {
             float currentHealth = TrueHealthManager.getHealth(this);
             float newHealth = currentHealth - realDamage;
@@ -519,6 +664,16 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
     @Override
     public void readAdditionalSaveData(@NotNull CompoundTag tag) {
         super.readAdditionalSaveData(tag);
+        CompoundTag rescue = tag.getCompound("VoidRescue");
+        lastSafeDimension = rescue.getString("Dimension");
+        lastSafePosition = null;
+        if (rescue.contains("X") && rescue.contains("Y") && rescue.contains("Z")) {
+            Vec3 savedPosition = new Vec3(rescue.getDouble("X"), rescue.getDouble("Y"), rescue.getDouble("Z"));
+            if (Double.isFinite(savedPosition.x) && Double.isFinite(savedPosition.y)
+                    && Double.isFinite(savedPosition.z)) lastSafePosition = savedPosition;
+        }
+        voidRescueActive = rescue.getBoolean("Active");
+        voidRescueRetryTicks = 0;
         if (tag.contains("AnimationState")) {
             int savedState = tag.getInt("AnimationState");
             // Skill Goal timers are transient and are not serialized. Restoring one of
@@ -543,6 +698,15 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
     @Override
     public void addAdditionalSaveData(@NotNull CompoundTag tag) {
         super.addAdditionalSaveData(tag);
+        CompoundTag rescue = new CompoundTag();
+        rescue.putString("Dimension", lastSafeDimension);
+        rescue.putBoolean("Active", voidRescueActive);
+        if (lastSafePosition != null) {
+            rescue.putDouble("X", lastSafePosition.x);
+            rescue.putDouble("Y", lastSafePosition.y);
+            rescue.putDouble("Z", lastSafePosition.z);
+        }
+        tag.put("VoidRescue", rescue);
         int animationState = getAnimationState();
         tag.putInt("AnimationState", animationState > STATE_IDLE ? STATE_IDLE : animationState);
         tag.putInt("Level", getTheLastEndLevel());

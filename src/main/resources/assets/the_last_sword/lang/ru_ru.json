@@ -540,5 +540,11 @@
   "named_priest.the_last_sword.vokun": "Вокун",
   "named_priest.the_last_sword.volsung": "Вольсунг",
   "named_priest.the_last_sword.konahrik": "Конахрик",
-  "named_priest.the_last_sword.miraak": "Мирак"
+  "named_priest.the_last_sword.miraak": "Мирак",
+  "item.the_last_sword.lightning_spear": "Копьё молнии",
+  "item_tooltip.the_last_sword.lightning_spear.skill": "Громовой приговор: удерживайте правую кнопку мыши %1$s сек., чтобы зарядиться и метнуть копьё молнии, пролетающее до %2$s блоков. При попадании в существо или блок оно вызывает взрыв молнии, нанося %4$s ед. урона молнией доступным для атаки существам в области %3$s×%3$s×%3$s блока и накладывая Замедление %5$s на %6$s сек. Перезарядка: %7$s сек.",
+  "item_tooltip_lore.the_last_sword.lightning_spear": "Из свойств драконьих кристаллов можно заключить, что драконы обладают особым сродством с молнией. Согласно легендам, они способны даже обратить молнию в копьё и метнуть его.",
+  "bossshow.the_last_sword.the_past_shadow_of_the_queen.subtitle_1": "Хм? Искатель приключений, не принадлежащий миру Под Пустотой.",
+  "bossshow.the_last_sword.the_past_shadow_of_the_queen.subtitle_2": "В твоих глазах я вижу жажду силы. Что ж, прими мой вызов!",
+  "message.the_last_sword.location_locked": "Вы не можете двигаться!"
 }

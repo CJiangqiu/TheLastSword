@@ -540,5 +540,11 @@
   "named_priest.the_last_sword.vokun": "보쿤",
   "named_priest.the_last_sword.volsung": "볼성",
   "named_priest.the_last_sword.konahrik": "코나릭",
-  "named_priest.the_last_sword.miraak": "미락"
+  "named_priest.the_last_sword.miraak": "미락",
+  "item.the_last_sword.lightning_spear": "번개의 창",
+  "item_tooltip.the_last_sword.lightning_spear.skill": "뇌정의 심판: 우클릭을 %1$s초 동안 눌러 충전한 뒤 최대 %2$s블록까지 비행하는 번개의 창을 발사합니다. 엔티티 또는 블록에 명중하면 번개가 폭발하여 %3$s×%3$s×%3$s블록 범위 안의 공격 가능한 엔티티에게 %4$s의 번개 피해를 주고 %6$s초 동안 감속 %5$s 효과를 부여합니다. 재사용 대기시간: %7$s초.",
+  "item_tooltip_lore.the_last_sword.lightning_spear": "용 수정의 특성을 통해 용들은 번개에 독특한 친화력을 지닌 듯하다는 사실을 알 수 있다. 전설에 따르면 그들은 심지어 번개를 창으로 빚어 던질 수도 있다고 한다.",
+  "bossshow.the_last_sword.the_past_shadow_of_the_queen.subtitle_1": "흠? 공허 아래에 속하지 않은 모험가로군.",
+  "bossshow.the_last_sword.the_past_shadow_of_the_queen.subtitle_2": "네 눈에서 힘을 향한 갈망이 보이는구나. 좋다, 나의 도전을 받아 보아라!",
+  "message.the_last_sword.location_locked": "이동할 수 없습니다!"
 }

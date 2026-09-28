@@ -6,7 +6,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
-import net.the_last_sword.entity.SwordWraithAppearance;
+import net.the_last_sword.entity.TheLastEndSwordWraithAppearance;
 import net.the_last_sword.entity.TheLastEndEntity;
 import net.the_last_sword.entity.TheLastEndSwordWraithEntity;
 import net.the_last_sword.init.ModEntities;
@@ -17,12 +17,12 @@ public class SwordWraithAppearanceScreen extends Screen {
     private static final int FRAME_WIDTH = 120;
     private static final int FRAME_HEIGHT = 140;
     private final InteractionHand hand;
-    private SwordWraithAppearance appearance;
+    private TheLastEndSwordWraithAppearance appearance;
     private TheLastEndSwordWraithEntity preview;
     private int frameLeft;
     private int frameTop;
 
-    public SwordWraithAppearanceScreen(InteractionHand hand, SwordWraithAppearance appearance) {
+    public SwordWraithAppearanceScreen(InteractionHand hand, TheLastEndSwordWraithAppearance appearance) {
         super(Component.translatable("gui.the_last_sword.sword_wraith_appearance.title"));
         this.hand = hand;
         this.appearance = appearance;
@@ -43,7 +43,7 @@ public class SwordWraithAppearanceScreen extends Screen {
         rebuildPreview();
     }
 
-    private void select(SwordWraithAppearance selected) {
+    private void select(TheLastEndSwordWraithAppearance selected) {
         appearance = selected;
         rebuildPreview();
         NetworkHandler.sendToServer(new SetWraithAppearancePacket(hand, selected));

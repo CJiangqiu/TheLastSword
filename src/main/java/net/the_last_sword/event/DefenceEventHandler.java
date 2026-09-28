@@ -22,7 +22,6 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEquipmentChangeEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -43,8 +42,6 @@ import net.the_last_sword.network.NetworkHandler;
 import net.the_last_sword.util.EntityUtil;
 import net.the_last_sword.util.health.TrueHealthManager;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.DamageTypes;
 import net.the_last_sword.init.ModEffects;
 
 import net.minecraft.server.level.ServerPlayer;
@@ -55,7 +52,6 @@ import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.the_last_sword.network.PerceptionScanPacket.ScanType;
-import net.the_last_sword.network.NetworkHandler;
 import net.the_last_sword.network.PerceptionScanPacket;
 
 import java.util.HashMap;
@@ -155,40 +151,6 @@ public final class DefenceEventHandler {
                         && !player.getAbilities().flying) {
                     player.getAbilities().flying = true;
                 }
-            }
-        }
-
-        //龙之盔甲伤害减免（龙魂觉醒被动，全套固定生效）
-        @SubscribeEvent(priority = EventPriority.HIGH)
-        public static void onDragonArmorHurt(LivingHurtEvent event) {
-            if (!(event.getEntity() instanceof Player player)) return;
-            if (!DragonArmorItem.isFullSet(player)) return;
-
-            DamageSource source = event.getSource();
-
-            //检查是否为非玩家攻击或爆炸伤害
-            boolean isNonPlayerAttack = source.getEntity() != null && !(source.getEntity() instanceof Player);
-            boolean isExplosion = source.is(DamageTypes.EXPLOSION) ||
-                                  source.is(DamageTypes.PLAYER_EXPLOSION) ||
-                                  source.is(DamageTypes.FIREWORKS) ||
-                                  source.is(DamageTypes.BAD_RESPAWN_POINT);
-
-            if (!isNonPlayerAttack && !isExplosion) return;
-
-            DefenceConfigData playerConfig = DefenceConfigPacket.getPlayerConfig(player.getUUID());
-            DragonShieldModule dragonShield = playerConfig.armor.dragonArmor.defence.dragonShield;
-            boolean dragonShieldEnabled = dragonShield == null || dragonShield.enabled;
-            boolean dragonShieldActive = dragonShieldEnabled && DragonArmorItem.hasEnergyFullSet(player);
-
-            if (dragonShieldActive) {
-                event.setAmount(0);
-                if (DefenceConfig.getDragonShieldModule().shieldEffect != DefenceConfigData.ShieldEffectMode.DISABLED
-                        && player instanceof ServerPlayer sp) {
-                    NetworkHandler.sendToPlayer(DragonShieldPacket.fromDamageSource(sp, source), sp);
-                }
-            } else {
-                //减少90%伤害
-                event.setAmount(event.getAmount() * 0.1f);
             }
         }
 

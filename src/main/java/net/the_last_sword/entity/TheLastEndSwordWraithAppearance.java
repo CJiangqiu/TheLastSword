@@ -3,7 +3,7 @@ package net.the_last_sword.entity;
 import net.minecraft.resources.ResourceLocation;
 import net.the_last_sword.TheLastSwordMod;
 
-public enum SwordWraithAppearance {
+public enum TheLastEndSwordWraithAppearance {
     DEFAULT("the_last_end_sword_wraith", "gui.the_last_sword.sword_wraith_appearance.default",
             "entity.the_last_sword.the_last_end_sword_wraith"),
     THYSIA_TELENDRACON("thysia_telendracon", "gui.the_last_sword.sword_wraith_appearance.thysia_telendracon",
@@ -16,7 +16,7 @@ public enum SwordWraithAppearance {
     private final ResourceLocation animation;
     private final ResourceLocation texture;
 
-    SwordWraithAppearance(String id, String nameKey, String entityNameKey) {
+    TheLastEndSwordWraithAppearance(String id, String nameKey, String entityNameKey) {
         this.id = id;
         this.nameKey = nameKey;
         this.entityNameKey = entityNameKey;
@@ -49,18 +49,18 @@ public enum SwordWraithAppearance {
         return texture;
     }
 
-    public SwordWraithAppearance previous() {
-        SwordWraithAppearance[] appearances = values();
+    public TheLastEndSwordWraithAppearance previous() {
+        TheLastEndSwordWraithAppearance[] appearances = values();
         return appearances[Math.floorMod(ordinal() - 1, appearances.length)];
     }
 
-    public SwordWraithAppearance next() {
-        SwordWraithAppearance[] appearances = values();
+    public TheLastEndSwordWraithAppearance next() {
+        TheLastEndSwordWraithAppearance[] appearances = values();
         return appearances[(ordinal() + 1) % appearances.length];
     }
 
-    public static SwordWraithAppearance fromId(String id) {
-        for (SwordWraithAppearance appearance : values()) {
+    public static TheLastEndSwordWraithAppearance fromId(String id) {
+        for (TheLastEndSwordWraithAppearance appearance : values()) {
             if (appearance.id.equals(id)) {
                 return appearance;
             }

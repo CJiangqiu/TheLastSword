@@ -12,7 +12,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -39,7 +38,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.eca.api.EcaAPI;
-import net.eca.network.EntityExtensionOverridePacket.MusicData;
 import net.eca.util.entity_extension.EntityExtensionManager;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.entity.ai.LostWraithDragonFireBallGoal;
@@ -315,10 +313,6 @@ public class LostWraithEntity extends TheLastEndEntity {
     @Override
     protected void onDeathStart() {
         sendDeathTalkToNearbyPlayers();
-
-        if (level() instanceof ServerLevel serverLevel) {
-            EcaAPI.clearGlobalMusic(serverLevel);
-        }
     }
 
     public void activate() {
@@ -338,14 +332,6 @@ public class LostWraithEntity extends TheLastEndEntity {
                     // 激活演出BossShow（allow_repeat:false 时每玩家每存档只播一次，测试需用新存档）
                     EcaAPI.playBossShowIfNew(sp, this, BOSS_SHOW_ID);
                 }
-
-                // 通过ECA API播放战斗音乐
-                MusicData musicData = new MusicData(
-                    ResourceLocation.fromNamespaceAndPath("the_last_sword", "lost_wraith"),
-                    SoundSource.MUSIC.ordinal(),
-                    1.0f, 1.0f, true, true
-                );
-                EcaAPI.setGlobalMusic(serverLevel, musicData);
             }
         }
     }

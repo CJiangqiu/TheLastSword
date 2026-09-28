@@ -22,6 +22,13 @@ public class TheLastSwordConfiguration {
     public static ForgeConfigSpec.ConfigValue<Double> PRIEST_STAFF_GUARD_RADIUS;
     public static ForgeConfigSpec.ConfigValue<Double> PRIEST_STAFF_GUARD_SHIELD_GAIN;
     public static ForgeConfigSpec.ConfigValue<Integer> PRIEST_STAFF_GUARD_COOLDOWN;
+    public static ForgeConfigSpec.ConfigValue<Integer> LIGHTNING_SPEAR_COOLDOWN;
+    public static ForgeConfigSpec.ConfigValue<Integer> LIGHTNING_SPEAR_CHARGE_TIME;
+    public static ForgeConfigSpec.ConfigValue<Double> LIGHTNING_SPEAR_RANGE;
+    public static ForgeConfigSpec.ConfigValue<Double> LIGHTNING_SPEAR_BURST_SIZE;
+    public static ForgeConfigSpec.ConfigValue<Double> LIGHTNING_SPEAR_DAMAGE;
+    public static ForgeConfigSpec.ConfigValue<Integer> LIGHTNING_SPEAR_SLOW_LEVEL;
+    public static ForgeConfigSpec.ConfigValue<Integer> LIGHTNING_SPEAR_SLOW_DURATION;
 
     // Armor Generic | 盔甲类通用配置（等级区间）
     public static ForgeConfigSpec.ConfigValue<Double> ARMOR_INCREASE_LOW_LEVEL;    // < 6级
@@ -132,6 +139,7 @@ public class TheLastSwordConfiguration {
     public static ForgeConfigSpec.ConfigValue<Boolean> THE_LAST_END_ENTITY_ENABLE_DANGEROUS_SKILL_ALARM;
     public static ForgeConfigSpec.ConfigValue<Boolean> THE_LAST_END_ENTITY_ENABLE_DANGEROUS_SKILL_RANGE_PREVIEW;
     public static ForgeConfigSpec.ConfigValue<Boolean> THE_LAST_END_ENTITY_ENABLE_ALL_THINGS_END;
+    public static ForgeConfigSpec.ConfigValue<Boolean> THE_LAST_END_ENTITY_ENABLE_VOID_RESCUE;
 
     // The Last End Sword Wraith | 终焉剑灵配置
     public static ForgeConfigSpec.ConfigValue<Boolean> THE_LAST_END_SWORD_WRAITH_ENABLE_BATTLE_MUSIC;
@@ -141,6 +149,25 @@ public class TheLastSwordConfiguration {
     public static ForgeConfigSpec.ConfigValue<Boolean> LOST_WRAITH_ENABLE_CUSTOM_BOSS_BAR;
     public static ForgeConfigSpec.ConfigValue<Double> LOST_WRAITH_DAMAGE_LIMIT;
     public static ForgeConfigSpec.ConfigValue<Integer> LOST_WRAITH_HURT_RESIST_TIME;
+
+    // The Past Shadow Of The Queen | 女皇的逝去之影配置
+    public static ForgeConfigSpec.ConfigValue<Double> THE_PAST_SHADOW_OF_THE_QUEEN_DAMAGE_LIMIT;
+    public static ForgeConfigSpec.ConfigValue<Integer> THE_PAST_SHADOW_OF_THE_QUEEN_LIGHTNING_SPEAR_COOLDOWN;
+    public static ForgeConfigSpec.ConfigValue<Integer> QUEEN_BLINK_COOLDOWN;
+    public static ForgeConfigSpec.ConfigValue<Integer> QUEEN_TRIPLE_SLASH_COOLDOWN;
+    public static ForgeConfigSpec.ConfigValue<Boolean> QUEEN_TRIPLE_SLASH_ENABLE_SCREEN_SHAKE;
+    public static ForgeConfigSpec.ConfigValue<Integer> QUEEN_SUMMON_PROJECTILES_COOLDOWN;
+    public static ForgeConfigSpec.ConfigValue<Double> QUEEN_SUMMON_PROJECTILES_DAMAGE_MULTIPLIER;
+    public static ForgeConfigSpec.ConfigValue<Double> QUEEN_SUMMON_PROJECTILES_AOE_RADIUS;
+    public static ForgeConfigSpec.ConfigValue<Integer> QUEEN_ENCHANT_COOLDOWN;
+    public static ForgeConfigSpec.ConfigValue<Integer> QUEEN_EXECUTION_COOLDOWN;
+    public static ForgeConfigSpec.ConfigValue<Double> QUEEN_EXECUTION_FIRST_DAMAGE_RATIO;
+    public static ForgeConfigSpec.ConfigValue<Double> QUEEN_EXECUTION_SECOND_DAMAGE_RATIO;
+    public static ForgeConfigSpec.ConfigValue<Double> QUEEN_BLINK_DAMAGE;
+    public static ForgeConfigSpec.ConfigValue<Double> QUEEN_BLINK_SPEED;
+    public static ForgeConfigSpec.ConfigValue<Double> QUEEN_BLINK_WIDTH;
+    public static ForgeConfigSpec.ConfigValue<Double> QUEEN_BLINK_HEIGHT;
+    public static ForgeConfigSpec.ConfigValue<Double> QUEEN_BLINK_LENGTH;
 
     // Lost Wraith Skills | 迷失战魂技能
     // Enchant | 虚空附魔
@@ -428,6 +455,24 @@ public class TheLastSwordConfiguration {
                 "守护能力的冷却时间（刻，100刻 = 5秒）"
             )
             .defineInRange("Guard Cooldown", 100, 0, 72000);
+        BUILDER.pop();
+
+        BUILDER.push("Lightning Spear");
+        LIGHTNING_SPEAR_COOLDOWN = BUILDER.comment("Skill cooldown in ticks", "技能冷却（刻，20刻为1秒）")
+            .defineInRange("Cooldown", 200, 0, 72000);
+        LIGHTNING_SPEAR_CHARGE_TIME = BUILDER.comment("Required charge time in ticks", "所需蓄力时间（刻）")
+            .defineInRange("Charge Time", 10, 1, 1200);
+        LIGHTNING_SPEAR_RANGE = BUILDER.comment("Maximum flight distance in blocks", "最大飞行距离（格）")
+            .defineInRange("Flight Range", 32.0, 1.0, 256.0);
+        LIGHTNING_SPEAR_BURST_SIZE = BUILDER.comment("Full side length of the cubic damage area, not radius",
+                "伤害区域立方体的完整边长（格），不是半径")
+            .defineInRange("Burst Size", 3.0, 0.1, 64.0);
+        LIGHTNING_SPEAR_DAMAGE = BUILDER.comment("Lightning damage per target", "对每个目标的闪电伤害")
+            .defineInRange("Damage", 100.0, 0.0, 1000000.0);
+        LIGHTNING_SPEAR_SLOW_LEVEL = BUILDER.comment("Slowness level, 1 means Slowness I", "缓慢等级，1表示缓慢I")
+            .defineInRange("Slowness Level", 3, 1, 256);
+        LIGHTNING_SPEAR_SLOW_DURATION = BUILDER.comment("Slowness duration in ticks", "缓慢持续时间（刻）")
+            .defineInRange("Slowness Duration", 60, 0, 72000);
         BUILDER.pop();
 
         BUILDER.push("Dragon Crystal Sword");
@@ -988,6 +1033,10 @@ public class TheLastSwordConfiguration {
 
         // The Last End Entity Settings | 终焉实体设置
         BUILDER.push("The Last End Entity");
+        THE_LAST_END_ENTITY_ENABLE_VOID_RESCUE = BUILDER
+            .comment("Rescue end entities below the world's minimum build height minus 16 blocks",
+                "终焉种低于世界最低建筑高度 16 格时，返回安全落点；无落点则临时悬浮等待救援")
+            .define("Enable Void Rescue", true);
         THE_LAST_END_ENTITY_ENABLE_DANGEROUS_SKILL_ALARM = BUILDER
             .comment(
                 "Enable the warning sound played when a dangerous skill starts",
@@ -1274,6 +1323,77 @@ public class TheLastSwordConfiguration {
         BUILDER.pop(); // End Skills
 
         BUILDER.pop(); // End Lost Wraith
+
+        // The Past Shadow Of The Queen Settings | 女皇的逝去之影设置
+        BUILDER.push("The Past Shadow Of The Queen");
+        THE_PAST_SHADOW_OF_THE_QUEEN_DAMAGE_LIMIT = BUILDER
+            .comment(
+                "Maximum absolute damage the Past Shadow of the Queen can take per hit",
+                "女皇的逝去之影每次承受伤害的最大绝对值"
+            )
+            .defineInRange("Damage Limit", 2048.0, 0.0, Double.MAX_VALUE);
+
+        BUILDER.push("Skills");
+        BUILDER.push("Lightning Spear");
+        THE_PAST_SHADOW_OF_THE_QUEEN_LIGHTNING_SPEAR_COOLDOWN = BUILDER
+            .comment(
+                "Lightning Spear cooldown (240 ticks = 12 seconds)",
+                "雷霆之矛冷却时间（240 tick = 12 秒）"
+            )
+            .defineInRange("Cooldown", 240, 0, Integer.MAX_VALUE);
+        BUILDER.pop();
+        BUILDER.push("Triple Slash");
+        QUEEN_TRIPLE_SLASH_COOLDOWN = BUILDER
+            .comment("Triple Slash cooldown in ticks (480 ticks = 24 seconds)", "三连斩冷却（480刻为24秒）")
+            .defineInRange("Cooldown", 480, 0, 72000);
+        QUEEN_TRIPLE_SLASH_ENABLE_SCREEN_SHAKE = BUILDER
+            .comment("Shake nearby players' cameras when each slash is released", "每次释放斩击时震动附近玩家的镜头")
+            .define("Enable Screen Shake", true);
+        BUILDER.pop();
+        BUILDER.push("Summon Projectiles");
+        QUEEN_SUMMON_PROJECTILES_COOLDOWN = BUILDER
+            .comment("Summon Projectiles cooldown in ticks (600 ticks = 30 seconds)", "召唤水晶冷却（600刻为30秒）")
+            .defineInRange("Cooldown", 600, 0, 72000);
+        QUEEN_SUMMON_PROJECTILES_DAMAGE_MULTIPLIER = BUILDER
+            .comment("Projectile damage multiplier based on the Queen's attack damage", "投射物基于女皇攻击力的伤害倍率")
+            .defineInRange("Damage Multiplier", 0.05, 0.0, 100.0);
+        QUEEN_SUMMON_PROJECTILES_AOE_RADIUS = BUILDER
+            .comment("Projectile damage radius in blocks", "投射物伤害半径（格）")
+            .defineInRange("AOE Radius", 2.5, 0.0, 64.0);
+        BUILDER.pop();
+        BUILDER.push("Enchant");
+        QUEEN_ENCHANT_COOLDOWN = BUILDER
+            .comment("Void Enchanting cooldown in ticks (600 ticks = 30 seconds)", "虚空附魔冷却（600刻为30秒）")
+            .defineInRange("Cooldown", 600, 0, 72000);
+        BUILDER.pop();
+        BUILDER.push("Execution");
+        QUEEN_EXECUTION_COOLDOWN = BUILDER
+            .comment("Execution cooldown in ticks (1200 ticks = 60 seconds)", "处决冷却（1200刻为60秒）")
+            .defineInRange("Cooldown", 1200, 0, 72000);
+        QUEEN_EXECUTION_FIRST_DAMAGE_RATIO = BUILDER
+            .comment("First hit damage as a ratio of target maximum health", "第一次伤害占目标最大生命值的比例")
+            .defineInRange("First Damage Ratio", 0.30, 0.0, 1.0);
+        QUEEN_EXECUTION_SECOND_DAMAGE_RATIO = BUILDER
+            .comment("Second hit damage as a ratio of target maximum health", "第二次伤害占目标最大生命值的比例")
+            .defineInRange("Second Damage Ratio", 0.20, 0.0, 1.0);
+        BUILDER.pop();
+        BUILDER.push("Blink");
+        QUEEN_BLINK_COOLDOWN = BUILDER.comment("Blink cooldown in ticks (240 ticks = 12 seconds)",
+                "裂隙技能冷却（240刻为12秒）")
+            .defineInRange("Cooldown", 240, 0, 72000);
+        QUEEN_BLINK_DAMAGE = BUILDER.comment("Dragon breath damage per target per tick", "每个目标每刻受到的龙息伤害")
+            .defineInRange("Damage", 5.0, 0.0, 1000000.0);
+        QUEEN_BLINK_SPEED = BUILDER.comment("Blade speed in blocks per tick", "刀光速度（格每刻）")
+            .defineInRange("Speed", 1.0, 0.1, 4.0);
+        QUEEN_BLINK_WIDTH = BUILDER.comment("Blade horizontal width in blocks", "刀光横向宽度（格）")
+            .defineInRange("Width", 1.0, 0.1, 16.0);
+        QUEEN_BLINK_HEIGHT = BUILDER.comment("Blade vertical height in blocks", "刀光竖直高度（格）")
+            .defineInRange("Height", 8.0, 0.1, 32.0);
+        QUEEN_BLINK_LENGTH = BUILDER.comment("Blade length along flight direction in blocks", "刀光沿飞行方向的长度（格）")
+            .defineInRange("Length", 3.0, 0.1, 16.0);
+        BUILDER.pop();
+        BUILDER.pop();
+        BUILDER.pop();
 
         // Guardian Of Sealed Spire Settings | 封印尖塔守卫设置
         BUILDER.push("Guardian Of Sealed Spire");
@@ -1788,8 +1908,8 @@ public class TheLastSwordConfiguration {
 
         DEFENCE_MAX_DAMAGE_PER_HIT = BUILDER
             .comment(
-                "Maximum absolute damage that can be dealt per hit for defence system",
-                "防御系统：每次受伤的最大绝对伤害值"
+                "Maximum damage per hit for Last End entities and sword wraiths",
+                "终焉种实体与剑灵的单次伤害上限"
             )
             .defineInRange("Max Damage Per Hit", 20.0, 0.0, Double.MAX_VALUE);
 
@@ -2023,6 +2143,14 @@ public class TheLastSwordConfiguration {
 
     public static double getKnightGreatswordGroundSlamDamageMultiplierSafely() {
         return safeGet(KNIGHT_GREATSWORD_GROUND_SLAM_DAMAGE_MULTIPLIER, 2.0);
+    }
+
+    public static LightningSpearSettings getLightningSpearSettings() {
+        return new LightningSpearSettings(
+            safeGet(LIGHTNING_SPEAR_COOLDOWN, 200), safeGet(LIGHTNING_SPEAR_CHARGE_TIME, 10),
+            safeGet(LIGHTNING_SPEAR_RANGE, 32.0), safeGet(LIGHTNING_SPEAR_BURST_SIZE, 3.0),
+            safeGet(LIGHTNING_SPEAR_DAMAGE, 100.0), safeGet(LIGHTNING_SPEAR_SLOW_LEVEL, 3),
+            safeGet(LIGHTNING_SPEAR_SLOW_DURATION, 60));
     }
 
     public static double getPriestStaffProjectileDamageMultiplierSafely() {
@@ -2301,6 +2429,10 @@ public class TheLastSwordConfiguration {
         return safeGet(THE_LAST_END_ENTITY_ENABLE_DANGEROUS_SKILL_ALARM, true);
     }
 
+    public static boolean getEntityVoidRescueEnabledSafely() {
+        return safeGet(THE_LAST_END_ENTITY_ENABLE_VOID_RESCUE, true);
+    }
+
     public static boolean getEntityDangerousSkillRangePreviewEnabledSafely() {
         return safeGet(THE_LAST_END_ENTITY_ENABLE_DANGEROUS_SKILL_RANGE_PREVIEW, true);
     }
@@ -2361,6 +2493,58 @@ public class TheLastSwordConfiguration {
 
     public static int getLostWraithEndStrikeShieldCooldownSafely() {
         return safeGet(LOST_WRAITH_END_STRIKE_SHIELD_COOLDOWN, 260);
+    }
+
+    //女皇的逝去之影配置
+    public static double getThePastShadowOfTheQueenDamageLimitSafely() {
+        return safeGet(THE_PAST_SHADOW_OF_THE_QUEEN_DAMAGE_LIMIT, 2048.0);
+    }
+
+    public static int getThePastShadowOfTheQueenLightningSpearCooldownSafely() {
+        return safeGet(THE_PAST_SHADOW_OF_THE_QUEEN_LIGHTNING_SPEAR_COOLDOWN, 240);
+    }
+
+    public static int getQueenTripleSlashCooldownSafely() {
+        return safeGet(QUEEN_TRIPLE_SLASH_COOLDOWN, 480);
+    }
+
+    public static boolean getQueenTripleSlashScreenShakeEnabledSafely() {
+        return safeGet(QUEEN_TRIPLE_SLASH_ENABLE_SCREEN_SHAKE, true);
+    }
+
+    public static int getQueenSummonProjectilesCooldownSafely() {
+        return safeGet(QUEEN_SUMMON_PROJECTILES_COOLDOWN, 600);
+    }
+
+    public static double getQueenSummonProjectilesDamageMultiplierSafely() {
+        return safeGet(QUEEN_SUMMON_PROJECTILES_DAMAGE_MULTIPLIER, 0.05);
+    }
+
+    public static double getQueenSummonProjectilesAoeRadiusSafely() {
+        return safeGet(QUEEN_SUMMON_PROJECTILES_AOE_RADIUS, 2.5);
+    }
+
+    public static int getQueenEnchantCooldownSafely() {
+        return safeGet(QUEEN_ENCHANT_COOLDOWN, 600);
+    }
+
+    public static int getQueenExecutionCooldownSafely() {
+        return safeGet(QUEEN_EXECUTION_COOLDOWN, 1200);
+    }
+
+    public static double getQueenExecutionFirstDamageRatioSafely() {
+        return safeGet(QUEEN_EXECUTION_FIRST_DAMAGE_RATIO, 0.30);
+    }
+
+    public static double getQueenExecutionSecondDamageRatioSafely() {
+        return safeGet(QUEEN_EXECUTION_SECOND_DAMAGE_RATIO, 0.20);
+    }
+
+    public static QueenBlinkSettings getQueenBlinkSettings() {
+        return new QueenBlinkSettings(safeGet(QUEEN_BLINK_COOLDOWN, 240),
+                safeGet(QUEEN_BLINK_DAMAGE, 5.0), safeGet(QUEEN_BLINK_SPEED, 1.0),
+                safeGet(QUEEN_BLINK_WIDTH, 1.0),
+                safeGet(QUEEN_BLINK_HEIGHT, 8.0), safeGet(QUEEN_BLINK_LENGTH, 3.0));
     }
 
     //封印尖塔守卫配置

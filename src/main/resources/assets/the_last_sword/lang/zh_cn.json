@@ -501,6 +501,8 @@
   "subtitles.the_past_shadow_of_the_queen": "女皇的逝去之影",
   "subtitles.wound_of_time": "时间之伤",
   "subtitles.dragon_cult_is_coming": "拜龙教来袭！",
+  "bossshow.the_last_sword.the_past_shadow_of_the_queen.subtitle_1": "嗯？一位不属于虚空之下的冒险者。",
+  "bossshow.the_last_sword.the_past_shadow_of_the_queen.subtitle_2": "我从你的眼中，看到了对力量的渴望，很好，来迎接我的挑战吧！",
   "talk.lost_wraith.activation": "谢谢你...那么，让我们开始吧。唯有战斗至死的荣耀可以让我彻底安息！",
   "talk.lost_wraith.death": "终于，我解脱了！末影龙的诅咒再也无法束缚我了！我将履行我们的约定，拿起我的魂石吧，将它放入带有唤灵功能的物品。当你遇到强敌的时候，即可召唤我为你而战！对了，我能感觉到封印我的家伙将自己的力量碎片放在了塔的最高处，你可以去看看。",
   "talk.lost_wraith.init_1": "嗯...你是谁？",
@@ -540,5 +542,9 @@
   "named_priest.the_last_sword.vokun": "沃昆",
   "named_priest.the_last_sword.volsung": "沃尔松",
   "named_priest.the_last_sword.konahrik": "科纳瑞克",
-  "named_priest.the_last_sword.miraak": "米拉克"
+  "named_priest.the_last_sword.miraak": "米拉克",
+  "item.the_last_sword.lightning_spear": "闪电长矛",
+  "item_tooltip.the_last_sword.lightning_spear.skill": "雷霆裁决：右键蓄力%1$s秒发射闪电长矛，最远飞行%2$s格。命中实体或方块后引爆雷霆，对%3$s×%3$s×%3$s格范围内可攻击的实体造成%4$s点闪电伤害，并施加缓慢%5$s，持续%6$s秒。冷却%7$s秒。",
+  "item_tooltip_lore.the_last_sword.lightning_spear": "从龙水晶的特性中我们可以发现，似乎龙对闪电有着独特的亲和，传说中祂们甚至可以将闪电化为长矛掷出。",
+  "message.the_last_sword.location_locked": "你无法移动！"
 }

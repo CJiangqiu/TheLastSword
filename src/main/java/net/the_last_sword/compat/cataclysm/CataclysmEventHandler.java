@@ -72,7 +72,7 @@ public class CataclysmEventHandler {
     }
 
     //伤害加成（乘法）：焰魔×1.5、灵骸×负面效果数
-    @SubscribeEvent(priority = EventPriority.HIGH, receiveCanceled = true)
+    @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onLivingHurtCataclysmDamageBonus(LivingHurtEvent event) {
         if (!CompatCheck.isCataclysmLoaded()) {
             return;
@@ -87,7 +87,7 @@ public class CataclysmEventHandler {
     }
 
     //状态效果附加：焰魔战意、巨兽点燃缓慢、利维坦深渊烧灼、灵骸虚弱、斯库拉潮湿+落雷
-    @SubscribeEvent(priority = EventPriority.LOW, receiveCanceled = true)
+    @SubscribeEvent(priority = EventPriority.LOW)
     public static void onLivingHurtCataclysmEffects(LivingHurtEvent event) {
         if (!CompatCheck.isCataclysmLoaded()) {
             return;

@@ -5,6 +5,7 @@
   "minVersion": "0.8",
   "refmap": "mixins.the_last_sword.refmap.json",
   "client": [
+    "CameraMixin",
     "MinecraftMixin",
     "GameRendererMixin",
     "LevelRendererMixin",

@@ -7,7 +7,6 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -156,11 +155,6 @@ public final class PresentWorldAnchorManager {
 
     public static boolean handleAbsoluteDestructionDamage(LivingEntity entity, DamageSource source, float amount) {
         if (entity == null || source == null || Float.isNaN(amount) || amount <= 0.0F) {
-            return false;
-        }
-
-        Entity attacker = source.getEntity();
-        if (attacker != null && !EntityUtil.canAttack(attacker, entity)) {
             return false;
         }
 

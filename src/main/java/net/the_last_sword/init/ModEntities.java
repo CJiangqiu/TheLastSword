@@ -23,6 +23,10 @@ import net.the_last_sword.entity.GuardianOfSealedSpireEntity;
 import net.the_last_sword.entity.GuardianSaberEntity;
 import net.the_last_sword.entity.GroundRuptureFragmentEntity;
 import net.the_last_sword.entity.LostWraithEntity;
+import net.the_last_sword.entity.LightningSpearProjectile;
+import net.the_last_sword.entity.QueenBlinkBlade;
+import net.the_last_sword.entity.QueenEnhancedBlade;
+import net.the_last_sword.entity.QueenSummonedProjectile;
 import net.the_last_sword.entity.TheLastEndLightingEntity;
 import net.the_last_sword.entity.TheLastEndSwordProjectile;
 import net.the_last_sword.entity.TheLastSwordYouNeverForgotProjectile;
@@ -37,13 +41,25 @@ public class ModEntities {
     public static final DeferredRegister<EntityType<?>> ENTITY_TYPES =
         DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, TheLastSwordMod.MOD_ID);
 
+    public static final RegistryObject<EntityType<QueenBlinkBlade>> QUEEN_BLINK_BLADE =
+            ENTITY_TYPES.register("queen_blink_blade",
+                    () -> EntityType.Builder.<QueenBlinkBlade>of(QueenBlinkBlade::new, MobCategory.MISC)
+                            .sized(1F, 8F).clientTrackingRange(64).updateInterval(1).fireImmune()
+                            .build("queen_blink_blade"));
+
+    public static final RegistryObject<EntityType<QueenEnhancedBlade>> QUEEN_ENHANCED_BLADE =
+            ENTITY_TYPES.register("queen_enhanced_blade",
+                    () -> EntityType.Builder.<QueenEnhancedBlade>of(QueenEnhancedBlade::new, MobCategory.MISC)
+                            .sized(1F, 8F).clientTrackingRange(64).updateInterval(1).fireImmune()
+                            .build("queen_enhanced_blade"));
+
     //龙水晶剑弹射物
     public static final RegistryObject<EntityType<DragonCrystalSwordProjectile>> DRAGON_CRYSTAL_SWORD_PROJECTILE =
         ENTITY_TYPES.register("dragon_crystal_sword_projectile",
             () -> EntityType.Builder.<DragonCrystalSwordProjectile>of(DragonCrystalSwordProjectile::new, MobCategory.MISC)
                 .sized(0.5f, 0.5f)
                 .clientTrackingRange(4)
-                .updateInterval(10)
+                .updateInterval(1)
                 .build("dragon_crystal_sword_projectile")
         );
 
@@ -53,7 +69,7 @@ public class ModEntities {
             () -> EntityType.Builder.<DragonSwordProjectile>of(DragonSwordProjectile::new, MobCategory.MISC)
                 .sized(0.5f, 0.5f)
                 .clientTrackingRange(4)
-                .updateInterval(10)
+                .updateInterval(1)
                 .build("dragon_sword_projectile")
         );
 
@@ -63,7 +79,7 @@ public class ModEntities {
             () -> EntityType.Builder.<DragonLightingEntity>of(DragonLightingEntity::new, MobCategory.MISC)
                 .sized(0.25f, 0.25f)
                 .clientTrackingRange(64)
-                .updateInterval(20)
+                .updateInterval(1)
                 .fireImmune()
                 .build("dragon_lighting")
         );
@@ -74,7 +90,7 @@ public class ModEntities {
             () -> EntityType.Builder.<TheLastEndLightingEntity>of(TheLastEndLightingEntity::new, MobCategory.MISC)
                 .sized(0.25f, 0.25f)
                 .clientTrackingRange(64)
-                .updateInterval(20)
+                .updateInterval(1)
                 .fireImmune()
                 .build("the_last_end_lighting")
         );
@@ -85,8 +101,17 @@ public class ModEntities {
             () -> EntityType.Builder.<TheLastEndSwordProjectile>of(TheLastEndSwordProjectile::new, MobCategory.MISC)
                 .sized(0.5f, 0.5f)
                 .clientTrackingRange(4)
-                .updateInterval(10)
+                .updateInterval(1)
                 .build("the_last_end_sword_projectile")
+        );
+
+    public static final RegistryObject<EntityType<QueenSummonedProjectile>> QUEEN_SUMMONED_PROJECTILE =
+        ENTITY_TYPES.register("queen_summoned_projectile",
+            () -> EntityType.Builder.<QueenSummonedProjectile>of(QueenSummonedProjectile::new, MobCategory.MISC)
+                .sized(0.5f, 0.5f)
+                .clientTrackingRange(4)
+                .updateInterval(1)
+                .build("queen_summoned_projectile")
         );
 
     //隐藏武器弹射物
@@ -95,7 +120,7 @@ public class ModEntities {
             () -> EntityType.Builder.<TheLastSwordYouNeverForgotProjectile>of(TheLastSwordYouNeverForgotProjectile::new, MobCategory.MISC)
                 .sized(0.5f, 0.5f)
                 .clientTrackingRange(4)
-                .updateInterval(10)
+                .updateInterval(1)
                 .build("the_last_sword_you_never_forgot_projectile")
         );
 
@@ -105,7 +130,7 @@ public class ModEntities {
             () -> EntityType.Builder.of(TestEntity::new, MobCategory.MONSTER)
                 .sized(0.6f, 1.8f)
                 .clientTrackingRange(64)
-                .updateInterval(3)
+                .updateInterval(1)
                 .fireImmune()
                 .build("test_entity")
         );
@@ -116,7 +141,7 @@ public class ModEntities {
             () -> EntityType.Builder.of(GuardianOfSealedSpireEntity::new, MobCategory.MONSTER)
                 .sized(0.6f, 1.95f)
                 .clientTrackingRange(64)
-                .updateInterval(3)
+                .updateInterval(1)
                 .fireImmune()
                 .build("guardian_of_sealed_spire")
         );
@@ -127,7 +152,7 @@ public class ModEntities {
             () -> EntityType.Builder.of(GuardianSaberEntity::new, MobCategory.MONSTER)
                 .sized(0.6f, 1.95f)
                 .clientTrackingRange(64)
-                .updateInterval(3)
+                .updateInterval(1)
                 .fireImmune()
                 .build("guardian_saber")
         );
@@ -138,7 +163,7 @@ public class ModEntities {
             () -> EntityType.Builder.of(GuardianBerserkerEntity::new, MobCategory.MONSTER)
                 .sized(0.6f, 1.95f)
                 .clientTrackingRange(64)
-                .updateInterval(3)
+                .updateInterval(1)
                 .fireImmune()
                 .build("guardian_berserker")
         );
@@ -149,7 +174,7 @@ public class ModEntities {
             () -> EntityType.Builder.of(GuardianArcherEntity::new, MobCategory.MONSTER)
                 .sized(0.6f, 1.95f)
                 .clientTrackingRange(64)
-                .updateInterval(3)
+                .updateInterval(1)
                 .fireImmune()
                 .build("guardian_archer")
         );
@@ -160,7 +185,7 @@ public class ModEntities {
             () -> EntityType.Builder.of(LostWraithEntity::new, MobCategory.MONSTER)
                 .sized(0.6f, 3.5f)
                 .clientTrackingRange(64)
-                .updateInterval(3)
+                .updateInterval(1)
                 .fireImmune()
                 .build("lost_wraith")
         );
@@ -171,7 +196,7 @@ public class ModEntities {
             () -> EntityType.Builder.of(TheLastEndSwordWraithEntity::new, MobCategory.MONSTER)
                 .sized(0.6f, 1.95f)
                 .clientTrackingRange(64)
-                .updateInterval(3)
+                .updateInterval(1)
                 .fireImmune()
                 .build("the_last_end_sword_wraith")
         );
@@ -180,9 +205,9 @@ public class ModEntities {
     public static final RegistryObject<EntityType<ThePastShadowOfTheQueenEntity>> THE_PAST_SHADOW_OF_THE_QUEEN =
         ENTITY_TYPES.register("the_past_shadow_of_the_queen",
             () -> EntityType.Builder.of(ThePastShadowOfTheQueenEntity::new, MobCategory.MONSTER)
-                .sized(0.6f, 2.25f)
+                .sized(0.6F, 3.5F)
                 .clientTrackingRange(64)
-                .updateInterval(3)
+                .updateInterval(1)
                 .fireImmune()
                 .build("the_past_shadow_of_the_queen")
         );
@@ -193,7 +218,7 @@ public class ModEntities {
             () -> EntityType.Builder.of(DragonCultistEntity::new, MobCategory.MONSTER)
                 .sized(0.6f, 1.85f)
                 .clientTrackingRange(64)
-                .updateInterval(3)
+                .updateInterval(1)
                 .fireImmune()
                 .build("dragon_cultist")
         );
@@ -204,7 +229,7 @@ public class ModEntities {
             () -> EntityType.Builder.of(DragonCultPaladinEntity::new, MobCategory.MONSTER)
                 .sized(0.7f, 2.0f)
                 .clientTrackingRange(64)
-                .updateInterval(3)
+                .updateInterval(1)
                 .fireImmune()
                 .build("dragon_cult_paladin")
         );
@@ -215,9 +240,18 @@ public class ModEntities {
             () -> EntityType.Builder.of(DragonCultPriestEntity::new, MobCategory.MONSTER)
                 .sized(0.7f, 2.0f)
                 .clientTrackingRange(64)
-                .updateInterval(3)
+                .updateInterval(1)
                 .fireImmune()
                 .build("dragon_cult_priest")
+        );
+
+    public static final RegistryObject<EntityType<LightningSpearProjectile>> LIGHTNING_SPEAR_PROJECTILE =
+        ENTITY_TYPES.register("lightning_spear_projectile",
+            () -> EntityType.Builder.<LightningSpearProjectile>of(LightningSpearProjectile::new, MobCategory.MISC)
+                .sized(0.5F, 0.5F)
+                .clientTrackingRange(64)
+                .updateInterval(1)
+                .build("lightning_spear_projectile")
         );
 
     public static final RegistryObject<EntityType<GroundRuptureFragmentEntity>> GROUND_RUPTURE_FRAGMENT =

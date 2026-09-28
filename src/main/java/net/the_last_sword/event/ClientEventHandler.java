@@ -28,6 +28,8 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.client.gui.DefenceConfigScreen;
+import net.the_last_sword.client.QueenExecutionCamera;
+import net.the_last_sword.client.QueenTripleSlashScreenShake;
 import net.the_last_sword.client.recipe.ClientDragonCrystalRecipeCache;
 import net.the_last_sword.client.overlay.DragonArmorOverlay;
 import net.the_last_sword.client.overlay.JustifiedDefenceOverlay;
@@ -181,6 +183,8 @@ public class ClientEventHandler {
     //断开服务器后清空服务端配方，避免切换服务器期间沿用上一台服务器的数据
     @SubscribeEvent
     public static void onPlayerLogout(ClientPlayerNetworkEvent.LoggingOut event) {
+        QueenExecutionCamera.clear();
+        QueenTripleSlashScreenShake.clear();
         DangerousSkillPreviewRenderer.clear();
         LostWraithEndStrikeEffectRenderer.clear();
         ClientDragonCrystalRecipeCache.clear();
@@ -250,6 +254,8 @@ public class ClientEventHandler {
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase == TickEvent.Phase.END) {
+            QueenExecutionCamera.tick();
+            QueenTripleSlashScreenShake.tick();
             DangerousSkillPreviewRenderer.tick();
             LostWraithEndStrikeEffectRenderer.tick();
             Minecraft mc = Minecraft.getInstance();

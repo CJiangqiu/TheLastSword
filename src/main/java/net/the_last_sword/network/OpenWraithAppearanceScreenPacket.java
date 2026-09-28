@@ -4,15 +4,15 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.InteractionHand;
 import net.minecraftforge.network.NetworkEvent;
 import net.the_last_sword.client.ClientPacketHandler;
-import net.the_last_sword.entity.SwordWraithAppearance;
+import net.the_last_sword.entity.TheLastEndSwordWraithAppearance;
 
 import java.util.function.Supplier;
 
 public class OpenWraithAppearanceScreenPacket {
     private final InteractionHand hand;
-    private final SwordWraithAppearance appearance;
+    private final TheLastEndSwordWraithAppearance appearance;
 
-    public OpenWraithAppearanceScreenPacket(InteractionHand hand, SwordWraithAppearance appearance) {
+    public OpenWraithAppearanceScreenPacket(InteractionHand hand, TheLastEndSwordWraithAppearance appearance) {
         this.hand = hand;
         this.appearance = appearance;
     }
@@ -25,7 +25,7 @@ public class OpenWraithAppearanceScreenPacket {
     public static OpenWraithAppearanceScreenPacket decode(FriendlyByteBuf buffer) {
         return new OpenWraithAppearanceScreenPacket(
                 buffer.readEnum(InteractionHand.class),
-                buffer.readEnum(SwordWraithAppearance.class));
+                buffer.readEnum(TheLastEndSwordWraithAppearance.class));
     }
 
     public static void handle(OpenWraithAppearanceScreenPacket message,

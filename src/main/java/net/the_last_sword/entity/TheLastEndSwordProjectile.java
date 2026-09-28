@@ -2,6 +2,7 @@ package net.the_last_sword.entity;
 
 import net.eca.api.EcaAPI;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
@@ -42,6 +43,23 @@ public class TheLastEndSwordProjectile extends TheLastEndSwordItemsProjectile {
 
     //最大存活时间：12秒，约240 ticks
     private static final int MAX_TICKS = 240;
+    private int remainingLifetime = MAX_TICKS;
+
+    public void setLifetimeTicks(int ticks) {
+        remainingLifetime = Math.max(1, ticks);
+    }
+
+    @Override
+    protected void addAdditionalSaveData(CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        tag.putInt("RemainingLifetime", remainingLifetime);
+    }
+
+    @Override
+    protected void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        if (tag.contains("RemainingLifetime")) setLifetimeTicks(tag.getInt("RemainingLifetime"));
+    }
 
     //拖尾位置历史（客户端）
     private static final int TRAIL_LENGTH = 20;
@@ -90,7 +108,7 @@ public class TheLastEndSwordProjectile extends TheLastEndSwordItemsProjectile {
 
         //AOE伤害逻辑（每tick检测，以立方体形式）
         if (!this.hasHitGround && !this.level().isClientSide()) {
-            double radius = TheLastSwordConfiguration.getTheLastEndSwordProjectileAoeRadiusSafely();
+            double radius = getAoeRadius();
             AABB damageBox = new AABB(
                     this.getX() - radius, this.getY() - radius, this.getZ() - radius,
                     this.getX() + radius, this.getY() + radius, this.getZ() + radius
@@ -112,7 +130,7 @@ public class TheLastEndSwordProjectile extends TheLastEndSwordItemsProjectile {
             double cx = this.getX();
             double cy = this.getY();
             double cz = this.getZ();
-            double r = TheLastSwordConfiguration.getTheLastEndSwordProjectileAoeRadiusSafely();
+            double r = getAoeRadius();
             double offsetY = (Math.random() * 2 * r) - r;
             double offsetZ = (Math.random() * 2 * r) - r;
             this.level().addParticle(ParticleTypes.PORTAL, cx + r, cy + offsetY, cz + offsetZ, 0, 0, 0);
@@ -133,10 +151,14 @@ public class TheLastEndSwordProjectile extends TheLastEndSwordItemsProjectile {
             this.level().addParticle(ParticleTypes.PORTAL, cx + offsetX, cy + offsetY, cz - r, 0, 0, 0);
         }
 
-        //飞行超过12秒后删除
-        if (this.tickCount >= MAX_TICKS) {
+        // 寿命由发射者指定，服务端统一决定移除时机。
+        if (!level().isClientSide && --remainingLifetime <= 0) {
             this.discard();
         }
+    }
+
+    protected double getAoeRadius() {
+        return TheLastSwordConfiguration.getTheLastEndSwordProjectileAoeRadiusSafely();
     }
 
     //造成基础物理伤害（使用发射时快照）
@@ -158,7 +180,10 @@ public class TheLastEndSwordProjectile extends TheLastEndSwordItemsProjectile {
         if (!(this.getOwner() instanceof LivingEntity owner) || snapshotExtraDamage <= 0) return;
         if (target instanceof LivingEntity living) {
             if (EntityUtil.canAttack(owner, living)) {
-                EcaAPI.hurt(living, AbsoluteDestructionDamageSource.absoluteDestruction(owner), snapshotExtraDamage);
+                float percentageDamage = living.getMaxHealth()
+                        * (float) TheLastSwordConfiguration.getTheLastSwordPercentageDamageSafely();
+                EcaAPI.hurt(living, AbsoluteDestructionDamageSource.absoluteDestruction(owner),
+                        snapshotExtraDamage + percentageDamage);
             }
         } else {
             //非 LivingEntity（如末影龙部件）：由目标自身的 hurt 方法转发到父实体处理

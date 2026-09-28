@@ -39,6 +39,7 @@ public class ModCreativeTabs {
                 output.accept(ModItems.DRAGON_CULT_HORN.get());
                 output.accept(ModItems.KNIGHT_GREATSWORD.get());
                 output.accept(ModItems.PRIEST_STAFF.get());
+                output.accept(ModItems.LIGHTNING_SPEAR.get());
                 output.accept(ModItems.DRAGON_CULTIST_ARMOR_HELMET.get());
                 output.accept(ModItems.DRAGON_CULTIST_ARMOR_CHESTPLATE.get());
                 output.accept(ModItems.DRAGON_CULTIST_ARMOR_LEGGINGS.get());

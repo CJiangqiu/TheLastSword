@@ -13,7 +13,7 @@ import net.minecraft.server.level.ServerPlayer;
 //网络包管理器
 public class NetworkHandler {
 
-    private static final String PROTOCOL_VERSION = "6";
+    private static final String PROTOCOL_VERSION = "9";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "main"),
@@ -30,6 +30,16 @@ public class NetworkHandler {
 
     //注册所有网络包
     public static void register() {
+        CHANNEL.messageBuilder(LightningSpearConfigPacket.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(LightningSpearConfigPacket::encode)
+                .decoder(LightningSpearConfigPacket::decode)
+                .consumerMainThread(LightningSpearConfigPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(LightningSpearBurstPacket.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(LightningSpearBurstPacket::encode)
+                .decoder(LightningSpearBurstPacket::decode)
+                .consumerMainThread(LightningSpearBurstPacket::handle)
+                .add();
         CHANNEL.messageBuilder(OpenWraithAppearanceScreenPacket.class, id(), NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(OpenWraithAppearanceScreenPacket::encode)
                 .decoder(OpenWraithAppearanceScreenPacket::decode)
@@ -49,6 +59,16 @@ public class NetworkHandler {
                 .encoder(LostWraithEndStrikeEffectPacket::encode)
                 .decoder(LostWraithEndStrikeEffectPacket::decode)
                 .consumerMainThread(LostWraithEndStrikeEffectPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(QueenExecutionCameraPacket.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(QueenExecutionCameraPacket::encode)
+                .decoder(QueenExecutionCameraPacket::decode)
+                .consumerMainThread(QueenExecutionCameraPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(QueenTripleSlashShakePacket.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(QueenTripleSlashShakePacket::encode)
+                .decoder(QueenTripleSlashShakePacket::decode)
+                .consumerMainThread(QueenTripleSlashShakePacket::handle)
                 .add();
         CHANNEL.messageBuilder(ChangeModePacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
                 .encoder(ChangeModePacket::encode)

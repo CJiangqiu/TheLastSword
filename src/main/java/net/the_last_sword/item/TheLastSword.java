@@ -26,6 +26,7 @@ import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
 import net.the_last_sword.entity.TheLastEndSwordProjectile;
+import net.the_last_sword.event.ClientEventHandler;
 import net.the_last_sword.init.ModKeyMappings;
 import net.the_last_sword.summon.WraithSummonManager;
 import net.the_last_sword.util.EntityUtil;
@@ -329,13 +330,10 @@ public class TheLastSword extends TheLastEndSwordItems implements ISummonableIte
 
         //6. 被动技能：终焉之主（动态计算限伤值）
         tooltip.add(Component.empty());
-        float damageLimit = (float) TheLastSwordConfiguration.getDefenceMaxDamagePerHitSafely();
         //通过客户端类的静态方法获取本地玩家生命值，避免在通用代码中直接引用客户端专用类
-        float maxHealth = net.the_last_sword.event.ClientEventHandler.getLocalPlayerMaxHealth();
-        if (maxHealth > 0) {
-            float ratio = (float) TheLastSwordConfiguration.getDefenceCustomHealthDamageReductionSafely();
-            damageLimit = Math.min(maxHealth * ratio, damageLimit);
-        }
+        float maxHealth = ClientEventHandler.getLocalPlayerMaxHealth();
+        float ratio = (float) TheLastSwordConfiguration.getDefenceCustomHealthDamageReductionSafely();
+        float damageLimit = Math.max(0.0F, maxHealth * ratio);
         String percentageDamageStr = String.format("%.0f",
                 TheLastSwordConfiguration.getTheLastSwordPercentageDamageSafely() * 100);
         tooltip.add(Component.translatable("item_tooltip.the_last_sword.the_last_sword.passive",

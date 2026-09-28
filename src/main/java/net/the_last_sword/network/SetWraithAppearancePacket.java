@@ -8,7 +8,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
-import net.the_last_sword.entity.SwordWraithAppearance;
+import net.the_last_sword.entity.TheLastEndSwordWraithAppearance;
 import net.the_last_sword.entity.TheLastEndSwordWraithEntity;
 import net.the_last_sword.item.SwordSoulStone;
 import net.the_last_sword.summon.WraithSummonManager;
@@ -18,9 +18,9 @@ import java.util.function.Supplier;
 
 public class SetWraithAppearancePacket {
     private final InteractionHand hand;
-    private final SwordWraithAppearance appearance;
+    private final TheLastEndSwordWraithAppearance appearance;
 
-    public SetWraithAppearancePacket(InteractionHand hand, SwordWraithAppearance appearance) {
+    public SetWraithAppearancePacket(InteractionHand hand, TheLastEndSwordWraithAppearance appearance) {
         this.hand = hand;
         this.appearance = appearance;
     }
@@ -33,7 +33,7 @@ public class SetWraithAppearancePacket {
     public static SetWraithAppearancePacket decode(FriendlyByteBuf buffer) {
         return new SetWraithAppearancePacket(
                 buffer.readEnum(InteractionHand.class),
-                buffer.readEnum(SwordWraithAppearance.class));
+                buffer.readEnum(TheLastEndSwordWraithAppearance.class));
     }
 
     public static void handle(SetWraithAppearancePacket message,
