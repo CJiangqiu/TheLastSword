@@ -1368,14 +1368,14 @@ public class TheLastSwordConfiguration {
         BUILDER.pop();
         BUILDER.push("Execution");
         QUEEN_EXECUTION_COOLDOWN = BUILDER
-            .comment("Execution cooldown in ticks (1200 ticks = 60 seconds)", "处决冷却（1200刻为60秒）")
-            .defineInRange("Cooldown", 1200, 0, 72000);
+            .comment("Execution cooldown in ticks (600 ticks = 30 seconds)", "处决冷却（600刻为30秒）")
+            .defineInRange("Cooldown", 600, 0, 72000);
         QUEEN_EXECUTION_FIRST_DAMAGE_RATIO = BUILDER
             .comment("First hit damage as a ratio of target maximum health", "第一次伤害占目标最大生命值的比例")
-            .defineInRange("First Damage Ratio", 0.30, 0.0, 1.0);
+            .defineInRange("First Damage Ratio", 0.50, 0.0, 1.0);
         QUEEN_EXECUTION_SECOND_DAMAGE_RATIO = BUILDER
             .comment("Second hit damage as a ratio of target maximum health", "第二次伤害占目标最大生命值的比例")
-            .defineInRange("Second Damage Ratio", 0.20, 0.0, 1.0);
+            .defineInRange("Second Damage Ratio", 0.30, 0.0, 1.0);
         BUILDER.pop();
         BUILDER.push("Blink");
         QUEEN_BLINK_COOLDOWN = BUILDER.comment("Blink cooldown in ticks (240 ticks = 12 seconds)",
@@ -2529,15 +2529,15 @@ public class TheLastSwordConfiguration {
     }
 
     public static int getQueenExecutionCooldownSafely() {
-        return safeGet(QUEEN_EXECUTION_COOLDOWN, 1200);
+        return safeGet(QUEEN_EXECUTION_COOLDOWN, 600);
     }
 
     public static double getQueenExecutionFirstDamageRatioSafely() {
-        return safeGet(QUEEN_EXECUTION_FIRST_DAMAGE_RATIO, 0.30);
+        return safeGet(QUEEN_EXECUTION_FIRST_DAMAGE_RATIO, 0.50);
     }
 
     public static double getQueenExecutionSecondDamageRatioSafely() {
-        return safeGet(QUEEN_EXECUTION_SECOND_DAMAGE_RATIO, 0.20);
+        return safeGet(QUEEN_EXECUTION_SECOND_DAMAGE_RATIO, 0.30);
     }
 
     public static QueenBlinkSettings getQueenBlinkSettings() {

@@ -546,5 +546,13 @@
   "item_tooltip_lore.the_last_sword.lightning_spear": "ドラゴンクリスタルの特性から、ドラゴンは雷に対して特別な親和性を持つらしい。伝説によれば、彼らは雷さえ槍へと変え、投げ放つことができるという。",
   "bossshow.the_last_sword.the_past_shadow_of_the_queen.subtitle_1": "ん？「虚空の下」に属さぬ冒険者か。",
   "bossshow.the_last_sword.the_past_shadow_of_the_queen.subtitle_2": "お前の目から、力への渇望が見える。よかろう、私の試練を受けてみよ！",
+  "talk.the_past_shadow_of_the_queen.enchant": "虚空よ、我が命に従え。",
+  "talk.the_past_shadow_of_the_queen.blink": "気をつけてね。",
+  "talk.the_past_shadow_of_the_queen.triple_slash": "気をつけて、死なないでね。",
+  "talk.the_past_shadow_of_the_queen.lightning_spear": "ハリネズミにされないようにね。",
+  "talk.the_past_shadow_of_the_queen.execution": "これは痛いわよ。",
+  "talk.the_past_shadow_of_the_queen.summon_projectiles": "もう少し速く走ってね。",
+  "talk.the_past_shadow_of_the_queen.death_1": "うむ、よい、とてもよい。どうやらお前は確かに一人前の戦士のようだ。",
+  "talk.the_past_shadow_of_the_queen.death_2": "さあ、褒美としてこれをやろう。かつて一人の鍛冶屋も、最後の剣の在り処を求めて私を訪ねた。だが残念ながら、彼は試練を越えられなかった。彼の魂に宿った怨念は、すべてこの籠手に集まっている。",
   "message.the_last_sword.location_locked": "移動できません！"
 }

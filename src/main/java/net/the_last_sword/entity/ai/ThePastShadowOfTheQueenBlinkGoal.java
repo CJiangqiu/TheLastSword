@@ -44,6 +44,7 @@ public class ThePastShadowOfTheQueenBlinkGoal extends Goal {
             EntityUtil.faceTarget(queen, target);
         }
         queen.setAnimationState(ThePastShadowOfTheQueenEntity.STATE_BLINK);
+        queen.trySendSkillTalk("blink");
         queen.setBlinkTick(0);
         queen.setLightningSpearVisible(false);
         queen.getNavigation().stop();

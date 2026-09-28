@@ -50,6 +50,7 @@ public class ThePastShadowOfTheQueenTripleSlashGoal extends Goal {
         origin = queen.position();
         queen.setLightningSpearVisible(false);
         queen.setAnimationState(ThePastShadowOfTheQueenEntity.STATE_TRIPLE_SLASH);
+        queen.trySendSkillTalk("triple_slash");
         queen.setNoGravity(true);
         holdPose();
     }

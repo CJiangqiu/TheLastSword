@@ -5,6 +5,7 @@ import java.util.EnumSet;
 import java.util.List;
 import net.eca.api.EcaAPI;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -13,9 +14,11 @@ import net.minecraft.world.phys.Vec3;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
 import net.the_last_sword.entity.ThePastShadowOfTheQueenEntity;
+import net.the_last_sword.event.DefenceEventHandler;
 import net.the_last_sword.network.NetworkHandler;
 import net.the_last_sword.network.QueenExecutionCameraPacket;
 import net.the_last_sword.util.EntityUtil;
+import net.the_last_sword.util.ParticleUtil;
 import net.the_last_sword.util.health.TrueHealthManager;
 
 public class ThePastShadowOfTheQueenExecutionGoal extends DangerousSkillGoal<ThePastShadowOfTheQueenEntity> {
@@ -26,7 +29,8 @@ public class ThePastShadowOfTheQueenExecutionGoal extends DangerousSkillGoal<The
     private static final int LIE_DOWN_TICK = 49;
     private static final int SECOND_DAMAGE_TICK = 92;
     private static final int RELEASE_TICK = 130;
-    private static final double TRIGGER_DISTANCE = 3.0;
+    private static final double TELEPORT_DISTANCE = 2.0;
+    private static final int TELEPORT_VERTICAL_SEARCH_RANGE = 4;
     private static final double RANGE_WIDTH = 1.0;
     private static final double RANGE_HEIGHT = 4.0;
     private static final double RANGE_LENGTH = 3.0;
@@ -55,8 +59,7 @@ public class ThePastShadowOfTheQueenExecutionGoal extends DangerousSkillGoal<The
         LivingEntity target = queen.getTarget();
         return queen.canAct() && queen.getAnimationState() == ThePastShadowOfTheQueenEntity.STATE_IDLE
                 && queen.level().getGameTime() >= cooldownEnd
-                && target != null && target.isAlive() && EntityUtil.canAttack(queen, target)
-                && queen.distanceTo(target) <= TRIGGER_DISTANCE;
+                && target != null && target.isAlive() && EntityUtil.canAttack(queen, target);
     }
 
     @Override
@@ -69,13 +72,47 @@ public class ThePastShadowOfTheQueenExecutionGoal extends DangerousSkillGoal<The
         phase = Phase.WINDUP;
         phaseTick = 0;
         cooldownCommitted = false;
+        teleportToTargetFront(queen.getTarget());
         EntityUtil.faceTarget(queen, queen.getTarget());
         origin = queen.position();
         yaw = queen.getYRot();
         queen.setLightningSpearVisible(false);
         queen.setAnimationState(ThePastShadowOfTheQueenEntity.STATE_EXECUTION);
+        queen.trySendSkillTalk("execution");
         queen.setNoGravity(true);
         holdPose();
+    }
+
+    private void teleportToTargetFront(LivingEntity target) {
+        if (target == null || !target.isAlive() || !EntityUtil.canAttack(queen, target)) {
+            return;
+        }
+
+        Vec3 direction = target.getLookAngle().multiply(1.0, 0.0, 1.0);
+        if (direction.lengthSqr() < 1.0E-6) {
+            direction = queen.position().subtract(target.position()).multiply(1.0, 0.0, 1.0);
+        }
+        if (direction.lengthSqr() < 1.0E-6) {
+            direction = new Vec3(0.0, 0.0, 1.0);
+        } else {
+            direction = direction.normalize();
+        }
+
+        Vec3 oldPosition = queen.position();
+        Vec3 desiredPosition = target.position().add(direction.scale(TELEPORT_DISTANCE));
+        Vec3 teleportPosition = EntityUtil.theLastEndSafeTeleport(
+                queen, desiredPosition, TELEPORT_VERTICAL_SEARCH_RANGE);
+        if (teleportPosition == null) {
+            return;
+        }
+
+        queen.fallDistance = 0.0F;
+        queen.level().playSound(null, oldPosition.x, oldPosition.y, oldPosition.z,
+                SoundEvents.ENDERMAN_TELEPORT, queen.getSoundSource(), 1.0F, 1.0F);
+        queen.level().playSound(null, teleportPosition.x, teleportPosition.y, teleportPosition.z,
+                SoundEvents.ENDERMAN_TELEPORT, queen.getSoundSource(), 1.0F, 1.0F);
+        ParticleUtil.spawnTeleportParticles(
+                queen.level(), oldPosition, teleportPosition, queen.getBbHeight());
     }
 
     @Override
@@ -150,13 +187,13 @@ public class ThePastShadowOfTheQueenExecutionGoal extends DangerousSkillGoal<The
             restoreExecutionTarget();
         }
         if (phaseTick == FIRST_DAMAGE_TICK) {
-            dealExecutionDamage(TheLastSwordConfiguration.getQueenExecutionFirstDamageRatioSafely());
+            dealExecutionDamage(TheLastSwordConfiguration.getQueenExecutionFirstDamageRatioSafely(), true);
         }
         if (phaseTick == LIE_DOWN_TICK) {
             applyExecutionPose();
         }
         if (phaseTick == SECOND_DAMAGE_TICK) {
-            dealExecutionDamage(TheLastSwordConfiguration.getQueenExecutionSecondDamageRatioSafely());
+            dealExecutionDamage(TheLastSwordConfiguration.getQueenExecutionSecondDamageRatioSafely(), false);
         }
         if (phaseTick == RELEASE_TICK) {
             restoreExecutionTarget();
@@ -171,11 +208,17 @@ public class ThePastShadowOfTheQueenExecutionGoal extends DangerousSkillGoal<The
                 && executionTarget.level() == queen.level();
     }
 
-    private void dealExecutionDamage(double ratio) {
+    private void dealExecutionDamage(double ratio, boolean clearJustifiedDefence) {
         if (!isExecutionTargetAvailable() || !EntityUtil.canAttack(queen, executionTarget)) {
             return;
         }
+        if (clearJustifiedDefence) {
+            DefenceEventHandler.setShieldValue(executionTarget, 0.0);
+        }
         float damage = TrueHealthManager.getMaxHealth(executionTarget) * (float) ratio;
+        if (executionTarget instanceof Player player) {
+            damage = Math.min(damage, Math.max(0.0F, TrueHealthManager.getHealth(player) - 1.0F));
+        }
         if (Float.isFinite(damage) && damage > 0.0F) {
             EcaAPI.hurt(executionTarget,
                     AbsoluteDestructionDamageSource.absoluteDestruction(queen), damage);

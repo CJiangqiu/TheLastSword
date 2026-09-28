@@ -44,6 +44,7 @@ public class ThePastShadowOfTheQueenEnchantGoal extends Goal {
         cooldownEnd = queen.level().getGameTime() + TheLastSwordConfiguration.getQueenEnchantCooldownSafely();
         queen.setLightningSpearVisible(false);
         queen.setAnimationState(ThePastShadowOfTheQueenEntity.STATE_ENCHANT);
+        queen.trySendSkillTalk("enchant");
         queen.getNavigation().stop();
     }
 

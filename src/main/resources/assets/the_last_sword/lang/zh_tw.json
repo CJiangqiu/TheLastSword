@@ -546,5 +546,13 @@
   "item_tooltip_lore.the_last_sword.lightning_spear": "從龍水晶的特性中我們可以發現，龍似乎對閃電有著獨特的親和力，傳說中祂們甚至可以將閃電化為長矛擲出。",
   "bossshow.the_last_sword.the_past_shadow_of_the_queen.subtitle_1": "嗯？一位不屬於虛空之下的冒險者。",
   "bossshow.the_last_sword.the_past_shadow_of_the_queen.subtitle_2": "我從你的眼中看見了對力量的渴望。很好，來迎接我的挑戰吧！",
+  "talk.the_past_shadow_of_the_queen.enchant": "虛空啊，聆聽我的命令。",
+  "talk.the_past_shadow_of_the_queen.blink": "要小心哦。",
+  "talk.the_past_shadow_of_the_queen.triple_slash": "注意點，別死了。",
+  "talk.the_past_shadow_of_the_queen.lightning_spear": "別被紮成刺蝟哦。",
+  "talk.the_past_shadow_of_the_queen.execution": "這一下會很痛。",
+  "talk.the_past_shadow_of_the_queen.summon_projectiles": "請跑快一點。",
+  "talk.the_past_shadow_of_the_queen.death_1": "嗯，很好，很好，看來你確實是一名合格的戰士。",
+  "talk.the_past_shadow_of_the_queen.death_2": "來，這個給你當作獎勵吧，曾經有一位鐵匠也向我尋求最終之劍的下落，不過可惜他沒有過關，他靈魂上的怨念，都集中在了這個手套上。",
   "message.the_last_sword.location_locked": "你無法移動！"
 }

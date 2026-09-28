@@ -58,6 +58,7 @@ public class ThePastShadowOfTheQueenLightningSpearGoal extends Goal {
         startY = queen.getY();
         airMovementActive = true;
         queen.setAnimationState(ThePastShadowOfTheQueenEntity.STATE_LIGHTNING_SPEAR);
+        queen.trySendSkillTalk("lightning_spear");
         queen.setNoGravity(true);
         queen.getNavigation().stop();
         queen.setDeltaMovement(Vec3.ZERO);

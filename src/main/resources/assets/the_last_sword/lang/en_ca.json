@@ -546,5 +546,13 @@
   "item_tooltip_lore.the_last_sword.lightning_spear": "From the properties of dragon crystals, we can infer that dragons seem to possess a unique affinity for lightning. Legends say They can even shape lightning into spears and hurl them.",
   "bossshow.the_last_sword.the_past_shadow_of_the_queen.subtitle_1": "Hm? An adventurer who does not belong to the Under Void.",
   "bossshow.the_last_sword.the_past_shadow_of_the_queen.subtitle_2": "I see the hunger for power in your eyes. Very well. Come and face my challenge!",
+  "talk.the_past_shadow_of_the_queen.enchant": "Void, heed my command.",
+  "talk.the_past_shadow_of_the_queen.blink": "Be careful now.",
+  "talk.the_past_shadow_of_the_queen.triple_slash": "Watch yourself. Don't die.",
+  "talk.the_past_shadow_of_the_queen.lightning_spear": "Try not to get skewered.",
+  "talk.the_past_shadow_of_the_queen.execution": "This is going to hurt.",
+  "talk.the_past_shadow_of_the_queen.summon_projectiles": "Please run a little faster.",
+  "talk.the_past_shadow_of_the_queen.death_1": "Mm. Good, very good. It seems you truly are a worthy warrior.",
+  "talk.the_past_shadow_of_the_queen.death_2": "Here, take this as your reward. A blacksmith once sought me out as well, asking about the whereabouts of the Final Sword. Unfortunately, he failed the trial. All the resentment clinging to his soul has gathered within this gauntlet.",
   "message.the_last_sword.location_locked": "You cannot move!"
 }

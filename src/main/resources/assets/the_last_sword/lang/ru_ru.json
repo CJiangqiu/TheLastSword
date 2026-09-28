@@ -546,5 +546,13 @@
   "item_tooltip_lore.the_last_sword.lightning_spear": "Из свойств драконьих кристаллов можно заключить, что драконы обладают особым сродством с молнией. Согласно легендам, они способны даже обратить молнию в копьё и метнуть его.",
   "bossshow.the_last_sword.the_past_shadow_of_the_queen.subtitle_1": "Хм? Искатель приключений, не принадлежащий миру Под Пустотой.",
   "bossshow.the_last_sword.the_past_shadow_of_the_queen.subtitle_2": "В твоих глазах я вижу жажду силы. Что ж, прими мой вызов!",
+  "talk.the_past_shadow_of_the_queen.enchant": "Пустота, внемли моему приказу.",
+  "talk.the_past_shadow_of_the_queen.blink": "Будь осторожнее.",
+  "talk.the_past_shadow_of_the_queen.triple_slash": "Смотри в оба. Не умри.",
+  "talk.the_past_shadow_of_the_queen.lightning_spear": "Смотри, не превратись в ежа.",
+  "talk.the_past_shadow_of_the_queen.execution": "Это будет больно.",
+  "talk.the_past_shadow_of_the_queen.summon_projectiles": "Пожалуйста, беги чуть быстрее.",
+  "talk.the_past_shadow_of_the_queen.death_1": "Хм, хорошо, очень хорошо. Похоже, ты и впрямь достойный воин.",
+  "talk.the_past_shadow_of_the_queen.death_2": "Вот, возьми это в награду. Когда-то один кузнец тоже пришёл ко мне, желая узнать, где находится Последний Меч. Но, к сожалению, он не прошёл испытание. Вся обида, терзавшая его душу, сосредоточилась в этой перчатке.",
   "message.the_last_sword.location_locked": "Вы не можете двигаться!"
 }

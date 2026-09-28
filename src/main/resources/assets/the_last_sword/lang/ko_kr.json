@@ -546,5 +546,13 @@
   "item_tooltip_lore.the_last_sword.lightning_spear": "용 수정의 특성을 통해 용들은 번개에 독특한 친화력을 지닌 듯하다는 사실을 알 수 있다. 전설에 따르면 그들은 심지어 번개를 창으로 빚어 던질 수도 있다고 한다.",
   "bossshow.the_last_sword.the_past_shadow_of_the_queen.subtitle_1": "흠? 공허 아래에 속하지 않은 모험가로군.",
   "bossshow.the_last_sword.the_past_shadow_of_the_queen.subtitle_2": "네 눈에서 힘을 향한 갈망이 보이는구나. 좋다, 나의 도전을 받아 보아라!",
+  "talk.the_past_shadow_of_the_queen.enchant": "공허여, 내 명령을 들어라.",
+  "talk.the_past_shadow_of_the_queen.blink": "조심하는 게 좋을 거야.",
+  "talk.the_past_shadow_of_the_queen.triple_slash": "조심해, 죽지 말고.",
+  "talk.the_past_shadow_of_the_queen.lightning_spear": "고슴도치 꼴이 되지 않게 조심해.",
+  "talk.the_past_shadow_of_the_queen.execution": "이번 건 꽤 아플 거야.",
+  "talk.the_past_shadow_of_the_queen.summon_projectiles": "조금 더 빨리 달려 줘.",
+  "talk.the_past_shadow_of_the_queen.death_1": "흠, 좋아, 아주 좋아. 보아하니 너는 확실히 자격 있는 전사로구나.",
+  "talk.the_past_shadow_of_the_queen.death_2": "자, 이걸 보상으로 받으렴. 예전에 한 대장장이도 최후의 검이 어디 있는지 내게 물어왔지만, 안타깝게도 그는 시험을 통과하지 못했지. 그의 영혼에 서린 원한은 모두 이 건틀릿에 모여 있단다.",
   "message.the_last_sword.location_locked": "이동할 수 없습니다!"
 }

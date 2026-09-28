@@ -1,6 +1,8 @@
 package net.the_last_sword.entity;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -47,7 +49,11 @@ import org.jetbrains.annotations.Nullable;
 
 // 女皇的逝去之影
 public class ThePastShadowOfTheQueenEntity extends TheLastEndEntity {
+    private static final float SKILL_TALK_CHANCE = 0.30F;
+    private static final double SKILL_TALK_RADIUS = 32.0;
+    private static final String TALK_KEY_PREFIX = "talk.the_past_shadow_of_the_queen.";
     private static final int DEATH_ANIMATION_DURATION = 160;
+    private static final int DEATH_SECOND_TALK_TICK = 60;
     private static final int DEATH_ITEM_APPEAR_TICK = 70;
     private static final int DEATH_REWARD_TICK = 100;
     private static final String DEATH_REWARD_GRANTED_TAG = "QueenDeathRewardGranted";
@@ -82,6 +88,35 @@ public class ThePastShadowOfTheQueenEntity extends TheLastEndEntity {
         xpReward = 1024;
         setMaxUpStep(0.6f);
         setPersistenceRequired();
+    }
+
+    public void trySendSkillTalk(String skillId) {
+        if (level().isClientSide || skillId == null || skillId.isBlank()
+                || getRandom().nextFloat() >= SKILL_TALK_CHANCE) {
+            return;
+        }
+
+        Component message = createTalkMessage(skillId);
+        double radiusSqr = SKILL_TALK_RADIUS * SKILL_TALK_RADIUS;
+        for (Player player : level().getEntitiesOfClass(Player.class,
+                getBoundingBox().inflate(SKILL_TALK_RADIUS), player -> distanceToSqr(player) <= radiusSqr)) {
+            player.sendSystemMessage(message);
+        }
+    }
+
+    private Component createTalkMessage(String talkId) {
+        return Component.literal("[")
+                .append(getDisplayName())
+                .append(Component.literal("] "))
+                .withStyle(ChatFormatting.DARK_PURPLE)
+                .append(Component.translatable(TALK_KEY_PREFIX + talkId)
+                        .withStyle(ChatFormatting.WHITE));
+    }
+
+    private void sendDeathTalk(String talkId) {
+        if (!level().isClientSide && getKillCredit() instanceof ServerPlayer player) {
+            player.sendSystemMessage(createTalkMessage(talkId));
+        }
     }
 
     @Override
@@ -363,11 +398,14 @@ public class ThePastShadowOfTheQueenEntity extends TheLastEndEntity {
         setBlinkTick(-1);
         setLightningSpearVisible(false);
         setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+        sendDeathTalk("death_1");
     }
 
     private void tickDeathSequence() {
         int deathTick = getDeathTick();
-        if (deathTick == DEATH_ITEM_APPEAR_TICK) {
+        if (deathTick == DEATH_SECOND_TALK_TICK) {
+            sendDeathTalk("death_2");
+        } else if (deathTick == DEATH_ITEM_APPEAR_TICK) {
             setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(ModItems.THE_GIVERS_PAIN.get()));
         } else if (deathTick == DEATH_REWARD_TICK) {
             setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);

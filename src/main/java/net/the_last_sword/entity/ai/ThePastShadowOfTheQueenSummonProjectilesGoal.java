@@ -51,6 +51,7 @@ public class ThePastShadowOfTheQueenSummonProjectilesGoal extends Goal {
         queen.setSummonYaw(yaw);
         queen.setSummonTick(0);
         queen.setAnimationState(ThePastShadowOfTheQueenEntity.STATE_SUMMON_PROJECTILES);
+        queen.trySendSkillTalk("summon_projectiles");
         queen.setNoGravity(true);
         holdPose();
     }
