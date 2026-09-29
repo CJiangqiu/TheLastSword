@@ -5,6 +5,7 @@ import java.util.EnumSet;
 import java.util.List;
 import net.eca.api.EcaAPI;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
@@ -15,6 +16,7 @@ import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
 import net.the_last_sword.entity.ThePastShadowOfTheQueenEntity;
 import net.the_last_sword.event.DefenceEventHandler;
+import net.the_last_sword.init.ModSounds;
 import net.the_last_sword.network.NetworkHandler;
 import net.the_last_sword.network.QueenExecutionCameraPacket;
 import net.the_last_sword.util.EntityUtil;
@@ -26,7 +28,9 @@ public class ThePastShadowOfTheQueenExecutionGoal extends DangerousSkillGoal<The
     private static final int FAILURE_DURATION = 30;
     private static final int SUCCESS_DURATION = 133;
     private static final int FIRST_DAMAGE_TICK = 23;
+    private static final int FIRST_SOUND_TICK = 30;
     private static final int LIE_DOWN_TICK = 49;
+    private static final int SECOND_SOUND_TICK = 90;
     private static final int SECOND_DAMAGE_TICK = 92;
     private static final int RELEASE_TICK = 130;
     private static final double TELEPORT_DISTANCE = 2.0;
@@ -189,8 +193,14 @@ public class ThePastShadowOfTheQueenExecutionGoal extends DangerousSkillGoal<The
         if (phaseTick == FIRST_DAMAGE_TICK) {
             dealExecutionDamage(TheLastSwordConfiguration.getQueenExecutionFirstDamageRatioSafely(), true);
         }
+        if (phaseTick == FIRST_SOUND_TICK) {
+            playExecutionSound(ModSounds.EXECUTION_1.get());
+        }
         if (phaseTick == LIE_DOWN_TICK) {
             applyExecutionPose();
+        }
+        if (phaseTick == SECOND_SOUND_TICK) {
+            playExecutionSound(ModSounds.EXECUTION_2.get());
         }
         if (phaseTick == SECOND_DAMAGE_TICK) {
             dealExecutionDamage(TheLastSwordConfiguration.getQueenExecutionSecondDamageRatioSafely(), false);
@@ -201,6 +211,11 @@ public class ThePastShadowOfTheQueenExecutionGoal extends DangerousSkillGoal<The
         if (phaseTick >= SUCCESS_DURATION) {
             finishSkill();
         }
+    }
+
+    private void playExecutionSound(SoundEvent sound) {
+        queen.level().playSound(null, queen.blockPosition(), sound,
+                queen.getSoundSource(), 1.0F, 1.0F);
     }
 
     private boolean isExecutionTargetAvailable() {

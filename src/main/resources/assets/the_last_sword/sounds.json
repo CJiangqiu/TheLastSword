@@ -52,5 +52,23 @@
         "stream": false
       }
     ]
+  },
+  "execution_1": {
+    "subtitle": "subtitles.the_last_sword.execution",
+    "sounds": [
+      {
+        "name": "the_last_sword:execution_1",
+        "stream": false
+      }
+    ]
+  },
+  "execution_2": {
+    "subtitle": "subtitles.the_last_sword.execution",
+    "sounds": [
+      {
+        "name": "the_last_sword:execution_2",
+        "stream": false
+      }
+    ]
   }
 }

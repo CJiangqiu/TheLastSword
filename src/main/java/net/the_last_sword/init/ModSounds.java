@@ -44,4 +44,14 @@ public class ModSounds {
             SOUNDS.register("alarm",
                     () -> SoundEvent.createVariableRangeEvent(
                             ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "alarm")));
+
+    public static final RegistryObject<SoundEvent> EXECUTION_1 =
+            SOUNDS.register("execution_1",
+                    () -> SoundEvent.createVariableRangeEvent(
+                            ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "execution_1")));
+
+    public static final RegistryObject<SoundEvent> EXECUTION_2 =
+            SOUNDS.register("execution_2",
+                    () -> SoundEvent.createVariableRangeEvent(
+                            ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "execution_2")));
 }

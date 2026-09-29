@@ -320,6 +320,12 @@ public class LivingEntityMixin {
                 return;
             }
 
+            //绝毁必须尊重终焉种独立于原版的受伤冷却
+            if (entity instanceof TheLastEndEntity theLastEnd && theLastEnd.getHurtResistTick() > 0) {
+                cir.setReturnValue(false);
+                return;
+            }
+
             if (the_last_sword$consumeShield(entity, 1)) {
                 the_last_sword$showShieldEffect(entity, damageSource);
                 cir.setReturnValue(false);
