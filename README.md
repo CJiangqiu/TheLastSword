@@ -21,18 +21,23 @@ Completely revamped textures! For players who prefer nostalgia, you can activate
 
 This mod introduces a JSON-driven crafting system, allowing you complete freedom to customize recipes for each level of swords and armor. This system is fully compatible with JEI. Additionally, numerous configurable options have been included, enabling you to customize values and functionalities of The Last Sword.
 
-**About customization:** You can find JSON recipe files under `config/the_last_sword/dragon_crystal_smithing_recipes/`. These files allow you to modify the `template` and `addition` fields freely, corresponding to the 1st and 3rd input slots of the Dragon Crystal Smithing Table.
+**Built-in and config recipes:** Official recipes are stored inside the mod JAR and are loaded first. The directory `config/the_last_sword/dragon_crystal_smithing_recipes/` is reserved for overrides and custom recipes, so official recipes are no longer copied into it on startup. This allows official recipes to receive updates without replacing the user's config files.
 
-**Nested folder support:** You can organize recipe files into subfolders for better management, e.g. `dragon_crystal_smithing_recipes/sword/`, `dragon_crystal_smithing_recipes/armor/`. All `.json` files in nested directories will be loaded automatically.
+**Overriding official recipes:** Place a recipe with the same file name as an official recipe anywhere under the config recipe directory. The config version will replace the official version and retain the same recipe ID. A current-format override must define `template.inputLevel`; old official recipe copies without this field are recognized as outdated and ignored, so they do not need to be deleted manually.
 
-**Disabling recipes:** To disable a recipe without deleting it, simply rename the file extension to `.disabled.json` (e.g. `recipe.json` → `recipe.disabled.json`). Files ending with `.disabled.json` will be skipped during loading. This is especially useful for modpack makers who want to disable default recipes via scripts.
+**Custom recipes and nested folders:** Recipe files may use arbitrary names and be organized into any number of subfolders, e.g. `dragon_crystal_smithing_recipes/sword/` or `dragon_crystal_smithing_recipes/armor/high_level/`. All enabled `.json` files are loaded recursively. Custom recipes with the same file name can coexist in different subfolders unless that name belongs to an official recipe, in which case the file acts as an override. Non-conflicting recipes using the old format remain compatible.
+
+**Disabling recipes:** Rename a recipe to `.disabled.json`, `.json.disabled`, or `.json.disable` to disable it without deleting it. A disabled config file whose name matches an official recipe also disables that official recipe.
+
+**File name convention:** Official sword and armor upgrade recipes are named after their output level. For example, `dragon_crystal_smithing_sword_level_6.json` produces a Level 6 sword. Custom recipe file names do not have to follow this convention.
 
 **Example recipe format:**
 ```json
 {
   "type": "the_last_sword:dragon_crystal_smithing",
   "template": {
-    "item": "the_last_sword:dragon_crystal_upgrade_template"
+    "item": "the_last_sword:dragon_crystal_upgrade_template",
+    "inputLevel": 0
   },
   "input": {
     "item": "the_last_sword:dragon_crystal_sword",
@@ -48,7 +53,7 @@ This mod introduces a JSON-driven crafting system, allowing you complete freedom
 }
 ```
 
-Note: `inputLevel` and `outputLevel` are optional fields (default: 0). If you don't need level-based crafting, you can omit them.
+The `inputLevel` inside `template` applies to the first slot, while the `inputLevel` inside `input` applies to the second slot. The output receives `outputLevel`. For standalone custom recipes, omitting `template.inputLevel` disables the template-level check for compatibility with the old format. The second-slot `inputLevel` and `outputLevel` default to 0 when omitted. Same-name overrides of official recipes must include `template.inputLevel`.
 
 ## Modernized Damage Values
 
@@ -224,18 +229,23 @@ Mods with added compatibility content:
 
 本模组引入了 JSON 驱动的合成系统，允许你完全自由地自定义每个等级的剑和盔甲的配方。该系统完全兼容 JEI。此外，还提供了大量可配置选项，让你可以自定义最终之剑的各种数值和功能。
 
-**关于自定义配方：** 你可以在 `config/the_last_sword/dragon_crystal_smithing_recipes/` 下找到 JSON 配方文件。这些文件允许你自由修改 `template` 和 `addition` 字段，分别对应龙水晶锻造台的第 1 和第 3 个输入槽。
+**内置配方与 config 配方：** 官方配方保存在模组 JAR 内并优先加载。`config/the_last_sword/dragon_crystal_smithing_recipes/` 目录只用于放置覆盖配方和自定义配方，启动时不再向其中复制官方配方。这样官方配方可以随模组更新，同时不会覆盖用户的 config 文件。
 
-**支持嵌套文件夹：** 你可以将配方文件放入子文件夹中以便管理，例如 `dragon_crystal_smithing_recipes/sword/`、`dragon_crystal_smithing_recipes/armor/`。所有嵌套目录中的 `.json` 文件都会被自动加载。
+**覆盖官方配方：** 在 config 配方目录的任意位置放入与官方配方同名的文件，即可替换官方配方并沿用相同的配方 ID。当前格式的覆盖配方必须定义 `template.inputLevel`；缺少该字段的旧官方配方副本会被识别为过时配方并忽略，因此无需手动删除。
 
-**禁用配方：** 要禁用某个配方而不删除文件，只需将文件扩展名改为 `.disabled.json`（例如 `recipe.json` → `recipe.disabled.json`）。以 `.disabled.json` 结尾的文件在加载时会被跳过。这对于整合包作者通过脚本禁用默认配方非常方便。
+**自定义配方与嵌套文件夹：** 配方文件可以任意命名，并能放入任意层级的子文件夹中，例如 `dragon_crystal_smithing_recipes/sword/` 或 `dragon_crystal_smithing_recipes/armor/high_level/`。所有未禁用的 `.json` 文件都会被递归加载。不同子目录中的同名自定义配方可以共存；如果文件名与官方配方相同，则会作为官方配方的覆盖项。名称不冲突的旧格式自定义配方仍然兼容。
+
+**禁用配方：** 将配方重命名为 `.disabled.json`、`.json.disabled` 或 `.json.disable` 即可禁用，而不必删除文件。与官方配方同名的禁用文件也会禁用对应的官方配方。
+
+**文件命名规则：** 官方剑和盔甲升级配方以输出等级命名。例如，`dragon_crystal_smithing_sword_level_6.json` 的产物是 6 级剑。自定义配方文件名不强制遵循该规则。
 
 **配方格式示例：**
 ```json
 {
   "type": "the_last_sword:dragon_crystal_smithing",
   "template": {
-    "item": "the_last_sword:dragon_crystal_upgrade_template"
+    "item": "the_last_sword:dragon_crystal_upgrade_template",
+    "inputLevel": 0
   },
   "input": {
     "item": "the_last_sword:dragon_crystal_sword",
@@ -251,7 +261,7 @@ Mods with added compatibility content:
 }
 ```
 
-注意：`inputLevel` 和 `outputLevel` 为可选字段（默认值：0）。如果不需要基于等级的合成，可以省略它们。
+`template` 中的 `inputLevel` 对应第一个槽位，`input` 中的 `inputLevel` 对应第二个槽位，产物则会获得 `outputLevel`。对于独立的自定义配方，省略 `template.inputLevel` 会关闭模板等级检查，以兼容旧格式；第二槽位的 `inputLevel` 和 `outputLevel` 省略时默认为 0。覆盖官方配方的同名文件必须包含 `template.inputLevel`。
 
 ## 现代化的伤害数值
 

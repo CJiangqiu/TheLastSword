@@ -115,7 +115,8 @@ public final class ClientPacketHandler {
         QueenTripleSlashScreenShake.start();
     }
 
-    public static void updateNpcDialogue(int entityId, String dialogueId, String nodeId, boolean close) {
+    public static void updateNpcDialogue(int entityId, String dialogueId, String nodeId,
+                                         Set<String> readOptionIds, boolean close) {
         Minecraft minecraft = Minecraft.getInstance();
         if (close) {
             if (minecraft.screen instanceof NpcDialogueScreen) {
@@ -125,9 +126,9 @@ public final class ClientPacketHandler {
         }
         if (minecraft.screen instanceof NpcDialogueScreen screen
                 && screen.matches(entityId, dialogueId)) {
-            screen.setNode(nodeId);
+            screen.setNode(nodeId, readOptionIds);
             return;
         }
-        minecraft.setScreen(new NpcDialogueScreen(entityId, dialogueId, nodeId));
+        minecraft.setScreen(new NpcDialogueScreen(entityId, dialogueId, nodeId, readOptionIds));
     }
 }

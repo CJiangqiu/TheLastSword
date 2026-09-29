@@ -413,7 +413,8 @@ public class LostWraithEntity extends TheLastEndEntity {
                 .append(Component.translatable("entity.the_last_sword.lost_wraith"))
                 .append(Component.literal("] "))
                 .withStyle(ChatFormatting.DARK_PURPLE)
-                .append(Component.translatable("talk.lost_wraith.death").copy().withStyle(ChatFormatting.WHITE));
+                .append(Component.translatable("dialogue.the_last_sword.lost_wraith.encounter.death")
+                    .copy().withStyle(ChatFormatting.WHITE));
 
             for (Player player : uniquePlayers.values()) {
                 player.sendSystemMessage(prefixedMessage);
@@ -425,7 +426,7 @@ public class LostWraithEntity extends TheLastEndEntity {
         if (player.level().isClientSide()) return;
 
         int currentIndex = getTalkIndex();
-        String translationKey = "talk.lost_wraith.init_" + currentIndex;
+        String translationKey = "dialogue.the_last_sword.lost_wraith.encounter.init_" + currentIndex;
 
         Component prefixedMessage = Component.literal("[")
             .append(Component.translatable("entity.the_last_sword.lost_wraith"))
@@ -455,7 +456,8 @@ public class LostWraithEntity extends TheLastEndEntity {
             .append(Component.translatable("entity.the_last_sword.lost_wraith"))
             .append(Component.literal("] "))
             .withStyle(ChatFormatting.DARK_PURPLE)
-            .append(Component.translatable("talk.lost_wraith.activation").copy().withStyle(ChatFormatting.WHITE));
+            .append(Component.translatable("dialogue.the_last_sword.lost_wraith.encounter.activation")
+                .copy().withStyle(ChatFormatting.WHITE));
 
         player.sendSystemMessage(prefixedMessage);
     }

@@ -59,7 +59,7 @@ import org.jetbrains.annotations.Nullable;
 public class ThePastShadowOfTheQueenEntity extends TheLastEndEntity implements NpcDialogueProvider {
     private static final float SKILL_TALK_CHANCE = 0.30F;
     private static final double SKILL_TALK_RADIUS = 32.0;
-    private static final String TALK_KEY_PREFIX = "talk.the_past_shadow_of_the_queen.";
+    private static final String DIALOGUE_KEY_PREFIX = "dialogue.the_last_sword.queen.combat.";
     private static final int DEATH_ANIMATION_DURATION = 160;
     private static final int DEATH_SECOND_TALK_TICK = 60;
     private static final int DEATH_ITEM_APPEAR_TICK = 70;
@@ -119,7 +119,7 @@ public class ThePastShadowOfTheQueenEntity extends TheLastEndEntity implements N
                 .append(getDisplayName())
                 .append(Component.literal("] "))
                 .withStyle(ChatFormatting.DARK_PURPLE)
-                .append(Component.translatable(TALK_KEY_PREFIX + talkId)
+                .append(Component.translatable(DIALOGUE_KEY_PREFIX + talkId)
                         .withStyle(ChatFormatting.WHITE));
     }
 

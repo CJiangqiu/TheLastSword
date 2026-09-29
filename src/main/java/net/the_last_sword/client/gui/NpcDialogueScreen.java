@@ -19,6 +19,7 @@ import net.the_last_sword.network.NpcDialogueChoicePacket;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class NpcDialogueScreen extends Screen {
     private static final ResourceLocation SCROLL_TEXTURE = ResourceLocation.fromNamespaceAndPath(
@@ -39,9 +40,12 @@ public class NpcDialogueScreen extends Screen {
     private static final int TEXT_COLOR = 0xFF3C2415;
     private static final int OPTION_COLOR = 0xFF5A2E20;
     private static final int OPTION_HOVER_COLOR = 0xFF8A3F2C;
+    private static final int READ_OPTION_COLOR = 0xFF77716C;
+    private static final int READ_OPTION_HOVER_COLOR = 0xFF99918B;
     private final int entityId;
     private final String dialogueId;
     private String nodeId;
+    private Set<String> readOptionIds;
     private float scrollOffset;
     private int maxScroll;
     private int panelLeft;
@@ -57,19 +61,21 @@ public class NpcDialogueScreen extends Screen {
     private boolean choicePending;
     private List<OptionLayout> optionLayouts = List.of();
 
-    public NpcDialogueScreen(int entityId, String dialogueId, String nodeId) {
+    public NpcDialogueScreen(int entityId, String dialogueId, String nodeId, Set<String> readOptionIds) {
         super(Component.translatable("gui.the_last_sword.npc_dialogue.title"));
         this.entityId = entityId;
         this.dialogueId = dialogueId;
         this.nodeId = nodeId;
+        this.readOptionIds = Set.copyOf(readOptionIds);
     }
 
     public boolean matches(int nextEntityId, String nextDialogueId) {
         return entityId == nextEntityId && dialogueId.equals(nextDialogueId);
     }
 
-    public void setNode(String nextNodeId) {
+    public void setNode(String nextNodeId, Set<String> nextReadOptionIds) {
         nodeId = nextNodeId;
+        readOptionIds = Set.copyOf(nextReadOptionIds);
         scrollOffset = 0.0F;
         choicePending = false;
         rebuildLayout();
@@ -140,6 +146,8 @@ public class NpcDialogueScreen extends Screen {
 
         for (OptionLayout option : optionLayouts) {
             int optionY = contentTop + option.contentY() - Mth.floor(scrollOffset);
+            NpcDialogueOption dialogueOption = node.options().get(option.index());
+            boolean read = dialogueOption.tracksRead() && readOptionIds.contains(dialogueOption.id());
             boolean hovered = isInside(mouseX, mouseY, contentLeft, optionY, contentWidth, option.height())
                     && mouseY >= contentTop && mouseY < contentTop + viewportHeight;
             int backgroundColor = hovered ? 0x55A85A3A : 0x337B432D;
@@ -147,9 +155,11 @@ public class NpcDialogueScreen extends Screen {
             graphics.fill(contentLeft, optionY, contentLeft + 2, optionY + option.height(),
                     hovered ? OPTION_HOVER_COLOR : OPTION_COLOR);
             int lineY = optionY + 4;
+            int optionColor = read
+                    ? (hovered ? READ_OPTION_HOVER_COLOR : READ_OPTION_COLOR)
+                    : (hovered ? OPTION_HOVER_COLOR : OPTION_COLOR);
             for (FormattedCharSequence line : option.lines()) {
-                graphics.drawString(font, line, contentLeft + 8, lineY,
-                        hovered ? OPTION_HOVER_COLOR : OPTION_COLOR, false);
+                graphics.drawString(font, line, contentLeft + 8, lineY, optionColor, false);
                 lineY += LINE_HEIGHT;
             }
         }

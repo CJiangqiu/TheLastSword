@@ -219,7 +219,8 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
                 .append(Component.translatable("entity.the_last_sword.the_last_end_sword_wraith"))
                 .append(Component.literal("] "))
                 .withStyle(ChatFormatting.DARK_PURPLE)
-                .append(Component.translatable("talk.the_last_end_sword_wraith." + dialogueId)
+                .append(Component.translatable("dialogue.the_last_sword.the_last_end_sword_wraith.combat."
+                                + dialogueId)
                         .withStyle(ChatFormatting.WHITE));
         for (Player player : level().getEntitiesOfClass(Player.class, getBoundingBox().inflate(32.0))) {
             player.sendSystemMessage(message);

@@ -95,6 +95,16 @@ public class ModItems {
         )
     );
 
+    //铁匠的痛苦 - 剧情纸条
+    public static final RegistryObject<Item> BLACKSMITHS_PAIN_NOTE = ITEMS.register("blacksmiths_pain_note",
+        () -> new PaperNote(
+            "item.the_last_sword.blacksmiths_pain_note",
+            "item_tooltip.the_last_sword.blacksmiths_pain_note",
+            "note.the_last_sword.blacksmiths_pain_note.content",
+            "note.the_last_sword.blacksmiths_pain_note.gui"
+        )
+    );
+
     public static final RegistryObject<Item> DRAGON_CRYSTAL = ITEMS.register("dragon_crystal",
         DragonCrystal::new
     );
