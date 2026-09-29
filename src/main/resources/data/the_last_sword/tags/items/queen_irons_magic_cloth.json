@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "irons_spellbooks:magic_cloth",
+      "required": false
+    }
+  ]
+}

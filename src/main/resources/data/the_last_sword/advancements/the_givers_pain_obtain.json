@@ -1,0 +1,36 @@
+{
+  "display": {
+    "icon": {
+      "item": "the_last_sword:the_givers_pain"
+    },
+    "title": {
+      "translate": "advancements.the_givers_pain_obtain.title"
+    },
+    "description": {
+      "translate": "advancements.the_givers_pain_obtain.descr"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "the_givers_pain_obtain": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "the_last_sword:the_givers_pain"
+            ],
+            "count": {
+              "min": 1,
+              "max": 1
+            }
+          }
+        ]
+      }
+    }
+  },
+  "parent": "the_last_sword:dragon_sword_obtain"
+}

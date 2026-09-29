@@ -58,6 +58,8 @@ public class TheLastSwordQuestHandler {
     private static final ResourceLocation NETHER_TRAVELER_OUTPOST =
             ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "nether_traveler_outpost");
     private static final ResourceLocation LIBERATOR = ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "liberator");
+    public static final ResourceLocation PROOF_OF_SOVEREIGNTY =
+            ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "proof_of_sovereignty");
 
     private static final int CHECK_INTERVAL = 40;
     private static final int VILLAGE_HINT_DELAY = 60;

@@ -1,7 +1,8 @@
 {
   "type": "the_last_sword:dragon_crystal_smithing",
   "template": {
-    "item": "the_last_sword:dragon_crystal_upgrade_template"
+    "item": "the_last_sword:dragon_crystal_upgrade_template",
+    "inputLevel": 0
   },
   "input": {
     "item": "minecraft:enchanting_table",

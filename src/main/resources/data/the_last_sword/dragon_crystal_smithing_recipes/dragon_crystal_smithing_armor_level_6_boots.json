@@ -1,17 +1,18 @@
 {
   "type": "the_last_sword:dragon_crystal_smithing",
   "template": {
-    "item": "the_last_sword:dragon_crystal_upgrade_template"
+    "item": "the_last_sword:ancient_energy_core",
+    "inputLevel": 0
   },
   "input": {
-    "item": "the_last_sword:dragon_armor_boots",
-    "inputLevel": 6
+    "item": "the_last_sword:dragon_crystal_armor_boots",
+    "inputLevel": 5
   },
   "addition": {
-    "item": "the_last_sword:dragon_crystal"
+    "item": "the_last_sword:dimension_explorer"
   },
   "output": {
     "item": "the_last_sword:dragon_armor_boots",
-    "outputLevel": 7
+    "outputLevel": 6
   }
 }

@@ -71,10 +71,16 @@ public class DragonCrystalSmithingCategory implements IRecipeCategory<DragonCrys
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, DragonCrystalSmithingRecipe recipe, IFocusGroup focuses) {
-        //模板槽位
+        ItemStack[] templateItems = recipe.getTemplate().getItems();
+        ItemStack[] displayedTemplateItems = new ItemStack[templateItems.length];
+        for (int i = 0; i < templateItems.length; i++) {
+            displayedTemplateItems[i] = recipe.hasTemplateInputLevel()
+                    ? createStackWithLevel(templateItems[i], recipe.getTemplateInputLevel())
+                    : templateItems[i];
+        }
         builder.addSlot(RecipeIngredientRole.INPUT, 7, 11)
             .setBackground(slotBackground, -1, -1)
-            .addIngredients(recipe.getTemplate());
+            .addItemStacks(Arrays.asList(displayedTemplateItems));
 
         //输入槽位（带等级）
         ItemStack[] inputItems = recipe.getInput().getItems();

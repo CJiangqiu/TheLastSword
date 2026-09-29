@@ -1,0 +1,26 @@
+{
+  "display": {
+    "icon": {
+      "item": "the_last_sword:the_givers_pain"
+    },
+    "title": {
+      "translate": "advancements.proof_of_sovereignty.title"
+    },
+    "description": {
+      "translate": "advancements.proof_of_sovereignty.descr"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "complete_queens_trial": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "rewards": {
+    "experience": 1024
+  },
+  "parent": "the_last_sword:beyond_time"
+}

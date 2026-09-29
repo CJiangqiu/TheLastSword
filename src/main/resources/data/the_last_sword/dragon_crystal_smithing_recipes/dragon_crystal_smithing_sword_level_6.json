@@ -1,17 +1,18 @@
 {
   "type": "the_last_sword:dragon_crystal_smithing",
   "template": {
-    "item": "the_last_sword:dragon_crystal_upgrade_template"
+    "item": "the_last_sword:dragon_crystal_upgrade_template",
+    "inputLevel": 0
   },
   "input": {
-    "item": "the_last_sword:dragon_sword",
-    "inputLevel": 6
+    "item": "the_last_sword:dragon_crystal_sword",
+    "inputLevel": 5
   },
   "addition": {
-    "item": "minecraft:dragon_egg"
+    "item": "the_last_sword:dragon_soul_lantern"
   },
   "output": {
     "item": "the_last_sword:dragon_sword",
-    "outputLevel": 7
+    "outputLevel": 6
   }
 }

@@ -1,0 +1,30 @@
+{
+  "display": {
+    "icon": {
+      "item": "minecraft:clock"
+    },
+    "title": {
+      "translate": "advancements.beyond_time.title"
+    },
+    "description": {
+      "translate": "advancements.beyond_time.descr"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "discover_wound_of_time": {
+      "trigger": "minecraft:tick",
+      "conditions": {
+        "player": {
+          "location": {
+            "structure": "the_last_sword:wound_of_time"
+          }
+        }
+      }
+    }
+  },
+  "parent": "the_last_sword:queens_whereabouts"
+}

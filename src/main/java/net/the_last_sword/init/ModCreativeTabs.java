@@ -112,6 +112,7 @@ public class ModCreativeTabs {
                 output.accept(ModItems.MAGE_NOTE_4.get());
                 output.accept(ModItems.DRAGON_CULT_SECRET_LETTER.get());
                 output.accept(ModItems.TRAVELER_MESSAGE.get());
+                output.accept(ModItems.WHERE_IS_IT_NOTE.get());
             })
             .build()
     );

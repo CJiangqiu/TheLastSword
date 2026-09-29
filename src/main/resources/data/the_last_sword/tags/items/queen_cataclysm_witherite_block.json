@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "cataclysm:witherite_block",
+      "required": false
+    }
+  ]
+}

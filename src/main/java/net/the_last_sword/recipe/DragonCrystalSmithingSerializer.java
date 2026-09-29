@@ -13,7 +13,11 @@ public class DragonCrystalSmithingSerializer implements RecipeSerializer<DragonC
 
     @Override
     public DragonCrystalSmithingRecipe fromJson(ResourceLocation recipeId, JsonObject json) {
-        Ingredient template = Ingredient.fromJson(GsonHelper.getAsJsonObject(json, "template"));
+        JsonObject templateJson = GsonHelper.getAsJsonObject(json, "template");
+        Ingredient template = Ingredient.fromJson(templateJson);
+        Integer templateInputLevel = templateJson.has("inputLevel")
+                ? GsonHelper.getAsInt(templateJson, "inputLevel")
+                : null;
 
         JsonObject inputJson = GsonHelper.getAsJsonObject(json, "input");
         Ingredient input = Ingredient.fromJson(inputJson);
@@ -25,24 +29,31 @@ public class DragonCrystalSmithingSerializer implements RecipeSerializer<DragonC
         ItemStack output = ShapedRecipe.itemStackFromJson(outputJson);
         int outputLevel = GsonHelper.getAsInt(outputJson, "outputLevel", 0);
 
-        return new DragonCrystalSmithingRecipe(recipeId, template, input, inputLevel, addition, output, outputLevel);
+        return new DragonCrystalSmithingRecipe(recipeId, template, templateInputLevel,
+                input, inputLevel, addition, output, outputLevel);
     }
 
     @Override
     public DragonCrystalSmithingRecipe fromNetwork(ResourceLocation recipeId, FriendlyByteBuf buffer) {
         Ingredient template = Ingredient.fromNetwork(buffer);
+        Integer templateInputLevel = buffer.readBoolean() ? buffer.readInt() : null;
         Ingredient input = Ingredient.fromNetwork(buffer);
         int inputLevel = buffer.readInt();
         Ingredient addition = Ingredient.fromNetwork(buffer);
         ItemStack output = buffer.readItem();
         int outputLevel = buffer.readInt();
 
-        return new DragonCrystalSmithingRecipe(recipeId, template, input, inputLevel, addition, output, outputLevel);
+        return new DragonCrystalSmithingRecipe(recipeId, template, templateInputLevel,
+                input, inputLevel, addition, output, outputLevel);
     }
 
     @Override
     public void toNetwork(FriendlyByteBuf buffer, DragonCrystalSmithingRecipe recipe) {
         recipe.getTemplate().toNetwork(buffer);
+        buffer.writeBoolean(recipe.hasTemplateInputLevel());
+        if (recipe.hasTemplateInputLevel()) {
+            buffer.writeInt(recipe.getTemplateInputLevel());
+        }
         recipe.getInput().toNetwork(buffer);
         buffer.writeInt(recipe.getInputLevel());
         recipe.getAddition().toNetwork(buffer);

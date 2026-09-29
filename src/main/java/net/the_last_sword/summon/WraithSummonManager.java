@@ -348,6 +348,9 @@ public class WraithSummonManager {
         Vec3 spawnPos = findSafeSpawnPosition(player);
         wraith.setPos(spawnPos.x, spawnPos.y, spawnPos.z);
 
+        // 剑灵不继承原实体的未激活、生成、死亡、技能或 NPC 阶段。
+        initializeTheLastEndWraith(wraith);
+
         //4. 添加到世界
         boolean addSuccess = level.addFreshEntity(wraith);
         if (!addSuccess) {
@@ -355,16 +358,7 @@ public class WraithSummonManager {
             return false;
         }
 
-        //4.5. 终焉种实体初始化
-        if (wraith instanceof TheLastEndEntity theLastEnd) {
-            float maxHealth = (float) wraith.getAttributeValue(Attributes.MAX_HEALTH);
-            TrueHealthManager.setMaxHealth(theLastEnd, maxHealth);
-            TrueHealthManager.setHealth(theLastEnd, maxHealth);
-            theLastEnd.setAnimationState(theLastEnd.hasSpawnAnimation()
-                ? TheLastEndEntity.STATE_SPAWNING : TheLastEndEntity.STATE_IDLE);
-        }
-
-        //4.6. 清除禁疗状态（防止旧魂石或 entity_nbt 里残留的禁疗拦截 setHealth）
+        //4.5. 清除禁疗状态（防止旧魂石或 entity_nbt 里残留的禁疗拦截 setHealth）
         PresentWorldAnchorManager.clearHealBan(wraith);
 
         //5. 设置生命值为最大生命值（实体刚生成后立即设置满血）
@@ -474,6 +468,9 @@ public class WraithSummonManager {
         Vec3 spawnPos = findSafeSpawnPosition(player);
         wraith.setPos(spawnPos.x, spawnPos.y, spawnPos.z);
 
+        // 剑灵不继承原实体的未激活、生成、死亡、技能或 NPC 阶段。
+        initializeTheLastEndWraith(wraith);
+
         //4. 添加到世界
         boolean addSuccess = level.addFreshEntity(wraith);
         if (!addSuccess) {
@@ -481,16 +478,7 @@ public class WraithSummonManager {
             return false;
         }
 
-        //4.5. 终焉种实体初始化
-        if (wraith instanceof TheLastEndEntity theLastEnd) {
-            float maxHealth = (float) wraith.getAttributeValue(Attributes.MAX_HEALTH);
-            TrueHealthManager.setMaxHealth(theLastEnd, maxHealth);
-            TrueHealthManager.setHealth(theLastEnd, maxHealth);
-            theLastEnd.setAnimationState(theLastEnd.hasSpawnAnimation()
-                ? TheLastEndEntity.STATE_SPAWNING : TheLastEndEntity.STATE_IDLE);
-        }
-
-        //4.6. 清除禁疗状态（从 entity_nbt 恢复时会带回旧的禁疗，必须清掉后再 setHealth）
+        //4.5. 清除禁疗状态（从 entity_nbt 恢复时会带回旧的禁疗，必须清掉后再 setHealth）
         PresentWorldAnchorManager.clearHealBan(wraith);
 
         //5. 设置生命值为最大生命值（实体刚生成后立即设置满血）
@@ -539,6 +527,24 @@ public class WraithSummonManager {
         sendSummonMessage(player, wraith);
 
         return true;
+    }
+
+    private static void initializeTheLastEndWraith(LivingEntity wraith) {
+        if (!(wraith instanceof TheLastEndEntity theLastEnd)) {
+            return;
+        }
+
+        wraith.revive();
+        wraith.dead = false;
+        wraith.deathTime = 0;
+        wraith.hurtTime = 0;
+        wraith.setPose(Pose.STANDING);
+        theLastEnd.setDeathTick(0);
+        theLastEnd.setAnimationState(TheLastEndEntity.STATE_IDLE);
+
+        float maxHealth = (float) wraith.getAttributeValue(Attributes.MAX_HEALTH);
+        TrueHealthManager.setMaxHealth(theLastEnd, maxHealth);
+        TrueHealthManager.setHealth(theLastEnd, maxHealth);
     }
 
     private static void applySoulStoneAppearance(ItemStack soulStone, LivingEntity wraith) {

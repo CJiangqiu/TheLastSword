@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "cataclysm:essence_of_the_storm",
+      "required": false
+    }
+  ]
+}

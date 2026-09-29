@@ -1,17 +1,18 @@
 {
   "type": "the_last_sword:dragon_crystal_smithing",
   "template": {
-    "item": "the_last_sword:dragon_crystal_upgrade_template"
+    "item": "the_last_sword:dragon_crystal_upgrade_template",
+    "inputLevel": 0
   },
   "input": {
     "item": "the_last_sword:dragon_armor_chestplate",
-    "inputLevel": 10
+    "inputLevel": 9
   },
   "addition": {
     "item": "the_last_sword:dragon_crystal"
   },
   "output": {
     "item": "the_last_sword:dragon_armor_chestplate",
-    "outputLevel": 11
+    "outputLevel": 10
   }
 }

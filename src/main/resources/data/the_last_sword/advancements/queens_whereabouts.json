@@ -1,0 +1,35 @@
+{
+  "display": {
+    "icon": {
+      "item": "the_last_sword:wings_that_cover_the_world"
+    },
+    "title": {
+      "translate": "advancements.queens_whereabouts.title"
+    },
+    "description": {
+      "translate": "advancements.queens_whereabouts.descr"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "obtain_where_is_it_note": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "the_last_sword:where_is_it_note"
+            ],
+            "count": {
+              "min": 1
+            }
+          }
+        ]
+      }
+    }
+  },
+  "parent": "the_last_sword:liberator"
+}

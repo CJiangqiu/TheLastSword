@@ -1,6 +1,10 @@
 {
   "replace": false,
   "values": [
-    "the_last_sword:dragon_crystal"
+    "the_last_sword:dragon_crystal",
+    {
+      "id": "cataclysm:lava_power_cell",
+      "required": false
+    }
   ]
 }

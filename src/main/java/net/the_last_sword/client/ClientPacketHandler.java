@@ -7,6 +7,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.ItemStackHandler;
 import net.the_last_sword.client.gui.PaperNoteScreen;
+import net.the_last_sword.client.gui.NpcDialogueScreen;
 import net.the_last_sword.client.gui.SwordWraithAppearanceScreen;
 import net.the_last_sword.client.gui.TheLastEndScrollScreen;
 import net.the_last_sword.client.gui.menu.DragonCrystalEnchantingTableMenu;
@@ -112,5 +113,21 @@ public final class ClientPacketHandler {
 
     public static void triggerQueenTripleSlashScreenShake() {
         QueenTripleSlashScreenShake.start();
+    }
+
+    public static void updateNpcDialogue(int entityId, String dialogueId, String nodeId, boolean close) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (close) {
+            if (minecraft.screen instanceof NpcDialogueScreen) {
+                minecraft.setScreen(null);
+            }
+            return;
+        }
+        if (minecraft.screen instanceof NpcDialogueScreen screen
+                && screen.matches(entityId, dialogueId)) {
+            screen.setNode(nodeId);
+            return;
+        }
+        minecraft.setScreen(new NpcDialogueScreen(entityId, dialogueId, nodeId));
     }
 }

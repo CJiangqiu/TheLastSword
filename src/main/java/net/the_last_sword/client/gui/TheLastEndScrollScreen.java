@@ -31,11 +31,11 @@ public class TheLastEndScrollScreen extends Screen {
     private static final ResourceLocation UPGRADE_TEMPLATE_RECIPE = recipeId("dragon_crystal_upgrade_template_recipe");
     private static final ResourceLocation SMITHING_TABLE_RECIPE = recipeId("dragon_crystal_smithing_table_recipe");
     private static final ResourceLocation DRAGON_CRYSTAL_SWORD_RECIPE = recipeId("dragon_crystal_sword_recipe");
-    private static final ResourceLocation DRAGON_CRYSTAL_SWORD_LEVEL_0_RECIPE = configRecipeId("dragon_crystal_smithing_sword_level_0");
-    private static final ResourceLocation DRAGON_CRYSTAL_SWORD_LEVEL_5_RECIPE = configRecipeId("dragon_crystal_smithing_sword_level_5");
-    private static final ResourceLocation DRAGON_SWORD_LEVEL_6_RECIPE = configRecipeId("dragon_crystal_smithing_sword_level_6");
+    private static final ResourceLocation DRAGON_CRYSTAL_SWORD_LEVEL_1_RECIPE = configRecipeId("dragon_crystal_smithing_sword_level_1");
+    private static final ResourceLocation DRAGON_CRYSTAL_SWORD_LEVEL_6_RECIPE = configRecipeId("dragon_crystal_smithing_sword_level_6");
+    private static final ResourceLocation DRAGON_SWORD_LEVEL_7_RECIPE = configRecipeId("dragon_crystal_smithing_sword_level_7");
     private static final ResourceLocation DRAGON_CRYSTAL_HELMET_RECIPE = recipeId("dragon_crystal_helmet_recipe");
-    private static final ResourceLocation DRAGON_CRYSTAL_HELMET_LEVEL_0_RECIPE = configRecipeId("dragon_crystal_smithing_armor_level_0_helmet");
+    private static final ResourceLocation DRAGON_CRYSTAL_HELMET_LEVEL_1_RECIPE = configRecipeId("dragon_crystal_smithing_armor_level_1_helmet");
     private static final ResourceLocation SOUL_STONE_RECIPE = recipeId("dragon_crystal_soul_stone_recipe");
     private static final ResourceLocation SOUL_LANTERN_RECIPE = recipeId("dragon_soul_lantern_recipe");
     private static final ResourceLocation SOUL_LANTERN_RECIPE_1 = recipeId("dragon_soul_lantern_recipe_1");
@@ -186,16 +186,16 @@ public class TheLastEndScrollScreen extends Screen {
                   "gui.the_last_sword.scroll_book.chapter3.content",
                   new ItemStack(ModItems.DRAGON_CRYSTAL_SWORD.get()),
                    DRAGON_CRYSTAL_SWORD_RECIPE,
-                   DRAGON_CRYSTAL_SWORD_LEVEL_0_RECIPE,
-                   DRAGON_CRYSTAL_SWORD_LEVEL_5_RECIPE,
-                   DRAGON_SWORD_LEVEL_6_RECIPE);
+                   DRAGON_CRYSTAL_SWORD_LEVEL_1_RECIPE,
+                   DRAGON_CRYSTAL_SWORD_LEVEL_6_RECIPE,
+                   DRAGON_SWORD_LEVEL_7_RECIPE);
 
         //章节4：龙之躯壳
         addChapter("gui.the_last_sword.scroll_book.chapter4.title",
                   "gui.the_last_sword.scroll_book.chapter4.content",
                   new ItemStack(ModItems.DRAGON_CRYSTAL_ARMOR_HELMET.get()),
                    DRAGON_CRYSTAL_HELMET_RECIPE,
-                   DRAGON_CRYSTAL_HELMET_LEVEL_0_RECIPE);
+                   DRAGON_CRYSTAL_HELMET_LEVEL_1_RECIPE);
 
         //章节5：龙与魂
         addChapter("gui.the_last_sword.scroll_book.chapter5.title",

@@ -85,6 +85,16 @@ public class ModItems {
         )
     );
 
+    //尖塔灵魂印记 - 剧情纸条
+    public static final RegistryObject<Item> WHERE_IS_IT_NOTE = ITEMS.register("where_is_it_note",
+        () -> new PaperNote(
+            "item.the_last_sword.where_is_it_note",
+            "item_tooltip.the_last_sword.where_is_it_note",
+            "note.the_last_sword.where_is_it_note.content",
+            "note.the_last_sword.where_is_it_note.gui"
+        )
+    );
+
     public static final RegistryObject<Item> DRAGON_CRYSTAL = ITEMS.register("dragon_crystal",
         DragonCrystal::new
     );

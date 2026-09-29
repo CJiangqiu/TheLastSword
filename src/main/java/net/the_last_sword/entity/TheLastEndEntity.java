@@ -182,6 +182,12 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
             return PlayState.STOP;
         }
 
+        String persistentAnimation = getPersistentAnimationName(attackState);
+        if (persistentAnimation != null && !persistentAnimation.isEmpty()) {
+            state.setAnimation(RawAnimation.begin().thenLoop(persistentAnimation));
+            return PlayState.CONTINUE;
+        }
+
         if (attackState == STATE_IDLE) {
             if (state.isMoving()) {
                 state.setAnimation(RawAnimation.begin().thenLoop(getWalkAnimationName()));
@@ -223,6 +229,10 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
     public abstract String getSpawnAnimationName();
 
     public String getWaitAnimationName() {
+        return "";
+    }
+
+    protected String getPersistentAnimationName(int animationState) {
         return "";
     }
 
@@ -473,6 +483,24 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
         deathDamageSource = null;
         setDeathTick(0);
         setAnimationState(STATE_IDLE);
+    }
+
+    protected void finishDeathWithoutRemoval(int nextState) {
+        if (level().isClientSide) {
+            return;
+        }
+
+        float restoredMaxHealth = TrueHealthManager.getMaxHealth(this);
+        if (!Float.isFinite(restoredMaxHealth) || restoredMaxHealth <= 0.0F) {
+            restoredMaxHealth = getMaxHealth();
+        }
+        EcaAPI.revive(this);
+        TrueHealthManager.setMaxHealth(this, restoredMaxHealth);
+        TrueHealthManager.setHealth(this, restoredMaxHealth);
+        EntityUtil.setProtection(this, true);
+        deathDamageSource = null;
+        setDeathTick(0);
+        setAnimationState(nextState);
     }
 
     public void triggerDeath(@NotNull DamageSource damageSource) {

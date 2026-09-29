@@ -13,7 +13,7 @@ import net.minecraft.server.level.ServerPlayer;
 //网络包管理器
 public class NetworkHandler {
 
-    private static final String PROTOCOL_VERSION = "9";
+    private static final String PROTOCOL_VERSION = "10";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "main"),
@@ -69,6 +69,16 @@ public class NetworkHandler {
                 .encoder(QueenTripleSlashShakePacket::encode)
                 .decoder(QueenTripleSlashShakePacket::decode)
                 .consumerMainThread(QueenTripleSlashShakePacket::handle)
+                .add();
+        CHANNEL.messageBuilder(NpcDialogueStatePacket.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(NpcDialogueStatePacket::encode)
+                .decoder(NpcDialogueStatePacket::decode)
+                .consumerMainThread(NpcDialogueStatePacket::handle)
+                .add();
+        CHANNEL.messageBuilder(NpcDialogueChoicePacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
+                .encoder(NpcDialogueChoicePacket::encode)
+                .decoder(NpcDialogueChoicePacket::decode)
+                .consumerMainThread(NpcDialogueChoicePacket::handle)
                 .add();
         CHANNEL.messageBuilder(ChangeModePacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
                 .encoder(ChangeModePacket::encode)

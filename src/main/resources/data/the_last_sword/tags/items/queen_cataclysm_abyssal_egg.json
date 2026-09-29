@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "cataclysm:abyssal_egg",
+      "required": false
+    }
+  ]
+}

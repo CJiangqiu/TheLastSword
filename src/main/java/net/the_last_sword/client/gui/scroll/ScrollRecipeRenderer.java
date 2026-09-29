@@ -89,7 +89,7 @@ public final class ScrollRecipeRenderer {
             return renderSmithing(accessor.theLastSword$getTemplate(), accessor.theLastSword$getBase(),
                     accessor.theLastSword$getAddition(),
                     smithingRecipe.getResultItem(minecraft.level.registryAccess()), graphics, font,
-                    areaX, areaY, areaWidth, mouseX, mouseY, 0, 0);
+                    areaX, areaY, areaWidth, mouseX, mouseY, false, 0, 0, 0);
         }
         if (value instanceof DragonCrystalSmithingRecipe dragonSmithingRecipe) {
             return renderDragonSmithing(dragonSmithingRecipe, graphics, font, areaX, areaY,
@@ -175,12 +175,14 @@ public final class ScrollRecipeRenderer {
         ItemLevelHelper.setLevel(result, recipe.getOutputLevel());
         return renderSmithing(recipe.getTemplate(), recipe.getInput(), recipe.getAddition(), result,
                 graphics, font, areaX, areaY, areaWidth, mouseX, mouseY,
+                recipe.hasTemplateInputLevel(), recipe.getTemplateInputLevel(),
                 recipe.getInputLevel(), recipe.getOutputLevel());
     }
 
     private static ItemStack renderSmithing(Ingredient template, Ingredient base, Ingredient addition,
                                             ItemStack result, GuiGraphics graphics, Font font,
                                             int areaX, int areaY, int areaWidth, int mouseX, int mouseY,
+                                            boolean hasTemplateInputLevel, int templateInputLevel,
                                             int inputLevel, int outputLevel) {
         int inputsWidth = 3 * RecipeSlotElement.SIZE;
         int totalWidth = inputsWidth + GAP + ARROW_SIZE + GAP + RecipeSlotElement.SIZE;
@@ -188,11 +190,15 @@ public final class ScrollRecipeRenderer {
         int slotY = areaY + (SMITHING_DISPLAY_HEIGHT - RecipeSlotElement.SIZE) / 2;
         List<RecipeSlotElement> slots = new ArrayList<>();
 
+        ItemStack templateStack = displayStack(template, 0);
+        if (!templateStack.isEmpty() && hasTemplateInputLevel) {
+            ItemLevelHelper.setLevel(templateStack, templateInputLevel);
+        }
         ItemStack inputStack = displayStack(base, 1);
         if (!inputStack.isEmpty()) {
             ItemLevelHelper.setLevel(inputStack, inputLevel);
         }
-        slots.add(new RecipeSlotElement(startX, slotY, displayStack(template, 0)));
+        slots.add(new RecipeSlotElement(startX, slotY, templateStack));
         slots.add(new RecipeSlotElement(startX + RecipeSlotElement.SIZE, slotY, inputStack));
         slots.add(new RecipeSlotElement(startX + 2 * RecipeSlotElement.SIZE, slotY, displayStack(addition, 2)));
 

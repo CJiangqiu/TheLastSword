@@ -10,11 +10,14 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MobType;
@@ -28,9 +31,13 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
+import net.the_last_sword.dialogue.NpcDialogueManager;
+import net.the_last_sword.dialogue.NpcDialogueProvider;
+import net.the_last_sword.dialogue.NpcDialogueRegistry;
 import net.the_last_sword.entity.ai.ThePastShadowOfTheQueenChaseTargetGoal;
 import net.the_last_sword.entity.ai.ThePastShadowOfTheQueenEnchantGoal;
 import net.the_last_sword.entity.ai.ThePastShadowOfTheQueenExecutionGoal;
@@ -39,6 +46,7 @@ import net.the_last_sword.entity.ai.ThePastShadowOfTheQueenLightningSpearGoal;
 import net.the_last_sword.entity.ai.ThePastShadowOfTheQueenBlinkGoal;
 import net.the_last_sword.entity.ai.ThePastShadowOfTheQueenTripleSlashGoal;
 import net.the_last_sword.entity.ai.ThePastShadowOfTheQueenSummonProjectilesGoal;
+import net.the_last_sword.event.TheLastSwordQuestHandler;
 import net.the_last_sword.init.ModItems;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -48,7 +56,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 // 女皇的逝去之影
-public class ThePastShadowOfTheQueenEntity extends TheLastEndEntity {
+public class ThePastShadowOfTheQueenEntity extends TheLastEndEntity implements NpcDialogueProvider {
     private static final float SKILL_TALK_CHANCE = 0.30F;
     private static final double SKILL_TALK_RADIUS = 32.0;
     private static final String TALK_KEY_PREFIX = "talk.the_past_shadow_of_the_queen.";
@@ -57,6 +65,7 @@ public class ThePastShadowOfTheQueenEntity extends TheLastEndEntity {
     private static final int DEATH_ITEM_APPEAR_TICK = 70;
     private static final int DEATH_REWARD_TICK = 100;
     private static final String DEATH_REWARD_GRANTED_TAG = "QueenDeathRewardGranted";
+    private static final String NPC_STATE_TAG = "QueenNpcState";
     public static final int STATE_LIGHTNING_SPEAR = 3;
     public static final int STATE_BLINK = 4;
     public static final int STATE_TRIPLE_SLASH = 5;
@@ -65,6 +74,7 @@ public class ThePastShadowOfTheQueenEntity extends TheLastEndEntity {
     public static final int STATE_EXECUTION = 8;
     public static final int STATE_EXECUTION_FAIL = 9;
     public static final int STATE_EXECUTION_SUCCESS = 10;
+    public static final int STATE_NPC = 11;
     private ThePastShadowOfTheQueenLightningSpearGoal lightningSpearGoal;
     private ThePastShadowOfTheQueenBlinkGoal blinkGoal;
     private ThePastShadowOfTheQueenSummonProjectilesGoal summonProjectilesGoal;
@@ -159,6 +169,36 @@ public class ThePastShadowOfTheQueenEntity extends TheLastEndEntity {
         entityData.set(LIGHTNING_SPEAR_VISIBLE, visible);
     }
 
+    public boolean isNpc() {
+        return getAnimationState() == STATE_NPC;
+    }
+
+    @Override
+    public String getDialogueId() {
+        return NpcDialogueRegistry.QUEEN_DIALOGUE_ID;
+    }
+
+    @Override
+    public boolean canStartDialogue(Player player) {
+        return isNpc() && isAlive();
+    }
+
+    @Override
+    public @NotNull InteractionResult mobInteract(@NotNull Player player, @NotNull InteractionHand hand) {
+        if (isNpc()) {
+            if (!level().isClientSide && player instanceof ServerPlayer serverPlayer) {
+                NpcDialogueManager.open(serverPlayer, this);
+            }
+            return InteractionResult.sidedSuccess(level().isClientSide);
+        }
+        return super.mobInteract(player, hand);
+    }
+
+    @Override
+    public boolean canAct() {
+        return !isNpc() && super.canAct();
+    }
+
     public int getBlinkTick() {
         return getAnimationState() == STATE_BLINK ? entityData.get(BLINK_TICK) : -1;
     }
@@ -242,6 +282,7 @@ public class ThePastShadowOfTheQueenEntity extends TheLastEndEntity {
         this.targetSelector.addGoal(1, new ThePastShadowOfTheQueenHurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false,
                 entity -> entity instanceof Player player
+                        && !isNpc()
                         && !player.isCreative()
                         && !player.isSpectator()
                         && EntityUtil.canAttack(this, player)));
@@ -302,6 +343,11 @@ public class ThePastShadowOfTheQueenEntity extends TheLastEndEntity {
     }
 
     @Override
+    protected String getPersistentAnimationName(int animationState) {
+        return animationState == STATE_NPC ? getIdleAnimationName() : super.getPersistentAnimationName(animationState);
+    }
+
+    @Override
     public String getSkillAnimationName(int attackState) {
         if (attackState == STATE_EXECUTION) {
             return "execution";
@@ -347,10 +393,20 @@ public class ThePastShadowOfTheQueenEntity extends TheLastEndEntity {
 
     @Override
     public boolean hurt(@NotNull DamageSource source, float amount) {
-        if (!isReady()) {
+        if (!isReady() || isNpc()) {
             return false;
         }
         return super.hurt(source, amount);
+    }
+
+    @Override
+    public boolean doHurtTarget(@NotNull Entity target) {
+        return !isNpc() && super.doHurtTarget(target);
+    }
+
+    @Override
+    public void setTarget(@Nullable LivingEntity target) {
+        super.setTarget(isNpc() ? null : target);
     }
 
     @Override
@@ -423,18 +479,43 @@ public class ThePastShadowOfTheQueenEntity extends TheLastEndEntity {
         if (!reward.isEmpty()) {
             player.drop(reward, false);
         }
+        if (level().getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
+            dropFromLootTable(damageSources().playerAttack(player), true);
+        }
+        TheLastSwordQuestHandler.grant(player, TheLastSwordQuestHandler.PROOF_OF_SOVEREIGNTY);
+    }
+
+    @Override
+    protected void onDeathEnd() {
+        if (level().isClientSide) {
+            return;
+        }
+
+        finishDeathWithoutRemoval(STATE_NPC);
+        getNavigation().stop();
+        setTarget(null);
+        setLastHurtByMob(null);
+        setLastHurtMob(null);
+        setAggressive(false);
+        setDeltaMovement(Vec3.ZERO);
+        setNoGravity(false);
     }
 
     @Override
     public void readAdditionalSaveData(@NotNull CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         deathRewardGranted = tag.getBoolean(DEATH_REWARD_GRANTED_TAG);
+        if (tag.getBoolean(NPC_STATE_TAG)) {
+            setDeathTick(0);
+            setAnimationState(STATE_NPC);
+        }
     }
 
     @Override
     public void addAdditionalSaveData(@NotNull CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putBoolean(DEATH_REWARD_GRANTED_TAG, deathRewardGranted);
+        tag.putBoolean(NPC_STATE_TAG, isNpc());
     }
 
     @Override

@@ -89,7 +89,8 @@ public class ThePastShadowOfTheQueenExtension extends EntityExtension {
     @OnlyIn(Dist.CLIENT)
     @Override
     public CombatMusicExtension combatMusicExtension(LivingEntity entity) {
-        if (entity instanceof ThePastShadowOfTheQueenEntity queen && queen.isReady() && queen.isAlive()) {
+        if (entity instanceof ThePastShadowOfTheQueenEntity queen
+                && queen.isReady() && !queen.isNpc() && queen.isAlive()) {
             return COMBAT_MUSIC;
         }
         return null;

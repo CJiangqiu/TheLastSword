@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "cataclysm:lava_power_cell",
+      "required": false
+    }
+  ]
+}

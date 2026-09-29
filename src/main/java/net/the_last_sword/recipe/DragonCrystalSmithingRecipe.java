@@ -18,15 +18,19 @@ public class DragonCrystalSmithingRecipe implements Recipe<Container> {
 
     private final ResourceLocation id;
     private final Ingredient template;
+    private final Integer templateInputLevel;
     private final Ingredient input;
     private final int inputLevel;
     private final Ingredient addition;
     private final ItemStack output;
     private final int outputLevel;
 
-    public DragonCrystalSmithingRecipe(ResourceLocation id, Ingredient template, Ingredient input, int inputLevel, Ingredient addition, ItemStack output, int outputLevel) {
+    public DragonCrystalSmithingRecipe(ResourceLocation id, Ingredient template, Integer templateInputLevel,
+                                       Ingredient input, int inputLevel, Ingredient addition,
+                                       ItemStack output, int outputLevel) {
         this.id = id;
         this.template = template;
+        this.templateInputLevel = templateInputLevel;
         this.input = input;
         this.inputLevel = inputLevel;
         this.addition = addition;
@@ -52,6 +56,10 @@ public class DragonCrystalSmithingRecipe implements Recipe<Container> {
             id, templateMatch, inputMatch, additionMatch);
 
         if (!templateMatch || !inputMatch || !additionMatch) {
+            return false;
+        }
+
+        if (templateInputLevel != null && ItemLevelHelper.getLevel(templateStack) != templateInputLevel) {
             return false;
         }
 
@@ -117,6 +125,14 @@ public class DragonCrystalSmithingRecipe implements Recipe<Container> {
     //为JEI和序列化器提供getter方法
     public Ingredient getTemplate() {
         return template;
+    }
+
+    public boolean hasTemplateInputLevel() {
+        return templateInputLevel != null;
+    }
+
+    public int getTemplateInputLevel() {
+        return templateInputLevel != null ? templateInputLevel : 0;
     }
 
     public Ingredient getInput() {
