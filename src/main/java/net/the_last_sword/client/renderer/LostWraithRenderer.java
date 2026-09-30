@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.resources.ResourceLocation;
+import net.the_last_sword.client.layer.LostWraithSealLayer;
 import net.the_last_sword.client.model.LostWraithModel;
 import net.the_last_sword.entity.LostWraithEntity;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
@@ -15,6 +16,7 @@ import software.bernie.geckolib.renderer.GeoEntityRenderer;
 public class LostWraithRenderer extends GeoEntityRenderer<LostWraithEntity> {
     public LostWraithRenderer(EntityRendererProvider.Context renderManager) {
         super(renderManager, new LostWraithModel());
+        addRenderLayer(new LostWraithSealLayer(this));
         this.shadowRadius = 1.0f;
     }
 

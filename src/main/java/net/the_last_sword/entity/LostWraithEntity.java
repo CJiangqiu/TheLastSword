@@ -228,7 +228,6 @@ public class LostWraithEntity extends TheLastEndEntity {
                 TrueHealthManager.register(this, maxHealth);
             }
 
-            faceNearestPlayer();
         }
 
         return result;
@@ -421,7 +420,7 @@ public class LostWraithEntity extends TheLastEndEntity {
             .append(Component.translatable("entity.the_last_sword.lost_wraith"))
             .append(Component.literal("] "))
             .withStyle(ChatFormatting.DARK_PURPLE)
-            .append(Component.translatable("dialogue.the_last_sword.lost_wraith.encounter.activation")
+            .append(Component.translatable("bossshow.the_last_sword.lost_wraith.subtitle_1")
                 .copy().withStyle(ChatFormatting.WHITE));
 
         player.sendSystemMessage(prefixedMessage);
@@ -447,13 +446,6 @@ public class LostWraithEntity extends TheLastEndEntity {
                     this.getZ() + (random.nextDouble() - 0.5D) * 1.5D,
                     1, 0, 0.1D, 0, 0.02D);
             }
-        }
-    }
-
-    private void faceNearestPlayer() {
-        Player nearestPlayer = level().getNearestPlayer(this, 32.0);
-        if (nearestPlayer != null) {
-            EntityUtil.faceTarget(this, nearestPlayer);
         }
     }
 

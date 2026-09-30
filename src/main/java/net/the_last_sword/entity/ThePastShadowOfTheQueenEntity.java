@@ -1,5 +1,8 @@
 package net.the_last_sword.entity;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -67,6 +70,7 @@ public class ThePastShadowOfTheQueenEntity extends TheLastEndEntity implements N
     private static final int DEATH_REWARD_TICK = 100;
     private static final String DEATH_REWARD_GRANTED_TAG = "QueenDeathRewardGranted";
     private static final String NPC_STATE_TAG = "QueenNpcState";
+    private static final String ACTIVATION_TALK_SENT_TAG = "QueenActivationTalkSent";
     public static final int STATE_LIGHTNING_SPEAR = 3;
     public static final int STATE_BLINK = 4;
     public static final int STATE_TRIPLE_SLASH = 5;
@@ -94,6 +98,7 @@ public class ThePastShadowOfTheQueenEntity extends TheLastEndEntity implements N
     private static final EntityDataAccessor<Boolean> LIGHTNING_SPEAR_VISIBLE = SynchedEntityData.defineId(
             ThePastShadowOfTheQueenEntity.class, EntityDataSerializers.BOOLEAN);
     private boolean deathRewardGranted;
+    private boolean activationTalkSent;
 
     public ThePastShadowOfTheQueenEntity(EntityType<? extends ThePastShadowOfTheQueenEntity> type, Level level) {
         super(type, level);
@@ -126,12 +131,38 @@ public class ThePastShadowOfTheQueenEntity extends TheLastEndEntity implements N
     }
 
     private Component createTalkMessage(String talkId) {
+        return createTranslatedTalkMessage(DIALOGUE_KEY_PREFIX + talkId);
+    }
+
+    private Component createTranslatedTalkMessage(String translationKey) {
         return Component.literal("[")
                 .append(getDisplayName())
                 .append(Component.literal("] "))
                 .withStyle(ChatFormatting.DARK_PURPLE)
-                .append(Component.translatable(DIALOGUE_KEY_PREFIX + talkId)
+                .append(Component.translatable(translationKey)
                         .withStyle(ChatFormatting.WHITE));
+    }
+
+    private void sendActivationTalk() {
+        if (activationTalkSent) {
+            return;
+        }
+        // 播报次数独立于动画状态，避免演出重入或状态恢复时重复发送。
+        activationTalkSent = true;
+        Component firstLine = createTranslatedTalkMessage(
+                "bossshow.the_last_sword.the_past_shadow_of_the_queen.subtitle_1");
+        Component secondLine = createTranslatedTalkMessage(
+                "bossshow.the_last_sword.the_past_shadow_of_the_queen.subtitle_2");
+        double radiusSqr = SKILL_TALK_RADIUS * SKILL_TALK_RADIUS;
+        Set<UUID> recipients = new HashSet<>();
+        for (Player player : level().getEntitiesOfClass(Player.class,
+                getBoundingBox().inflate(SKILL_TALK_RADIUS), player -> distanceToSqr(player) <= radiusSqr)) {
+            if (!recipients.add(player.getUUID())) {
+                continue;
+            }
+            player.sendSystemMessage(firstLine);
+            player.sendSystemMessage(secondLine);
+        }
     }
 
     private void sendDeathTalk(String talkId) {
@@ -449,11 +480,13 @@ public class ThePastShadowOfTheQueenEntity extends TheLastEndEntity implements N
     }
 
     public void activate() {
-        if (isReady() || isDying()) {
+        if (level().isClientSide || isReady() || isDying()) {
             return;
         }
 
         setAnimationState(STATE_IDLE);
+        // 正常结束与跳过演出共用激活入口，聊天记录保留字幕且只播报一次。
+        sendActivationTalk();
     }
 
     @Override
@@ -516,6 +549,8 @@ public class ThePastShadowOfTheQueenEntity extends TheLastEndEntity implements N
     public void readAdditionalSaveData(@NotNull CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         deathRewardGranted = tag.getBoolean(DEATH_REWARD_GRANTED_TAG);
+        activationTalkSent = tag.contains(ACTIVATION_TALK_SENT_TAG)
+                ? tag.getBoolean(ACTIVATION_TALK_SENT_TAG) : isReady();
         if (tag.getBoolean(NPC_STATE_TAG)) {
             setDeathTick(0);
             setAnimationState(STATE_NPC);
@@ -526,6 +561,7 @@ public class ThePastShadowOfTheQueenEntity extends TheLastEndEntity implements N
     public void addAdditionalSaveData(@NotNull CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putBoolean(DEATH_REWARD_GRANTED_TAG, deathRewardGranted);
+        tag.putBoolean(ACTIVATION_TALK_SENT_TAG, activationTalkSent);
         tag.putBoolean(NPC_STATE_TAG, isNpc());
     }
 
