@@ -320,8 +320,9 @@ public class LivingEntityMixin {
                 return;
             }
 
-            //绝毁必须尊重终焉种独立于原版的受伤冷却
-            if (entity instanceof TheLastEndEntity theLastEnd && theLastEnd.getHurtResistTick() > 0) {
+            //普通伤害不能抢占绝毁冷却，否则同一次武器攻击的物理部分会吞掉绝毁伤害
+            if (entity instanceof TheLastEndEntity theLastEnd
+                    && theLastEnd.getAbsoluteDestructionHurtResistTick() > 0) {
                 cir.setReturnValue(false);
                 return;
             }

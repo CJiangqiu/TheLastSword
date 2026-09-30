@@ -56,6 +56,9 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
     private static final EntityDataAccessor<Integer> HURT_RESIST_TICK =
             SynchedEntityData.defineId(TheLastEndEntity.class, EntityDataSerializers.INT);
 
+    private static final EntityDataAccessor<Integer> ABSOLUTE_DESTRUCTION_HURT_RESIST_TICK =
+            SynchedEntityData.defineId(TheLastEndEntity.class, EntityDataSerializers.INT);
+
     private static final EntityDataAccessor<Integer> LEVEL =
             SynchedEntityData.defineId(TheLastEndEntity.class, EntityDataSerializers.INT);
 
@@ -91,6 +94,7 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
         super.defineSynchedData();
         this.entityData.define(ANIMATION_STATE, STATE_UNSPAWNED);
         this.entityData.define(HURT_RESIST_TICK, 0);
+        this.entityData.define(ABSOLUTE_DESTRUCTION_HURT_RESIST_TICK, 0);
         this.entityData.define(LEVEL, 1);
         this.entityData.define(DEATH_TICK, 0);
         this.entityData.define(ALL_THINGS_END, false);
@@ -124,6 +128,14 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
 
     public void setHurtResistTick(int tick) {
         this.entityData.set(HURT_RESIST_TICK, tick);
+    }
+
+    public int getAbsoluteDestructionHurtResistTick() {
+        return this.entityData.get(ABSOLUTE_DESTRUCTION_HURT_RESIST_TICK);
+    }
+
+    public void startAbsoluteDestructionHurtResist() {
+        this.entityData.set(ABSOLUTE_DESTRUCTION_HURT_RESIST_TICK, getHurtResistTime());
     }
 
     protected int getHurtResistTime() {
@@ -303,6 +315,10 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
         // 无敌帧递减
         if (getHurtResistTick() > 0) {
             setHurtResistTick(getHurtResistTick() - 1);
+        }
+        if (getAbsoluteDestructionHurtResistTick() > 0) {
+            this.entityData.set(ABSOLUTE_DESTRUCTION_HURT_RESIST_TICK,
+                    getAbsoluteDestructionHurtResistTick() - 1);
         }
     }
 

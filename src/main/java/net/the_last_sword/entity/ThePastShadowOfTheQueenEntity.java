@@ -58,6 +58,7 @@ import org.jetbrains.annotations.Nullable;
 // 女皇的逝去之影
 public class ThePastShadowOfTheQueenEntity extends TheLastEndEntity implements NpcDialogueProvider {
     private static final float SKILL_TALK_CHANCE = 0.30F;
+    private static final int SKILL_TALK_ATTEMPT_INTERVAL = 48;
     private static final double SKILL_TALK_RADIUS = 32.0;
     private static final String DIALOGUE_KEY_PREFIX = "dialogue.the_last_sword.queen.combat.";
     private static final int DEATH_ANIMATION_DURATION = 160;
@@ -89,6 +90,7 @@ public class ThePastShadowOfTheQueenEntity extends TheLastEndEntity implements N
             ThePastShadowOfTheQueenEntity.class, EntityDataSerializers.INT);
     private boolean blinkPhysicsActive;
     private boolean beforeBlinkNoPhysics;
+    private long nextSkillTalkAttemptTime;
     private static final EntityDataAccessor<Boolean> LIGHTNING_SPEAR_VISIBLE = SynchedEntityData.defineId(
             ThePastShadowOfTheQueenEntity.class, EntityDataSerializers.BOOLEAN);
     private boolean deathRewardGranted;
@@ -101,8 +103,17 @@ public class ThePastShadowOfTheQueenEntity extends TheLastEndEntity implements N
     }
 
     public void trySendSkillTalk(String skillId) {
-        if (level().isClientSide || skillId == null || skillId.isBlank()
-                || getRandom().nextFloat() >= SKILL_TALK_CHANCE) {
+        if (level().isClientSide || skillId == null || skillId.isBlank()) {
+            return;
+        }
+
+        long gameTime = level().getGameTime();
+        if (gameTime < nextSkillTalkAttemptTime) {
+            return;
+        }
+        // 在抽取前锁定本次起手，避免异常重启通过反复补抽放大触发概率。
+        nextSkillTalkAttemptTime = gameTime + SKILL_TALK_ATTEMPT_INTERVAL;
+        if (getRandom().nextFloat() >= SKILL_TALK_CHANCE) {
             return;
         }
 

@@ -165,6 +165,10 @@ public final class PresentWorldAnchorManager {
             return false;
         }
 
+        if (entity instanceof TheLastEndEntity theLastEnd) {
+            theLastEnd.startAbsoluteDestructionHurtResist();
+        }
+
         float currentAnchor = getPresentWorldAnchor(entity);
         float remainingAnchor = Double.isInfinite(presentWorldAnchorDamage)
                 ? 0.0F
@@ -175,16 +179,21 @@ public final class PresentWorldAnchorManager {
             boolean lethalHealthDamage = Float.isFinite(currentHealth)
                     && currentHealth > 0.0F && amount >= currentHealth;
             if (lethalHealthDamage || remainingAnchor <= 0.0F) {
+                clearHealBan(entity);
                 setPresentWorldAnchor(entity, remainingAnchor);
                 if (remainingAnchor <= 0.0F) {
-                    clearHealBan(entity);
                     tryCaptureBeforeForcedDeath(entity, source);
-                } else {
-                    applyHealBan(entity, remainingAnchor);
                 }
                 EntityUtil.theLastEndSetDead(entity, source);
                 return true;
             }
+        }
+
+        float currentHealth = TrueHealthManager.getHealth(entity);
+        boolean lethalHealthDamage = Float.isFinite(currentHealth)
+                && currentHealth > 0.0F && amount >= currentHealth;
+        if (lethalHealthDamage) {
+            clearHealBan(entity);
         }
 
         boolean healthDepleted = applyExpectedHealthDamage(entity, amount);
@@ -204,9 +213,10 @@ public final class PresentWorldAnchorManager {
             return true;
         }
 
-        applyHealBan(entity, remainingAnchor);
         if (healthDepleted) {
             entity.die(source);
+        } else {
+            applyHealBan(entity, remainingAnchor);
         }
         return true;
     }
