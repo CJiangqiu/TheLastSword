@@ -13,7 +13,7 @@ import net.minecraft.server.level.ServerPlayer;
 //网络包管理器
 public class NetworkHandler {
 
-    private static final String PROTOCOL_VERSION = "10";
+    private static final String PROTOCOL_VERSION = "12";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "main"),
@@ -167,6 +167,12 @@ public class NetworkHandler {
                 .consumerMainThread(DragonShieldPacket::handle)
                 .add();
 
+        CHANNEL.messageBuilder(JustifiedDefenceFlashPacket.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(JustifiedDefenceFlashPacket::encode)
+                .decoder(JustifiedDefenceFlashPacket::decode)
+                .consumerMainThread(JustifiedDefenceFlashPacket::handle)
+                .add();
+
         //龙水晶锻造配方同步包（服务端配置为唯一数据源）
         CHANNEL.messageBuilder(SyncDragonCrystalRecipesPacket.class, id(), NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(SyncDragonCrystalRecipesPacket::encode)
@@ -213,6 +219,13 @@ public class NetworkHandler {
                     PacketDistributor.TRACKING_ENTITY.with(() -> entity),
                     message
             );
+        }
+    }
+
+    //发送到追踪实体的玩家，并在实体为玩家时包含其自身客户端
+    public static <MSG> void sendToTrackingClientsAndSelf(MSG message, Entity entity) {
+        if (entity.level() instanceof ServerLevel) {
+            CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity), message);
         }
     }
 }

@@ -4,8 +4,8 @@ import net.minecraft.util.Mth;
 
 public final class QueenTripleSlashScreenShake {
     private static final int DURATION_TICKS = 6;
-    private static final float YAW_AMPLITUDE = 0.7F;
-    private static final float PITCH_AMPLITUDE = 0.45F;
+    private static final float YAW_AMPLITUDE = 1.05F;
+    private static final float PITCH_AMPLITUDE = 0.675F;
     private static int remainingTicks;
 
     private QueenTripleSlashScreenShake() {

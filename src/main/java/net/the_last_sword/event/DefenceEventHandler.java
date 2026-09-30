@@ -38,6 +38,7 @@ import net.the_last_sword.item.DragonCrystalArmorItem;
 import net.the_last_sword.network.DefenceConfigPacket;
 import net.the_last_sword.network.DragonArmorEnergyStatusPacket;
 import net.the_last_sword.network.DragonShieldPacket;
+import net.the_last_sword.network.JustifiedDefenceFlashPacket;
 import net.the_last_sword.network.NetworkHandler;
 import net.the_last_sword.util.EntityUtil;
 import net.the_last_sword.util.health.TrueHealthManager;
@@ -236,7 +237,12 @@ public final class DefenceEventHandler {
     public static void setShieldValue(LivingEntity entity, double value) {
         AttributeInstance a = entity.getAttribute(ModAttributes.JUSTIFIED_DEFENCE.get());
         if (a != null) {
+            double previous = a.getValue();
             a.setBaseValue(Math.max(0, value));
+            if (!entity.level().isClientSide() && a.getValue() < previous) {
+                NetworkHandler.sendToTrackingClientsAndSelf(
+                        new JustifiedDefenceFlashPacket(entity.getId(), entity.getUUID()), entity);
+            }
         }
     }
 

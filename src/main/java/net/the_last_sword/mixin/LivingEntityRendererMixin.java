@@ -1,43 +1,33 @@
 package net.the_last_sword.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.entity.LivingEntity;
-import net.the_last_sword.client.layer.JustifiedDefenceLayer;
-import net.the_last_sword.init.ModEffects;
+import net.the_last_sword.client.JustifiedDefenceFlash;
 import net.the_last_sword.test.UltraTestSwordItem;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(LivingEntityRenderer.class)
 public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extends EntityModel<T>> {
 
-    @Shadow
-    protected M model;
-
-    @Shadow
-    protected abstract RenderType getRenderType(T entity, boolean bodyVisible, boolean translucent, boolean glowing);
-
-    @Unique
-    private T the_last_sword$currentEntity;
-
-    //构造器中挂载肃正防御护盾层（覆盖所有生物渲染器）
-    @Inject(method = "<init>", at = @At("TAIL"))
-    private void theLastSword$addJustifiedDefenceLayer(CallbackInfo ci) {
-        ((LivingEntityRenderer<T, M>) (Object) this).addLayer(new JustifiedDefenceLayer<>((LivingEntityRenderer<T, M>) (Object) this));
+    //统一覆盖色入口同时供原版与自定义生物渲染器复用
+    @Inject(method = "getOverlayCoords", at = @At("HEAD"), cancellable = true)
+    private static void theLastSword$applyJustifiedDefenceFlash(LivingEntity entity,
+            float whiteOverlayProgress, CallbackInfoReturnable<Integer> cir) {
+        float flash = JustifiedDefenceFlash.getWhiteOverlayProgress(entity);
+        if (flash > whiteOverlayProgress) {
+            cir.setReturnValue(OverlayTexture.pack(OverlayTexture.u(flash),
+                    OverlayTexture.v(entity.hurtTime > 0 || entity.deathTime > 0)));
+        }
     }
 
-    //在render方法开始时捕获当前实体
     @Inject(
         method = "render(Lnet/minecraft/world/entity/LivingEntity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V",
         at = @At("HEAD"),
@@ -45,37 +35,10 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
     )
     private void theLastSword$captureEntity(T entity, float entityYaw, float partialTicks, PoseStack poseStack,
                                              MultiBufferSource bufferSource, int packedLight, CallbackInfo ci) {
-        the_last_sword$currentEntity = entity;
         //防御模式的究极测试剑持有者完全不可见
         if (UltraTestSwordItem.hasDefenseSword(entity)) {
             ci.cancel();
         }
-    }
-
-    //虚化效果：使用半透明渲染类型
-    @Inject(
-        method = "getRenderType",
-        at = @At("HEAD"),
-        cancellable = true
-    )
-    protected void theLastSword$modifyRenderType(T entity, boolean bodyVisible, boolean translucent, boolean glowing, CallbackInfoReturnable<RenderType> cir) {
-        if (entity.hasEffect(ModEffects.PHASING.get())) {
-            LivingEntityRenderer<T, M> renderer = (LivingEntityRenderer<T, M>) (Object) this;
-            cir.setReturnValue(RenderType.entityTranslucent(renderer.getTextureLocation(entity)));
-        }
-    }
-
-    //虚化效果：修改实体本体的alpha参数为0.4（40%透明）
-    @ModifyArg(
-        method = "render(Lnet/minecraft/world/entity/LivingEntity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/EntityModel;renderToBuffer(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;IIFFFF)V"),
-        index = 7
-    )
-    private float theLastSword$modifyEntityAlpha(float originalAlpha) {
-        if (the_last_sword$currentEntity != null && the_last_sword$currentEntity.hasEffect(ModEffects.PHASING.get())) {
-            return 0.4f;
-        }
-        return originalAlpha;
     }
 
 }

@@ -22,6 +22,7 @@ import net.the_last_sword.configuration.DefenceConfigData;
 import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
 import net.the_last_sword.entity.TheLastEndEntity;
 import net.the_last_sword.entity.TheLastEndSwordWraithEntity;
+import net.the_last_sword.event.DefenceEventHandler;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.init.ModAttributes;
 import net.the_last_sword.init.TheLastSwordDamageTypes;
@@ -30,6 +31,7 @@ import net.the_last_sword.network.DragonShieldPacket;
 import net.the_last_sword.network.NetworkHandler;
 import net.the_last_sword.summon.WraithSummonManager;
 import net.the_last_sword.util.EntityUtil;
+import net.the_last_sword.util.PhasingState;
 import net.the_last_sword.util.damage.AdvancedEquipmentDamageHandler;
 import net.the_last_sword.util.damage.AdvancedEquipmentDamageHandler.DamageResult;
 import net.the_last_sword.util.health.TrueHealthManager;
@@ -56,6 +58,7 @@ public class LivingEntityMixin {
         PresentWorldAnchorManager.PRESENT_WORLD_ANCHOR = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.STRING);
         PresentWorldAnchorManager.HEAL_BAN_TIME = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.INT);
         EntityUtil.IS_PROTECTED = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.BOOLEAN);
+        PhasingState.PHASING = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.BOOLEAN);
     }
 
     //注册实体数据（在每个实例的 defineSynchedData 中调用）
@@ -65,12 +68,20 @@ public class LivingEntityMixin {
         entity.getEntityData().define(PresentWorldAnchorManager.PRESENT_WORLD_ANCHOR, "");
         entity.getEntityData().define(PresentWorldAnchorManager.HEAL_BAN_TIME, 0);
         entity.getEntityData().define(EntityUtil.IS_PROTECTED, false);
+        entity.getEntityData().define(PhasingState.PHASING, false);
     }
 
-    //读档完成后恢复同步值，避免为所有生物增加逐 tick 轮询
+    // 读档后恢复派生状态，让首次追踪的客户端也能获取正确同步值。
     @Inject(method = "readAdditionalSaveData", at = @At("TAIL"))
     private void the_last_sword$syncPresentWorldAnchorAfterLoad(CompoundTag tag, CallbackInfo ci) {
         PresentWorldAnchorManager.syncPresentWorldAnchor((LivingEntity) (Object) this);
+        PhasingState.sync((LivingEntity) (Object) this);
+    }
+
+    // 等效果列表完成到期与移除处理后同步，避免清除全部效果时读到移除前的状态。
+    @Inject(method = "tickEffects", at = @At("TAIL"))
+    private void the_last_sword$syncPhasingState(CallbackInfo ci) {
+        PhasingState.sync((LivingEntity) (Object) this);
     }
 
     //检查是否是绝对毁灭伤害源
@@ -126,7 +137,7 @@ public class LivingEntityMixin {
     private boolean the_last_sword$consumeShield(LivingEntity entity, int cost) {
         AttributeInstance shieldAttr = entity.getAttribute(ModAttributes.JUSTIFIED_DEFENCE.get());
         if (shieldAttr == null || shieldAttr.getValue() <= 0) return false;
-        shieldAttr.setBaseValue(Math.max(0.0, shieldAttr.getValue() - cost));
+        DefenceEventHandler.setShieldValue(entity, shieldAttr.getValue() - cost);
         return true;
     }
 

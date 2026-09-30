@@ -2,6 +2,8 @@ package net.the_last_sword.client;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
@@ -23,6 +25,7 @@ import net.the_last_sword.recipe.DragonCrystalSmithingRecipe;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Client-only effects of S2C packets. Network packet classes must stay safe to
@@ -88,6 +91,17 @@ public final class ClientPacketHandler {
     public static void triggerDragonShield(boolean hasDirection, float x, float y, float z) {
         if (hasDirection) {
             DragonShieldRenderer.trigger(x, y, z);
+        }
+    }
+
+    public static void triggerJustifiedDefenceFlash(int entityId, UUID entityUuid) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.level == null) {
+            return;
+        }
+        Entity entity = minecraft.level.getEntity(entityId);
+        if (entity instanceof LivingEntity livingEntity && entityUuid.equals(entity.getUUID())) {
+            JustifiedDefenceFlash.trigger(livingEntity);
         }
     }
 

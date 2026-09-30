@@ -30,6 +30,7 @@ import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.client.gui.DefenceConfigScreen;
 import net.the_last_sword.client.QueenExecutionCamera;
 import net.the_last_sword.client.QueenTripleSlashScreenShake;
+import net.the_last_sword.client.JustifiedDefenceFlash;
 import net.the_last_sword.client.recipe.ClientDragonCrystalRecipeCache;
 import net.the_last_sword.client.overlay.DragonArmorOverlay;
 import net.the_last_sword.client.overlay.JustifiedDefenceOverlay;
@@ -185,6 +186,7 @@ public class ClientEventHandler {
     public static void onPlayerLogout(ClientPlayerNetworkEvent.LoggingOut event) {
         QueenExecutionCamera.clear();
         QueenTripleSlashScreenShake.clear();
+        JustifiedDefenceFlash.clear();
         DangerousSkillPreviewRenderer.clear();
         LostWraithEndStrikeEffectRenderer.clear();
         ClientDragonCrystalRecipeCache.clear();
@@ -256,6 +258,7 @@ public class ClientEventHandler {
         if (event.phase == TickEvent.Phase.END) {
             QueenExecutionCamera.tick();
             QueenTripleSlashScreenShake.tick();
+            JustifiedDefenceFlash.tick();
             DangerousSkillPreviewRenderer.tick();
             LostWraithEndStrikeEffectRenderer.tick();
             Minecraft mc = Minecraft.getInstance();

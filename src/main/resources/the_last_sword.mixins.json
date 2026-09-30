@@ -5,12 +5,14 @@
   "minVersion": "0.8",
   "refmap": "mixins.the_last_sword.refmap.json",
   "client": [
+    "EntityRenderDispatcherMixin",
     "CameraMixin",
     "MinecraftMixin",
     "GameRendererMixin",
     "LevelRendererMixin",
     "LivingEntityRendererMixin",
     "LocalPlayerMixin",
+    "EnderDragonRendererMixin",
     "ScreenEffectRendererMixin",
     "SmithingTransformRecipeAccessor"
   ],
