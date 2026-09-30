@@ -191,7 +191,7 @@ public class ThePastShadowOfTheQueenEntity extends TheLastEndEntity implements N
 
     @Override
     public boolean canStartDialogue(Player player) {
-        return isNpc() && isAlive();
+        return isNpc() && isAlive() && TheLastSwordQuestHandler.isQuestSystemEnabled();
     }
 
     @Override

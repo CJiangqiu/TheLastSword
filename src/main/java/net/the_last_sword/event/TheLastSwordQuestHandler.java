@@ -40,6 +40,7 @@ import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.init.ModItems;
 import net.the_last_sword.raid.DragonCultRaid;
 
+import java.util.Set;
 import java.util.UUID;
 
 //最终之剑任务事件处理器
@@ -60,6 +61,26 @@ public class TheLastSwordQuestHandler {
     private static final ResourceLocation LIBERATOR = ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "liberator");
     public static final ResourceLocation PROOF_OF_SOVEREIGNTY =
             ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "proof_of_sovereignty");
+    private static final Set<String> MAIN_QUEST_ADVANCEMENTS = Set.of(
+            "the_last_sword_welcome",
+            "troubled_blacksmith",
+            "the_last_end_scroll_obtain",
+            "mage_village_destination",
+            "ruined_village_discover",
+            "dragon_crystal_obtain",
+            "dragon_cult_raid",
+            "dragon_cult_raid_victory",
+            "nether_traveler_outpost",
+            "travelers_hold_discover",
+            "journey_to_end",
+            "end_reset_discover",
+            "end_lost_altar_discover",
+            "sealed_spire_discover",
+            "liberator",
+            "queens_whereabouts",
+            "beyond_time",
+            "proof_of_sovereignty"
+    );
 
     private static final int CHECK_INTERVAL = 40;
     private static final int VILLAGE_HINT_DELAY = 60;
@@ -87,6 +108,13 @@ public class TheLastSwordQuestHandler {
     //任务系统总开关
     public static boolean isQuestSystemEnabled() {
         return TheLastSwordConfiguration.QUEST_SYSTEM_ENABLED.get();
+    }
+
+    //关闭任务系统时仅阻止主线进度，保留独立的收集与装备进度
+    public static boolean shouldBlockMainQuestAdvancement(ResourceLocation advancementId) {
+        return !isQuestSystemEnabled()
+                && TheLastSwordMod.MOD_ID.equals(advancementId.getNamespace())
+                && MAIN_QUEST_ADVANCEMENTS.contains(advancementId.getPath());
     }
 
     //坐标组件，与原版/locate一致；结构定位的Y无意义时传null显示为~
@@ -125,6 +153,7 @@ public class TheLastSwordQuestHandler {
             UUID playerId = player.getUUID();
             TheLastSwordMod.queueServerWork(VILLAGE_HINT_DELAY, () -> locateNearestVillage(server, playerId));
         } else if (LIBERATOR.equals(advancementId)) {
+            broadcast(player, "dialogue.the_last_sword.lost_wraith.encounter.death");
             broadcast(player, "message.the_last_sword.liberator_tower_hint");
         }
     }

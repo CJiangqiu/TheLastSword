@@ -53,11 +53,6 @@ import net.the_last_sword.util.health.TrueHealthManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
 // 迷失战魂实体
 public class LostWraithEntity extends TheLastEndEntity {
 
@@ -310,11 +305,6 @@ public class LostWraithEntity extends TheLastEndEntity {
         return 50;
     }
 
-    @Override
-    protected void onDeathStart() {
-        sendDeathTalkToNearbyPlayers();
-    }
-
     public void activate() {
         if (getAnimationState() == STATE_UNSPAWNED) {
             setAnimationState(STATE_SPAWNING);
@@ -395,31 +385,6 @@ public class LostWraithEntity extends TheLastEndEntity {
             return;
         }
         super.push(entity);
-    }
-
-    private void sendDeathTalkToNearbyPlayers() {
-        if (level().isClientSide) return;
-
-        List<Player> nearbyPlayers = level().getEntitiesOfClass(Player.class,
-                getBoundingBox().inflate(32.0));
-
-        Map<UUID, Player> uniquePlayers = new HashMap<>();
-        for (Player p : nearbyPlayers) {
-            uniquePlayers.putIfAbsent(p.getUUID(), p);
-        }
-
-        if (!uniquePlayers.isEmpty()) {
-            Component prefixedMessage = Component.literal("[")
-                .append(Component.translatable("entity.the_last_sword.lost_wraith"))
-                .append(Component.literal("] "))
-                .withStyle(ChatFormatting.DARK_PURPLE)
-                .append(Component.translatable("dialogue.the_last_sword.lost_wraith.encounter.death")
-                    .copy().withStyle(ChatFormatting.WHITE));
-
-            for (Player player : uniquePlayers.values()) {
-                player.sendSystemMessage(prefixedMessage);
-            }
-        }
     }
 
     private void sendNextTalk(Player player) {

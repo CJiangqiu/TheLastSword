@@ -23,6 +23,7 @@
     "InventoryMixin",
     "LivingEntityMixin",
     "PlayerMixin",
+    "PlayerAdvancementsMixin",
     "ServerPlayerMixin",
     "PersistentEntitySectionManagerMixin",
     "PersistentEntitySectionManagerMixin$CallbackMixin",
