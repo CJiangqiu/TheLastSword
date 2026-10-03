@@ -211,6 +211,7 @@ public class ThePastShadowOfTheQueenEntity extends TheLastEndEntity implements N
         entityData.set(LIGHTNING_SPEAR_VISIBLE, visible);
     }
 
+    @Override
     public boolean isNpc() {
         return getAnimationState() == STATE_NPC;
     }

@@ -14,10 +14,13 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.tags.DamageTypeTags;
 import net.the_last_sword.configuration.DefenceConfig;
 import net.the_last_sword.configuration.DefenceConfigData;
 import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
@@ -39,6 +42,7 @@ import net.the_last_sword.util.damage.AdvancedEquipmentDamageHandler.DamageResul
 import net.the_last_sword.util.health.TrueHealthManager;
 import net.the_last_sword.util.health.PresentWorldAnchorManager;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -50,6 +54,18 @@ import java.util.Collection;
 
 @Mixin(value = LivingEntity.class, priority = 1024)
 public class LivingEntityMixin {
+
+    @Shadow
+    protected Player lastHurtByPlayer;
+
+    @Shadow
+    protected int lastHurtByPlayerTime;
+
+    @Shadow
+    private DamageSource lastDamageSource;
+
+    @Shadow
+    private long lastDamageStamp;
 
     //伤害源被重建时仍需阻止同一调用链重复派生等级附伤。
     @Unique
@@ -101,6 +117,36 @@ public class LivingEntityMixin {
     private boolean the_last_sword$isLevelBonus(DamageSource source) {
         return source instanceof AbsoluteDestructionDamageSource absoluteDamage
                 && absoluteDamage.isLevelBonus();
+    }
+
+    //绝毁接管原版 hurt 后必须保留击杀归属，否则玩家限定掉落与延迟奖励无法识别攻击者。
+    @Unique
+    private void the_last_sword$recordAbsoluteDamageSource(LivingEntity target, DamageSource source,
+                                                            float damageAmount) {
+        Entity attacker = source.getEntity();
+        if (attacker instanceof LivingEntity livingAttacker && !source.is(DamageTypeTags.NO_ANGER)) {
+            target.setLastHurtByMob(livingAttacker);
+        }
+
+        Player playerCredit = null;
+        if (attacker instanceof Player player) {
+            playerCredit = player;
+        } else if (attacker instanceof TamableAnimal tamable
+                && tamable.isTame()
+                && tamable.getOwner() instanceof Player owner) {
+            playerCredit = owner;
+        }
+        if (playerCredit == null) {
+            playerCredit = WraithSummonManager.getWraithOwnerFromDamageSource(source, target.level());
+        }
+        if (playerCredit != null) {
+            lastHurtByPlayer = playerCredit;
+            lastHurtByPlayerTime = 100;
+        }
+
+        lastDamageSource = source;
+        lastDamageStamp = target.level().getGameTime();
+        target.getCombatTracker().recordDamage(source, damageAmount);
     }
 
     @Unique
@@ -386,6 +432,7 @@ public class LivingEntityMixin {
                 return;
             }
 
+            the_last_sword$recordAbsoluteDamageSource(entity, damageSource, result.amount());
             cir.setReturnValue(PresentWorldAnchorManager.handleAbsoluteDestructionDamage(
                     entity, damageSource, result.amount()));
             return;

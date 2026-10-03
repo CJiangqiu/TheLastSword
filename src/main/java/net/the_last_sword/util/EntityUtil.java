@@ -357,6 +357,9 @@ public class EntityUtil {
     // ==================== 实体目标与队伍模块====================
     //综合判断是否可以攻击目标（阵营、原版队伍、宠物主从、无敌保护统一由 ECA 判定）
     public static boolean canAttack(Entity attacker, Entity target) {
+        if (target instanceof TheLastEndEntity theLastEnd && theLastEnd.isNpc()) {
+            return false;
+        }
         return FactionUtil.canAttack(attacker, target);
     }
     //查找实体的主人

@@ -117,6 +117,10 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
         return getAnimationState() == STATE_DEATH;
     }
 
+    public boolean isNpc() {
+        return false;
+    }
+
     public boolean canAct() {
         return !voidRescueActive && getAnimationState() >= STATE_IDLE;
     }
