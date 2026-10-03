@@ -24,6 +24,9 @@ import net.the_last_sword.util.TheLastSwordLogger;
 @Mod.EventBusSubscriber(modid = TheLastSwordMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class EffectEventHandler {
 
+    //伤害类型被替换后，虚空附伤也不能在同一调用链中重复触发。
+    private static final ThreadLocal<Boolean> APPLYING_VOID_DAMAGE = new ThreadLocal<>();
+
     //虚化效果 - 伤害免疫
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onPhasingHurt(LivingHurtEvent event) {
@@ -50,6 +53,9 @@ public class EffectEventHandler {
     //虚空附魔 - 额外虚空伤害
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onVoidEnchantingHurt(LivingHurtEvent event) {
+        if (Boolean.TRUE.equals(APPLYING_VOID_DAMAGE.get())) {
+            return;
+        }
         LivingEntity victim = event.getEntity();
         DamageSource damageSource = event.getSource();
 
@@ -100,6 +106,10 @@ public class EffectEventHandler {
     //应用虚空伤害并生成特效
     private static void applyVoidDamage(LivingEntity victim, DamageSource voidDamageSource,
                                         float damage, ServerLevel serverLevel) {
+        if (Boolean.TRUE.equals(APPLYING_VOID_DAMAGE.get())) {
+            return;
+        }
+        APPLYING_VOID_DAMAGE.set(true);
         try {
             victim.invulnerableTime = 0;
             boolean damaged = victim.hurt(voidDamageSource, damage);
@@ -108,6 +118,8 @@ public class EffectEventHandler {
             }
         } catch (Exception e) {
             TheLastSwordLogger.error("Error applying void enchanting damage: {}", e.getMessage());
+        } finally {
+            APPLYING_VOID_DAMAGE.remove();
         }
     }
 

@@ -16,6 +16,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.the_last_sword.configuration.DefenceConfig;
 import net.the_last_sword.configuration.DefenceConfigData;
@@ -25,6 +26,7 @@ import net.the_last_sword.entity.TheLastEndSwordWraithEntity;
 import net.the_last_sword.event.DefenceEventHandler;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.init.ModAttributes;
+import net.the_last_sword.init.ModEnchantments;
 import net.the_last_sword.init.TheLastSwordDamageTypes;
 import net.the_last_sword.item.DragonArmorItem;
 import net.the_last_sword.network.DragonShieldPacket;
@@ -48,6 +50,10 @@ import java.util.Collection;
 
 @Mixin(value = LivingEntity.class, priority = 1024)
 public class LivingEntityMixin {
+
+    //伤害源被重建时仍需阻止同一调用链重复派生等级附伤。
+    @Unique
+    private static final ThreadLocal<Boolean> the_last_sword$APPLYING_LEVEL_BONUS = new ThreadLocal<>();
 
     @Unique
     private double the_last_sword$justifiedDefenceRecoveryProgress;
@@ -100,7 +106,8 @@ public class LivingEntityMixin {
     @Unique
     private void the_last_sword$applyLevelBonus(LivingEntity target, DamageSource source,
                                                            float damageAmount) {
-        if (the_last_sword$isLevelBonus(source)
+        if (Boolean.TRUE.equals(the_last_sword$APPLYING_LEVEL_BONUS.get())
+                || the_last_sword$isLevelBonus(source)
                 || !(source.getEntity() instanceof LivingEntity attacker)
                 || !Float.isFinite(damageAmount)
                 || damageAmount <= 0.0F
@@ -118,7 +125,12 @@ public class LivingEntityMixin {
         }
         float bonusDamage = damageAmount * level / 100.0F;
         if (Float.isFinite(bonusDamage) && bonusDamage > 0.0F) {
-            EcaAPI.hurt(target, AbsoluteDestructionDamageSource.levelBonus(attacker), bonusDamage);
+            the_last_sword$APPLYING_LEVEL_BONUS.set(true);
+            try {
+                EcaAPI.hurt(target, AbsoluteDestructionDamageSource.levelBonus(attacker), bonusDamage);
+            } finally {
+                the_last_sword$APPLYING_LEVEL_BONUS.remove();
+            }
         }
     }
 
@@ -149,6 +161,30 @@ public class LivingEntityMixin {
                 && DefenceConfig.getDragonShieldModule().shieldEffect
                 != DefenceConfigData.ShieldEffectMode.DISABLED) {
             NetworkHandler.sendToPlayer(DragonShieldPacket.fromDamageSource(serverPlayer, source), serverPlayer);
+        }
+    }
+
+    //注册等级只控制自然附魔，附伤必须使用物品保存的真实等级。
+    @Unique
+    private void the_last_sword$applyWorldSeveranceEnchantment(LivingEntity target, DamageSource source,
+                                                                float damageAmount) {
+        if (!(source.getEntity() instanceof LivingEntity attacker)
+                || !Float.isFinite(damageAmount)
+                || damageAmount <= 0.0F
+                || !EntityUtil.canAttack(attacker, target)) {
+            return;
+        }
+
+        ItemStack weapon = attacker.getMainHandItem();
+        int enchantmentLevel = EnchantmentHelper.getItemEnchantmentLevel(
+                ModEnchantments.WORLD_SEVERANCE.get(), weapon);
+        if (enchantmentLevel <= 0) {
+            return;
+        }
+
+        float bonusDamage = damageAmount * enchantmentLevel * 0.1F;
+        if (Float.isFinite(bonusDamage) && bonusDamage > 0.0F) {
+            EcaAPI.hurt(target, AbsoluteDestructionDamageSource.absoluteDestruction(attacker, weapon), bonusDamage);
         }
     }
 
@@ -360,6 +396,8 @@ public class LivingEntityMixin {
             cir.setReturnValue(false);
             return;
         }
+
+        the_last_sword$applyWorldSeveranceEnchantment(entity, damageSource, damageAmount);
 
         if (!AdvancedEquipmentDamageHandler.isConvertingDamage()) {
             the_last_sword$applyLevelBonus(entity, damageSource, damageAmount);

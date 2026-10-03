@@ -21,6 +21,7 @@ import net.the_last_sword.init.ModBlockEntities;
 import net.the_last_sword.init.ModBlocks;
 import net.the_last_sword.init.ModCreativeTabs;
 import net.the_last_sword.init.ModEffects;
+import net.the_last_sword.init.ModEnchantments;
 import net.the_last_sword.init.ModEntities;
 import net.the_last_sword.init.ModInstruments;
 import net.the_last_sword.init.ModItems;
@@ -58,6 +59,7 @@ public class TheLastSwordMod {
         IEventBus modEventBus = context.getModEventBus();
         ModAttributes.register(modEventBus);
         ModEffects.register(modEventBus);
+        ModEnchantments.register(modEventBus);
         ModItems.register(modEventBus);
         ModBlocks.register(modEventBus);
         ModBlockEntities.register(modEventBus);

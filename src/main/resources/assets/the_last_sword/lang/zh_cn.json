@@ -1,4 +1,8 @@
 {
+  "gui.the_last_sword.scroll_book.chapter3.guide": "锻造参考：下方依次列出基础剑制作、0至5级升级、突破至6级、继续升级至12级，以及13级最终重铸的完整配方。高阶升级前附有龙蛋合成方法，请以每张配方显示的材料与等级要求为准。",
+  "gui.the_last_sword.scroll_book.chapter4.guide": "护甲参考：下方分别列出头盔、胸甲、护腿与靴子从初次制作到12级的完整配方。突破至6级时，模板槽需要远古能量核心，四个部位还分别需要不同的特殊物品，请核对三个槽位及装备的输入等级。",
+  "gui.the_last_sword.scroll_book.chapter6.guide": "旅途指引\n以下线索指引后续探索，不代表你已经完成了这些任务。请调查相应地点，阅读沿途发现的笔记。点击“我已知晓”后，笔记原文会收录到“旅途见闻”。",
+  "gui.the_last_sword.scroll_book.chapter6.reforging": "通过女皇的试炼后，与她谈论“给予者的痛苦”，领取铁匠最后的笔记。阅读并确认，将他的遗言保存下来。他留下的手套正是重铸的最后材料：第三章列出了以龙水晶升级模板、12级龙之剑和给予者的痛苦，锻造13级最终之剑的配方。",
   "_comment": "最终之剑：重铸",
   "advancements.ancient_energy_core_obtain.descr": "获得一个远古能量核心",
   "advancements.ancient_energy_core_obtain.title": "天工造物",
@@ -118,6 +122,8 @@
   "effect.the_last_sword.void_enchanting": "§5虚空附魔",
   "effect.the_last_sword.void_enchanting.description": "以虚空之力附魔武器。每次攻击造成相当于buff等级*攻击力20%的额外虚空伤害。",
   "effect.the_last_sword.world_severance": "现世剥离",
+  "enchantment.the_last_sword.world_severance": "现世剥离",
+  "enchantment.the_last_sword.world_severance.desc": "对敌人造成伤害时，将会造成附魔等级 × 10%伤害值的额外绝对毁灭伤害。",
   "effect.the_last_sword.world_severance.description": "现世锚度：每个实体都有的基于实体最大生命值的一个值，当受到绝对毁灭伤害时，将会按照一定比例扣除现世锚度并触发“现世剥离”状态，现世剥离持续期间血量将会被限制在实体最大生命值减去损失的现世锚度值，当现世锚度被扣除到小于等于0时将会直接斩杀该实体。现世剥离结束后血量限制效果结束并在受到治疗时候同步治疗损失的现世锚度。",
   "entity.the_last_end_sword_wraith.purple_lighting": "紫色闪电",
   "entity.the_last_sword.dragon_cult_paladin": "拜龙教圣骑士",

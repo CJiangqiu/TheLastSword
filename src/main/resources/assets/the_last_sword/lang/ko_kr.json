@@ -1,4 +1,8 @@
 {
+  "gui.the_last_sword.scroll_book.chapter3.guide": "제련 안내: 아래에는 기본 검 제작, 0~5레벨 강화, 6레벨 돌파, 12레벨까지의 강화, 13레벨 재련에 필요한 모든 제작법이 실려 있다. 고레벨 강화 앞에는 드래곤 알 제작법도 수록되어 있다. 각 제작법의 재료와 요구 레벨을 확인하자.",
+  "gui.the_last_sword.scroll_book.chapter4.guide": "방어구 안내: 투구, 흉갑, 각반, 장화마다 최초 제작부터 12레벨까지의 모든 제작법이 실려 있다. 6레벨 돌파 시에는 형판 칸에 고대 에너지 코어가 필요하며, 부위마다 서로 다른 특수 아이템을 사용한다. 세 칸의 재료와 투입 장비의 레벨을 확인하자.",
+  "gui.the_last_sword.scroll_book.chapter6.guide": "여정 안내\n다음 단서들은 앞으로의 탐험을 안내하며, 이미 완료한 임무를 뜻하지 않는다. 해당 장소를 조사하고 발견한 기록을 읽자. 읽음 확인 버튼을 누르면 기록의 원문이 여정의 견문에 보관된다.",
+  "gui.the_last_sword.scroll_book.chapter6.reforging": "여제의 시련을 통과한 뒤, 그녀에게 베푸는 자의 고통에 관해 묻고 대장장이의 마지막 기록을 받자. 읽고 확인하여 그의 유언을 보관하자. 그가 남긴 장갑이 재련의 마지막 재료다. 제3장에는 드래곤 수정 강화 형판, 12레벨 드래곤 검, 베푸는 자의 고통으로 13레벨 최후의 검을 만드는 제작법이 실려 있다.",
   "_comment": "당신이 결코 잊지 못한 최후의 검",
   "advancements.ancient_energy_core_obtain.descr": "고대 에너지 코어를 획득하세요",
   "advancements.ancient_energy_core_obtain.title": "장인의 창조물",
@@ -101,6 +105,8 @@
   "effect.the_last_sword.phasing": "§7위상화",
   "effect.the_last_sword.phasing.description": "대상으로 지정되지 않으며 벽을 통과할 수 있습니다.",
   "effect.the_last_sword.world_severance": "현세 단절",
+  "enchantment.the_last_sword.world_severance": "현세 단절",
+  "enchantment.the_last_sword.world_severance.desc": "적에게 피해를 주면 피해량의 마법 부여 레벨 × 10%만큼 추가 절대 파괴 피해를 줍니다.",
   "effect.the_last_sword.world_severance.description": "현세 닻: 각 개체가 최대 체력에 따라 지니는 수치입니다. 절대 파괴 피해는 현세 닻을 일정 비율로 감소시키고 현세 단절을 부여합니다. 현세 단절이 지속되는 동안 체력은 최대 체력에서 잃은 현세 닻을 뺀 값으로 제한됩니다. 현세 닻이 0 이하가 되면 즉시 처형됩니다. 현세 단절이 끝나면 체력 제한이 해제되며, 이후 받는 회복량만큼 잃은 현세 닻도 회복됩니다.",
   "effect.the_last_sword.void_enchanting": "§5허공 마법 부여",
   "effect.the_last_sword.void_enchanting.description": "무기에 허공의 힘을 부여합니다. 공격할 때마다 공격력의 20% × 효과 레벨만큼 추가 세계 밖 피해를 줍니다.",

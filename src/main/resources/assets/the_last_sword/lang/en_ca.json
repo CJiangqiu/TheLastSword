@@ -1,4 +1,8 @@
 {
+  "gui.the_last_sword.scroll_book.chapter3.guide": "Forging reference: the recipes below cover the initial sword, upgrades from level 0 to 5, the breakthrough to level 6, upgrades through level 12, and reforging at level 13. Dragon egg crafting is included before the higher-level upgrades. Follow the ingredients and levels shown in each recipe.",
+  "gui.the_last_sword.scroll_book.chapter4.guide": "Armor reference: each of the four armor pieces has its own complete recipe chain below, from initial crafting through level 12. The level 6 breakthrough uses an Ancient Energy Core in the template slot and a different special item for each piece. Check all three slots and the required input level.",
+  "gui.the_last_sword.scroll_book.chapter6.guide": "Journey guide\nThe following clues outline the journey ahead; they do not mean that you have already completed these tasks. Investigate the locations and read the notes you find. Confirming a note with “I understand” adds its original text to Journey Logs.",
+  "gui.the_last_sword.scroll_book.chapter6.reforging": "After passing the Queen's trial, speak to her about The Giver's Pain and claim the blacksmith's final note. Read it and confirm it to preserve his message. His glove is the final reforging ingredient: consult Chapter 3 for the recipe that combines a Dragon Crystal Upgrade Template, a level 12 Dragon Sword, and The Giver's Pain to produce a level 13 Last Sword.",
   "_comment": "The Last Sword You Never Forgot",
   "advancements.ancient_energy_core_obtain.descr": "Obtain an Ancient Energy Core",
   "advancements.ancient_energy_core_obtain.title": "Artisan's Creation",
@@ -101,6 +105,8 @@
   "effect.the_last_sword.phasing": "§7Phasing",
   "effect.the_last_sword.phasing.description": "Entity cannot be targeted and can pass through walls.",
   "effect.the_last_sword.world_severance": "World Severance",
+  "enchantment.the_last_sword.world_severance": "World Severance",
+  "enchantment.the_last_sword.world_severance.desc": "When dealing damage to an enemy, deals additional Absolute Destruction damage equal to the enchantment level × 10% of the damage.",
   "effect.the_last_sword.world_severance.description": "Present World Anchor: a value each entity has based on its maximum health. Absolute Destruction damage reduces the anchor by a certain proportion and applies World Severance. While World Severance lasts, health is limited to the entity's maximum health minus the lost Present World Anchor. If the anchor is reduced to zero or below, the entity is executed immediately. When World Severance ends, the health limit is removed, and subsequent healing also restores the lost Present World Anchor by the healing amount.",
   "effect.the_last_sword.void_enchanting": "§5Void Enchanting",
   "effect.the_last_sword.void_enchanting.description": "Enchanting weapons with void power. Each attack deals additional Out of World Damage equal to buff level × 20% of attack damage.",
