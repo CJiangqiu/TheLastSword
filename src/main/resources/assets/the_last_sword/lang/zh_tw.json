@@ -1,8 +1,4 @@
 {
-  "gui.the_last_sword.scroll_book.chapter3.guide": "鍛造參考：下方依序列出基礎劍製作、0至5級升級、突破至6級、繼續升級至12級，以及13級最終重鑄的完整配方。高階升級前附有龍蛋合成方法，請以每張配方顯示的材料與等級要求為準。",
-  "gui.the_last_sword.scroll_book.chapter4.guide": "護甲參考：下方分別列出頭盔、胸甲、護腿與靴子從初次製作到12級的完整配方。突破至6級時，模板欄需要遠古能量核心，四個部位還分別需要不同的特殊物品，請核對三個欄位及裝備的輸入等級。",
-  "gui.the_last_sword.scroll_book.chapter6.guide": "旅途指引\n以下線索指引後續探索，不代表你已經完成了這些任務。請調查相應地點，閱讀沿途發現的筆記。點擊「我已知曉」後，筆記原文會收錄到「旅途見聞」。",
-  "gui.the_last_sword.scroll_book.chapter6.reforging": "通過女皇的試煉後，與她談論「給予者的痛苦」，領取鐵匠最後的筆記。閱讀並確認，將他的遺言保存下來。他留下的手套正是重鑄的最後材料：第三章列出了以龍水晶升級模板、12級龍之劍和給予者的痛苦，鍛造13級最終之劍的配方。",
   "_comment": "最終之劍：重鑄",
   "advancements.ancient_energy_core_obtain.descr": "獲得一個遠古能量核心",
   "advancements.ancient_energy_core_obtain.title": "天工造物",

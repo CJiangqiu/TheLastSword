@@ -30,6 +30,13 @@ public class TheLastEndScrollScreen extends Screen {
     private static final ResourceLocation DRAGON_CRYSTAL_RECIPE = recipeId("dragon_crystal_recipe");
     private static final ResourceLocation UPGRADE_TEMPLATE_RECIPE = recipeId("dragon_crystal_upgrade_template_recipe");
     private static final ResourceLocation SMITHING_TABLE_RECIPE = recipeId("dragon_crystal_smithing_table_recipe");
+    private static final ResourceLocation DRAGON_CRYSTAL_SWORD_RECIPE = recipeId("dragon_crystal_sword_recipe");
+    private static final ResourceLocation DRAGON_CRYSTAL_SWORD_LEVEL_1_RECIPE = configRecipeId("dragon_crystal_smithing_sword_level_1");
+    private static final ResourceLocation DRAGON_CRYSTAL_SWORD_LEVEL_6_RECIPE = configRecipeId("dragon_crystal_smithing_sword_level_6");
+    private static final ResourceLocation DRAGON_SWORD_LEVEL_7_RECIPE = configRecipeId("dragon_crystal_smithing_sword_level_7");
+    private static final ResourceLocation THE_LAST_SWORD_LEVEL_13_RECIPE = configRecipeId("dragon_crystal_smithing_sword_level_13");
+    private static final ResourceLocation DRAGON_CRYSTAL_HELMET_RECIPE = recipeId("dragon_crystal_helmet_recipe");
+    private static final ResourceLocation DRAGON_CRYSTAL_HELMET_LEVEL_1_RECIPE = configRecipeId("dragon_crystal_smithing_armor_level_1_helmet");
     private static final ResourceLocation SOUL_STONE_RECIPE = recipeId("dragon_crystal_soul_stone_recipe");
     private static final ResourceLocation SOUL_LANTERN_RECIPE = recipeId("dragon_soul_lantern_recipe");
     private static final ResourceLocation SOUL_LANTERN_RECIPE_1 = recipeId("dragon_soul_lantern_recipe_1");
@@ -173,21 +180,24 @@ public class TheLastEndScrollScreen extends Screen {
                   "gui.the_last_sword.scroll_book.chapter2.content",
                   new ItemStack(ModItems.DRAGON_CRYSTAL_UPGRADE_TEMPLATE.get()),
                    UPGRADE_TEMPLATE_RECIPE,
-                   recipeId("dragon_crystal_upgrade_template_copy_recipe"),
-                   SMITHING_TABLE_RECIPE,
-                   configRecipeId("dragon_crystal_enchanting_table"));
+                   SMITHING_TABLE_RECIPE);
 
         //章节3：传说之剑
         addChapter("gui.the_last_sword.scroll_book.chapter3.title",
                   "gui.the_last_sword.scroll_book.chapter3.content",
                   new ItemStack(ModItems.DRAGON_CRYSTAL_SWORD.get()),
-                   swordRecipes());
+                   DRAGON_CRYSTAL_SWORD_RECIPE,
+                   DRAGON_CRYSTAL_SWORD_LEVEL_1_RECIPE,
+                   DRAGON_CRYSTAL_SWORD_LEVEL_6_RECIPE,
+                   DRAGON_SWORD_LEVEL_7_RECIPE,
+                   THE_LAST_SWORD_LEVEL_13_RECIPE);
 
         //章节4：龙之躯壳
         addChapter("gui.the_last_sword.scroll_book.chapter4.title",
                   "gui.the_last_sword.scroll_book.chapter4.content",
                   new ItemStack(ModItems.DRAGON_CRYSTAL_ARMOR_HELMET.get()),
-                   armorRecipes());
+                   DRAGON_CRYSTAL_HELMET_RECIPE,
+                   DRAGON_CRYSTAL_HELMET_LEVEL_1_RECIPE);
 
         //章节5：龙与魂
         addChapter("gui.the_last_sword.scroll_book.chapter5.title",
@@ -201,55 +211,6 @@ public class TheLastEndScrollScreen extends Screen {
         addChapter("gui.the_last_sword.scroll_book.chapter6.title",
                   "gui.the_last_sword.scroll_book.chapter6.content",
                   new ItemStack(ModItems.THE_LAST_SWORD.get()));
-    }
-
-    private static ResourceLocation[] swordRecipes() {
-        List<ResourceLocation> recipes = new ArrayList<>();
-        recipes.add(recipeId("dragon_crystal_sword_recipe"));
-        for (int level = 1; level <= 13; level++) {
-            if (level == 7) {
-                recipes.add(recipeId("dragon_egg_recipe"));
-            }
-            recipes.add(configRecipeId("dragon_crystal_smithing_sword_level_" + level));
-        }
-        return recipes.toArray(ResourceLocation[]::new);
-    }
-
-    private static ResourceLocation[] armorRecipes() {
-        List<ResourceLocation> recipes = new ArrayList<>();
-        for (String piece : List.of("helmet", "chestplate", "leggings", "boots")) {
-            recipes.add(recipeId("dragon_crystal_" + piece + "_recipe"));
-            for (int level = 1; level <= 12; level++) {
-                recipes.add(configRecipeId("dragon_crystal_smithing_armor_level_" + level + "_" + piece));
-            }
-        }
-        return recipes.toArray(ResourceLocation[]::new);
-    }
-
-    //后续调查属于读者的记录，避免混入铁匠留下的第一人称手记。
-    private String chapterSupplement(String contentKey) {
-        String chapterKey = contentKey.substring(0, contentKey.length() - ".content".length());
-        if (chapterKey.endsWith("chapter3") || chapterKey.endsWith("chapter4")) {
-            return "\n\n" + Component.translatable(chapterKey + ".guide").getString();
-        }
-        if (!chapterKey.endsWith("chapter6")) {
-            return "";
-        }
-        StringBuilder guide = new StringBuilder("\n\n")
-                .append(Component.translatable(chapterKey + ".guide").getString());
-        for (String advancement : List.of("mage_village_destination", "ruined_village_discover",
-                "dragon_crystal_obtain", "dragon_cult_raid", "dragon_cult_raid_victory",
-                "nether_traveler_outpost", "travelers_hold_discover", "journey_to_end",
-                "end_reset_discover", "end_lost_altar_discover", "sealed_spire_discover",
-                "liberator", "queens_whereabouts", "beyond_time", "proof_of_sovereignty")) {
-            guide.append("\n\n").append(Component.translatable("advancements." + advancement + ".title").getString())
-                    .append("\n").append(Component.translatable("advancements." + advancement + ".descr").getString());
-        }
-        guide.append("\n\n").append(Component.translatable(chapterKey + ".reforging").getString());
-        if (!CompatCheck.isTLSUVLoaded()) {
-            guide.append("\n\n").append(Component.translatable(chapterKey + ".compat_hint").getString());
-        }
-        return guide.toString();
     }
 
     //添加章节并自动分页
@@ -281,7 +242,7 @@ public class TheLastEndScrollScreen extends Screen {
         } else {
             contentComp = Component.translatable(contentKey);
         }
-        String content = contentComp.getString() + chapterSupplement(contentKey);
+        String content = contentComp.getString();
         chapter.allLines = wrapText(content, TEXT_WIDTH);
 
         //计算起始页（第0页是目录）
@@ -640,6 +601,13 @@ public class TheLastEndScrollScreen extends Screen {
                     currentChapter.trailingRecipeIds, mouseX, mouseY);
         }
 
+        //终章保留附属内容提示
+        if (chapters.indexOf(currentChapter) == 5 && !CompatCheck.isTLSUVLoaded()) {
+            Component hintText = Component.translatable("gui.the_last_sword.scroll_book.chapter6.compat_hint");
+            //在文本下方留一些间距后渲染
+            int hintY = textY + (lineCount * LINE_HEIGHT) + 10;
+            graphics.drawString(this.font, hintText, textX, hintY, 0x3F2A1D, false);
+        }
     }
 
     //渲染动态配方页
