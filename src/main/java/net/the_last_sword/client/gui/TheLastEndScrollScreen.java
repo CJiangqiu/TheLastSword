@@ -197,7 +197,15 @@ public class TheLastEndScrollScreen extends Screen {
                   "gui.the_last_sword.scroll_book.chapter4.content",
                   new ItemStack(ModItems.DRAGON_CRYSTAL_ARMOR_HELMET.get()),
                    DRAGON_CRYSTAL_HELMET_RECIPE,
-                   DRAGON_CRYSTAL_HELMET_LEVEL_1_RECIPE);
+                   DRAGON_CRYSTAL_HELMET_LEVEL_1_RECIPE,
+                   configRecipeId("dragon_crystal_smithing_armor_level_6_helmet"),
+                   configRecipeId("dragon_crystal_smithing_armor_level_7_helmet"),
+                   configRecipeId("dragon_crystal_smithing_armor_level_6_chestplate"),
+                   configRecipeId("dragon_crystal_smithing_armor_level_7_chestplate"),
+                   configRecipeId("dragon_crystal_smithing_armor_level_6_leggings"),
+                   configRecipeId("dragon_crystal_smithing_armor_level_7_leggings"),
+                   configRecipeId("dragon_crystal_smithing_armor_level_6_boots"),
+                   configRecipeId("dragon_crystal_smithing_armor_level_7_boots"));
 
         //章节5：龙与魂
         addChapter("gui.the_last_sword.scroll_book.chapter5.title",
