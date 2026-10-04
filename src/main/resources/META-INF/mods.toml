@@ -1,6 +1,6 @@
 modLoader="javafml"
 loaderVersion="[47,)"
-license="'Anything Goes As Long As It’s Free' License"
+license="MIT"
 
 [[mods]]
 modId="the_last_sword"

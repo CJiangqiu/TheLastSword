@@ -78,4 +78,7 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
-tasks.jar { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
+tasks.jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from('LICENSE.txt')
+}
