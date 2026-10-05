@@ -6,7 +6,9 @@ logs
 run
 libs
 .claude
+.codex
 CLAUDE.md
 AGENTS.md
 计划.txt
 nul
+

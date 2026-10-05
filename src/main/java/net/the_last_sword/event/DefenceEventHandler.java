@@ -99,7 +99,7 @@ public final class DefenceEventHandler {
             if (entity.level().isClientSide()) return;
 
             double currentShield = DefenceEventHandler.getShieldValue(entity);
-            if (currentShield > 0) {
+            if (currentShield >= 2) {
                 DefenceEventHandler.triggerShieldProtection(entity, event, 2);
             }
         }

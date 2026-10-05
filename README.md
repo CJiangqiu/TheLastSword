@@ -7,31 +7,132 @@
 
 ***Note: This mod has been refactored in version 1.1.0. All content below applies only to version 1.1.0 and later. Downloading outdated versions is not recommended!***
 
-This is a remastered version of [The Last Sword](https://www.curseforge.com/minecraft/mc-mods/last-sword-you-will-ever-need-mo) created with authorization from the original author [queenofsquiggles](https://www.curseforge.com/members/queenofsquiggles/projects). This version focuses on content expansion and gameplay enhancement for The Last Sword in modern Minecraft versions. Therefore, the gameplay experience may not feel as "nostalgic." If you prefer a more classic The Last Sword experience, please visit [another author's Fabric branch](https://www.curseforge.com/minecraft/mc-mods/the-last-sword-you-will-ever-need-remastered).
+This is a remastered version of [The Last Sword](https://www.curseforge.com/minecraft/mc-mods/last-sword-you-will-ever-need-mo) created with authorization from the original author [queenofsquiggles](https://www.curseforge.com/members/queenofsquiggles/projects). This version focuses on expanding the adventures and gameplay surrounding The Last Sword in modern Minecraft versions. The experience may therefore feel less "nostalgic." If you prefer a more classic The Last Sword experience, please visit [another author's Fabric branch](https://www.curseforge.com/minecraft/mc-mods/the-last-sword-you-will-ever-need-remastered).
+
+Visit the mod's [official wiki](https://github.com/CJiangqiu/TheLastSword/wiki) for more details.
+
+Parts of this mod draw inspiration from *The Elder Scrolls V: Skyrim*, *Elden Ring*, *Fate/Grand Order*, and other works.
 
 ***
 
-# What's different compared to the old 1.7.10 version?
+# Embark on a Journey to Reforge The Last Sword
 
-## <img src="https://i.postimg.cc/XvPvJq3p/dragon_crystal_sword_4.png" alt="Dragon Crystal Sword" height="32"> Old Look, New Style
+## [![The Last End Scroll](https://i.postimg.cc/VNGn9XQf/the-last-sword-the-last-end-scroll.png)](https://postimg.cc/hJmXczt6) Where It All Begins
 
-Completely revamped textures! For players who prefer nostalgia, you can activate the built-in "The Last Sword Classical Texture Pack" to use the original textures from version 1.7.10.
+On your first visit to a village, you find a blacksmith selling off family heirlooms. An ancient-looking scroll catches your eye. Reading it reveals another blacksmith's account of searching for The Last Sword. Follow the scroll's guidance and begin your own journey to reforge it.
 
-## <img src="https://i.postimg.cc/GhZ9Pz5q/the_last_sword_dragon_crystal_smithing_table.png" alt="Modpack Friendly" height="32"> Modpack Friendly!
+[![Discovering the scroll](https://i.postimg.cc/zvRTT6Qt/1.png)](https://postimg.cc/MfqcSPqV)
 
-This mod introduces a JSON-driven crafting system, allowing you complete freedom to customize recipes for each level of swords and armor. This system is fully compatible with JEI. Additionally, numerous configurable options have been included, enabling you to customize values and functionalities of The Last Sword.
+## [![Traveler's Message](https://i.postimg.cc/0NZKTPmR/the-last-sword-traveler-message.png)](https://postimg.cc/1gnz6xJJ) Explore Lost Ruins
 
-**Built-in and config recipes:** Official recipes are stored inside the mod JAR and are loaded first. The directory `config/the_last_sword/dragon_crystal_smithing_recipes/` is reserved for overrides and custom recipes, so official recipes are no longer copied into it on startup. This allows official recipes to receive updates without replacing the user's config files.
+As you follow the scroll and uncover the story of The Last Sword, you will visit ruins scattered across different dimensions. Search them for clues and piece together a long-forgotten tale.
 
-**Overriding official recipes:** Place a recipe with the same file name as an official recipe anywhere under the config recipe directory. The config version will replace the official version and retain the same recipe ID. A current-format override must define `template.inputLevel`; old official recipe copies without this field are recognized as outdated and ignored, so they do not need to be deleted manually.
+[![Exploring lost ruins](https://i.postimg.cc/gj633Q7T/2.png)](https://postimg.cc/Lg2qpC2t)
 
-**Custom recipes and nested folders:** Recipe files may use arbitrary names and be organized into any number of subfolders, e.g. `dragon_crystal_smithing_recipes/sword/` or `dragon_crystal_smithing_recipes/armor/high_level/`. All enabled `.json` files are loaded recursively. Custom recipes with the same file name can coexist in different subfolders unless that name belongs to an official recipe, in which case the file acts as an override. Non-conflicting recipes using the old format remain compatible.
+## [![Dragon Cult Horn](https://i.postimg.cc/rw1r9SwN/the-last-sword-dragon-cult-horn.png)](https://postimg.cc/tsgJqnPs) Face the Dragon Cult
 
-**Disabling recipes:** Rename a recipe to `.disabled.json`, `.json.disabled`, or `.json.disable` to disable it without deleting it. A disabled config file whose name matches an official recipe also disables that official recipe.
+These fanatical cultists stand in the way of your search for The Last Sword. When their horns sound around the village, prepare for a desperate battle. Take up your weapon and defend the villagers.
 
-**File name convention:** Official sword and armor upgrade recipes are named after their output level. For example, `dragon_crystal_smithing_sword_level_6.json` produces a Level 6 sword. Custom recipe file names do not have to follow this convention.
+[![Facing the Dragon Cult](https://i.postimg.cc/br211W5F/3.png)](https://postimg.cc/QKhB34hp)
 
-**Example recipe format:**
+## [![Dragon Crystal Ring](https://i.postimg.cc/kgQbyxgb/the-last-sword-dragon-crystal-ring.png)](https://postimg.cc/fVbyzSXz) Ancient Relics
+
+During your travels, you can obtain accessories containing fragments of The Last Sword's power. Some seem to have negative effects, but combining them can yield greater strength. These ancient relics may also prove useful when you are ready to advance your Dragon Crystal equipment into more powerful Dragon equipment.
+
+[![Ancient relics](https://i.postimg.cc/WzJ00CyY/4.png)](https://postimg.cc/7JwCkswS)
+
+## [![Dragon Crystal Upgrade Template](https://i.postimg.cc/FHyLxjHy/the-last-sword-dragon-crystal-upgrade-template.png)](https://postimg.cc/cvJCxtYC) Forging and Upgrading
+
+Craft a Dragon Crystal Upgrade Template and a Dragon Crystal Smithing Table to upgrade your Dragon Crystal equipment step by step. Higher levels bring better stats and allow equipment to evolve into new forms. Each breakthrough requires materials gathered on your journey. As you explore further, seemingly unrelated discoveries may become part of the reforging process.
+
+[![Forging and upgrading](https://i.postimg.cc/CdTk7JyJ/5.png)](https://postimg.cc/wR21TXjs)
+
+## [![Ancient Energy Core](https://i.postimg.cc/FH5ScPNz/the-last-sword-ancient-energy-core.png)](https://postimg.cc/nC2MfGsf) Power, More Power!
+
+You can obtain an Ancient Energy Core by trading with a Wandering Trader or exploring ruins in the End. Crafted long ago by beings of The Last End living beneath the void, these cores help you upgrade Dragon Crystal Armor into Dragon War Armor. Once you obtain this advanced armor, it may seem less powerful than you expected—you need to charge it with FE energy to unlock its full potential.
+
+While you wear Dragon War Armor, nearby End Crystals will treat you as a friendly Ender Dragon and charge your equipment! If their charging rate is not enough, you can also use a Disposable Energy Battery. These batteries are obtained in the same ways as Ancient Energy Cores.
+
+You can also craft a Dragon Crystal Enchanting Table to generate power. Despite its name, it doubles as a generator, using Dragon Crystal as its default fuel. Place fuel in the red slot on the left to generate energy, then put equipment that needs charging into the green slot on the right. Equipment that uses standard FE energy is supported.
+
+[![Generating power and charging equipment](https://i.postimg.cc/xqDM5grt/6.png)](https://postimg.cc/PvyCrW5w)[![6-1.png](https://i.postimg.cc/YSM93ZvF/6-1.png)](https://postimg.cc/K1pxc9rc)
+
+## [![Dragon Soul Lantern](https://i.postimg.cc/TPTWNpKt/the-last-sword-dragon-soul-lantern.png)](https://postimg.cc/v4SBc8Ln) Summon Sword Wraiths
+
+You do not have to adventure alone. Through Spirit Calling, former enemies can become allies who fight at your side. Craft a Dragon Crystal Soul Stone and a Dragon Soul Lantern. Activate the lantern by wearing it as an accessory or placing it on Obsidian or Crying Obsidian, and keep an empty Dragon Crystal Soul Stone in your inventory. Slay an entity to bind its soul to the stone and turn it into your sword wraith.
+
+Use the Dragon Soul Lantern or another item with Summon Mode to summon the corresponding sword wraith. Its strength increases according to the level of the item used to summon it. Sword wraiths generally do not harm one another, although some mods' attack implementations may cause friendly fire against companions or the owner.
+
+Press the Open Summon Wraith GUI key (default: Z) to open the Summon Wraith screen and place a Dragon Crystal Soul Stone in its dedicated slot. The stone in that slot becomes your active soul stone, allowing Summon Mode to call its sword wraith without requiring you to hold the stone.
+
+[![Summoning sword wraiths](https://i.postimg.cc/DmkL65Vx/7.png)](https://postimg.cc/p5CmXfLj)[![7-2.png](https://i.postimg.cc/c19nJxrk/7-2.png)](https://postimg.cc/JtXn6W3j)
+
+If you believe yourself strong enough, travel to the Sealed Spire in the End and free a knight who has long been imprisoned. After granting the knight peace, you will be able to summon a powerful and loyal ally—The-Last-End Sword Wraith—to clear obstacles on your path to reforging The Last Sword. Of course, this knight is not invincible.
+
+[![The-Last-End Sword Wraith](https://i.postimg.cc/HnQ4fF9N/7-1.png)](https://postimg.cc/9wQ798SP)
+
+## [![Dragon Crystal Crown](https://i.postimg.cc/zGCgknGL/the-last-sword-dragon-crystal-crown.png)](https://postimg.cc/mPrkL1MR) A Sovereign Awaits—Bear Witness
+
+Once the truth is revealed, every clue points to the Wound of Time in the End. It is time to travel there and obtain the final piece needed to reforge The Last Sword. In a garden floating above the void sleeps the Queen who once forged it. Though she is now only a shadow of her former self, you can still feel the power of the sword's former wielder. Prepare thoroughly and face her trial.
+
+*Warning: This is an OP boss and a difficult challenge.*
+
+[![The Queen's trial](https://i.postimg.cc/MX2V5tks/8.png)](https://postimg.cc/7J95Y3Z7)
+
+# Lore and Mechanics
+
+## Beings of The Last End
+
+A new entity type introduced by this mod, said to originate from beneath the void of the End. These beings have different levels, and higher levels grant greater strength.
+
+| Level | Offensive Abilities | Defensive Abilities |
+|-------|---------------------|---------------------|
+| **1–5** | No additional effects. | Custom health and basic resistance to entity removal. Ordinary damage from a single hit is reduced to the damage cap if it exceeds that cap. |
+| **6–12** | Attacks deal additional Absolute Destruction damage equal to **level × 1%** of the original damage. | Custom health and basic resistance to entity removal. Ordinary damage from a single hit is completely negated if it exceeds the damage cap. |
+| **13 and above** | Attacks deal additional Absolute Destruction damage equal to **level × 1%** of the original damage. | Custom health and basic resistance to entity removal. Ordinary damage from a single hit is completely negated if it exceeds the damage cap. They also revive upon death if their custom health has not been depleted. |
+
+*The damage cap depends on the entity and configuration. Absolute Destruction damage is resolved separately and is not subject to the ordinary damage caps listed above.*
+
+## Dangerous Skills
+
+Some beings of The Last End have dangerous skills that pose a particular threat to players. Before one is unleashed, a warning sound plays and a red area indicator shows the skill's affected region.
+
+## Absolute Destruction Damage
+
+A form of true damage that bypasses armor and conventional damage reduction, as well as the damage caps of beings of The Last End. In addition to reducing health, it reduces the target's Present World Anchor by a certain proportion. Players can deal this damage, but it also appears in some enemies' attacks and skills.
+
+## Present World Anchor
+
+Every living entity has this value independently of its current health, initially equal to its maximum health. Absolute Destruction damage reduces Present World Anchor; when it is depleted, the target is executed immediately.
+
+Survivors of Absolute Destruction damage enter World Severance for a period of time, during which their health cannot exceed their remaining Present World Anchor. When World Severance ends, the health limit is removed, and subsequent healing can also restore lost Present World Anchor.
+
+## Justified Defence
+
+A shield that blocks damage by consuming charges. Each point negates one instance of damage, regardless of its amount, including Absolute Destruction damage. When the holder dies, at least 2 remaining points allow the shield to consume 2 points, prevent death, and restore the holder to maximum health. Entities with a Justified Defence capacity gradually recover shield points according to their Justified Defence Recovery Speed attribute, up to that capacity.
+
+## Levels
+
+Some items in this mod have levels ranging from 0 to 13. For most of these items, the level directly affects their stats. You can upgrade your items at the Dragon Crystal Smithing Table.
+
+## Modes
+
+Some items in this mod have multiple modes. Press the mode switch key (default: Left Ctrl) to cycle through them.
+
+# Miscellaneous
+
+## A New Look for an Old Legend
+
+This mod gives The Last Sword completely revamped textures! If you prefer a nostalgic look, enable the built-in "The Last Sword Classical Texture Pack" to use the original textures from version 1.7.10.
+
+## JSON Customization
+
+This mod provides several JSON-driven customization features for modpack authors. You can adjust Dragon Crystal Smithing recipes, specify equipment that serves as a Dragon Cult disguise, or add fuels for the Dragon Crystal Enchanting Table.
+
+### [![Dragon Crystal Smithing Table](https://i.postimg.cc/htLd09tm/the-last-sword-dragon-crystal-smithing-table.png)](https://postimg.cc/NK0Fs2TG) Custom Dragon Crystal Smithing Recipes
+
+Create a `.json` file under `config/the_last_sword/dragon_crystal_smithing_recipes/` in the game directory to add a recipe. Subfolders are supported for organization; in multiplayer, only the server needs this configuration. The following example, `custom_sword_upgrade.json`, uses a Level 0 Dragon Crystal Upgrade Template, a Level 0 Dragon Crystal Sword, and a Diamond to produce a Level 1 Dragon Crystal Sword:
+
 ```json
 {
   "type": "the_last_sword:dragon_crystal_smithing",
@@ -44,7 +145,7 @@ This mod introduces a JSON-driven crafting system, allowing you complete freedom
     "inputLevel": 0
   },
   "addition": {
-    "item": "the_last_sword:dragon_crystal"
+    "item": "minecraft:diamond"
   },
   "output": {
     "item": "the_last_sword:dragon_crystal_sword",
@@ -53,143 +154,121 @@ This mod introduces a JSON-driven crafting system, allowing you complete freedom
 }
 ```
 
-The `inputLevel` inside `template` applies to the first slot, while the `inputLevel` inside `input` applies to the second slot. The output receives `outputLevel`. For standalone custom recipes, omitting `template.inputLevel` disables the template-level check for compatibility with the old format. The second-slot `inputLevel` and `outputLevel` default to 0 when omitted. Same-name overrides of official recipes must include `template.inputLevel`.
+`template`, `input`, and `addition` correspond to the three input slots, while `output` defines the result. The two `inputLevel` fields check the levels of the template and base item respectively, and `outputLevel` sets the resulting item's level. Replace the item IDs and levels as needed.
 
-## Modernized Damage Values
+Official recipes are stored under `data/the_last_sword/dragon_crystal_smithing_recipes/` inside the mod JAR. To change an official recipe, copy it into the config recipe directory and edit it while keeping its original file name. A config file with the same name overrides the official recipe. Use a different file name when adding a new recipe.
 
-Considering that most mods in 1.20.1 have smaller damage values compared to 1.7.10 mods, this version has also been reasonably adjusted. Now, the base damage values are:
+Rename a recipe file to end in `.disabled.json`, `.json.disabled`, or `.json.disable` to disable it. A disabled file with a matching name also disables the corresponding official recipe. After making changes, run `/reload` or restart the server to reload recipes and synchronize them with players.
 
-- Dragon Crystal Sword: 12
-- Dragon Sword: 200
-- The Last Sword: 1024
+### [![Dragon Crystal Enchanting Table](https://i.postimg.cc/wjXmkhjR/the-last-sword-dragon-crystal-enchanting-table.png)](https://postimg.cc/RW0hSJfv) Add Disguise Equipment and Fuels with a Data Pack
 
-Of course, we also provide configuration options to let players control the damage bonus per upgrade. You can adjust `Increase Value` in `config/TheLastSword-common.toml` to control the damage bonus for levels 0-5, and `Increase Value High Level` to control the damage bonus for levels 6-13.
+Both features below use item tags in a data pack. Create a `the_last_sword_custom` folder inside the target world's `datapacks/` directory, then create a `pack.mcmeta` file inside it:
 
-***
+```json
+{
+  "pack": {
+    "pack_format": 15,
+    "description": "The Last Sword custom Dragon Cult disguise equipment and fuels"
+  }
+}
+```
 
-# How to play?
+Create the tag files at the paths shown below. This is the full directory structure; you may include either tag on its own:
 
-## <img src="https://i.postimg.cc/VNGn9XQf/the-last-sword-the-last-end-scroll.png" alt="Combat Lore" height="32"> Combat Lore
+```text
+the_last_sword_custom/
+├── pack.mcmeta
+└── data/
+    └── the_last_sword/
+        └── tags/
+            └── items/
+                ├── dragon_cult_disguise.json
+                └── dragon_crystal_enchanting_table_fuel.json
+```
 
-### Absolute Destruction Damage
+#### Dragon Cult Disguise
 
-This is an extremely powerful true damage that bypasses most mods' custom health defenses. It also applies a healing negation debuff for a period of time. When the damage value exceeds the entity's remaining health, it will instantly execute that entity and temporarily prevent that entity type from spawning.
+In `data/the_last_sword/tags/items/dragon_cult_disguise.json`, list equipment that can be used to disguise the wearer as a member of the Dragon Cult. For example, this adds the full set of Leather Armor:
 
-This damage can be dealt not only by players, but also by certain hostile entities. Therefore, players need to avoid being hit by this damage as much as possible—and that requires a new shield attribute.
+```json
+{
+  "replace": false,
+  "values": [
+    "minecraft:leather_helmet",
+    "minecraft:leather_chestplate",
+    "minecraft:leather_leggings",
+    "minecraft:leather_boots"
+  ]
+}
+```
 
-### Justified Defence Shield
+The disguise only works when all four armor slots—helmet, chestplate, leggings, and boots—contain equipment from the tag. The Dragon Cult will then refrain from selecting the wearer as a player target for its proactive attacks. Equipment in the tag can be mixed and matched, and item IDs from other mods are supported.
 
-This shield attribute appears as a white shield icon (inspired by *Fate/Grand Order*). Each time you take damage, it consumes 1 point and negates one instance of damage of any amount (including Absolute Destruction damage). Alternatively, when the player dies, it consumes 2 points to revive the player. This makes it an essential defense mechanism when facing certain entities from this mod.
+#### Dragon Crystal Enchanting Table Fuel
 
-Press the defence config key (default: Left Alt) to open the Defence Configuration screen, where you can toggle the shield overlay and move it anywhere on your HUD, as well as adjust equipment settings.
+In `data/the_last_sword/tags/items/dragon_crystal_enchanting_table_fuel.json`, list items that can be used to generate power. For example, this allows Coal and Charcoal to be used as fuel:
 
-### Phasing Buff
+```json
+{
+  "replace": false,
+  "values": [
+    "minecraft:coal",
+    "minecraft:charcoal"
+  ]
+}
+```
 
-While in the Phasing state, the player is briefly isolated from the world, allowing them to pass through walls like in Spectator Mode! Additionally, they gain powerful defense during this effect.
+Items in this tag can be placed in the Dragon Crystal Enchanting Table's fuel slot and consumed to generate power. All fuels use the same common configuration for generation duration and rate; the tag does not define an energy value for each fuel.
 
-## Items
+In these examples, `replace: false` preserves the existing tag contents and adds the new items. Changing it to `true` lets the data pack replace the mod's original tag contents. After saving, run `/reload` in the target world and use `/datapack list enabled` to confirm that the data pack is enabled.
 
-### <img src="https://i.postimg.cc/C1SVwn6V/the-last-sword-dragon-crystal.png" alt="Dragon Crystal" height="32"> Dragon Crystal
+## Stronger Ender Dragons and Random Names
 
-It all begins when you break down the Dragon Egg into Dragon Crystals.
+When you participate in slaying the Ender Dragon in the End, you receive extra Dragon Eggs, even if you have defeated it before. Each time it is reborn, however, it returns stronger: its health, armor, and attack damage increase with each challenge. It also gains a name with unique abilities and displays its level. The possible random names are:
 
-![Dragon Crystal Recipe](https://i.postimg.cc/8k6SRwdB/chapter_recipe_1_1.png)
+- **Akatosh, the Dragon God of Time**: Maximum health, attack damage, armor, and armor toughness increase by 100%. Gains 2 temporary Justified Defence points. Has a 10% chance to cancel an incoming attack. Every 30 seconds, makes a recovery check with a 1% chance to restore health to maximum. A successful recovery starts a 60-second cooldown, with the next check occurring when that cooldown ends.
 
-Next, you need to craft the Dragon Crystal Upgrade Template and the Dragon Crystal Smithing Table—these are the foundation of your path to forging the sword.
+- **Dragonlord Placidusax**: Maximum health, attack damage, armor, and armor toughness increase by 100%. Has a 1% chance to cancel an incoming attack. Reaching or falling below 50%, 25%, and 5% of maximum health triggers 6 seconds of Phasing and a thunderstorm at each threshold. During the thunderstorm, lightning strikes one randomly selected attackable living entity within a 64-block radius every second. Each threshold triggers only once; crossing several thresholds in a single hit does not stack the duration.
 
-![Dragon Crystal Upgrade Template Recipe](https://i.postimg.cc/DfXTr5Q1/chapter_recipe_2_1.png)
-![Dragon Crystal Smithing Table Recipe](https://i.postimg.cc/tRxj3Ddh/chapter_recipe_2_2.png)
+- **Alduin, the World-Eater**: Maximum health, attack damage, armor, and armor toughness increase by 100%. Gains 2 temporary Justified Defence points. Calls down a volley of 16 fireballs every 30 seconds, prioritizing areas occupied by attackable living entities within a 64-block radius. Each kill of another living entity grants one stack of +100% attack damage, up to 1,000 stacks. The bonuses add linearly; each kill does not double the current attack damage.
 
-### <img src="https://i.postimg.cc/6Tx2Q3r7/dragonsword.png" alt="Swords" height="32"> Swords
+- **Paarthurnax**: Maximum health, attack damage, armor, and armor toughness increase by 50%. The flying speed attribute increases by 50%.
 
-#### Level
+- **Odahviing**: Calls down a volley of 16 fireballs every 60 seconds, prioritizing areas occupied by attackable living entities within a 64-block radius.
 
-All swords in this mod have a level system ranging from 0 to 13. A sword's level directly affects its extra damage output—the higher the level, the more extra damage it deals. You can upgrade your sword at the Dragon Crystal Smithing Table.
+- **Durnehviir**: Applies Weakness V and Poison V to other living entities within a 16-block radius every second. Each application lasts 3 seconds, so the effects keep refreshing while the target stays in range.
 
-#### Mode
+- **Bayle the Dread**: Maximum health decreases by 50%, and attack damage increases by 300%. Contact attacks set the target on fire for 60 seconds.
 
-Dragon Sword and The Last Sword have a mode system. Press the mode switch key (default: Left Ctrl) to cycle through different modes. Each mode changes the sword's right-click ability while keeping left-click as melee attack.
+- **Elder Dragon Greyoll**: Maximum health increases by 300%. Attack damage, armor, armor toughness, and the flying speed attribute decrease by 50%.
 
-#### Upgrade Path
+*The 2 Justified Defence points granted to Akatosh and Alduin are temporary: they do not raise the shield's capacity or recover automatically. If base armor toughness is 0, a name bonus of +100% instead grants 4 armor toughness, +50% grants 2, and −50% leaves it at 0.*
 
-**Netherite Sword → Dragon Crystal Sword (Level 0-5)**
+Dragon Cult Priests also receive a random name when they spawn:
 
-First, you need to use the vanilla Smithing Table with a Dragon Crystal Upgrade Template, a Netherite Sword, and a Dragon Crystal to transform it into a Dragon Crystal Sword. Subsequent upgrades are done at the Dragon Crystal Smithing Table.
+- **Hevnoraak**: Immune to negative effects and removes any negative effects on itself once per second.
 
-This sword deals physical damage plus extra magic damage based on its level. Right-click to shoot a diamond projectile.
+- **Krosis**: When damaged, has a 30% chance to gain Invisibility for 3 seconds.
 
-![Dragon Crystal Sword Recipe](https://i.postimg.cc/ryrk1gGx/chapter_recipe_3_1.png)
+- **Morokei**: Lightning, dragon breath, and ward skill cooldowns are reduced by 50%.
 
-To upgrade the Dragon Crystal Sword, use a Dragon Crystal Upgrade Template, a Dragon Crystal Sword, and a Dragon Crystal at the Dragon Crystal Smithing Table.
+- **Nahkriin**: Lightning and dragon breath skill damage increases by 50%.
 
-![Dragon Crystal Sword Upgrade Recipe](https://i.postimg.cc/ZYdS8jPc/chapter_recipe_3_2.png)
+- **Otar**: Incoming damage is reduced by 30%.
 
-**Dragon Crystal Sword → Dragon Sword (Level 6-12)**
+- **Rahgot**: Immune to ordinary knockback.
 
-Continue upgrading to obtain the Dragon Sword. This sword deals physical damage plus extra dragon breath damage. It has 2 modes:
-- Normal Mode: Right-click to shoot a dragon crystal projectile
-- Summon Mode: Right-click to summon or recall your Sword Wraith
+- **Vokun**: Each skill cast has a 10% chance to summon a Dragon Cultist.
 
-![Dragon Sword Recipe](https://i.postimg.cc/3rvTX9j1/chapter_recipe_3_3.png)
+- **Volsung**: Attracts nearby Villagers and Wandering Traders once every 0.5 seconds, drawing them toward itself. The search area is its bounding box expanded by 8 blocks in every direction.
 
-To upgrade the Dragon Sword, use a Dragon Crystal Upgrade Template, a Dragon Sword, and a Dragon Egg at the Dragon Crystal Smithing Table.
+- **Konahrik**: Casting its ward skill has a 10% chance to restore health equal to 50% of its maximum health, without exceeding maximum health. Every second, it produces dragon breath around itself, dealing dragon breath damage to attackable living entities in a 3×3×3-block area centered on its body. Each skill cast also has a 1% chance to summon a Dragon Cult Priest.
 
-![Dragon Sword Upgrade Recipe](https://i.postimg.cc/BZK0TN5M/chapter_recipe_3_4.png)
-
-**Dragon Sword → The Last Sword (Level 13)**
-
-Congratulations, you have finally reforged this legendary weapon! This sword deals physical damage plus extra Absolute Destruction damage. It has 3 modes:
-- Normal Mode: Left-click mines most blocks and deals melee damage, right-click shoots an End Crystal projectile
-- Powerful Mining Mode: Right-click to select blocks within range, right-click again to destroy them
-- Summon Mode: Left-click performs an area attack up to 6 blocks ahead, right-click summons or recalls your Sword Wraith
-
-Additionally, having The Last Sword in your inventory grants flight, removes all item cooldowns, and provides defense protection.
-
-### <img src="https://i.postimg.cc/Hx7k7ms9/dragon_crystal_helmet.png" alt="Armor" height="32"> Armor
-
-#### Dragon Crystal Armor
-
-Each piece provides potion effects when worn: the helmet grants night vision and water breathing, the chestplate grants damage resistance and strength, the leggings grant regeneration and jump boost, and the boots grant speed and fire resistance.
-
-Wearing the full set activates Crystal Guard, which grants a shield equal to your max health and refreshes periodically.
-
-#### Dragon Armor
-
-A powerful living armor that requires FE energy to function at full capacity. Each piece provides similar effects to Dragon Crystal Armor but stronger. When powered, the effects are enhanced by one level.
-
-The chestplate grants flight ability (consumes energy). When wearing the full set with energy, you gain 90% damage reduction from non-player attacks and explosions. Its other energy-powered features—saturation, immunity to fire and freezing, and phasing that lets you pass through blocks—come as modules you can toggle individually in the Equipment Settings screen.
-
-### <img src="https://i.postimg.cc/RVjq1GDg/the_last_sword_dragon_crystal_enchanting_table.png" alt="Blocks" height="32"> Blocks
-
-#### Dragon Crystal Smithing Table
-
-A crafting station used to upgrade your swords and craft armor. It has 3 input slots (template, base item, and addition) similar to the vanilla smithing table. All recipes can be customized via JSON files in the config folder.
-
-#### Dragon Crystal Enchanting Table
-
-A perfect fusion of technology and magic. It can consume FE energy to apply enchantments, or function as a generator by using Dragon Crystals as fuel to produce power.
-
-### <img src="https://i.postimg.cc/Y0Gy1pvy/dragon-crystal-ring.png" alt="Curios" height="32"> Curios
-
-You can find some rare treasures in the chests of the new structures added to the End, the Nether and the Overworld: Dragon Crystal Necklace, Dragon Crystal Ring, Wings That Cover The World, Extreme Life Support Device, Dimension Explorer, and Ancient Energy Core. Each one has its own unique and powerful effect.
-
-## <img src="https://i.postimg.cc/Jnm162NG/dragon-crystal-soul-stone-full-4.png" alt="Summon Your Sword Wraith" height="32"> Summon Your Sword Wraith!
-
-You can craft a Dragon Crystal Soul Stone and a Dragon Soul Lantern to bind an entity's soul into the stone by slaying it, turning it into your Sword Wraith. Using the Dragon Soul Lantern or other items with Summon Mode, you can summon the corresponding Sword Wraith to fight for you! These entities will be enhanced to varying degrees based on your weapon's level. Sword Wraiths generally won't harm each other, though some mods with aggressive implementations may cause friendly fire to companions or the owner.
-
-Press the summon GUI key (default: Z) to open the Summon Wraith screen and place a Dragon Crystal Soul Stone into its dedicated slot. The stone kept there is bound to you as your active soul stone, so Summon Mode will call that Sword Wraith without you having to hold the stone.
-
-If you believe yourself strong enough, you may journey to the Sealed Spire in the End and free a knight who has been sealed away. After granting them peace, you will be able to summon a powerful and loyal knight—the Last End Sword Wraith—who will clear the obstacles on your path to reforging The Last Sword (though it is not invincible, of course).
-
-## Stronger Ender Dragon
-
-When you participate in slaying the Ender Dragon in the End, you will receive additional Dragon Eggs as a reward—even if you've already defeated it before. However, each time the Ender Dragon is reborn, it returns with greater strength. Its health, armor, and attack power will increase with each challenge, and its level will be displayed above its name.
-
-***
+- **Miraak**: Maximum health, attack damage, armor, and armor toughness increase by 100%; if base armor toughness is 0, it gains 4 armor toughness instead. When attacked by a living entity or when one of its skills successfully damages a living entity, it has a 1% chance to attempt to control that entity. Tamable animals and horses become its servants. Players instead receive Slowness III, Weakness III, and Nausea III for 10 seconds. Other types of living entities do not become servants.
 
 ## Dependencies
 
-This mod requires 3 essential dependency mods:
+This mod requires three dependency mods:
 
 - [GeckoLib](https://www.curseforge.com/minecraft/mc-mods/geckolib)
 - [Curios API](https://www.curseforge.com/minecraft/mc-mods/curios)
@@ -197,7 +276,7 @@ This mod requires 3 essential dependency mods:
 
 ## Compatibility
 
-Mods with added compatibility content:
+Mods with added integrations or compatibility support:
 
 - [JEI](https://www.curseforge.com/minecraft/mc-mods/jei)
 - [Jade](https://www.curseforge.com/minecraft/mc-mods/jade)
@@ -216,30 +295,100 @@ Mods with added compatibility content:
 ***注意：本模组在 1.1.0 版本进行了重构。以下所有内容仅适用于 1.1.0 及之后的版本。不建议下载过时版本！***
 
 这是经原作者 [queenofsquiggles](https://www.curseforge.com/members/queenofsquiggles/projects) 授权制作的 [The Last Sword](https://www.curseforge.com/minecraft/mc-mods/last-sword-you-will-ever-need-mo) 重制版。本Mod着重于在现代 Minecraft 版本中对最终之剑进行冒险向内容扩展和玩法增强。因此，游戏体验可能不会那么"怀旧"。如果你更喜欢经典的最终之剑体验，请访问[另一位作者的 Fabric 分支](https://www.curseforge.com/minecraft/mc-mods/the-last-sword-you-will-ever-need-remastered)。
-
+您可以前往本 Mod 的[官方 wiki ](https://github.com/CJiangqiu/TheLastSword/wiki)了解更加详细的内容。
+本 Mod 的部分灵感来源于《上古卷轴5：天际》、《艾尔登法环》、《Fate:Grand Order》等作品。
 ***
 
-# 与旧版 1.7.10 有什么不同？
+# 踏上重铸最终之剑的冒险旅程
+## [![the-last-sword-the-last-end-scroll.png](https://i.postimg.cc/VNGn9XQf/the-last-sword-the-last-end-scroll.png)](https://postimg.cc/hJmXczt6)一切的开始
 
-## <img src="https://i.postimg.cc/XvPvJq3p/dragon_crystal_sword_4.png" alt="龙水晶剑" height="32"> 旧貌换新颜
+当你初次进入村庄的时候，你会发现一名铁匠正在变卖自己祖传的家产，这时，一个看上去十分古老的卷轴吸引了你的注意。翻阅卷轴，你得知了这是某位铁匠追寻最终之剑的经历。根据卷轴的指引，开始你重铸最终之剑的冒险旅程吧。
+[![1.png](https://i.postimg.cc/zvRTT6Qt/1.png)](https://postimg.cc/MfqcSPqV)
+## [![the-last-sword-traveler-message.png](https://i.postimg.cc/0NZKTPmR/the-last-sword-traveler-message.png)](https://postimg.cc/1gnz6xJJ)探寻失落的遗迹
 
-全面翻新的材质！如果你喜欢怀旧风格，可以启用内置的"最终之剑经典材质包"（The Last Sword Classical Texture Pack）来使用 1.7.10 版本的原版材质。
+在跟随卷轴深入发现最终之剑的故事中，你会前往分散在各个维度的遗迹，并从中找到最终之剑相关的蛛丝马迹，通过这些线索拼凑出尘封的故事。
+[![2.png](https://i.postimg.cc/gj633Q7T/2.png)](https://postimg.cc/Lg2qpC2t)
+## [![the-last-sword-dragon-cult-horn.png](https://i.postimg.cc/rw1r9SwN/the-last-sword-dragon-cult-horn.png)](https://postimg.cc/tsgJqnPs)迎战拜龙教
 
-## <img src="https://i.postimg.cc/GhZ9Pz5q/the_last_sword_dragon_crystal_smithing_table.png" alt="整合包友好" height="32"> 整合包友好！
+在你探寻最终之剑的旅程上，这群邪教徒疯子成为了一大障碍。当他们的号角在村庄周围响起时，你需要做好背水一战的准备，拿起武器保卫村庄。
+[![3.png](https://i.postimg.cc/br211W5F/3.png)](https://postimg.cc/QKhB34hp)
+## [![the-last-sword-dragon-crystal-ring.png](https://i.postimg.cc/kgQbyxgb/the-last-sword-dragon-crystal-ring.png)](https://postimg.cc/fVbyzSXz)古老的遗物
+在探索过程中，你可以获得许多蕴含最终之剑力量碎片的饰品，它们中有一些具有看起来似乎是负面的效果，但是相互搭配可以得到更强的效果。在你想要突破龙水晶装备得到更强的龙之装备时，这些古老的遗物或许可以发挥作用。
+[![4.png](https://i.postimg.cc/WzJ00CyY/4.png)](https://postimg.cc/7JwCkswS)
+## [![the-last-sword-dragon-crystal-upgrade-template.png](https://i.postimg.cc/FHyLxjHy/the-last-sword-dragon-crystal-upgrade-template.png)](https://postimg.cc/cvJCxtYC)锻造与升级
 
-本模组引入了 JSON 驱动的合成系统，允许你完全自由地自定义每个等级的剑和盔甲的配方。该系统完全兼容 JEI。此外，还提供了大量可配置选项，让你可以自定义最终之剑的各种数值和功能。
+通过制作龙水晶升级模板和龙水晶锻造台，你可以一步步升级你的龙水晶装备。随着等级的提升，装备不仅可以获得更高的数值，还可以突破为新的形态。不同阶段的突破，需要你在旅途中取得相应的材料。随着探索深入，那些看似独立的发现，也可能成为重铸所需的一部分。
+[![5.png](https://i.postimg.cc/CdTk7JyJ/5.png)](https://postimg.cc/wR21TXjs)
+## [![the-last-sword-ancient-energy-core.png](https://i.postimg.cc/FH5ScPNz/the-last-sword-ancient-energy-core.png)](https://postimg.cc/nC2MfGsf)发电，发电！
 
-**内置配方与 config 配方：** 官方配方保存在模组 JAR 内并优先加载。`config/the_last_sword/dragon_crystal_smithing_recipes/` 目录只用于放置覆盖配方和自定义配方，启动时不再向其中复制官方配方。这样官方配方可以随模组更新，同时不会覆盖用户的 config 文件。
+你可以从流浪商人手中交易或者探索末地中的各个遗迹来获得“远古能量核心”，生活在虚空之下的终焉种在古老的年代制作了它们，这些核心可以帮助你突破龙水晶套装为更高等级的龙之套装。当你获得了本 Mod 的高级装备龙之套装，你会发现它们似乎并不如想象中那样强大——你需要给它们充能（FE 能量）才能让它们发挥应有的力量。
 
-**覆盖官方配方：** 在 config 配方目录的任意位置放入与官方配方同名的文件，即可替换官方配方并沿用相同的配方 ID。当前格式的覆盖配方必须定义 `template.inputLevel`；缺少该字段的旧官方配方副本会被识别为过时配方并忽略，因此无需手动删除。
+当你穿戴了龙之套装的时候，身边的末影水晶会将你视为友善的末影龙为你充能！如果你不满意末影水晶的充能速率，还可以使用一次性能量电池来为装备充能，它们的获得方法和远古能量核心的获得方法是一样的。
+你还可以制作龙水晶附魔台来发电，尽管它叫“附魔台”，但实际上同样可以作为一台发电机使用，它需要的燃料默认为龙水晶，在左侧的红色槽位中放入龙水晶，便可以进行发电，之后在右侧的绿色槽位中放入需要充能的装备（支持需求标准FE能量的装备）便可以进行充能。
+[![6.png](https://i.postimg.cc/xqDM5grt/6.png)](https://postimg.cc/PvyCrW5w)[![6-1.png](https://i.postimg.cc/YSM93ZvF/6-1.png)](https://postimg.cc/K1pxc9rc)
+## [![the-last-sword-dragon-soul-lantern.png](https://i.postimg.cc/TPTWNpKt/the-last-sword-dragon-soul-lantern.png)](https://postimg.cc/v4SBc8Ln)召唤剑灵
 
-**自定义配方与嵌套文件夹：** 配方文件可以任意命名，并能放入任意层级的子文件夹中，例如 `dragon_crystal_smithing_recipes/sword/` 或 `dragon_crystal_smithing_recipes/armor/high_level/`。所有未禁用的 `.json` 文件都会被递归加载。不同子目录中的同名自定义配方可以共存；如果文件名与官方配方相同，则会作为官方配方的覆盖项。名称不冲突的旧格式自定义配方仍然兼容。
+你在冒险中并不孤单，通过唤灵，你可以将过去的敌人作为你的帮手进行召唤，他们将为你而战。你可以制作龙晶魂石和龙魂灯，通过穿戴龙魂灯饰品或者将其放置于黑曜石/哭泣的黑曜石上进行激活，并在背包中保留空的龙晶魂石，击杀实体来将其灵魂绑定到魂石中，使其成为你的剑灵。使用龙魂灯或其他拥有召唤模式的物品，你可以召唤对应的剑灵为你而战！这些实体会根据你召唤时使用的物品的等级获得不同程度的强化，剑灵之间通常不会互相伤害，但某些模组的攻击实现方式可能导致友军误伤同伴或主人。
+按下唤灵 GUI 键（默认：Z）可以打开唤灵界面，将龙晶魂石放入专属槽位。放在其中的魂石会绑定为你当前生效的魂石，因此使用唤灵模式时无需手持魂石也能召唤对应的剑灵。
+[![7.png](https://i.postimg.cc/DmkL65Vx/7.png)](https://postimg.cc/p5CmXfLj)[![7-2.png](https://i.postimg.cc/c19nJxrk/7-2.png)](https://postimg.cc/JtXn6W3j)
+如果你相信自己足够强大，可以前往末地的封印尖塔，解放一位被封印已久的骑士。在给予祂安息之后，你将能够召唤一位强大而忠诚的骑士——终焉剑灵，祂将为你扫清重铸最终之剑路上的障碍（当然，祂并非无敌）。
+[![7-1.png](https://i.postimg.cc/HnQ4fF9N/7-1.png)](https://postimg.cc/9wQ798SP)
+## [![the-last-sword-dragon-crystal-crown.png](https://i.postimg.cc/zGCgknGL/the-last-sword-dragon-crystal-crown.png)](https://postimg.cc/mPrkL1MR)前有王者，敬请见证
 
-**禁用配方：** 将配方重命名为 `.disabled.json`、`.json.disabled` 或 `.json.disable` 即可禁用，而不必删除文件。与官方配方同名的禁用文件也会禁用对应的官方配方。
+当你了解了一切，所有的线索都指向了末地的“时间之伤”结构。是时候前往那里，获得重铸最终之剑的最后一块拼图。在一片漂浮于虚空之上的花园中，沉睡着曾铸造了最终之剑的女皇，虽然现在她只是一缕过去的影子，但是你依然可以感觉到她作为往日最终之剑主人的强大。做好万全准备，接受她带来的试炼吧。
 
-**文件命名规则：** 官方剑和盔甲升级配方以输出等级命名。例如，`dragon_crystal_smithing_sword_level_6.json` 的产物是 6 级剑。自定义配方文件名不强制遵循该规则。
+_注意！这是一个 OP Boss,挑战难度较大。_
+[![8.png](https://i.postimg.cc/MX2V5tks/8.png)](https://postimg.cc/7J95Y3Z7)
+# 相关设定
+## 终焉种
 
-**配方格式示例：**
+本 Mod 新增的实体类型，据传它们来自于末地的虚空之下。终焉种各有不同的等级，等级越高，终焉种的实力也会越强。
+
+| 等级          | 攻击能力                                  | 防御能力                                                            |
+|-------------|---------------------------------------|-----------------------------------------------------------------|
+| **1—5 级**   | 无额外效果。                                | 具有自定义生命值与基础的清除抵抗；单次受到的普通伤害超过限额时，将伤害降低至限额。                       |
+| **6—12 级**  | 造成伤害时，额外附加相当于原伤害 **等级 × 1%** 的绝对毁灭伤害。 | 具有自定义生命值与基础的清除抵抗；单次受到的普通伤害超过限额时，直接豁免此次伤害。                       |
+| **13 级及以上** | 造成伤害时，额外附加相当于原伤害 **等级 × 1%** 的绝对毁灭伤害。 | 具有自定义生命值与基础的清除抵抗；单次受到的普通伤害超过限额时，直接豁免此次伤害；并在自定义生命尚未耗尽时，如果死亡则会复活。 |
+
+*伤害限额由具体实体与配置决定。绝对毁灭伤害独立结算，不受表中普通伤害限额约束。*
+
+## 危险技能
+
+一些终焉种拥有“危险技能”（危招），它们对玩家会具有一定的威胁，在释放危招前，会有警报声并出现本次危招的红色范围渲染来提醒玩家。
+
+## 绝对毁灭伤害
+
+一种真实伤害，可以绕过护甲与常规减伤，并且不受终焉种的限伤约束。除了扣除目标的生命值，还会按一定比例削减其“现世锚度”。这种伤害既能由玩家造成，也存在于部分敌人的攻击与技能中。
+
+## 现世锚度
+
+每个生物都拥有的一个独立于当前生命值的数值，初始等于其最大生命值。绝对毁灭伤害会削减现世锚度，当现世锚度耗尽时，目标将被直接斩杀。 受到绝对毁灭伤害后，存活的目标会进入一段时间的“现世剥离”状态，期间生命值无法超过剩余的现世锚度。现世剥离结束后，生命值限制解除，后续治疗也能恢复损失的现世锚度。
+
+## 肃正防御
+
+一种按次数抵挡伤害的护盾，每次消耗 1 点即可抵消一次伤害，不受伤害数值大小影响，也能抵挡绝对毁灭伤害。当持有者死亡时，若剩余护盾至少有 2 点，则消耗 2 点护盾阻止死亡并恢复至最大生命值。具有肃正防御上限的生物会根据“肃正防御恢复速度”属性逐渐恢复护盾，直至达到上限。
+
+## 等级
+
+本模组中部分物品拥有 0 到 13 的等级，大部分物品的等级直接影响其数值，你可以在龙水晶锻造台上升级你的物品。
+
+## 模式
+
+本模组中部分物品拥有模式，按下模式切换键（默认：左 Ctrl）可以循环切换不同模式。
+
+# 杂项
+## 旧貌锻新颜
+
+本 Mod 为最终之剑添加了全面翻新的材质！如果你喜欢怀旧风格，可以启用内置的"最终之剑经典材质包"（The Last Sword Classical Texture Pack）来使用 1.7.10 版本的原版材质。
+
+## json驱动的自定义系统
+
+本 Mod 提供了多种由 JSON 驱动的自定义功能来方便整合包作者。你可以调整龙水晶锻造配方、指定用于拜龙教伪装的装备，或扩展龙水晶附魔台的发电燃料。
+
+### [![the-last-sword-dragon-crystal-smithing-table.png](https://i.postimg.cc/htLd09tm/the-last-sword-dragon-crystal-smithing-table.png)](https://postimg.cc/NK0Fs2TG)自定义龙水晶锻造配方
+
+在游戏目录的 `config/the_last_sword/dragon_crystal_smithing_recipes/` 下新建 `.json` 文件，即可添加配方。支持使用子文件夹分类；多人游戏中，在服务端配置即可。下面以 `custom_sword_upgrade.json` 为例，使用 0 级龙水晶升级模板、0 级龙水晶剑和钻石，锻造出 1 级龙水晶剑：
+
 ```json
 {
   "type": "the_last_sword:dragon_crystal_smithing",
@@ -252,7 +401,7 @@ Mods with added compatibility content:
     "inputLevel": 0
   },
   "addition": {
-    "item": "the_last_sword:dragon_crystal"
+    "item": "minecraft:diamond"
   },
   "output": {
     "item": "the_last_sword:dragon_crystal_sword",
@@ -261,139 +410,115 @@ Mods with added compatibility content:
 }
 ```
 
-`template` 中的 `inputLevel` 对应第一个槽位，`input` 中的 `inputLevel` 对应第二个槽位，产物则会获得 `outputLevel`。对于独立的自定义配方，省略 `template.inputLevel` 会关闭模板等级检查，以兼容旧格式；第二槽位的 `inputLevel` 和 `outputLevel` 省略时默认为 0。覆盖官方配方的同名文件必须包含 `template.inputLevel`。
+`template`、`input` 和 `addition` 分别对应锻造台的三个输入槽，`output` 定义产物。两个 `inputLevel` 分别检查模板和基础物品的等级，`outputLevel` 决定产物等级。将物品 ID 和等级替换为你需要的内容即可。
+官方配方保存在模组 JAR 的 `data/the_last_sword/dragon_crystal_smithing_recipes/` 中。若要修改某个官方配方，将其复制到 config 配方目录，保留原始文件名后编辑保存，config 文件夹中和官方原始配方同名的文件会覆盖原始配方，若要新增配方则应使用不同的文件名。
+将配方文件改名为 `.disabled.json`、`.json.disabled` 或 `.json.disable` 后缀即可禁用它；同名的禁用文件也能禁用对应的官方配方。修改完成后，执行 `/reload`，或重启服务端，即可重新加载配方并同步给玩家。
 
-## 现代化的伤害数值
+### [![the-last-sword-dragon-crystal-enchanting-table.png](https://i.postimg.cc/wjXmkhjR/the-last-sword-dragon-crystal-enchanting-table.png)](https://postimg.cc/RW0hSJfv)使用数据包扩展装束与燃料
 
-考虑到 1.20.1 中大多数模组的伤害数值相比 1.7.10 较小，本Mod也进行了合理调整。现在，基础伤害数值为：
+以下两项通过数据包中的物品标签添加，在目标存档的 `datapacks/` 目录下创建 `the_last_sword_custom` 文件夹，并在其中新建 `pack.mcmeta`：
 
-- 龙水晶剑：12
-- 龙之剑：200
-- 最终之剑：1024
+```json
+{
+  "pack": {
+    "pack_format": 15,
+    "description": "最终之剑拜龙教自定义装束与燃料"
+  }
+}
+```
 
-当然，我们也提供了配置选项让玩家控制每次升级的伤害加成。你可以在 `config/TheLastSword-common.toml` 中调整 `Increase Value` 来控制 0-5 级的伤害加成，以及 `Increase Value High Level` 来控制 6-13 级的伤害加成。
+再按下方路径创建所需的标签文件。完整目录结构如下，两种标签可以只添加其中一种：
 
-***
+```text
+the_last_sword_custom/
+├── pack.mcmeta
+└── data/
+    └── the_last_sword/
+        └── tags/
+            └── items/
+                ├── dragon_cult_disguise.json
+                └── dragon_crystal_enchanting_table_fuel.json
+```
 
-# 玩法介绍
+#### 拜龙教装束
 
-## <img src="https://i.postimg.cc/VNGn9XQf/the-last-sword-the-last-end-scroll.png" alt="战斗机制" height="32"> 战斗机制
+在 `data/the_last_sword/tags/items/dragon_cult_disguise.json` 中填写可用于伪装拜龙教的装备。例如，以下内容将整套皮革盔甲加入拜龙教装束：
 
-### 绝对毁灭伤害（Absolute Destruction Damage）
+```json
+{
+  "replace": false,
+  "values": [
+    "minecraft:leather_helmet",
+    "minecraft:leather_chestplate",
+    "minecraft:leather_leggings",
+    "minecraft:leather_boots"
+  ]
+}
+```
 
-这是一种极其强大的真实伤害，能够绕过大多数模组的自定义生命值防御机制。它还会施加一段时间的禁疗效果。当伤害值超过实体的剩余生命值时，会直接斩杀该实体，并暂时阻止该实体类型的生成。
+玩家的头盔、胸甲、护腿和靴子四个槽位都穿着标签内的装备时，伪装才会成立，拜龙教不会将其选为主动攻击的玩家目标。标签内的装备可以混搭，也可以填写其他模组的装备 ID。
 
-这种伤害不仅可以由玩家造成，某些敌对实体也能造成。因此，玩家需要尽可能避免被这种伤害命中——这就需要一种新的护盾属性。
+#### 龙水晶附魔台燃料
 
-### 肃正防御护盾（Justified Defence Shield）
+在 `data/the_last_sword/tags/items/dragon_crystal_enchanting_table_fuel.json` 中填写可用于发电的物品。例如，以下内容允许使用煤炭和木炭发电：
 
-该护盾属性显示为白色盾牌图标（灵感来自《Fate/Grand Order》）。每次受到伤害时，消耗 1 点即可抵消一次任意数值的伤害（包括绝毁伤害）。另外，当玩家死亡时，消耗 2 点可以复活玩家，这使其成为面对本模组某些实体时不可或缺的防御机制。
+```json
+{
+  "replace": false,
+  "values": [
+    "minecraft:coal",
+    "minecraft:charcoal"
+  ]
+}
+```
 
-按下防御配置键（默认：左 Alt）可以打开防御配置界面，在这里可以开关护盾叠加层显示、将其调整到 HUD 上的任意位置，也可以调整装备设置。
+加入标签的物品可以放入龙水晶附魔台的燃料槽并被消耗发电。所有燃料使用相同的公共配置决定发电时长与速度，标签本身不设置每种燃料的能量值。
 
-### 虚化 Buff
+上述示例中的 `replace: false` 会保留原有标签内容并追加新物品；改为 `true` 则会让数据包的内容覆盖最终之剑原始的官方内容。保存后，可以在目标世界中执行 `/reload`，使用 `/datapack list enabled` 确认数据包已启用。
 
-处于虚化状态时，玩家会短暂地与世界隔离，能够像旁观者模式一样穿墙而过！此外，在此效果期间还会获得强大的防御。
+## 更强的末影龙与随机名称
 
-## 物品
+当你参与击杀末地的末影龙时，将会获得额外的龙蛋奖励，即使你已经战胜过它。然而，每次末影龙重生时都会带着更强的力量归来，它的生命值、护甲和攻击力都会随挑战次数提升，获得具有独特能力的名称并显示等级。末影龙随机获得的名称如下：
 
-### <img src="https://i.postimg.cc/C1SVwn6V/the-last-sword-dragon-crystal.png" alt="龙水晶" height="32"> 龙水晶
+- **“时间龙神”阿卡托什**：最大生命值、攻击力、护甲值和护甲韧性增加 100%，额外获得 2 点临时肃正防御。受到攻击时有 10% 概率取消此次攻击；每 30 秒进行一次恢复判定，有 1% 概率将生命值恢复至最大值。恢复成功后进入 60 秒冷却，冷却结束时进行下一次判定。
 
-一切开始于你将龙蛋分解为龙水晶。
+- **“龙王”普拉顿桑克斯**：最大生命值、攻击力、护甲值和护甲韧性增加 100%。受到攻击时有 1% 概率取消此次攻击。生命值降至最大生命值的 50%、25% 和 5% 或以下时，各触发一次持续 6 秒的虚化与雷暴。雷暴期间，每秒随机选择周围半径 64 格内的一个可攻击生物降下闪电。每个生命值阈值仅触发一次，一次伤害跨过多个阈值时，持续时间不会叠加。
 
-![龙水晶配方](https://i.postimg.cc/8k6SRwdB/chapter_recipe_1_1.png)
+- **“世界吞噬者”奥杜因**：最大生命值、攻击力、护甲值和护甲韧性增加 100%，额外获得 2 点临时肃正防御。每 30 秒召唤一轮包含 16 枚火球的火球雨，优先朝周围半径 64 格内的可攻击生物所在区域落下。每击杀一个其他生物，获得一层 100% 的攻击力加成，最多累积 1000 层；击杀加成按层数线性累加，并非每次击杀都将当前攻击力翻倍。
 
-接下来，你需要制作龙水晶升级模板和龙水晶锻造台——它们是你铸剑之路的基础。
+- **帕图纳克斯**：最大生命值、攻击力、护甲值和护甲韧性增加 50%，飞行速度属性增加 50%。
 
-![龙水晶升级模板配方](https://i.postimg.cc/DfXTr5Q1/chapter_recipe_2_1.png)
-![龙水晶锻造台配方](https://i.postimg.cc/tRxj3Ddh/chapter_recipe_2_2.png)
+- **傲达威英**：每 60 秒召唤一轮包含 16 枚火球的火球雨，优先朝周围半径 64 格内的可攻击生物所在区域落下。
 
-### <img src="https://i.postimg.cc/6Tx2Q3r7/dragonsword.png" alt="剑" height="32"> 剑
+- **杜耐维尔**：每秒向周围半径 16 格内的其他存活生物施加虚弱 V 和中毒 V，每次效果持续 3 秒。在范围内停留时，效果会持续刷新。
 
-#### 等级
+- **“狂龙”贝勒**：最大生命值减少 50%，攻击力增加 300%。接触攻击会使目标燃烧 60 秒。
 
-本模组中所有的剑都拥有 0 到 13 的等级系统。剑的等级直接影响其额外伤害输出——等级越高，额外伤害越多。你可以在龙水晶锻造台上升级你的剑。
+- **“老龙”桂奥尔**：最大生命值增加 300%，攻击力、护甲值和护甲韧性减少 50%，飞行速度属性降低 50%。
 
-#### 模式
+*阿卡托什与奥杜因获得的 2 点肃正防御属于临时护盾，不会增加护盾上限，也不会自动恢复。护甲韧性基础值为 0 时，增加 100% 的名称效果实际提供 4 点护甲韧性，增加 50% 提供 2 点，减少 50% 则仍为 0*
 
-龙之剑和最终之剑拥有模式。按下模式切换键（默认：左 Ctrl）可以循环切换不同模式。每种模式会改变剑的右键技能，而左键始终为近战攻击。
+此外，龙祭司也会在生成时获得随机的名称：
 
-#### 升级路线
+- **赫夫诺拉克（Hevnoraak）**：免疫负面效果，并每秒清除一次身上的负面效果。
 
-**下界合金剑 → 龙水晶剑（0-5 级）**
+- **克洛西斯（Krosis）**：受到伤害时，有 30% 概率获得持续 3 秒的隐身效果。
 
-首先，你需要在原版锻造台上使用龙水晶升级模板、下界合金剑和龙水晶将其转化为龙水晶剑。后续升级在龙水晶锻造台上完成。
+- **莫洛凯（Morokei）**：雷电、龙息和守护技能的冷却时间减少 50%。
 
-该剑造成物理伤害的同时附加基于等级的额外魔法伤害，右键可发射钻石弹射物。
+- **纳克林（Nahkriin）**：雷电和龙息技能的伤害增加 50%。
 
-![龙水晶剑配方](https://i.postimg.cc/ryrk1gGx/chapter_recipe_3_1.png)
+- **欧塔（Otar）**：自身受到的伤害减少 30%。
 
-升级龙水晶剑需要在龙水晶锻造台上使用龙水晶升级模板、龙水晶剑和龙水晶。
+- **拉赫戈特（Rahgot）**：免疫常规击退。
 
-![龙水晶剑升级配方](https://i.postimg.cc/ZYdS8jPc/chapter_recipe_3_2.png)
+- **沃昆（Vokun）**：每次释放技能时，有 10% 概率召唤一名拜龙教信徒。
 
-**龙水晶剑 → 龙之剑（6-12 级）**
+- **沃尔松（Volsung）**：每 0.5 秒吸引一次附近的村民与流浪商人，使其向自己走来。搜索范围为自身碰撞箱向各方向扩展 8 格的区域。
 
-继续升级即可获得龙之剑，该剑在造成物理伤害时额外附加龙息伤害。它有 2 种模式：
-- 普通模式：右键发射龙水晶弹射物
-- 唤灵模式：右键召唤或召回你的剑灵
+- **科纳瑞克（Konahrik）**：释放守护技能时，有 10% 概率恢复相当于自身最大生命值 50% 的生命值，恢复后不超过最大生命值。每秒在自身周围产生龙息，对以身体中心为中心的 3×3×3 格区域内可攻击的生物造成龙息伤害。每次释放技能时，有 1% 概率召唤一名龙祭司。
 
-![龙之剑配方](https://i.postimg.cc/3rvTX9j1/chapter_recipe_3_3.png)
-
-升级龙之剑需要在龙水晶锻造台上使用龙水晶升级模板、龙之剑和龙蛋。
-
-![龙之剑升级配方](https://i.postimg.cc/BZK0TN5M/chapter_recipe_3_4.png)
-
-**龙之剑 → 最终之剑（13 级）**
-
-恭喜，你终于重铸了这把传说中的武器！该剑在造成物理伤害时额外附加绝毁伤害。它有 3 种模式：
-- 普通模式：左键可挖掘大部分方块并进行近战攻击，右键发射末影水晶弹射物
-- 强力挖掘模式：右键选中范围内的方块，再次右键将其摧毁
-- 唤灵模式：左键对前方 6 格范围内的目标造成范围攻击，右键召唤或召回你的剑灵
-
-此外，背包中持有最终之剑可获得飞行能力、移除所有物品冷却时间，并提供防御保护。
-
-### <img src="https://i.postimg.cc/Hx7k7ms9/dragon_crystal_helmet.png" alt="盔甲" height="32"> 盔甲
-
-#### 龙水晶盔甲
-
-每件装备穿戴后提供药水效果：头盔提供夜视和水下呼吸，胸甲提供伤害抗性和力量，护腿提供再生和跳跃提升，靴子提供速度和火焰抗性。
-
-穿戴全套激活“水晶护佑”：获得等同于最大生命值的护盾，并定期刷新。
-
-#### 龙之战甲
-
-一套强大的活体盔甲，需要 FE 能量才能发挥全部功能。每件装备提供与龙水晶盔甲类似但更强的效果，通电时效果提升一个等级。
-
-胸甲提供飞行能力（消耗能量）。穿戴全套并通电时，获得来自非玩家攻击和爆炸的 90% 伤害减免。其余耗能功能——饱和、免疫火焰与冰冻、以及允许你穿越方块的虚化状态——都以模块形式提供，可在装备设置界面中单独开关。
-
-### <img src="https://i.postimg.cc/RVjq1GDg/the_last_sword_dragon_crystal_enchanting_table.png" alt="方块" height="32"> 方块
-
-#### 龙水晶锻造台
-
-用于升级剑和制作盔甲的工作站。它有 3 个输入槽（模板、基础物品和附加材料），类似原版锻造台。所有配方都可以通过配置文件夹中的 JSON 文件自定义。
-
-#### 龙水晶附魔台
-
-它是科技与魔法的完美融合，可以消耗 FE 能量来施加附魔，也可以使用龙水晶作为燃料发电。
-
-### <img src="https://i.postimg.cc/Y0Gy1pvy/dragon-crystal-ring.png" alt="饰品" height="32"> 饰品
-
-你可以在新增结构的箱子中找到一些稀有宝物，这些结构分布于末地、下界和主世界：龙水晶项链、龙水晶指环、覆世之翼、极限维生装置、维度探索者和远古能量核心，每一件都有独特且强大的效果。
-
-## <img src="https://i.postimg.cc/Jnm162NG/dragon-crystal-soul-stone-full-4.png" alt="召唤你的剑灵" height="32"> 召唤你的剑灵！
-
-你可以制作龙晶魂石和龙魂灯，通过击杀实体将其灵魂绑定到魂石中，使其成为你的剑灵。使用龙魂灯或其他拥有召唤模式的物品，你可以召唤对应的剑灵为你而战！这些实体会根据你武器的等级获得不同程度的强化。剑灵之间通常不会互相伤害，但某些模组的攻击实现方式可能导致友军误伤同伴或主人。
-
-按下唤灵 GUI 键（默认：Z）可以打开唤灵界面，将龙晶魂石放入专属槽位。放在其中的魂石会绑定为你当前生效的魂石，因此使用唤灵模式时无需手持魂石也能召唤对应的剑灵。
-
-如果你相信自己足够强大，可以前往末地的封印尖塔，解放一位被封印已久的骑士。在给予祂安息之后，你将能够召唤一位强大而忠诚的骑士——终焉剑灵，祂将为你扫清重铸最终之剑路上的障碍（当然，祂并非无敌）。
-
-## 更强的末影龙
-
-当你参与击杀末地的末影龙时，将会获得额外的龙蛋奖励，即使你已经战胜过它。然而，每次末影龙重生时都会带着更强的力量归来，它的生命值、护甲和攻击力都会随挑战次数提升，并在名称上显示等级。
-
-***
+- **米拉克（Miraak）**：最大生命值、攻击力、护甲值和护甲韧性增加 100%；护甲韧性基础值为 0 时，改为增加 4 点。受到生物攻击，或技能成功伤害生物时，有 1% 概率尝试控制对方。目标为可驯服动物或马类时，会被收为自己的仆从；目标为玩家时，改为施加持续 10 秒的缓慢 III、虚弱 III 和反胃 III，其他类型的生物不会被收为仆从。
 
 ## 依赖
 

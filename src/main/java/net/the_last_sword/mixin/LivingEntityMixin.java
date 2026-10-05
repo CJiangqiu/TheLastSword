@@ -573,14 +573,17 @@ public class LivingEntityMixin {
     private void onLivingEntityDie(DamageSource damageSource, CallbackInfo ci) {
         LivingEntity entity = (LivingEntity) (Object) this;
 
-        //肃正防御兜底：死亡时仍有护盾则消耗一层并恢复满血
-        if (the_last_sword$consumeShield(entity, 1)) {
+        if (DefenceEventHandler.getShieldValue(entity) >= 2
+                && the_last_sword$consumeShield(entity, 2)) {
             TrueHealthManager.setHealth(entity, entity.getMaxHealth());
             ci.cancel();
             return;
         }
 
-        if (EntityUtil.hasProtection(entity)) {
+        //护盾提供的通用保护不能绕过复活所需的点数。
+        boolean shieldOnlyProtection = entity.getPersistentData().getBoolean("JustifiedDefenceProtection")
+                && !entity.getPersistentData().getBoolean("TheLastSwordDefence");
+        if (EntityUtil.hasProtection(entity) && !shieldOnlyProtection) {
             ci.cancel();
         }
     }
