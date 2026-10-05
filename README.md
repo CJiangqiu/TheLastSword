@@ -288,13 +288,13 @@ Mods with added integrations or compatibility support:
 <p style="text-align:center"><em>在过去的纪元里，无数冒险者都曾追寻一把传说中的武器。</em></p>
 <p style="text-align:center"><em>然而岁月流转，剑已破碎，铸造它的女皇销声匿迹。</em></p>
 <p style="text-align:center"><em>如今，散落的线索再次汇聚，指向末地，而这段被遗忘的故事，即将迎来它的续写者。</em></p>
-<p style="text-align:center"><em>纵使前路艰难，纵使剑已破碎，也请踏上旅程，重铸那把——你从未忘记的最终之剑。</em></p>
+<p style="text-align:center"><em>纵使前路艰限、剑已破碎，也请踏上旅程，重铸那把——你从未忘记的最终之剑。</em></p>
 
 ***
 
 ***注意：本模组在 1.1.0 版本进行了重构。以下所有内容仅适用于 1.1.0 及之后的版本。不建议下载过时版本！***
 
-这是经原作者 [queenofsquiggles](https://www.curseforge.com/members/queenofsquiggles/projects) 授权制作的 [The Last Sword](https://www.curseforge.com/minecraft/mc-mods/last-sword-you-will-ever-need-mo) 重制版。本Mod着重于在现代 Minecraft 版本中对最终之剑进行冒险向内容扩展和玩法增强。因此，游戏体验可能不会那么"怀旧"。如果你更喜欢经典的最终之剑体验，请访问[另一位作者的 Fabric 分支](https://www.curseforge.com/minecraft/mc-mods/the-last-sword-you-will-ever-need-remastered)。
+这是经原作者 [queenofsquiggles](https://www.curseforge.com/members/queenofsquiggles/projects) 授权制作的 [The Last Sword](https://www.curseforge.com/minecraft/mc-mods/last-sword-you-will-ever-need-mo) 重制版。本 Mod 着重于在现代 Minecraft 版本中对最终之剑进行冒险向内容扩展和玩法增强。因此，游戏体验可能不会那么"怀旧"。如果你更喜欢经典的最终之剑体验，请访问[另一位作者的 Fabric 分支](https://www.curseforge.com/minecraft/mc-mods/the-last-sword-you-will-ever-need-remastered)。
 您可以前往本 Mod 的[官方 wiki ](https://github.com/CJiangqiu/TheLastSword/wiki)了解更加详细的内容。
 本 Mod 的部分灵感来源于《上古卷轴5：天际》、《艾尔登法环》、《Fate:Grand Order》等作品。
 ***
