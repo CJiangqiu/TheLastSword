@@ -186,7 +186,7 @@
   "gui.the_last_sword.module.life_support.saturation": "消耗電量獲得飽和",
   "gui.the_last_sword.module.life_support.ice_fire_immunity": "消耗電量冰火不侵",
   "gui.the_last_sword.module.dragon_shield.enabled": "耗電強化龍之護盾減傷",
-  "gui.the_last_sword.module.dragon_shield.dragon_aura": "耗電啟用龍威立場",
+  "gui.the_last_sword.module.dragon_shield.dragon_aura": "耗電啟用龍威力場",
   "gui.the_last_sword.module.dragon_shield.shield": "護盾特效: %s",
   "gui.the_last_sword.module.dragon_shield.shield.enabled": "開啟",
   "gui.the_last_sword.module.dragon_shield.shield.disabled": "關閉",

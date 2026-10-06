@@ -208,7 +208,7 @@
   "gui.the_last_sword.justified_defence_position.save": "保存并返回",
   "gui.the_last_sword.justified_defence_position.title": "肃正防御叠加层位置调整",
   "gui.the_last_sword.module.anti_gravity.enable_inertia": "飞行惯性",
-  "gui.the_last_sword.module.dragon_shield.dragon_aura": "耗电启用龙威立场",
+  "gui.the_last_sword.module.dragon_shield.dragon_aura": "耗电启用龙威力场",
   "gui.the_last_sword.module.dragon_shield.enabled": "耗电强化龙之护盾减伤",
   "gui.the_last_sword.module.dragon_shield.shield": "护盾特效: %s",
   "gui.the_last_sword.module.dragon_shield.shield.disabled": "关闭",
