@@ -653,7 +653,7 @@ public class TheLastSwordConfiguration {
             .define("Crystal Guard Refresh Interval", 600);
         BUILDER.pop();
 
-        // Dragon Armor Settings | 龙之战甲设置
+        // Dragon Armor Settings | 龙之套装设置
         BUILDER.push("Dragon Armor");
         DRAGON_ARMOR_ENERGY_PER_LEVEL = BUILDER
             .comment(
@@ -706,7 +706,7 @@ public class TheLastSwordConfiguration {
                 "Detection range for End Crystal charging (blocks)",
                 "Players within this range wearing Dragon Armor will be charged",
                 "末影水晶充能的检测范围（格）",
-                "穿戴龙之战甲且处于此范围内的玩家将被充能"
+                "穿戴龙之套装且处于此范围内的玩家将被充能"
             )
             .defineInRange("Ender Crystal Range", 8, 2, 32);
         DRAGON_ARMOR_PERCEPTION_GLOW_DURATION = BUILDER

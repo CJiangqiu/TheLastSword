@@ -49,9 +49,9 @@ Craft a Dragon Crystal Upgrade Template and a Dragon Crystal Smithing Table to u
 
 ## [![Ancient Energy Core](https://i.postimg.cc/FH5ScPNz/the-last-sword-ancient-energy-core.png)](https://postimg.cc/nC2MfGsf) Power, More Power!
 
-You can obtain an Ancient Energy Core by trading with a Wandering Trader or exploring ruins in the End. Crafted long ago by beings of The Last End living beneath the void, these cores help you upgrade Dragon Crystal Armor into Dragon War Armor. Once you obtain this advanced armor, it may seem less powerful than you expected—you need to charge it with FE energy to unlock its full potential.
+You can obtain an Ancient Energy Core by trading with a Wandering Trader or exploring ruins in the End. Crafted long ago by beings of The Last End living beneath the void, these cores help you upgrade Dragon Crystal Armor into Dragon Armor. Once you obtain this advanced armor, it may seem less powerful than you expected—you need to charge it with FE energy to unlock its full potential.
 
-While you wear Dragon War Armor, nearby End Crystals will treat you as a friendly Ender Dragon and charge your equipment! If their charging rate is not enough, you can also use a Disposable Energy Battery. These batteries are obtained in the same ways as Ancient Energy Cores.
+While you wear Dragon Armor, nearby End Crystals will treat you as a friendly Ender Dragon and charge your equipment! If their charging rate is not enough, you can also use a Disposable Energy Battery. These batteries are obtained in the same ways as Ancient Energy Cores.
 
 You can also craft a Dragon Crystal Enchanting Table to generate power. Despite its name, it doubles as a generator, using Dragon Crystal as its default fuel. Place fuel in the red slot on the left to generate energy, then put equipment that needs charging into the green slot on the right. Equipment that uses standard FE energy is supported.
 
