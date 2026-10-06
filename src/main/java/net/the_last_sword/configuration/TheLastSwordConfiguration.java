@@ -141,7 +141,7 @@ public class TheLastSwordConfiguration {
     public static ForgeConfigSpec.ConfigValue<Boolean> THE_LAST_END_ENTITY_ENABLE_ALL_THINGS_END;
     public static ForgeConfigSpec.ConfigValue<Boolean> THE_LAST_END_ENTITY_ENABLE_VOID_RESCUE;
 
-    // The Last End Sword Wraith | 终焉剑灵配置
+    // The-Last-End Sword Wraith | 终焉剑灵配置
     public static ForgeConfigSpec.ConfigValue<Boolean> THE_LAST_END_SWORD_WRAITH_ENABLE_BATTLE_MUSIC;
     public static ForgeConfigSpec.ConfigValue<Boolean> THE_LAST_END_SWORD_WRAITH_ENABLE_SUMMON_TALK;
 
@@ -263,7 +263,7 @@ public class TheLastSwordConfiguration {
     public static ForgeConfigSpec.ConfigValue<Double> THE_LAST_END_SWORD_PROJECTILE_EXTRA_DAMAGE_MULTIPLIER;
     public static ForgeConfigSpec.ConfigValue<Double> THE_LAST_END_SWORD_PROJECTILE_AOE_RADIUS;
 
-    // The Last End Sword Wraith Skills | 终焉剑灵技能配置
+    // The-Last-End Sword Wraith Skills | 终焉剑灵技能配置
     // Swift Thrust | 迅捷突刺
     public static ForgeConfigSpec.ConfigValue<Double> SKILL_SWIFT_DASH_DAMAGE_MULTIPLIER;
     public static ForgeConfigSpec.ConfigValue<Double> SKILL_SWIFT_DASH_RANGE;
@@ -500,7 +500,7 @@ public class TheLastSwordConfiguration {
             .define("Normal Mode Can Mine", true);
         DRAGON_SWORD_SUMMON_MODE_CAN_MINE = BUILDER
             .comment(
-                "Allow Dragon Sword to mine blocks in summon mode",
+                "Allow Dragon Sword to mine blocks in Sword Wraith Summoning Mode",
                 "允许龙之剑在唤灵模式下挖掘方块"
             )
             .define("Summon Mode Can Mine", true);
@@ -568,7 +568,7 @@ public class TheLastSwordConfiguration {
             .define("Normal Mode Can Mine", true);
         THE_LAST_SWORD_SUMMON_MODE_CAN_MINE = BUILDER
             .comment(
-                "Allow The Last Sword to mine blocks in summon mode",
+                "Allow The Last Sword to mine blocks in Sword Wraith Summoning Mode",
                 "允许最终之剑在唤灵模式下挖掘方块"
             )
             .define("Summon Mode Can Mine", true);
@@ -1055,11 +1055,11 @@ public class TheLastSwordConfiguration {
             .define("Enable All Things End Auto Trigger", true);
         BUILDER.pop();
 
-        // The Last End Sword Wraith Settings | 终焉剑灵设置
+        // The-Last-End Sword Wraith Settings | 终焉剑灵设置
         BUILDER.push("The Last End Sword Wraith");
         THE_LAST_END_SWORD_WRAITH_ENABLE_BATTLE_MUSIC = BUILDER
             .comment(
-                "Enable battle music when The Last End Sword Wraith in battle",
+                "Enable battle music when The-Last-End Sword Wraith is in battle",
                 "终焉剑灵进入战斗时启用战斗音乐"
             )
             .define("Enable Spawn Music", true);
@@ -1212,7 +1212,7 @@ public class TheLastSwordConfiguration {
 
         BUILDER.pop(); // End Skills
 
-        BUILDER.pop(); // End The Last End Sword Wraith
+        BUILDER.pop(); // End The-Last-End Sword Wraith
 
         // Lost Wraith Settings | 迷失战魂设置
         BUILDER.push("Lost Wraith");

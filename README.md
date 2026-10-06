@@ -59,11 +59,11 @@ You can also craft a Dragon Crystal Enchanting Table to generate power. Despite 
 
 ## [![Dragon Soul Lantern](https://i.postimg.cc/TPTWNpKt/the-last-sword-dragon-soul-lantern.png)](https://postimg.cc/v4SBc8Ln) Summon Sword Wraiths
 
-You do not have to adventure alone. Through Spirit Calling, former enemies can become allies who fight at your side. Craft a Dragon Crystal Soul Stone and a Dragon Soul Lantern. Activate the lantern by wearing it as an accessory or placing it on Obsidian or Crying Obsidian, and keep an empty Dragon Crystal Soul Stone in your inventory. Slay an entity to bind its soul to the stone and turn it into your sword wraith.
+You do not have to adventure alone. Through Sword Wraith Summoning, former enemies can become allies who fight at your side. Craft a Dragon Crystal Soul Stone and a Dragon Soul Lantern. Activate the lantern by wearing it as an accessory or placing it on Obsidian or Crying Obsidian, and keep an empty Dragon Crystal Soul Stone in your inventory. Slay an entity to bind its soul to the stone and turn it into your Sword Wraith.
 
-Use the Dragon Soul Lantern or another item with Summon Mode to summon the corresponding sword wraith. Its strength increases according to the level of the item used to summon it. Sword wraiths generally do not harm one another, although some mods' attack implementations may cause friendly fire against companions or the owner.
+Use the Dragon Soul Lantern or another item with Sword Wraith Summoning Mode to summon the corresponding Sword Wraith. Its strength increases according to the level of the item used to summon it. Sword Wraiths generally do not harm one another, although some mods' attack implementations may cause friendly fire against companions or the owner.
 
-Press the Open Summon Wraith GUI key (default: Z) to open the Summon Wraith screen and place a Dragon Crystal Soul Stone in its dedicated slot. The stone in that slot becomes your active soul stone, allowing Summon Mode to call its sword wraith without requiring you to hold the stone.
+Press the Open Sword Wraith Summoning Screen key (default: Z) to open the Sword Wraith Summoning screen and place a Dragon Crystal Soul Stone in its dedicated slot. The stone in that slot becomes your active soul stone, allowing Sword Wraith Summoning Mode to call its Sword Wraith without requiring you to hold the stone.
 
 [![Summoning sword wraiths](https://i.postimg.cc/DmkL65Vx/7.png)](https://postimg.cc/p5CmXfLj)[![7-2.png](https://i.postimg.cc/c19nJxrk/7-2.png)](https://postimg.cc/JtXn6W3j)
 
