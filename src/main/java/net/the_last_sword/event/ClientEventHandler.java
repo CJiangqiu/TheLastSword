@@ -14,6 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
@@ -73,6 +74,11 @@ public class ClientEventHandler {
     //龙魂灯笼渲染相关
     private static final double LANTERN_RANGE = 8.0;
     private static final double LANTERN_SEARCH_RANGE = 16.0;
+    private static final int LANTERN_SCAN_INTERVAL_TICKS = 5;
+    private static final List<BlockPos> LANTERN_SEARCH_OFFSETS = createLanternSearchOffsets();
+    private static List<BlockPos> cachedActiveLanterns = List.of();
+    private static Level lanternCacheLevel;
+    private static int lanternScanTicksRemaining;
 
     //球体渲染缓冲区（静态重用，避免内存泄漏）
     private static BufferBuilder sphereBufferBuilder = null;
@@ -184,6 +190,7 @@ public class ClientEventHandler {
     //断开服务器后清空服务端配方，避免切换服务器期间沿用上一台服务器的数据
     @SubscribeEvent
     public static void onPlayerLogout(ClientPlayerNetworkEvent.LoggingOut event) {
+        clearLanternCache();
         QueenExecutionCamera.clear();
         QueenTripleSlashScreenShake.clear();
         JustifiedDefenceFlash.clear();
@@ -262,6 +269,7 @@ public class ClientEventHandler {
             DangerousSkillPreviewRenderer.tick();
             LostWraithEndStrikeEffectRenderer.tick();
             Minecraft mc = Minecraft.getInstance();
+            updateLanternCache(mc);
 
             //检查防御配置按键
             while (ModKeyMappings.OPEN_DEFENCE_CONFIG.consumeClick()) {
@@ -519,10 +527,53 @@ public class ClientEventHandler {
 
     //========== 龙魂灯笼范围渲染方法 ==========
 
+    private static void clearLanternCache() {
+        cachedActiveLanterns = List.of();
+        lanternCacheLevel = null;
+        lanternScanTicksRemaining = 0;
+    }
+
+    private static void updateLanternCache(Minecraft mc) {
+        if (mc.level == null || mc.player == null) {
+            clearLanternCache();
+            return;
+        }
+        // 比较世界实例，避免重进同一维度时沿用旧缓存。
+        if (lanternCacheLevel != mc.level) {
+            clearLanternCache();
+            lanternCacheLevel = mc.level;
+        }
+        if (mc.isPaused()) {
+            return;
+        }
+        // 移动时也遵守扫描间隔，避免跨方块刷新抵消节流效果。
+        if (lanternScanTicksRemaining > 0) {
+            lanternScanTicksRemaining--;
+            return;
+        }
+        cachedActiveLanterns = findNearbyActiveLanterns(mc.level, mc.player.blockPosition());
+        lanternScanTicksRemaining = LANTERN_SCAN_INTERVAL_TICKS - 1;
+    }
+
+    private static List<BlockPos> createLanternSearchOffsets() {
+        List<BlockPos> offsets = new ArrayList<>();
+        int range = (int) Math.ceil(LANTERN_SEARCH_RANGE);
+        double rangeSquared = LANTERN_SEARCH_RANGE * LANTERN_SEARCH_RANGE;
+        for (int x = -range; x <= range; x++) {
+            for (int y = -range; y <= range; y++) {
+                for (int z = -range; z <= range; z++) {
+                    if (x * x + y * y + z * z <= rangeSquared) {
+                        offsets.add(new BlockPos(x, y, z));
+                    }
+                }
+            }
+        }
+        return List.copyOf(offsets);
+    }
+
     //渲染所有激活的龙魂灯笼范围
     private static void renderDragonSoulLanternRanges(PoseStack poseStack, Camera camera, Level level) {
-        List<BlockPos> activeLanterns = findNearbyActiveLanterns(level, Minecraft.getInstance().player.blockPosition());
-        if (activeLanterns.isEmpty()) {
+        if (lanternCacheLevel != level || cachedActiveLanterns.isEmpty()) {
             return;
         }
 
@@ -541,7 +592,7 @@ public class ClientEventHandler {
         float blue = 1.0f;
         Matrix4f matrix = poseStack.last().pose();
 
-        for (BlockPos lanternPos : activeLanterns) {
+        for (BlockPos lanternPos : cachedActiveLanterns) {
             renderLanternRangeBox(buffer, matrix, lanternPos, red, green, blue, alpha);
         }
 
@@ -552,22 +603,17 @@ public class ClientEventHandler {
     //查找附近激活的龙魂灯笼
     private static List<BlockPos> findNearbyActiveLanterns(Level level, BlockPos playerPos) {
         List<BlockPos> lanterns = new ArrayList<>();
-        int range = (int) Math.ceil(LANTERN_SEARCH_RANGE);
-
-        for (int x = -range; x <= range; x++) {
-            for (int y = -range; y <= range; y++) {
-                for (int z = -range; z <= range; z++) {
-                    BlockPos checkPos = playerPos.offset(x, y, z);
-
-                    if (playerPos.distSqr(checkPos) <= LANTERN_SEARCH_RANGE * LANTERN_SEARCH_RANGE) {
-                        BlockState state = level.getBlockState(checkPos);
-                        if (state.getBlock() == ModBlocks.DRAGON_SOUL_LANTERN.get()) {
-                            if (isLanternActivated(level, checkPos)) {
-                                lanterns.add(checkPos);
-                            }
-                        }
-                    }
-                }
+        Block lanternBlock = ModBlocks.DRAGON_SOUL_LANTERN.get();
+        BlockPos.MutableBlockPos checkPos = new BlockPos.MutableBlockPos();
+        for (BlockPos offset : LANTERN_SEARCH_OFFSETS) {
+            checkPos.setWithOffset(playerPos, offset);
+            if (level.isOutsideBuildHeight(checkPos) || !level.hasChunkAt(checkPos)) {
+                continue;
+            }
+            BlockState state = level.getBlockState(checkPos);
+            if (state.is(lanternBlock) && isLanternActivated(level, checkPos)) {
+                // 缓存不能持有下一次循环会被修改的扫描坐标。
+                lanterns.add(checkPos.immutable());
             }
         }
 
