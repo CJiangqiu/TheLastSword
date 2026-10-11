@@ -1,10 +1,12 @@
 package net.the_last_sword.raid;
 
 import net.eca.api.RegisterRaid;
+import net.eca.util.raid.RaidBarState;
 import net.eca.util.raid.RaidContext;
 import net.eca.util.raid.RaidDefinition;
+import net.eca.util.raid.RaidMusicExtension;
 import net.eca.util.raid.RaidWave;
-import net.minecraft.network.protocol.game.ClientboundStopSoundPacket;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.StructureTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.sounds.SoundEvents;
@@ -16,6 +18,8 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.the_last_sword.faction.DragonCultFaction;
 import net.the_last_sword.init.ModEntities;
 import net.the_last_sword.init.ModItems;
@@ -30,6 +34,17 @@ public class DragonCultRaid extends RaidDefinition {
     private static final int HERO_OF_THE_VILLAGE_DURATION = 24 * 60 * 60 * 20;
     private static final int ENDER_EYE_REWARD = 16;
     private static final int RESULT_DISPLAY_TICKS = 12 * 20;
+    private static final RaidMusicExtension COMBAT_MUSIC = new RaidMusicExtension() {
+        @Override
+        public ResourceLocation soundEventId() {
+            return ModSounds.DRAGON_CULT_IS_COMING.getId();
+        }
+
+        @Override
+        public boolean loop() {
+            return false;
+        }
+    };
 
     @Override
     public String getId() {
@@ -76,16 +91,10 @@ public class DragonCultRaid extends RaidDefinition {
         return RESULT_DISPLAY_TICKS;
     }
 
+    @OnlyIn(Dist.CLIENT)
     @Override
-    public void onStart(RaidContext context) {
-        context.getLevel().playSound(
-            null,
-            context.getCenter(),
-            ModSounds.DRAGON_CULT_IS_COMING.get(),
-            SoundSource.MUSIC,
-            1.0F,
-            1.0F
-        );
+    public RaidMusicExtension combatMusicExtension(RaidBarState state) {
+        return COMBAT_MUSIC;
     }
 
     @Override
@@ -103,9 +112,6 @@ public class DragonCultRaid extends RaidDefinition {
     @Override
     public void onVictory(RaidContext context) {
         for (var player : context.getNearbyPlayers()) {
-            player.connection.send(new ClientboundStopSoundPacket(
-                    ModSounds.DRAGON_CULT_IS_COMING.getId(), SoundSource.MUSIC));
-
             //仅本次新获得「背水一战」进度的玩家播报并获赠装置，他人袭击不再重复发放
             boolean newlyCompleted = !TheLastSwordQuestHandler.isDone(
                     player, TheLastSwordQuestHandler.DRAGON_CULT_RAID_VICTORY);
