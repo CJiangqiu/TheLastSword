@@ -88,7 +88,7 @@ public class StaffOfUniversalTransmutationItem extends Item implements GeoItem {
 
     @Override
     public int getUseDuration(ItemStack stack) {
-        return TransmutationStaffBehavior.isTermination(stack) ? TransmutationStaffBehavior.TERMINATION_USE_TICKS : 0;
+        return TransmutationStaffBehavior.isTermination(stack) ? TransmutationStaffBehavior.getTerminationUseTicks() : 0;
     }
 
     @Override

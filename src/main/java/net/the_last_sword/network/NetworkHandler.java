@@ -14,7 +14,7 @@ import net.minecraft.server.level.ServerPlayer;
 //网络包管理器
 public class NetworkHandler {
 
-    private static final String PROTOCOL_VERSION = "15";
+    private static final String PROTOCOL_VERSION = "16";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "main"),

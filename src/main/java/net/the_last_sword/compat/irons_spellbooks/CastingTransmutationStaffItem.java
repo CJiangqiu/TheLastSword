@@ -104,7 +104,7 @@ public class CastingTransmutationStaffItem extends StaffItem implements GeoItem 
     @Override
     public int getUseDuration(ItemStack stack) {
         if (TransmutationStaffBehavior.isTermination(stack)) {
-            return TransmutationStaffBehavior.TERMINATION_USE_TICKS;
+            return TransmutationStaffBehavior.getTerminationUseTicks();
         }
         return TransmutationStaffBehavior.isTransmutation(stack) ? 0 : super.getUseDuration(stack);
     }

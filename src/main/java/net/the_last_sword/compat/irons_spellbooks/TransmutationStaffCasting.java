@@ -11,6 +11,8 @@ import net.the_last_sword.compat.CompatCheck;
 import net.the_last_sword.compat.projecte.TransmutationStaffActions;
 import net.the_last_sword.compat.projecte.TransmutationStaffBehavior;
 
+import net.the_last_sword.configuration.TheLastSwordConfiguration;
+
 import java.util.Map;
 import java.util.UUID;
 import java.util.WeakHashMap;
@@ -52,7 +54,7 @@ public final class TransmutationStaffCasting {
             attribute.removeModifier(POWER_MODIFIER);
         }
         attribute.addTransientModifier(new AttributeModifier(POWER_MODIFIER,
-            "Transmutation charge spell power", charge * 0.25, AttributeModifier.Operation.MULTIPLY_BASE));
+            "Transmutation charge spell power", charge * TheLastSwordConfiguration.getTransmutationStaffSpellPowerPerChargeSafely(), AttributeModifier.Operation.MULTIPLY_BASE));
         try {
             action.run();
         } finally {

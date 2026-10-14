@@ -9,6 +9,7 @@ import moze_intel.projecte.utils.EMCHelper;
 import moze_intel.projecte.utils.EntityRandomizerHelper;
 import moze_intel.projecte.utils.PlayerHelper;
 import moze_intel.projecte.utils.WorldTransmutations;
+import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -99,8 +100,9 @@ public final class TransmutationStaffActions {
         if (replacement == null) {
             return InteractionResult.CONSUME;
         }
-        if (EMCHelper.consumePlayerFuel(player, 384) == -1) {
-            reportInsufficientFuel(player, 384);
+        long cost = TheLastSwordConfiguration.getTransmutationStaffEntityEmcCostSafely();
+        if (cost > 0 && EMCHelper.consumePlayerFuel(player, cost) == -1) {
+            reportInsufficientFuel(player, cost);
             replacement.discard();
             return InteractionResult.CONSUME;
         }
@@ -123,7 +125,7 @@ public final class TransmutationStaffActions {
     public static boolean consumeCastingFuel(Player player, ItemStack stack) {
         long cost = TransmutationStaffBehavior.getProjectileCost(stack);
         // 保留燃料面额的余量，避免每次消耗整份燃料而浪费差额。
-        if (ItemPE.consumeFuel(player, stack, cost, true)) {
+        if (cost == 0 || ItemPE.consumeFuel(player, stack, cost, true)) {
             return true;
         }
         reportInsufficientFuel(player, cost);

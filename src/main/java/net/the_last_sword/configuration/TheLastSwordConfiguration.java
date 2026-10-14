@@ -25,6 +25,15 @@ public class TheLastSwordConfiguration {
     public static ForgeConfigSpec.ConfigValue<Integer> PRIEST_STAFF_GUARD_COOLDOWN;
     public static ForgeConfigSpec.ConfigValue<Double> TRANSMUTATION_STAFF_DAMAGE_PER_CHARGE;
     public static ForgeConfigSpec.ConfigValue<Long> TRANSMUTATION_STAFF_BASE_EMC_COST;
+    public static ForgeConfigSpec.ConfigValue<Double> TRANSMUTATION_STAFF_SPELL_POWER_PER_CHARGE;
+    public static ForgeConfigSpec.ConfigValue<Long> TRANSMUTATION_STAFF_ENTITY_EMC_COST;
+    public static ForgeConfigSpec.ConfigValue<Integer> TRANSMUTATION_STAFF_TERMINATION_CHARGE_TICKS;
+    public static ForgeConfigSpec.ConfigValue<Double> TRANSMUTATION_STAFF_TERMINATION_RADIUS;
+    public static ForgeConfigSpec.ConfigValue<Integer> TRANSMUTATION_STAFF_TERMINATION_COOLDOWN;
+    public static ForgeConfigSpec.ConfigValue<Double> TRANSMUTATION_STAFF_TERMINATION_EMC_RATIO;
+    public static ForgeConfigSpec.ConfigValue<Double> TRANSMUTATION_STAFF_TERMINATION_EMC_DAMAGE_RATIO;
+    public static ForgeConfigSpec.ConfigValue<Double> TRANSMUTATION_STAFF_TERMINATION_MANA_RATIO;
+    public static ForgeConfigSpec.ConfigValue<Double> TRANSMUTATION_STAFF_TERMINATION_MANA_DAMAGE_RATIO;
     public static ForgeConfigSpec.ConfigValue<Integer> LIGHTNING_SPEAR_COOLDOWN;
     public static ForgeConfigSpec.ConfigValue<Integer> LIGHTNING_SPEAR_CHARGE_TIME;
     public static ForgeConfigSpec.ConfigValue<Double> LIGHTNING_SPEAR_RANGE;
@@ -471,17 +480,6 @@ public class TheLastSwordConfiguration {
                 "守护能力的冷却时间（刻，100刻 = 5秒）"
             )
             .defineInRange("Guard Cooldown", 100, 0, 72000);
-        BUILDER.pop();
-
-        BUILDER.push("Universal Transmutation Staff");
-        TRANSMUTATION_STAFF_DAMAGE_PER_CHARGE = BUILDER
-            .comment("Projectile damage equals this value times charge level plus one; area damage applies every tick",
-                "弹射伤害为此值乘以充能档位加一，范围伤害每刻生效")
-            .defineInRange("Damage Per Charge", 200.0, 0.0, 1000000.0);
-        TRANSMUTATION_STAFF_BASE_EMC_COST = BUILDER
-            .comment("EMC cost per projectile at charge zero; doubles for each charge level",
-                "零档每发弹射物的EMC消耗，每提高一档翻倍")
-            .defineInRange("Base EMC Cost", 128L, 0L, Long.MAX_VALUE / 16);
         BUILDER.pop();
 
         BUILDER.push("Lightning Spear");
@@ -2085,6 +2083,46 @@ public class TheLastSwordConfiguration {
 
         // Compat Mods Configuration | 联动Mod配置
         BUILDER.push("Compat Mods");
+        BUILDER.push("ProjectE");
+        BUILDER.push("Universal Transmutation Staff");
+        TRANSMUTATION_STAFF_DAMAGE_PER_CHARGE = BUILDER
+            .comment("Projectile damage equals this value times charge level plus one; area damage applies every tick",
+                "弹射伤害为此值乘以充能档位加一，范围伤害每刻生效")
+            .defineInRange("Damage Per Charge", 200.0, 0.0, 1000000.0);
+        TRANSMUTATION_STAFF_BASE_EMC_COST = BUILDER
+            .comment("Base EMC cost doubles per charge level; spellcasting at charge zero is free",
+                "基础EMC消耗，每提高一档翻倍；零档法术施法免费")
+            .defineInRange("Base EMC Cost", 128L, 0L, Long.MAX_VALUE / 16);
+        TRANSMUTATION_STAFF_SPELL_POWER_PER_CHARGE = BUILDER
+            .comment("Spell power bonus per charge level; zero charge has no bonus", "每档额外法术强度比例，零档无加成")
+            .defineInRange("Spell Power Per Charge", 0.25, 0.0, 1000.0);
+        TRANSMUTATION_STAFF_ENTITY_EMC_COST = BUILDER
+            .comment("EMC cost per entity transmutation", "每次生物嬗变的EMC消耗")
+            .defineInRange("Entity EMC Cost", 384L, 0L, Long.MAX_VALUE);
+        TRANSMUTATION_STAFF_TERMINATION_CHARGE_TICKS = BUILDER
+            .comment("Required charge time in ticks (20 ticks per second)", "终结蓄力时间（刻，20刻为1秒）")
+            .defineInRange("Termination Charge Ticks", 60, 1, 72000);
+        TRANSMUTATION_STAFF_TERMINATION_RADIUS = BUILDER
+            .comment("Termination radius in blocks", "终结球体半径（格）")
+            .defineInRange("Termination Radius", 16.0, 0.0, 128.0);
+        TRANSMUTATION_STAFF_TERMINATION_COOLDOWN = BUILDER
+            .comment("Cooldown after termination in ticks", "终结释放后的冷却（刻）")
+            .defineInRange("Termination Cooldown", 260, 0, 72000);
+        TRANSMUTATION_STAFF_TERMINATION_EMC_RATIO = BUILDER
+            .comment("Fraction of table EMC consumed; rounded down; zero disables EMC consumption", "终结消耗转化桌余额的比例，向下取整，零为不消耗EMC")
+            .defineInRange("Termination EMC Ratio", 0.5, 0.0, 1.0);
+        TRANSMUTATION_STAFF_TERMINATION_EMC_DAMAGE_RATIO = BUILDER
+            .comment("Damage per EMC consumed by termination", "终结每消耗一点EMC转化的伤害")
+            .defineInRange("Termination EMC Damage Ratio", 0.1, 0.0, 1000000.0);
+        TRANSMUTATION_STAFF_TERMINATION_MANA_RATIO = BUILDER
+            .comment("Fraction of current mana consumed by termination", "终结消耗当前法力的比例")
+            .defineInRange("Termination Mana Ratio", 1.0, 0.0, 1.0);
+        TRANSMUTATION_STAFF_TERMINATION_MANA_DAMAGE_RATIO = BUILDER
+            .comment("Extra damage per mana actually consumed", "终结每实际消耗一点法力增加的伤害")
+            .defineInRange("Termination Mana Damage Ratio", 1.0, 0.0, 1000000.0);
+        BUILDER.pop();
+        BUILDER.pop();
+
         BUILDER.push("Cataclysm");
         COMPAT_ENABLE_SWORD_WRAITH_BOSS_TALK = BUILDER
             .comment(
@@ -2215,6 +2253,42 @@ public class TheLastSwordConfiguration {
 
     public static int getPriestStaffGuardCooldownSafely() {
         return safeGet(PRIEST_STAFF_GUARD_COOLDOWN, 100);
+    }
+
+    public static double getTransmutationStaffSpellPowerPerChargeSafely() {
+        return safeGet(TRANSMUTATION_STAFF_SPELL_POWER_PER_CHARGE, 0.25);
+    }
+
+    public static long getTransmutationStaffEntityEmcCostSafely() {
+        return safeGet(TRANSMUTATION_STAFF_ENTITY_EMC_COST, 384L);
+    }
+
+    public static int getTransmutationStaffTerminationChargeTicksSafely() {
+        return safeGet(TRANSMUTATION_STAFF_TERMINATION_CHARGE_TICKS, 60);
+    }
+
+    public static double getTransmutationStaffTerminationRadiusSafely() {
+        return safeGet(TRANSMUTATION_STAFF_TERMINATION_RADIUS, 16.0);
+    }
+
+    public static int getTransmutationStaffTerminationCooldownSafely() {
+        return safeGet(TRANSMUTATION_STAFF_TERMINATION_COOLDOWN, 260);
+    }
+
+    public static double getTransmutationStaffTerminationEmcRatioSafely() {
+        return safeGet(TRANSMUTATION_STAFF_TERMINATION_EMC_RATIO, 0.5);
+    }
+
+    public static double getTransmutationStaffTerminationEmcDamageRatioSafely() {
+        return safeGet(TRANSMUTATION_STAFF_TERMINATION_EMC_DAMAGE_RATIO, 0.1);
+    }
+
+    public static double getTransmutationStaffTerminationManaRatioSafely() {
+        return safeGet(TRANSMUTATION_STAFF_TERMINATION_MANA_RATIO, 1.0);
+    }
+
+    public static double getTransmutationStaffTerminationManaDamageRatioSafely() {
+        return safeGet(TRANSMUTATION_STAFF_TERMINATION_MANA_DAMAGE_RATIO, 1.0);
     }
 
     public static double getTransmutationStaffDamagePerChargeSafely() {

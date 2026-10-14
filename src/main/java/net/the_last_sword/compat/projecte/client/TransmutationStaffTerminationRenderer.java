@@ -23,6 +23,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.compat.projecte.TransmutationStaffBehavior;
+import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.compat.projecte.TransmutationStaffTerminationPacket;
 import org.joml.Matrix4f;
 
@@ -46,7 +47,7 @@ public final class TransmutationStaffTerminationRenderer {
         if (RELEASES.size() >= 64) {
             RELEASES.remove(0);
         }
-        RELEASES.add(new Release(packet.position(), effectLevel.getGameTime()));
+        RELEASES.add(new Release(packet.position(), effectLevel.getGameTime(), packet.radius()));
     }
 
     private static void update() {
@@ -85,22 +86,23 @@ public final class TransmutationStaffTerminationRenderer {
                 continue;
             }
             float progress = Mth.clamp((player.getTicksUsingItem() + partialTick)
-                / TransmutationStaffBehavior.TERMINATION_USE_TICKS, 0, 1);
+                / TransmutationStaffBehavior.getTerminationUseTicks(), 0, 1);
             Vec3 center = new Vec3(Mth.lerp(partialTick, player.xo, player.getX()),
                 Mth.lerp(partialTick, player.yo, player.getY()), Mth.lerp(partialTick, player.zo, player.getZ()));
-            renderField(event, buffers, center, progress, 1.0F);
+            renderField(event, buffers, center, progress, 1.0F,
+                (float) TheLastSwordConfiguration.getTransmutationStaffTerminationRadiusSafely());
         }
         for (Release release : RELEASES) {
             float age = effectLevel.getGameTime() - release.tick() + partialTick;
-            renderField(event, buffers, release.position(), 1.0F, 1.0F - Mth.clamp(age / FADE_TICKS, 0, 1));
+            renderField(event, buffers, release.position(), 1.0F, 1.0F - Mth.clamp(age / FADE_TICKS, 0, 1), release.radius());
         }
         buffers.endBatch(FieldRenderTypes.CIRCLE);
         buffers.endBatch(FieldRenderTypes.SPHERE);
     }
 
     private static void renderField(RenderLevelStageEvent event, MultiBufferSource buffers,
-                                    Vec3 center, float progress, float opacity) {
-        float radius = TransmutationStaffBehavior.TERMINATION_RADIUS * progress;
+                                    Vec3 center, float progress, float opacity, float maximumRadius) {
+        float radius = maximumRadius * progress;
         if (radius <= 0 || opacity <= 0) {
             return;
         }
@@ -203,7 +205,7 @@ public final class TransmutationStaffTerminationRenderer {
             Math.sin(latitude) * Math.sin(longitude));
     }
 
-    private record Release(Vec3 position, long tick) {
+    private record Release(Vec3 position, long tick, float radius) {
     }
 
     private record SurfaceGlyph(Vec3 normal, Vec3 horizontal, Vec3 vertical, double size, float delay) {

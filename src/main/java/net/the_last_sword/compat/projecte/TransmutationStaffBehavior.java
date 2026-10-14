@@ -16,17 +16,24 @@ import net.the_last_sword.init.ModItems;
 import net.the_last_sword.init.ModKeyMappings;
 import net.the_last_sword.util.nbt.ItemModeHelper;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
 
 public final class TransmutationStaffBehavior {
     public static final int MAX_CHARGE = 4;
     public static final int MODE_COUNT = 3;
-    public static final int TERMINATION_USE_TICKS = 60;
-    public static final float TERMINATION_RADIUS = 16.0F;
     private static final String CHARGE_TAG = "Charge";
 
     private TransmutationStaffBehavior() {
+    }
+
+    public static int getTerminationUseTicks() {
+        return TheLastSwordConfiguration.getTransmutationStaffTerminationChargeTicksSafely();
+    }
+
+    private static String number(double value) {
+        return BigDecimal.valueOf(value).stripTrailingZeros().toPlainString();
     }
 
     public static boolean isStaff(ItemStack stack) {
@@ -124,17 +131,23 @@ public final class TransmutationStaffBehavior {
             tooltip.add(Component.translatable("item_tooltip.the_last_sword.shift"));
         } else {
             if (isTermination(stack)) {
-                tooltip.add(Component.translatable("item_tooltip.the_last_sword.transmutation_staff.left_click",
-                    String.format(Locale.ROOT, "%.0f", StaffOfUniversalTransmutationItem.ATTACK_DAMAGE_BONUS)));
-            }
-            if (isTermination(stack)) {
-                tooltip.add(Component.translatable("item_tooltip.the_last_sword.transmutation_staff.termination"));
+                tooltip.add(Component.translatable("item_tooltip.the_last_sword.transmutation_staff.termination",
+                    number(getTerminationUseTicks() / 20.0),
+                    number(TheLastSwordConfiguration.getTransmutationStaffTerminationRadiusSafely()),
+                    number(TheLastSwordConfiguration.getTransmutationStaffTerminationEmcRatioSafely() * 100),
+                    number(TheLastSwordConfiguration.getTransmutationStaffTerminationEmcDamageRatioSafely() * 100),
+                    number(TheLastSwordConfiguration.getTransmutationStaffTerminationManaRatioSafely() * 100),
+                    number(TheLastSwordConfiguration.getTransmutationStaffTerminationManaDamageRatioSafely()),
+                    number(TheLastSwordConfiguration.getTransmutationStaffTerminationCooldownSafely() / 20.0)));
             } else if (isTransmutation(stack)) {
                 tooltip.add(Component.translatable("item_tooltip.the_last_sword.transmutation_staff.right_click_block"));
-                tooltip.add(Component.translatable("item_tooltip.the_last_sword.transmutation_staff.right_click_entity"));
+                tooltip.add(Component.translatable("item_tooltip.the_last_sword.transmutation_staff.right_click_entity",
+                    TheLastSwordConfiguration.getTransmutationStaffEntityEmcCostSafely()));
                 tooltip.add(Component.translatable("item_tooltip.the_last_sword.transmutation_staff.sneak_right_click"));
             } else if (castingEnabled) {
-                tooltip.add(Component.translatable("item_tooltip.the_last_sword.transmutation_staff.cast"));
+                tooltip.add(Component.translatable("item_tooltip.the_last_sword.transmutation_staff.cast",
+                    number(TheLastSwordConfiguration.getTransmutationStaffSpellPowerPerChargeSafely() * 100),
+                    getCharge(stack) == 0 ? 0L : getProjectileCost(stack)));
             } else {
                 tooltip.add(Component.translatable("item_tooltip.the_last_sword.transmutation_staff.projectile",
                     projectileDamage, getProjectileCost(stack)));

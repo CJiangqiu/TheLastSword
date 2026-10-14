@@ -4,6 +4,7 @@ import io.redspace.ironsspellbooks.api.magic.MagicData;
 import io.redspace.ironsspellbooks.network.SyncManaPacket;
 import io.redspace.ironsspellbooks.setup.PacketDistributor;
 import net.minecraft.server.level.ServerPlayer;
+import net.the_last_sword.configuration.TheLastSwordConfiguration;
 
 public final class TransmutationStaffMana {
     private TransmutationStaffMana() {
@@ -15,7 +16,11 @@ public final class TransmutationStaffMana {
         if (!Float.isFinite(before) || before <= 0.0F) {
             return 0.0F;
         }
-        data.setMana(0.0F);
+        double ratio = TheLastSwordConfiguration.getTransmutationStaffTerminationManaRatioSafely();
+        if (ratio == 0.0) {
+            return 0.0F;
+        }
+        data.setMana((float) (before * (1.0 - ratio)));
         PacketDistributor.sendToPlayer(player, new SyncManaPacket(data));
         // 以实际扣除量计算加伤，避免余额变更被拦截后仍获得伤害。
         float after = data.getMana();
