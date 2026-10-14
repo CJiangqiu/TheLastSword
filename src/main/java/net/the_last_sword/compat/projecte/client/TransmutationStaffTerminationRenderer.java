@@ -23,13 +23,14 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.compat.projecte.TransmutationStaffBehavior;
+import net.the_last_sword.compat.projecte.TransmutationStaffField;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.compat.projecte.TransmutationStaffTerminationPacket;
 import org.joml.Matrix4f;
 
 @Mod.EventBusSubscriber(modid = TheLastSwordMod.MOD_ID, value = Dist.CLIENT)
 public final class TransmutationStaffTerminationRenderer {
-    private static final int FADE_TICKS = 10;
+    private static final int FADE_TICKS = TransmutationStaffField.FADE_TICKS;
     private static final List<Release> RELEASES = new ArrayList<>();
     private static final List<Vec3> SPHERE = createSphere();
     private static final List<SurfaceGlyph> SURFACE_GLYPHS = createSurfaceGlyphs();

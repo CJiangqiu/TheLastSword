@@ -38,7 +38,7 @@
   "spell.the_last_sword.void_enchanting.guide": "自身に30秒間の虚空エンチャントを付与する。効果レベルは呪文レベルと同じ。",
   "ui.the_last_sword.void_enchanting": "虚空エンチャント：レベル%s、%s秒",
   "item_tooltip.the_last_sword.termination_mode": "万法の終焉",
-  "item_tooltip.the_last_sword.transmutation_staff.termination": "右クリックを%s秒間長押ししてチャージ：半径%sブロックの球体を展開し、攻撃可能な対象をロックする。変換テーブルのEMC残高の%s%%を消費し、各対象に消費EMCの%s%%に相当する絶対破壊ダメージを与える。Iron's Spells 'n Spellbooks導入時は現在のマナの%s%%も消費し、実際に消費したマナ1につき%sの絶対破壊ダメージを加算する。発動後のクールダウン：%s秒。",
+  "item_tooltip.the_last_sword.transmutation_staff.termination": "右クリックを%s秒間長押ししてチャージ：半径%sブロックの球体を展開し、攻撃可能な対象をロックする。変換テーブルのEMC残高の%s%%を消費し、各対象に消費EMCの%s%%に相当する絶対破壊ダメージを与える。Iron's Spells 'n Spellbooks導入時は現在のマナの%s%%も消費し、実際に消費したマナ1につき%sの絶対破壊ダメージを加算する。同時に対象の全所持アイテムに30秒のクールダウンを付与し、範囲内のすべての飛翔体を除去する。発動後のクールダウン：%s秒。",
   "item_tooltip.the_last_sword.transmutation_staff.empty_balance": "変換テーブルに%s EMC以上必要です。",
   "item_tooltip.the_last_sword.transmutation_staff.projectile_damage": "投射ダメージ：%s",
   "item_tooltip.the_last_sword.transmutation_staff.right_click_block": "ブロックを右クリック：内蔵の賢者の石でそのブロックを変換する",

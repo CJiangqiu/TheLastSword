@@ -90,6 +90,12 @@ public final class TransmutationStaffTermination {
                 .doubleValue();
             knowledge.setEmc(balance.subtract(cost));
             knowledge.syncEmc(player);
+            for (Entity target : targets) {
+                if (target instanceof ServerPlayer targetPlayer) {
+                    TransmutationStaffField.disableItems(targetPlayer);
+                }
+            }
+            TransmutationStaffField.release(player.serverLevel(), center, radius);
             float manaSpent = CompatCheck.isSpellcastingLoaded()
                 ? TransmutationStaffMana.drain(player) : 0.0F;
             float damage = (float) Math.min(baseDamage + manaSpent * TheLastSwordConfiguration.getTransmutationStaffTerminationManaDamageRatioSafely(), Float.MAX_VALUE);

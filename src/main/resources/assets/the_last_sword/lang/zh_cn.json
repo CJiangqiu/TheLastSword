@@ -38,7 +38,7 @@
   "spell.the_last_sword.void_enchanting.guide": "为自身施加持续30秒的虚空附魔，效果等级等于法术等级。",
   "ui.the_last_sword.void_enchanting": "虚空附魔等级：%s；持续时间：%s秒",
   "item_tooltip.the_last_sword.termination_mode": "万法的终结",
-  "item_tooltip.the_last_sword.transmutation_staff.termination": "长按右键蓄力%s秒：展开半径%s格的球体并锁定可攻击目标。消耗转化桌余额的%s%%，对每个目标造成所消耗EMC的%s%%的绝对毁灭伤害；装有铁魔法时，额外消耗当前法力的%s%%，每实际消耗一点法力额外增加%s点绝对毁灭伤害。释放后冷却%s秒。",
+  "item_tooltip.the_last_sword.transmutation_staff.termination": "长按右键蓄力%s秒：展开半径%s格的球体并锁定可攻击目标。消耗转化桌余额的%s%%，对每个目标造成所消耗EMC的%s%%的绝对毁灭伤害；装有铁魔法时，额外消耗当前法力的%s%%，每实际消耗一点法力额外增加%s点绝对毁灭伤害。同时向目标的全部物品添加30秒冷却，并清除范围内全部弹射物。释放后冷却%s秒。",
   "item_tooltip.the_last_sword.transmutation_staff.empty_balance": "转化桌余额至少需要%s EMC。",
   "item_tooltip.the_last_sword.transmutation_staff.projectile_damage": "弹射伤害：%s",
   "item_tooltip.the_last_sword.transmutation_staff.right_click_block": "右键点击方块：使用内置的贤者之石转换该方块",

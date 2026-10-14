@@ -38,7 +38,7 @@
   "spell.the_last_sword.void_enchanting.guide": "Grants the caster Void Enchanting for 30 seconds. The effect level equals the spell level.",
   "ui.the_last_sword.void_enchanting": "Void Enchanting level %s — %s seconds",
   "item_tooltip.the_last_sword.termination_mode": "End of All Magic",
-  "item_tooltip.the_last_sword.transmutation_staff.termination": "Hold right-click to charge for %s seconds: expand a sphere with a %s-block radius and lock onto attackable targets. Consume %s%% of your transmutation table's EMC balance and deal absolute destruction damage equal to %s%% of the EMC spent to each target. With Iron's Spells 'n Spellbooks installed, also consume %s%% of current mana and add %s damage per mana actually consumed. Cooldown after casting: %s seconds.",
+  "item_tooltip.the_last_sword.transmutation_staff.termination": "Hold right-click to charge for %s seconds: expand a sphere with a %s-block radius and lock onto attackable targets. Consume %s%% of your transmutation table's EMC balance and deal absolute destruction damage equal to %s%% of the EMC spent to each target. With Iron's Spells 'n Spellbooks installed, also consume %s%% of current mana and add %s damage per mana actually consumed. Also apply a 30-second cooldown to all items carried by targets and remove all projectiles within range. Cooldown after casting: %s seconds.",
   "item_tooltip.the_last_sword.transmutation_staff.empty_balance": "At least %s EMC in your transmutation table is required.",
   "item_tooltip.the_last_sword.transmutation_staff.projectile_damage": "Projectile damage: %s",
   "item_tooltip.the_last_sword.transmutation_staff.right_click_block": "Right-click a block: use the built-in Philosopher's Stone to transmute that block",

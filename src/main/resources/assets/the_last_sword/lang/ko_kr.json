@@ -38,7 +38,7 @@
   "spell.the_last_sword.void_enchanting.guide": "자신에게 30초 동안 공허 부여 효과를 부여합니다. 효과 레벨은 주문 레벨과 같습니다.",
   "ui.the_last_sword.void_enchanting": "공허 부여 레벨: %s, 지속 시간: %s초",
   "item_tooltip.the_last_sword.termination_mode": "만법의 종말",
-  "item_tooltip.the_last_sword.transmutation_staff.termination": "우클릭을 %s초간 길게 눌러 충전: 반경 %s블록의 구체를 펼쳐 공격 가능한 대상을 고정합니다. 변환대 EMC 잔액의 %s%%를 소모하고, 각 대상에게 소모한 EMC의 %s%%만큼 절대 파괴 피해를 줍니다. Iron's Spells 'n Spellbooks가 설치되어 있으면 현재 마나의 %s%%도 소모하고, 실제로 소모한 마나 1당 절대 파괴 피해를 %s 추가합니다. 발동 후 재사용 대기시간: %s초.",
+  "item_tooltip.the_last_sword.transmutation_staff.termination": "우클릭을 %s초간 길게 눌러 충전: 반경 %s블록의 구체를 펼쳐 공격 가능한 대상을 고정합니다. 변환대 EMC 잔액의 %s%%를 소모하고, 각 대상에게 소모한 EMC의 %s%%만큼 절대 파괴 피해를 줍니다. Iron's Spells 'n Spellbooks가 설치되어 있으면 현재 마나의 %s%%도 소모하고, 실제로 소모한 마나 1당 절대 파괴 피해를 %s 추가합니다. 동시에 대상의 모든 아이템에 30초의 재사용 대기시간을 적용하고, 범위 내 모든 투사체를 제거합니다. 발동 후 재사용 대기시간: %s초.",
   "item_tooltip.the_last_sword.transmutation_staff.empty_balance": "변환대에 최소 %s EMC가 필요합니다.",
   "item_tooltip.the_last_sword.transmutation_staff.projectile_damage": "투사체 피해: %s",
   "item_tooltip.the_last_sword.transmutation_staff.right_click_block": "블록 우클릭: 내장된 현자의 돌로 해당 블록을 변환",

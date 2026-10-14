@@ -38,7 +38,7 @@
   "spell.the_last_sword.void_enchanting.guide": "為自身施加持續30秒的虛空附魔，效果等級等於法術等級。",
   "ui.the_last_sword.void_enchanting": "虛空附魔等級：%s；持續時間：%s秒",
   "item_tooltip.the_last_sword.termination_mode": "萬法的終結",
-  "item_tooltip.the_last_sword.transmutation_staff.termination": "長按右鍵蓄力%s秒：展開半徑%s格的球體並鎖定可攻擊目標。消耗轉化桌餘額的%s%%，對每個目標造成所消耗EMC的%s%%的絕對毀滅傷害；裝有鐵魔法時，額外消耗當前魔力的%s%%，每實際消耗一點魔力額外增加%s點絕對毀滅傷害。釋放後冷卻%s秒。",
+  "item_tooltip.the_last_sword.transmutation_staff.termination": "長按右鍵蓄力%s秒：展開半徑%s格的球體並鎖定可攻擊目標。消耗轉化桌餘額的%s%%，對每個目標造成所消耗EMC的%s%%的絕對毀滅傷害；裝有鐵魔法時，額外消耗當前魔力的%s%%，每實際消耗一點魔力額外增加%s點絕對毀滅傷害。同時向目標的全部物品添加30秒冷卻，並清除範圍內全部投射物。釋放後冷卻%s秒。",
   "item_tooltip.the_last_sword.transmutation_staff.empty_balance": "轉化桌餘額至少需要%s EMC。",
   "item_tooltip.the_last_sword.transmutation_staff.projectile_damage": "彈射傷害：%s",
   "item_tooltip.the_last_sword.transmutation_staff.right_click_block": "右鍵點擊方塊：使用內建的賢者之石轉換該方塊",
