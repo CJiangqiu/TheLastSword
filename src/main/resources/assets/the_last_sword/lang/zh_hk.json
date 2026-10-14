@@ -472,7 +472,7 @@
   "item_tooltip.the_last_sword.powerful_mining_mode": "強力挖掘模式",
   "item_tooltip.the_last_sword.powerful_mining_mode_descr": "\n§e操作說明：\n§7• 右鍵選擇：瞄準方塊右鍵，預覽挖掘範圍\n§7• 確認挖掘：選擇後再次右鍵，立即挖掘所有預覽方塊\n§7• 取消選擇：選擇期間左鍵取消，或等待10秒自動取消\n§7• 挖掘範圍：以目標方塊為中心，半徑%s格的立方體區域\n§c注意：此模式可挖掘幾乎所有方塊，請謹慎使用！",
   "item_tooltip.the_last_sword.powerful_range_attack_mode": "強力範圍攻擊模式",
-  "item_tooltip.the_last_sword.powerful_range_attack_mode_descr": "左鍵：對自身128格範圍內目標實體造成100點\"絕對毀滅傷害\"\nShift+左鍵：對自身128格範圍內目標實體觸發\"終焉死亡\"\n右鍵：清除自身128格範圍內目標實體\nShift+右鍵：對自身1024格範圍內目標實體使用本mod最強攻擊（需開啟ECA\"激進的攻擊邏輯\"配置項）",
+  "item_tooltip.the_last_sword.powerful_range_attack_mode_descr": "左鍵：對自身128格範圍內目標實體造成100點\"絕對毀滅傷害\"\nShift+左鍵：對自身128格範圍內目標實體觸發\"終焉死亡\"\n右鍵：將目前維度目標實體的類型禁止生成5秒，然後清除目標實體\nShift+右鍵：對自身1024格範圍內目標實體使用本mod最強攻擊（需開啟ECA\"激進的攻擊邏輯\"配置項）",
   "item_tooltip.the_last_sword.scylla_medal": "§6斯庫拉的風暴：§r\n被動：雨天/雷暴天氣下，對帶有潮濕效果的敵人造成傷害時，有25%/50%概率降下落雷，造成潮濕等級×5點閃電傷害\n主動：對敵人造成傷害時，給予/疊加敵人潮濕3秒（最高5級）；右鍵切換天氣（晴→雨→雷暴→晴），30秒冷却",
   "item_tooltip.the_last_sword.open_defence_config_key": "§e按下以打開防御配置:",
   "item_tooltip.the_last_sword.shift": "§e請按下Shift鍵以顯示模式詳細資訊",

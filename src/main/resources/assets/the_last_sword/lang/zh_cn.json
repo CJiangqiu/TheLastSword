@@ -459,7 +459,7 @@
   "item_tooltip.the_last_sword.powerful_mining_mode": "强力挖掘模式",
   "item_tooltip.the_last_sword.powerful_mining_mode_descr": "\n§e操作说明：\n§7• 右键选择：瞄准方块右键，预览挖掘范围\n§7• 确认挖掘：选择后再次右键，立即挖掘所有预览方块\n§7• 取消选择：选择期间左键取消，或等待10秒自动取消\n§7• 挖掘范围：以目标方块为中心，半径%s格的立方体区域\n§c注意：此模式可挖掘几乎所有方块，请谨慎使用！",
   "item_tooltip.the_last_sword.powerful_range_attack_mode": "强力范围攻击模式",
-  "item_tooltip.the_last_sword.powerful_range_attack_mode_descr": "左键：对自身128格范围内目标实体造成100点\"绝对毁灭伤害\"\nShift+左键：对自身128格范围内目标实体触发\"终焉死亡\"\n右键：清除自身128格范围内目标实体\nShift+右键：对自身1024格范围内目标实体使用本mod最强攻击（需开启ECA\"激进的攻击逻辑\"配置项）",
+  "item_tooltip.the_last_sword.powerful_range_attack_mode_descr": "左键：对自身128格范围内目标实体造成100点\"绝对毁灭伤害\"\nShift+左键：对自身128格范围内目标实体触发\"终焉死亡\"\n右键：将当前维度目标实体的类型禁生成5秒，然后清除目标实体\nShift+右键：对自身1024格范围内目标实体使用本mod最强攻击（需开启ECA\"激进的攻击逻辑\"配置项）",
   "item_tooltip.the_last_sword.priest_staff.guard": "Shift+右键：消耗2点耐久，清除%s格范围内友方的负面效果，清除背包物品的全部冷却，并为其增加%s点肃正防御护盾（%s秒冷却）",
   "item_tooltip.the_last_sword.priest_staff.projectile": "右键：消耗1点耐久，发射龙之剑弹射物，造成玩家攻击力×%s的伤害",
   "item_tooltip.the_last_sword.scylla_medal": "§6斯库拉的风暴：§r\n被动：雨天/雷暴天气下，对带有潮湿效果的敌人造成伤害时，有25%/50%概率降下落雷，造成潮湿等级×5点闪电伤害\n主动：对敌人造成伤害时，给予/叠加敌人潮湿3秒（最高5级）；右键切换天气（晴→雨→雷暴→晴），30秒冷却",

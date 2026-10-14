@@ -38,6 +38,8 @@ import net.the_last_sword.util.health.TrueHealthManager;
 
 public class TestEntity extends PathfinderMob {
 
+    private boolean healthManagementReady;
+
     /*────────────────────  显示名渐变：先准备  ────────────────────*/
     private static final int GRADIENT_START = 0x800080;   // 紫
     private static final int GRADIENT_END   = 0x000000;   // 黑
@@ -71,6 +73,7 @@ public class TestEntity extends PathfinderMob {
     /*────────────── 构造 ─────────────*/
     public TestEntity(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
+        healthManagementReady = true;
         setMaxUpStep(2f);
         xpReward = 100;
         setNoAi(false);
@@ -206,6 +209,11 @@ public class TestEntity extends PathfinderMob {
 
     @Override
     public void setHealth(float health) {
+        // 父类构造时装备列表尚未初始化，不能进入装备资格检查。
+        if (!healthManagementReady) {
+            super.setHealth(health);
+            return;
+        }
         TrueHealthManager.setHealth(this, health);
     }
 
@@ -243,7 +251,10 @@ public class TestEntity extends PathfinderMob {
     @Override public void setDeltaMovement(Vec3 m) {
     }
     @Override public void moveTo(double x, double y, double z, float yaw, float pitch) {
-
+        // 生成流程先定位再入场，位置保护不能拦截初始坐标。
+        if (!isAddedToWorld()) {
+            super.moveTo(x, y, z, yaw, pitch);
+        }
     }
 
     public void safeRemove() {

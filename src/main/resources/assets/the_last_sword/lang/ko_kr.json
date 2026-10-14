@@ -472,7 +472,7 @@
   "item_tooltip.the_last_sword.powerful_mining_mode": "강력 채굴 모드",
   "item_tooltip.the_last_sword.powerful_mining_mode_descr": "\n§e조작 안내:\n§7• 우클릭으로 선택: 블록을 겨냥해 우클릭하면 채굴 영역을 미리 봅니다\n§7• 채굴 확정: 선택 후 다시 우클릭하면 미리 본 모든 블록을 즉시 채굴합니다\n§7• 선택 취소: 선택 중 좌클릭하거나 10초를 기다리면 자동 취소됩니다\n§7• 채굴 범위: 대상 블록을 중심으로 반경%s블록인 정육면체 영역\n§c경고: 이 모드는 거의 모든 블록을 채굴할 수 있습니다. 주의해서 사용하세요!",
   "item_tooltip.the_last_sword.powerful_range_attack_mode": "강력 원거리 공격 모드",
-  "item_tooltip.the_last_sword.powerful_range_attack_mode_descr": "좌클릭: 128블록 내 대상 개체에게 \"절대 파괴 피해\" 100을 줍니다\nShift+좌클릭: 128블록 내 대상 개체에게 \"종언의 죽음\"을 발동합니다\n우클릭: 128블록 내 대상 개체를 제거합니다\nShift+우클릭: 1024블록 내 대상 개체에게 이 모드의 가장 강력한 공격을 사용합니다(ECA \"공격 극단 논리\" 설정 필요)",
+  "item_tooltip.the_last_sword.powerful_range_attack_mode_descr": "좌클릭: 128블록 내 대상 개체에게 \"절대 파괴 피해\" 100을 줍니다\nShift+좌클릭: 128블록 내 대상 개체에게 \"종언의 죽음\"을 발동합니다\n우클릭: 현재 차원에서 대상 개체 유형의 생성을 5초간 금지한 후 대상을 제거\nShift+우클릭: 1024블록 내 대상 개체에게 이 모드의 가장 강력한 공격을 사용합니다(ECA \"공격 극단 논리\" 설정 필요)",
   "item_tooltip.the_last_sword.scylla_medal": "§6스킬라의 폭풍:§r\n지속 효과: 비/뇌우 중 습기 효과가 있는 적에게 피해를 주면 25%/50% 확률로 번개를 불러 습기 레벨×5의 번개 피해를 줍니다\n사용 효과: 피해를 줄 때 3초간 습기를 부여·중첩합니다(최대 5레벨). 우클릭으로 날씨를 순환합니다(맑음→비→뇌우→맑음). 재사용 대기시간 30초",
   "item_tooltip.the_last_sword.open_defence_config_key": "§e눌러서 방어 설정 열기:",
   "item_tooltip.the_last_sword.shift": "§eShift를 눌러 모드 상세 정보 표시",

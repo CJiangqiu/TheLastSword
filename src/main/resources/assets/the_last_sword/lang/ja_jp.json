@@ -472,7 +472,7 @@
   "item_tooltip.the_last_sword.powerful_mining_mode": "強力採掘モード",
   "item_tooltip.the_last_sword.powerful_mining_mode_descr": "\n§e操作方法：\n§7• 右クリックで選択：ブロックを狙って右クリックし、採掘範囲をプレビュー\n§7• 採掘を確定：選択後に再び右クリックし、プレビュー中の全ブロックを即座に採掘\n§7• 選択を取消：選択中に左クリックするか、10秒待つと自動取消\n§7• 採掘範囲：対象ブロックを中心とする半径%sブロックの立方体\n§c警告：このモードではほぼすべてのブロックを採掘できます。慎重に使用してください！",
   "item_tooltip.the_last_sword.powerful_range_attack_mode": "強力範囲攻撃モード",
-  "item_tooltip.the_last_sword.powerful_range_attack_mode_descr": "左クリック：半径128ブロック以内の対象に100の「絶対破壊ダメージ」を与える\nShift＋左クリック：半径128ブロック以内の対象に「終焉の死」を発動する\n右クリック：半径128ブロック以内の対象を消去する\nShift＋右クリック：半径1024ブロック以内の対象に本Mod最強の攻撃を使用する（ECAの「攻撃の急進的ロジック」設定が必要）",
+  "item_tooltip.the_last_sword.powerful_range_attack_mode_descr": "左クリック：半径128ブロック以内の対象に100の「絶対破壊ダメージ」を与える\nShift＋左クリック：半径128ブロック以内の対象に「終焉の死」を発動する\n右クリック：現在のディメンションで対象のエンティティ種の生成を5秒間禁止し、対象を消去する\nShift＋右クリック：半径1024ブロック以内の対象に本Mod最強の攻撃を使用する（ECAの「攻撃の急進的ロジック」設定が必要）",
   "item_tooltip.the_last_sword.scylla_medal": "§6スキュラの嵐：§r\n常時：雨／雷雨のとき、湿潤効果を持つ敵にダメージを与えると25%／50%の確率で落雷を呼び、湿潤レベル×5の雷ダメージを与える\n発動：ダメージを与えると湿潤を3秒間付与／累積する（最大5レベル）。右クリックで天候を切り替える（晴れ→雨→雷雨→晴れ）。クールダウン30秒",
   "item_tooltip.the_last_sword.open_defence_config_key": "§e防御設定を開くキー：",
   "item_tooltip.the_last_sword.shift": "§eShiftを押すとモード詳細を表示",

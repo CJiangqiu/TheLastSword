@@ -34,6 +34,7 @@ import net.the_last_sword.event.ServerEventHandler;
 import net.the_last_sword.util.nbt.ItemModeHelper;
 
 import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 
 @Mod.EventBusSubscriber(modid = "the_last_sword")
@@ -112,6 +113,16 @@ public class UltraTestSwordItem extends TieredItem {
                     TestUtil.clear(targets);
                 } else {
                     List<Entity> targets = TestUtil.selectTargets(serverPlayer);
+                    Set<EntityType<?>> targetTypes = new HashSet<>();
+                    for (Entity target : targets) {
+                        targetTypes.add(target.getType());
+                    }
+                    // 先封锁再清除，且不缩短已有的更长禁生成时间。
+                    for (EntityType<?> type : targetTypes) {
+                        if (EcaAPI.getSpawnBanTime(serverLevel, type) < 5) {
+                            EcaAPI.banSpawn(serverLevel, type, 5);
+                        }
+                    }
                     for (Entity target : targets) {
                         EntityUtil.theLastEndRemove(target, Entity.RemovalReason.KILLED);
                     }
