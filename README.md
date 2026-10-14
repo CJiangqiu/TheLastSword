@@ -282,6 +282,8 @@ Mods with added integrations or compatibility support:
 - [Jade](https://www.curseforge.com/minecraft/mc-mods/jade)
 - [L_Ender's Cataclysm](https://www.curseforge.com/minecraft/mc-mods/lendercataclysm)
 - [Lucky Block](https://www.curseforge.com/minecraft/mc-mods/lucky-block)
+- [ProjectE](https://www.curseforge.com/minecraft/mc-mods/projecte)
+- [Iron's Spells 'n Spellbooks](https://www.curseforge.com/minecraft/mc-mods/irons-spells-n-spellbooks)
 
 ---
 
@@ -536,3 +538,5 @@ the_last_sword_custom/
 - [Jade](https://www.curseforge.com/minecraft/mc-mods/jade)
 - [L_Ender's Cataclysm](https://www.curseforge.com/minecraft/mc-mods/lendercataclysm)
 - [Lucky Block](https://www.curseforge.com/minecraft/mc-mods/lucky-block)
+- [ProjectE](https://www.curseforge.com/minecraft/mc-mods/projecte)
+- [Iron's Spells 'n Spellbooks](https://www.curseforge.com/minecraft/mc-mods/irons-spells-n-spellbooks)
