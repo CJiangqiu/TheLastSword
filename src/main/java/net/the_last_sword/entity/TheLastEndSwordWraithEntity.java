@@ -161,7 +161,6 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
             attackAttr.setBaseValue(newAttack);
         }
 
-        TrueHealthManager.setMaxHealth(this, (float) newMaxHealth);
         TrueHealthManager.setHealth(this, (float) newMaxHealth);
     }
 
@@ -349,9 +348,8 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
                 setTheLastEndLevel(1);
             }
 
-            float maxHealth = (float) getAttributeValue(Attributes.MAX_HEALTH);
             if (!EntityUtil.hasProtection(this)) {
-                TrueHealthManager.register(this, maxHealth);
+                TrueHealthManager.register(this);
             }
 
             setAnimationState(STATE_SPAWNING);

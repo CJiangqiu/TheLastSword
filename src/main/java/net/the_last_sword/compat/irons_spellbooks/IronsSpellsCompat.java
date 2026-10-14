@@ -15,6 +15,8 @@ import net.the_last_sword.item.DragonCrystalArmorItem;
 import net.the_last_sword.item.DragonCrystalSword;
 import net.the_last_sword.item.DragonSword;
 import net.the_last_sword.item.PriestStaffItem;
+import net.the_last_sword.compat.projecte.PrimalSourceArmorItem;
+import net.the_last_sword.init.ModItems;
 import net.the_last_sword.item.TheLastSword;
 
 import java.util.UUID;
@@ -26,6 +28,16 @@ public final class IronsSpellsCompat {
         ResourceLocation.fromNamespaceAndPath("irons_spellbooks", "max_mana");
     private static final ResourceLocation SPELL_POWER_ID =
         ResourceLocation.fromNamespaceAndPath("irons_spellbooks", "spell_power");
+    private static final ResourceLocation MANA_REGEN_ID =
+        ResourceLocation.fromNamespaceAndPath("irons_spellbooks", "mana_regen");
+    private static final ResourceLocation COOLDOWN_REDUCTION_ID =
+        ResourceLocation.fromNamespaceAndPath("irons_spellbooks", "cooldown_reduction");
+    private static final ResourceLocation CAST_TIME_REDUCTION_ID =
+        ResourceLocation.fromNamespaceAndPath("irons_spellbooks", "cast_time_reduction");
+    private static final UUID TRANSMUTATION_STAFF_CAST_TIME_MODIFIER_UUID =
+        UUID.fromString("b6f29c37-192f-46e7-8984-dbe2e84a7983");
+    private static final UUID TRANSMUTATION_STAFF_COOLDOWN_MODIFIER_UUID =
+        UUID.fromString("1f30ace7-1e79-4260-b6f0-c359f416b143");
     //部位独立 UUID 使四件装备的同属性加成可以叠加并正确移除
     private static final UUID[] MAX_MANA_MODIFIER_UUIDS = {
         UUID.fromString("3e37a19d-7dbd-4772-a256-970c1bf30203"),
@@ -38,6 +50,12 @@ public final class IronsSpellsCompat {
         UUID.fromString("c61417dd-47e2-48af-a6fe-6df144b4851c"),
         UUID.fromString("09b3b2c3-a4f6-4f7f-8c39-ee57be1ee448"),
         UUID.fromString("9748dcc6-da79-4cca-a87f-e2f417947118")
+    };
+    private static final UUID[] MANA_REGEN_MODIFIER_UUIDS = {
+        UUID.fromString("957a3b6f-9c84-41ec-b86e-4f664845152b"),
+        UUID.fromString("951a1ad3-11e5-43ae-843f-5e55510bf1ee"),
+        UUID.fromString("670a8e52-664f-4c8a-9c19-3c725b5df075"),
+        UUID.fromString("de9f0a11-c4b6-4bdc-bc1d-c6842d281368")
     };
     private static final UUID STAFF_MAX_MANA_MODIFIER_UUID =
         UUID.fromString("940cb348-78fa-4feb-9d1b-ab82339034cd");
@@ -53,6 +71,12 @@ public final class IronsSpellsCompat {
 
     @SubscribeEvent
     public static void onItemAttributeModifiers(ItemAttributeModifierEvent event) {
+        if (event.getItemStack().getItem() instanceof PrimalSourceArmorItem armor
+            && event.getSlotType() == armor.getPrimalArmorSlot()) {
+            addPrimalSourceArmorModifiers(event);
+            return;
+        }
+
         if (event.getItemStack().getItem() instanceof DragonCultPriestArmorItem armor
             && event.getSlotType() == armor.getEquipmentSlot()) {
             addArmorModifiers(event);
@@ -78,6 +102,37 @@ public final class IronsSpellsCompat {
         }
 
         if (event.getSlotType() == EquipmentSlot.MAINHAND) {
+            if (ModItems.STAFF_OF_UNIVERSAL_TRANSMUTATION != null
+                && event.getItemStack().is(ModItems.STAFF_OF_UNIVERSAL_TRANSMUTATION.get())) {
+                Attribute spellPower = ForgeRegistries.ATTRIBUTES.getValue(SPELL_POWER_ID);
+                if (spellPower != null) {
+                    event.addModifier(spellPower, new AttributeModifier(
+                        SWORD_SPELL_POWER_MODIFIER_UUID,
+                        "Universal transmutation staff spell power",
+                        1.0,
+                        AttributeModifier.Operation.MULTIPLY_BASE
+                    ));
+                }
+                Attribute castTimeReduction = ForgeRegistries.ATTRIBUTES.getValue(CAST_TIME_REDUCTION_ID);
+                if (castTimeReduction != null) {
+                    event.addModifier(castTimeReduction, new AttributeModifier(
+                        TRANSMUTATION_STAFF_CAST_TIME_MODIFIER_UUID,
+                        "Universal transmutation staff cast time reduction",
+                        1.0,
+                        AttributeModifier.Operation.MULTIPLY_BASE
+                    ));
+                }
+                Attribute cooldownReduction = ForgeRegistries.ATTRIBUTES.getValue(COOLDOWN_REDUCTION_ID);
+                if (cooldownReduction != null) {
+                    event.addModifier(cooldownReduction, new AttributeModifier(
+                        TRANSMUTATION_STAFF_COOLDOWN_MODIFIER_UUID,
+                        "Universal transmutation staff cooldown reduction",
+                        1.0,
+                        AttributeModifier.Operation.MULTIPLY_BASE
+                    ));
+                }
+                return;
+            }
             if (event.getItemStack().getItem() instanceof DragonCrystalSword) {
                 addSwordModifiers(event, 0.25, "Dragon crystal sword");
             } else if (event.getItemStack().getItem() instanceof DragonSword) {
@@ -85,6 +140,30 @@ public final class IronsSpellsCompat {
             } else if (event.getItemStack().getItem() instanceof TheLastSword) {
                 addSwordModifiers(event, 1.0, "The last sword");
             }
+        }
+    }
+
+    private static void addPrimalSourceArmorModifiers(ItemAttributeModifierEvent event) {
+        int slotIndex = event.getSlotType().getIndex();
+        Attribute maxMana = ForgeRegistries.ATTRIBUTES.getValue(MAX_MANA_ID);
+        if (maxMana != null) {
+            event.addModifier(maxMana, new AttributeModifier(
+                MAX_MANA_MODIFIER_UUIDS[slotIndex],
+                "Primal source armor max mana",
+                1000.0,
+                AttributeModifier.Operation.ADDITION
+            ));
+        }
+
+        Attribute manaRegen = ForgeRegistries.ATTRIBUTES.getValue(MANA_REGEN_ID);
+        if (manaRegen != null) {
+            // 基础倍率加成按部位相加，使整套提供 +400% 回复速度。
+            event.addModifier(manaRegen, new AttributeModifier(
+                MANA_REGEN_MODIFIER_UUIDS[slotIndex],
+                "Primal source armor mana regen",
+                1.0,
+                AttributeModifier.Operation.MULTIPLY_BASE
+            ));
         }
     }
 

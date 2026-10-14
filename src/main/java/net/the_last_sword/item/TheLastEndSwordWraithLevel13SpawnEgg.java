@@ -62,10 +62,10 @@ public class TheLastEndSwordWraithLevel13SpawnEgg extends Item {
 
                 //终焉种初始化：保护性真实血量、防御注册、生成动画
                 float maxHealth = (float) wraith.getAttributeValue(Attributes.MAX_HEALTH);
-                TrueHealthManager.setMaxHealth(wraith, maxHealth);
+
                 TrueHealthManager.setHealth(wraith, maxHealth);
                 if (!EntityUtil.hasProtection(wraith)) {
-                    TrueHealthManager.register(wraith, maxHealth);
+                    TrueHealthManager.register(wraith);
                 }
                 wraith.setAnimationState(TheLastEndEntity.STATE_SPAWNING);
 

@@ -68,7 +68,7 @@ public abstract class DragonArmorItem extends TheLastEndArmorItem implements Geo
 
             @Override
             public int getEnchantmentValue() {
-                return 200;
+                return 32;
             }
 
             @Override

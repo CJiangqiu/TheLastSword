@@ -460,9 +460,8 @@ public class ThePastShadowOfTheQueenEntity extends TheLastEndEntity implements N
         if (!level().isClientSide) {
             setTheLastEndLevel(6);
 
-            float maxHealth = (float) getAttributeValue(Attributes.MAX_HEALTH);
             if (!EntityUtil.hasProtection(this)) {
-                TrueHealthManager.register(this, maxHealth);
+                TrueHealthManager.register(this);
             }
         }
 

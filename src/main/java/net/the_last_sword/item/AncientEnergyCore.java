@@ -192,7 +192,7 @@ public class AncientEnergyCore extends Item implements IDragonSmithingTemplate, 
         });
     }
 
-    //充能单个物品，返回true表示已充能（能量核心能量已用尽或目标已充满）
+    // 一旦成功充能就结束本 tick，即使目标只缺少少量能量。
     private boolean chargeItem(IEnergyStorage source, ItemStack target) {
         if (target.isEmpty()) {
             return false;
@@ -214,7 +214,7 @@ public class AncientEnergyCore extends Item implements IDragonSmithingTemplate, 
             if (received > 0) {
                 //从能量核心中实际扣除能量
                 source.extractEnergy(received, false);
-                return received < extracted; //如果没充满说明还有空间，继续充能其他物品
+                return true;
             }
 
             return false;
@@ -249,6 +249,7 @@ public class AncientEnergyCore extends Item implements IDragonSmithingTemplate, 
             "item_tooltip.the_last_sword.ancient_energy_core.charging_enabled" :
             "item_tooltip.the_last_sword.ancient_energy_core.charging_disabled";
         tooltip.add(Component.translatable("item_tooltip.the_last_sword.ancient_energy_core",
+            TheLastSwordConfiguration.getAncientEnergyCoreChargeRateSafely(),
             Component.translatable(statusKey)));
 
         tooltip.add(Component.translatable("item_tooltip_lore.the_last_sword.ancient_energy_core")

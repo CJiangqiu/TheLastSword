@@ -543,7 +543,7 @@ public class WraithSummonManager {
         theLastEnd.setAnimationState(TheLastEndEntity.STATE_IDLE);
 
         float maxHealth = (float) wraith.getAttributeValue(Attributes.MAX_HEALTH);
-        TrueHealthManager.setMaxHealth(theLastEnd, maxHealth);
+
         TrueHealthManager.setHealth(theLastEnd, maxHealth);
     }
 
@@ -690,11 +690,7 @@ public class WraithSummonManager {
                 double newMaxHealth = healthAttr.getBaseValue() + healthBonus;
                 healthAttr.setBaseValue(newMaxHealth);
 
-                //同步真实生命值（必须用 newMaxHealth，因为 getMaxHealth 会返回旧值）
-                TrueHealthManager.setMaxHealth(entity, (float) newMaxHealth);
-                TrueHealthManager.setHealth(entity, (float) newMaxHealth);
-
-                entity.setHealth((float) newMaxHealth);
+                TrueHealthManager.setHealth(entity, entity.getMaxHealth());
             }
         }
 
@@ -715,11 +711,7 @@ public class WraithSummonManager {
                 double newMaxHealth = Math.max(1.0, healthAttr.getBaseValue() - healthBonus);
                 healthAttr.setBaseValue(newMaxHealth);
 
-                //同步真实生命值（必须用 newMaxHealth，因为 getMaxHealth 会返回旧值）
-                TrueHealthManager.setMaxHealth(entity, (float) newMaxHealth);
-                TrueHealthManager.setHealth(entity, (float) newMaxHealth);
-
-                entity.setHealth((float) newMaxHealth);
+                TrueHealthManager.setHealth(entity, entity.getMaxHealth());
             }
         }
 
@@ -782,7 +774,7 @@ public class WraithSummonManager {
 
         //注册防御追踪
         if (TheLastSwordConfiguration.getSwordWraithAsTheLastEndEntitySafely()) {
-            TrueHealthManager.register(wraith, wraith.getMaxHealth());
+            TrueHealthManager.register(wraith);
         }
     }
 
@@ -951,7 +943,7 @@ public class WraithSummonManager {
         }
         boolean enabled = TheLastSwordConfiguration.getSwordWraithAsTheLastEndEntitySafely();
         if (enabled && !EntityUtil.hasProtection(wraith)) {
-            TrueHealthManager.register(wraith, wraith.getMaxHealth());
+            TrueHealthManager.register(wraith);
         }
         if (enabled && getWraithLevel(wraith) >= TheLastEndEntity.RESURRECTION_LEVEL
                 && TrueHealthManager.getHealth(wraith) > 0.0F) {

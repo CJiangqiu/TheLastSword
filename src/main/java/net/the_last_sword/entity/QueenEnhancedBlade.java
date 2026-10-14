@@ -42,8 +42,8 @@ public class QueenEnhancedBlade extends QueenBlinkBlade {
         this(level, queen, TheLastSwordConfiguration.getQueenBlinkSettings());
     }
 
-    public QueenEnhancedBlade(Level level, ThePastShadowOfTheQueenEntity queen, QueenBlinkSettings settings) {
-        super(ModEntities.QUEEN_ENHANCED_BLADE.get(), level, queen,
+    public QueenEnhancedBlade(Level level, LivingEntity owner, QueenBlinkSettings settings) {
+        super(ModEntities.QUEEN_ENHANCED_BLADE.get(), level, owner,
                 new QueenBlinkSettings(settings.cooldown(), settings.damage(), settings.speed(),
                         1.0, 8.0, 3.0));
     }
@@ -51,6 +51,20 @@ public class QueenEnhancedBlade extends QueenBlinkBlade {
     @Override
     protected double flightRange() {
         return FLIGHT_RANGE;
+    }
+
+    public void aimAlongView(LivingEntity caster) {
+        double speed = getDeltaMovement().length();
+        setYRot(caster.getYRot());
+        setXRot(caster.getXRot());
+        Vec3 direction = forward();
+        setPos(caster.position().add(direction.scale(bladeLength() * 0.5 + 0.5)).add(0, 0.1, 0));
+        setDeltaMovement(direction.scale(speed));
+    }
+
+    @Override
+    protected Vec3 forward() {
+        return getXRot() == 0F ? super.forward() : getLookAngle().normalize();
     }
 
     @Override
@@ -62,9 +76,12 @@ public class QueenEnhancedBlade extends QueenBlinkBlade {
         double angle = Math.toRadians(bladeRoll());
         double sin = Math.sin(angle);
         double cos = Math.cos(angle);
-        Vec3 right = new Vec3(forward.z, 0, -forward.x);
-        return new Vec3[] {right.scale(cos).add(0, sin, 0),
-                right.scale(-sin).add(0, cos, 0), forward};
+        // 水平轴由偏航角构造，垂直瞄准时仍能保持稳定的刀面。
+        double yaw = Math.toRadians(getYRot());
+        Vec3 right = new Vec3(Math.cos(yaw), 0, Math.sin(yaw));
+        Vec3 up = forward.cross(right).normalize();
+        return new Vec3[] {right.scale(cos).add(up.scale(sin)),
+                right.scale(-sin).add(up.scale(cos)), forward};
     }
 
     @Override
@@ -91,7 +108,7 @@ public class QueenEnhancedBlade extends QueenBlinkBlade {
 
     @Override
     protected double contactDistance(AABB box, Vec3 forward, double step) {
-        if (bladeRoll() == 0F) return super.contactDistance(box, forward, step);
+        if (bladeRoll() == 0F && getXRot() == 0F) return super.contactDistance(box, forward, step);
         Vec3[] local = bladeAxes(forward);
         Vec3[] world = {new Vec3(1, 0, 0), new Vec3(0, 1, 0), new Vec3(0, 0, 1)};
         Vec3[] axes = new Vec3[15];
@@ -102,7 +119,7 @@ public class QueenEnhancedBlade extends QueenBlinkBlade {
         }
         Vec3 offset = box.getCenter().subtract(position().add(0, bladeHeight() * 0.5, 0));
         double enter = 0, leave = step;
-        // 连续三维分离轴检测使斜刀光的命中与挡墙距离匹配实际姿态。
+        // 连续三维分离轴检测使整段飞行路径的命中匹配刀光姿态。
         for (Vec3 axis : axes) {
             if (axis.lengthSqr() < 1.0E-12) continue;
             double radius = (box.getXsize() * Math.abs(axis.x) + box.getYsize() * Math.abs(axis.y)

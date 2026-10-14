@@ -3,6 +3,7 @@ package net.the_last_sword.configuration;
 import net.minecraftforge.common.ForgeConfigSpec;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class TheLastSwordConfiguration {
@@ -22,6 +23,8 @@ public class TheLastSwordConfiguration {
     public static ForgeConfigSpec.ConfigValue<Double> PRIEST_STAFF_GUARD_RADIUS;
     public static ForgeConfigSpec.ConfigValue<Double> PRIEST_STAFF_GUARD_SHIELD_GAIN;
     public static ForgeConfigSpec.ConfigValue<Integer> PRIEST_STAFF_GUARD_COOLDOWN;
+    public static ForgeConfigSpec.ConfigValue<Double> TRANSMUTATION_STAFF_DAMAGE_PER_CHARGE;
+    public static ForgeConfigSpec.ConfigValue<Long> TRANSMUTATION_STAFF_BASE_EMC_COST;
     public static ForgeConfigSpec.ConfigValue<Integer> LIGHTNING_SPEAR_COOLDOWN;
     public static ForgeConfigSpec.ConfigValue<Integer> LIGHTNING_SPEAR_CHARGE_TIME;
     public static ForgeConfigSpec.ConfigValue<Double> LIGHTNING_SPEAR_RANGE;
@@ -62,7 +65,6 @@ public class TheLastSwordConfiguration {
     public static ForgeConfigSpec.ConfigValue<Boolean> THE_LAST_SWORD_NORMAL_MODE_CAN_MINE;
     public static ForgeConfigSpec.ConfigValue<Boolean> THE_LAST_SWORD_SUMMON_MODE_CAN_MINE;
     public static ForgeConfigSpec.ConfigValue<Double> THE_LAST_SWORD_PERCENTAGE_DAMAGE;
-    public static ForgeConfigSpec.ConfigValue<Boolean> THE_LAST_SWORD_ENABLE_STRONG_INVENTORY_PROTECTION;
 
     // Dragon Crystal Armor | 龙晶护甲配置
     public static ForgeConfigSpec.ConfigValue<Integer> DRAGON_CRYSTAL_ARMOR_CRYSTAL_GUARD_REFRESH_INTERVAL;
@@ -88,6 +90,10 @@ public class TheLastSwordConfiguration {
     // Ancient Energy Core | 远古能量核心
     public static ForgeConfigSpec.ConfigValue<Integer> ANCIENT_ENERGY_CORE_MAX_ENERGY;
     public static ForgeConfigSpec.ConfigValue<Integer> ANCIENT_ENERGY_CORE_CHARGE_RATE;
+
+    public static ForgeConfigSpec.ConfigValue<Integer> ZERO_POINT_ENGINE_MAX_ENERGY;
+    public static ForgeConfigSpec.ConfigValue<Integer> ZERO_POINT_ENGINE_GENERATION_RATE;
+    public static ForgeConfigSpec.ConfigValue<Integer> ZERO_POINT_ENGINE_CHARGE_RATE;
 
     // Curios - The Giver's Pain | 给予者的痛苦
     public static ForgeConfigSpec.ConfigValue<Double> CURIOS_GIVERS_PAIN_ATTACK_DAMAGE_BONUS;
@@ -340,6 +346,16 @@ public class TheLastSwordConfiguration {
 
     public static ForgeConfigSpec.ConfigValue<Double> DEFENCE_CUSTOM_HEALTH_DAMAGE_REDUCTION;
     public static ForgeConfigSpec.ConfigValue<Double> DEFENCE_MAX_DAMAGE_PER_HIT;
+    public static ForgeConfigSpec.ConfigValue<Boolean> DEFENCE_ENABLE_STRONG_INVENTORY_PROTECTION;
+    public static ForgeConfigSpec.ConfigValue<List<? extends String>> DEFENCE_INVENTORY_PROTECTION_PACKAGE_WHITELIST;
+    private static final List<String> DEFAULT_INVENTORY_PROTECTION_PACKAGE_WHITELIST = List.of(
+        "moze_intel.projecte",
+        "net.p3pp3rf1y.sophisticatedbackpacks",
+        "net.p3pp3rf1y.sophisticatedcore",
+        "com.tiviacz.travelersbackpack",
+        "org.anti_ad.mc.ipnext",
+        "dev.terminalmc.clientsort"
+    );
 
     // ═══════════════════════════════════════════════════════════════════════════════════
     // Others Configuration | 其他配置
@@ -455,6 +471,17 @@ public class TheLastSwordConfiguration {
                 "守护能力的冷却时间（刻，100刻 = 5秒）"
             )
             .defineInRange("Guard Cooldown", 100, 0, 72000);
+        BUILDER.pop();
+
+        BUILDER.push("Universal Transmutation Staff");
+        TRANSMUTATION_STAFF_DAMAGE_PER_CHARGE = BUILDER
+            .comment("Projectile damage equals this value times charge level plus one; area damage applies every tick",
+                "弹射伤害为此值乘以充能档位加一，范围伤害每刻生效")
+            .defineInRange("Damage Per Charge", 200.0, 0.0, 1000000.0);
+        TRANSMUTATION_STAFF_BASE_EMC_COST = BUILDER
+            .comment("EMC cost per projectile at charge zero; doubles for each charge level",
+                "零档每发弹射物的EMC消耗，每提高一档翻倍")
+            .defineInRange("Base EMC Cost", 128L, 0L, Long.MAX_VALUE / 16);
         BUILDER.pop();
 
         BUILDER.push("Lightning Spear");
@@ -578,12 +605,6 @@ public class TheLastSwordConfiguration {
                 "在额外伤害基础上追加的目标最大生命值百分比（0.0 = 禁用，1.0 = 100%）"
             )
             .defineInRange("Percentage Damage", 0.13, 0.0, 1.0);
-        THE_LAST_SWORD_ENABLE_STRONG_INVENTORY_PROTECTION = BUILDER
-            .comment(
-                "Enable strong inventory protection. When enabled, blocks external mods from writing/removing items in the inventory and replacing equipment slots, preventing forced disarm/replace. Disabled by default for compatibility with backpack-style mods (avoids item loss). Death-drop / /clear / respawn-restore protections are always active.",
-                "启用强力背包保护。开启后将阻断外部 mod 对玩家背包/装备槽的写入与取出，防止强制缴械或替换装备。默认关闭以兼容背包类 mod，避免物品丢失。死亡掉落保护、/clear 保护、重生恢复始终生效。"
-            )
-            .define("Enable Strong Inventory Protection", false);
         BUILDER.pop();
 
         BUILDER.pop(); // End Sword
@@ -966,6 +987,18 @@ public class TheLastSwordConfiguration {
             .defineInRange("Charge Rate", 4096, 0, Integer.MAX_VALUE);
         BUILDER.pop();
 
+        BUILDER.push("Zero Point Engine");
+        ZERO_POINT_ENGINE_MAX_ENERGY = BUILDER
+            .comment("Maximum stored energy (FE)", "最大储能容量（FE）")
+            .defineInRange("Max Energy", 16777216, 0, Integer.MAX_VALUE);
+        ZERO_POINT_ENGINE_GENERATION_RATE = BUILDER
+            .comment("Energy generated per tick while carried or equipped (FE/tick)", "携带或装备时每 tick 自发电量（FE/tick）")
+            .defineInRange("Generation Rate", 1024, 0, Integer.MAX_VALUE);
+        ZERO_POINT_ENGINE_CHARGE_RATE = BUILDER
+            .comment("Energy transferred per tick to one item (FE/tick)", "每 tick 仅向一件物品充能的速率上限（FE/tick）")
+            .defineInRange("Charge Rate", 8192, 0, Integer.MAX_VALUE);
+        BUILDER.pop();
+
         BUILDER.pop(); // End Item
 
         // ═══════════════════════════════════════════════════════════════════════════════
@@ -1009,7 +1042,7 @@ public class TheLastSwordConfiguration {
                 "Maximum energy transferred per tick to the item in the charge slot (FE/t)",
                 "每 tick 向充电槽位物品充能的最大速率（FE/t）"
             )
-            .define("Item Charge Rate", 5120);
+            .define("Item Charge Rate", 8192);
         ENCHANTING_TABLE_ENCHANT_ENERGY_COST = BUILDER
             .comment(
                 "Energy cost per enchantment level (FE)",
@@ -1899,6 +1932,21 @@ public class TheLastSwordConfiguration {
         // ═══════════════════════════════════════════════════════════════════════════════
         BUILDER.push("Defence");
 
+        DEFENCE_ENABLE_STRONG_INVENTORY_PROTECTION = BUILDER
+            .comment(
+                "Enable strong inventory protection. When enabled, blocks external mods from writing/removing items in the inventory and replacing equipment slots, preventing forced disarm/replace. Disabled by default for compatibility with backpack-style mods (avoids item loss). Death-drop / /clear / respawn-restore protections are always active.",
+                "启用强力背包保护。开启后将阻断外部 mod 对玩家背包/装备槽的写入与取出，防止强制缴械或替换装备。默认关闭以兼容背包类 mod，避免物品丢失。死亡掉落保护、/clear 保护、重生恢复始终生效。"
+            )
+            .define("Enable Strong Inventory Protection", false);
+        DEFENCE_INVENTORY_PROTECTION_PACKAGE_WHITELIST = BUILDER
+            .comment(
+                "Java packages trusted by strong inventory protection, including their subpackages. Applies to inventory writes/removals and equipment replacement. An empty list disables custom exemptions; independent death-drop and clear protections are unchanged.",
+                "强力背包保护信任的 Java 包名，包含其子包。用于背包写入、移除和装备替换判定；空列表表示不额外放行任何包，不影响独立的死亡掉落与清空保护。"
+            )
+            .defineListAllowEmpty("Inventory Protection Package Whitelist", DEFAULT_INVENTORY_PROTECTION_PACKAGE_WHITELIST,
+                value -> value instanceof String prefix
+                    && prefix.matches("[A-Za-z_$][\\w$]*(\\.[A-Za-z_$][\\w$]*)+\\.?"));
+
         DEFENCE_CUSTOM_HEALTH_DAMAGE_REDUCTION = BUILDER
             .comment(
                 "Maximum percentage of health that can be lost per hit for defence system",
@@ -2169,6 +2217,14 @@ public class TheLastSwordConfiguration {
         return safeGet(PRIEST_STAFF_GUARD_COOLDOWN, 100);
     }
 
+    public static double getTransmutationStaffDamagePerChargeSafely() {
+        return safeGet(TRANSMUTATION_STAFF_DAMAGE_PER_CHARGE, 200.0);
+    }
+
+    public static long getTransmutationStaffBaseEmcCostSafely() {
+        return safeGet(TRANSMUTATION_STAFF_BASE_EMC_COST, 128L);
+    }
+
     //盔甲类通用配置（等级区间）
     public static double getArmorIncreaseLowLevelSafely() {
         return safeGet(ARMOR_INCREASE_LOW_LEVEL, 0.5);
@@ -2267,7 +2323,11 @@ public class TheLastSwordConfiguration {
     }
 
     public static boolean getEnableStrongInventoryProtectionSafely() {
-        return safeGet(THE_LAST_SWORD_ENABLE_STRONG_INVENTORY_PROTECTION, false);
+        return safeGet(DEFENCE_ENABLE_STRONG_INVENTORY_PROTECTION, false);
+    }
+
+    public static List<? extends String> getInventoryProtectionPackageWhitelistSafely() {
+        return safeGet(DEFENCE_INVENTORY_PROTECTION_PACKAGE_WHITELIST, DEFAULT_INVENTORY_PROTECTION_PACKAGE_WHITELIST);
     }
 
     //龙晶护甲配置
@@ -2333,6 +2393,18 @@ public class TheLastSwordConfiguration {
 
     public static int getAncientEnergyCoreChargeRateSafely() {
         return safeGet(ANCIENT_ENERGY_CORE_CHARGE_RATE, 4096);
+    }
+
+    public static int getZeroPointEngineMaxEnergySafely() {
+        return safeGet(ZERO_POINT_ENGINE_MAX_ENERGY, 16777216);
+    }
+
+    public static int getZeroPointEngineGenerationRateSafely() {
+        return safeGet(ZERO_POINT_ENGINE_GENERATION_RATE, 1024);
+    }
+
+    public static int getZeroPointEngineChargeRateSafely() {
+        return safeGet(ZERO_POINT_ENGINE_CHARGE_RATE, 8192);
     }
 
     //防御系统配置
@@ -2844,7 +2916,7 @@ public class TheLastSwordConfiguration {
     }
 
     public static int getEnchantingTableItemChargeRateSafely() {
-        return safeGet(ENCHANTING_TABLE_ITEM_CHARGE_RATE, 5120);
+        return safeGet(ENCHANTING_TABLE_ITEM_CHARGE_RATE, 8192);
     }
 
     public static int getEnchantingTableEnchantEnergyCostSafely() {

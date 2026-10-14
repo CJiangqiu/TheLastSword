@@ -183,9 +183,8 @@ public class GuardianOfSealedSpireEntity extends TheLastEndEntity {
         SpawnGroupData result = super.finalizeSpawn(world, difficulty, reason, livingdata, tag);
 
         if (!level().isClientSide) {
-            float maxHealth = (float) getAttributeValue(Attributes.MAX_HEALTH);
             if (!EntityUtil.hasProtection(this)) {
-                TrueHealthManager.register(this, maxHealth);
+                TrueHealthManager.register(this);
             }
 
             setTheLastEndLevel(1);

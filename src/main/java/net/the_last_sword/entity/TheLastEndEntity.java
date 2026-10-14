@@ -273,8 +273,7 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
         // 首次tick初始化防御系统
         if (!level().isClientSide && tickCount == 1) {
             if (!EntityUtil.hasProtection(this)) {
-                float maxHealth = (float) this.getAttributeValue(Attributes.MAX_HEALTH);
-                TrueHealthManager.register(this, maxHealth);
+                TrueHealthManager.register(this);
             }
         }
 
@@ -479,7 +478,6 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
             damageSource = damageSources().generic();
         }
 
-        float previousMaxHealth = TrueHealthManager.getMaxHealth(this);
         TrueHealthManager.setHealth(this, 0.0F);
         TrueHealthManager.clear(this);
         super.die(damageSource);
@@ -490,19 +488,16 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
         }
 
         // 其他死亡事件处理器仍可取消最终结算；取消后必须退出死亡动画并恢复真实血量保护。
-        float restoredMaxHealth = Float.isFinite(previousMaxHealth) && previousMaxHealth > 0.0F
-                ? previousMaxHealth
-                : getMaxHealth();
+        float restoredMaxHealth = getMaxHealth();
         float restoredHealth = super.getHealth();
         if (!Float.isFinite(restoredHealth) || restoredHealth <= 0.0F) {
             restoredHealth = restoredMaxHealth;
         }
-        TrueHealthManager.setMaxHealth(this, restoredMaxHealth);
-        TrueHealthManager.setHealth(this, Math.min(restoredHealth, restoredMaxHealth));
-        EntityUtil.setProtection(this, true);
+
         deathDamageSource = null;
         setDeathTick(0);
         setAnimationState(STATE_IDLE);
+        TrueHealthManager.setHealth(this, Math.min(restoredHealth, restoredMaxHealth));
     }
 
     protected void finishDeathWithoutRemoval(int nextState) {
@@ -515,12 +510,11 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
             restoredMaxHealth = getMaxHealth();
         }
         EcaAPI.revive(this);
-        TrueHealthManager.setMaxHealth(this, restoredMaxHealth);
-        TrueHealthManager.setHealth(this, restoredMaxHealth);
-        EntityUtil.setProtection(this, true);
+
         deathDamageSource = null;
         setDeathTick(0);
         setAnimationState(nextState);
+        TrueHealthManager.setHealth(this, restoredMaxHealth);
     }
 
     public void triggerDeath(@NotNull DamageSource damageSource) {
@@ -736,9 +730,8 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
         }
 
         if (!level().isClientSide) {
-            float maxHealth = (float) getAttributeValue(Attributes.MAX_HEALTH);
             if (!EntityUtil.hasProtection(this)) {
-                TrueHealthManager.register(this, maxHealth);
+                TrueHealthManager.register(this);
             }
         }
     }

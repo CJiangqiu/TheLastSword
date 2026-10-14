@@ -1,0 +1,24 @@
+{
+  "type": "the_last_sword:dragon_crystal_smithing",
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "projecte"
+    }
+  ],
+  "template": {
+    "item": "the_last_sword:dragon_crystal_upgrade_template",
+    "inputLevel": 0
+  },
+  "input": {
+    "item": "the_last_sword:dragon_cult_priest_armor_helmet",
+    "inputLevel": 0
+  },
+  "addition": {
+    "item": "projecte:gem_helmet"
+  },
+  "output": {
+    "item": "the_last_sword:crown_of_countless_stars",
+    "outputLevel": 0
+  }
+}

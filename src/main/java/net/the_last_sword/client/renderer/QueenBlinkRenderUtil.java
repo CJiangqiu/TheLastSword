@@ -26,6 +26,10 @@ public final class QueenBlinkRenderUtil {
 
     private QueenBlinkRenderUtil() {}
 
+    public static void finishRiftBatch(MultiBufferSource.BufferSource buffers) {
+        buffers.endBatch(RIFT);
+    }
+
     private static RenderType type(String name, boolean glow) {
         return RenderType.create(name, DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.QUADS,
                 4096, false, true, RenderType.CompositeState.builder()

@@ -14,6 +14,22 @@ public class CompatCheck {
     private static Boolean apotheosisLoaded = null;
     private static Boolean luckyBlockLoaded = null;
     private static Boolean jecLoaded = null;
+    private static Boolean transmutationLoaded = null;
+    private static Boolean spellcastingLoaded = null;
+
+    public static boolean isTransmutationLoaded() {
+        if (transmutationLoaded == null) {
+            transmutationLoaded = ModList.get().isLoaded("projecte");
+        }
+        return transmutationLoaded;
+    }
+
+    public static boolean isSpellcastingLoaded() {
+        if (spellcastingLoaded == null) {
+            spellcastingLoaded = ModList.get().isLoaded("irons_spellbooks");
+        }
+        return spellcastingLoaded;
+    }
 
     public static boolean isJeiLoaded() {
         if (jeiLoaded == null) {

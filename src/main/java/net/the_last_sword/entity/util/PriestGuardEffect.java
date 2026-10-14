@@ -3,12 +3,16 @@ package net.the_last_sword.entity.util;
 import net.eca.api.EcaAPI;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemCooldowns;
 import net.minecraft.world.phys.AABB;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.util.EntityUtil;
 
@@ -34,6 +38,7 @@ public final class PriestGuardEffect {
 
         for (LivingEntity ally : collectAllies(source, radius)) {
             purify(ally);
+            clearItemCooldowns(ally);
             EntityUtil.grantTempShield(ally, shieldGain);
             spawnBuffParticles(ally);
         }
@@ -82,6 +87,17 @@ public final class PriestGuardEffect {
             BUFF_PARTICLE_COUNT,
             entity.getBbWidth() * 0.5, entity.getBbHeight() * 0.4, entity.getBbWidth() * 0.5,
             0.0);
+    }
+
+    private static void clearItemCooldowns(LivingEntity entity) {
+        if (!(entity instanceof ServerPlayer player)) return;
+        ItemCooldowns cooldowns = player.getCooldowns();
+        // 冷却按物品类型记录，遍历注册表也能覆盖饰品与已移出背包的物品。
+        for (Item item : ForgeRegistries.ITEMS.getValues()) {
+            if (cooldowns.isOnCooldown(item)) {
+                cooldowns.removeCooldown(item);
+            }
+        }
     }
 
     private static void purify(LivingEntity entity) {

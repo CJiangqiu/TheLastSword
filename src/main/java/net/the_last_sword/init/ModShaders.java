@@ -10,6 +10,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.client.shader.TheLastEndEffect;
 import net.the_last_sword.client.shader.TheLastEndShaderInstance;
+import net.the_last_sword.client.shader.ZeroPointEngineShader;
 
 import java.io.IOException;
 
@@ -27,5 +28,6 @@ public class ModShaders {
             DefaultVertexFormat.BLOCK
         );
         event.registerShader(shader, TheLastEndEffect::setShader);
+        event.registerShader(new ZeroPointEngineShader(event.getResourceProvider()), ZeroPointEngineShader::setShader);
     }
 }

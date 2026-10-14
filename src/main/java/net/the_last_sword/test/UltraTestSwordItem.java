@@ -30,7 +30,6 @@ import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.damagesource.AbsoluteDestructionDamageSource;
 import net.the_last_sword.init.ModKeyMappings;
 import net.the_last_sword.util.EntityUtil;
-import net.the_last_sword.util.health.TrueHealthManager;
 import net.the_last_sword.event.ServerEventHandler;
 import net.the_last_sword.util.nbt.ItemModeHelper;
 
@@ -241,17 +240,6 @@ public class UltraTestSwordItem extends TieredItem {
         boolean isCreativeOrSpec = sp.isCreative() || sp.isSpectator();
         boolean isOp = sp.hasPermissions(2);
         if (!(isCreativeOrSpec && isOp)) return;
-
-        //TLS防御逻辑：持有究极测试剑时始终注册
-        if (hasUltraTestSword(sp)) {
-            TrueHealthManager.register(sp, sp.getMaxHealth());
-            sp.getPersistentData().putBoolean("UltraTestSwordTLSDefence", true);
-        } else {
-            if (sp.getPersistentData().getBoolean("UltraTestSwordTLSDefence")) {
-                TrueHealthManager.clear(sp);
-                sp.getPersistentData().remove("UltraTestSwordTLSDefence");
-            }
-        }
 
         //ECA无敌+位置锁定：仅防御模式
         if (hasDefenseSword(sp)) {

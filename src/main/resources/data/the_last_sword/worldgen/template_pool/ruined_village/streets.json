@@ -7,7 +7,7 @@
       "element": {
         "element_type": "minecraft:single_pool_element",
         "location": "the_last_sword:ruined_village/streets/straight_01",
-        "projection": "rigid",
+        "projection": "terrain_matching",
         "processors": {
           "processors": [
             {
@@ -30,7 +30,7 @@
       "element": {
         "element_type": "minecraft:single_pool_element",
         "location": "the_last_sword:ruined_village/streets/corner_01",
-        "projection": "rigid",
+        "projection": "terrain_matching",
         "processors": {
           "processors": [
             {
@@ -53,7 +53,7 @@
       "element": {
         "element_type": "minecraft:single_pool_element",
         "location": "the_last_sword:ruined_village/streets/straight_02",
-        "projection": "rigid",
+        "projection": "terrain_matching",
         "processors": {
           "processors": [
             {
@@ -76,7 +76,7 @@
       "element": {
         "element_type": "minecraft:single_pool_element",
         "location": "the_last_sword:ruined_village/streets/straight_03",
-        "projection": "rigid",
+        "projection": "terrain_matching",
         "processors": {
           "processors": [
             {
@@ -99,7 +99,7 @@
       "element": {
         "element_type": "minecraft:single_pool_element",
         "location": "the_last_sword:ruined_village/streets/corner_02",
-        "projection": "rigid",
+        "projection": "terrain_matching",
         "processors": {
           "processors": [
             {
@@ -122,7 +122,7 @@
       "element": {
         "element_type": "minecraft:single_pool_element",
         "location": "the_last_sword:ruined_village/streets/straight_04",
-        "projection": "rigid",
+        "projection": "terrain_matching",
         "processors": {
           "processors": [
             {

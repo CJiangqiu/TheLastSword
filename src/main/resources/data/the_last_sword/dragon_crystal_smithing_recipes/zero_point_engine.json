@@ -1,0 +1,18 @@
+{
+  "type": "the_last_sword:dragon_crystal_smithing",
+  "template": {
+    "item": "the_last_sword:dragon_crystal_upgrade_template",
+    "inputLevel": 0
+  },
+  "input": {
+    "item": "the_last_sword:ancient_energy_core",
+    "inputLevel": 0
+  },
+  "addition": {
+    "item": "minecraft:beacon"
+  },
+  "output": {
+    "item": "the_last_sword:zero_point_engine",
+    "outputLevel": 0
+  }
+}

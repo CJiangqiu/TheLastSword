@@ -62,9 +62,12 @@ dependencies {
     implementation fg.deobf("curse.maven:playeranimator-658587:4587214")
     implementation fg.deobf("curse.maven:irons-lib-1492763:8364892")
     implementation fg.deobf("curse.maven:irons-spells-n-spellbooks-855414:8680180")
+    implementation fg.deobf("curse.maven:projecte-226410:4901949")
+    implementation fg.deobf("curse.maven:lucky-block-576825:4817267")
     implementation fg.deobf("curse.maven:touhou-little-maid-355044:6979039")
     implementation fg.deobf("curse.maven:farmers-delight-398521:6917255")
     implementation fg.deobf("curse.maven:spark-361579:4738952")
+
 }
 
 mixin {

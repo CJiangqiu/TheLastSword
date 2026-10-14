@@ -1,0 +1,24 @@
+{
+  "type": "the_last_sword:dragon_crystal_smithing",
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "projecte"
+    }
+  ],
+  "template": {
+    "item": "the_last_sword:dragon_crystal_upgrade_template",
+    "inputLevel": 0
+  },
+  "input": {
+    "item": "the_last_sword:priest_staff",
+    "inputLevel": 0
+  },
+  "addition": {
+    "item": "projecte:rm_katar"
+  },
+  "output": {
+    "item": "the_last_sword:staff_of_universal_transmutation",
+    "outputLevel": 0
+  }
+}

@@ -1,0 +1,60 @@
+{
+	"format_version": "1.21.110",
+	"minecraft:geometry": [
+		{
+			"description": {
+				"identifier": "geometry.staff_of_universal_transmutation",
+				"texture_width": 128,
+				"texture_height": 128,
+				"visible_bounds_width": 3,
+				"visible_bounds_height": 3.5,
+				"visible_bounds_offset": [0, 1.25, 0]
+			},
+			"bones": [
+				{
+					"name": "staff_of_universal_transmutation",
+					"pivot": [1, -4, -1]
+				},
+				{
+					"name": "group2",
+					"parent": "staff_of_universal_transmutation",
+					"pivot": [1, -4, -1],
+					"cubes": [
+						{"origin": [-1, -4, -1], "size": [2, 14, 2], "uv": [42, 21]},
+						{"origin": [-2, 17, -2], "size": [4, 4, 4], "uv": [18, 50]},
+						{"origin": [-1.75, 15, -1.75], "size": [3.5, 2, 3.5], "uv": [50, 30]},
+						{"origin": [-1.5, 10, -1.5], "size": [3, 6, 3], "uv": [50, 21]},
+						{"origin": [-1, -6, -1.25], "size": [3, 3, 2.5], "pivot": [0, -5, 0], "rotation": [0, 0, -45], "uv": [34, 50]},
+						{"origin": [-3, 23, -3], "size": [6, 6, 6], "uv": [0, 21]}
+					]
+				},
+				{
+					"name": "ring",
+					"parent": "group2",
+					"pivot": [0, 26, 0],
+					"cubes": [
+						{"origin": [-10, 25.5, -10], "size": [20, 1, 20], "pivot": [0, 26, 0], "rotation": [0, 22.5, 0], "uv": [0, 0]}
+					]
+				},
+				{
+					"name": "group3",
+					"parent": "staff_of_universal_transmutation",
+					"pivot": [1, 29, -1],
+					"cubes": [
+						{"origin": [0, 22, -4], "size": [1, 10, 8], "uv": [24, 21]},
+						{"origin": [-1, 22, -4], "size": [1, 10, 8], "uv": [0, 33]}
+					]
+				},
+				{
+					"name": "group",
+					"parent": "staff_of_universal_transmutation",
+					"pivot": [0, 29, -1],
+					"cubes": [
+						{"origin": [-4, 22, 0], "size": [8, 10, 1], "uv": [18, 39]},
+						{"origin": [-4, 22, -1], "size": [8, 10, 1], "uv": [36, 39]}
+					]
+				}
+			]
+		}
+	]
+}

@@ -5,6 +5,7 @@
   "minVersion": "0.8",
   "refmap": "mixins.the_last_sword.refmap.json",
   "client": [
+    "SpellCooldownTooltipMixin",
     "EntityRenderDispatcherMixin",
     "CameraMixin",
     "MinecraftMixin",
@@ -17,6 +18,9 @@
     "SmithingTransformRecipeAccessor"
   ],
   "mixins": [
+    "TransmutationStaffCastingMixin",
+    "TransmutationStaffChannelMixin",
+    "SmithingLevelEmcMixin",
     "BlockBehaviourMixin",
     "ConnectionMixin",
     "EndCrystalMixin",

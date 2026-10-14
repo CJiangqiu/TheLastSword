@@ -46,6 +46,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -235,41 +236,6 @@ public class LivingEntityMixin {
     }
 
 
-    //肃正防御护盾 > 0 时注册保护，= 0 时清除（不影响剑的保护）
-    @Unique
-    private void the_last_sword$handleJustifiedDefenceProtection(LivingEntity entity) {
-        AttributeInstance curAttr = entity.getAttribute(ModAttributes.JUSTIFIED_DEFENCE.get());
-        if (curAttr == null) return;
-
-        if (curAttr.getValue() > 0) {
-            entity.getPersistentData().remove("JustifiedDefenceClearDelay");
-            if (!EntityUtil.hasProtection(entity)) {
-                float realHealth = entity.getHealth();
-                TrueHealthManager.setMaxHealth(entity, entity.getMaxHealth());
-                TrueHealthManager.setHealth(entity, realHealth);
-                EntityUtil.setProtection(entity, true);
-                entity.getPersistentData().putBoolean("JustifiedDefenceProtection", true);
-            }
-        } else if (entity.getPersistentData().getBoolean("JustifiedDefenceProtection")) {
-            int delay = entity.getPersistentData().getInt("JustifiedDefenceClearDelay");
-            if (delay <= 0) {
-                entity.getPersistentData().putInt("JustifiedDefenceClearDelay", 5);
-            } else if (delay == 1) {
-                entity.getPersistentData().remove("JustifiedDefenceClearDelay");
-                entity.getPersistentData().remove("JustifiedDefenceProtection");
-                if (!entity.getPersistentData().getBoolean("TheLastSwordDefence")) {
-                    float trueHealth = TrueHealthManager.getHealth(entity);
-                    TrueHealthManager.clear(entity);
-                    if (trueHealth >= 0 && trueHealth < entity.getHealth()) {
-                        entity.setHealth(trueHealth);
-                    }
-                }
-            } else {
-                entity.getPersistentData().putInt("JustifiedDefenceClearDelay", delay - 1);
-            }
-        }
-    }
-
     //护盾自动回复系统（两层分支优化）
     @Unique
     private void the_last_sword$handleShieldRegeneration(LivingEntity entity) {
@@ -308,9 +274,8 @@ public class LivingEntityMixin {
             return;
         }
 
-        //分支2: cur > max → 校准（限制不超过最大值）
+        // 超出上限的部分视为临时护盾，保留到消耗且不参与自然恢复。
         if (cur > max) {
-            curAttr.setBaseValue(max);
             the_last_sword$justifiedDefenceRecoveryProgress = 0.0;
             return;
         }
@@ -375,24 +340,26 @@ public class LivingEntityMixin {
         } else {
             the_last_sword$handleShieldRegeneration(entity);
 
-            //肃正防御存在时自动注册保护
-            the_last_sword$handleJustifiedDefenceProtection(entity);
         }
+
+        TrueHealthManager.syncProtection(entity);
 
         //每 tick 更新禁疗计时器
         PresentWorldAnchorManager.tickHealBanTime(entity);
 
     }
 
-    //tick 结束时（ECA 禁疗已接管强制血量逻辑）
+    // 装备更新完成后收敛血量，避免使用卸下旧修饰符时的中间上限。
     @Inject(method = "tick", at = @At("TAIL"))
     private void the_last_sword$onTickEnd(CallbackInfo ci) {
+        LivingEntity entity = (LivingEntity) (Object) this;
+        TrueHealthManager.clampHealth(entity);
     }
 
     @Inject(method = "tickDeath", at = @At("HEAD"), cancellable = true)
     private void onLivingEntityTickDeath(CallbackInfo ci) {
         LivingEntity entity = (LivingEntity) (Object) this;
-        if (EntityUtil.hasProtection(entity)) {
+        if (TrueHealthManager.hasLivingProtection(entity)) {
             ci.cancel();
         }
     }
@@ -509,32 +476,27 @@ public class LivingEntityMixin {
         ci.cancel();
     }
 
-    @Inject(method = "heal", at = @At("HEAD"), cancellable = true)
-    private void onLivingEntityHeal(float healAmount, CallbackInfo ci) {
+    // 治疗事件已处理完毕，此处只同步最终正数治疗，不另行计算恢复速度。
+    @ModifyArg(method = "heal", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/entity/LivingEntity;setHealth(F)V"), index = 0)
+    private float the_last_sword$applyHealing(float health) {
         LivingEntity entity = (LivingEntity) (Object) this;
-
         if (entity.level().isClientSide) {
-            return;
+            return health;
         }
-
-        PresentWorldAnchorManager.restorePresentWorldAnchorFromHeal(entity, healAmount);
-
-        //检查是否受保护
-        if (EntityUtil.hasProtection(entity)) {
-            if (healAmount > 0) {
-                float currentHealth = TrueHealthManager.getHealth(entity);
-                float maxHealth = (float) entity.getAttributeValue(Attributes.MAX_HEALTH);
-                float newHealth = Math.min(currentHealth + healAmount, maxHealth);
-                Float healLimit = EcaAPI.getHealBanValue(entity);
-                if (healLimit != null) {
-                    newHealth = Math.min(newHealth, healLimit);
-                }
-                if (newHealth > currentHealth) {
-                    TrueHealthManager.setHealth(entity, newHealth);
-                }
+        float currentHealth = TrueHealthManager.getHealth(entity);
+        float healAmount = health - currentHealth;
+        // 终焉剑灵的禁止治疗被动不属于召唤剑灵的通用治疗规则。
+        if (entity instanceof TheLastEndSwordWraithEntity && EntityUtil.hasProtection(entity)) {
+            return currentHealth;
+        }
+        if (Float.isFinite(healAmount) && healAmount > 0.0F) {
+            PresentWorldAnchorManager.restorePresentWorldAnchorFromHeal(entity, healAmount);
+            if (EntityUtil.hasProtection(entity)) {
+                TrueHealthManager.setHealth(entity, health);
             }
-            ci.cancel();
         }
+        return health;
     }
 
     @Inject(method = "setHealth", at = @At("HEAD"), cancellable = true)
@@ -580,10 +542,7 @@ public class LivingEntityMixin {
             return;
         }
 
-        //护盾提供的通用保护不能绕过复活所需的点数。
-        boolean shieldOnlyProtection = entity.getPersistentData().getBoolean("JustifiedDefenceProtection")
-                && !entity.getPersistentData().getBoolean("TheLastSwordDefence");
-        if (EntityUtil.hasProtection(entity) && !shieldOnlyProtection) {
+        if (TrueHealthManager.hasLivingProtection(entity)) {
             ci.cancel();
         }
     }

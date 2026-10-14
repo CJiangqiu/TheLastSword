@@ -1,6 +1,7 @@
 package net.the_last_sword.init;
 
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ArmorItem;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -10,8 +11,11 @@ import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.compat.CompatCheck;
 import net.the_last_sword.compat.cataclysm.CataclysmItemsRegistry;
 import net.the_last_sword.compat.curios.CuriosItemsRegistry;
+import net.the_last_sword.compat.irons_spellbooks.CastingTransmutationStaffItem;
+import net.the_last_sword.compat.projecte.StaffOfUniversalTransmutationItem;
 import net.the_last_sword.compat.lucky_block.TheLastEndLuckyBlockDisplayItem;
 import net.the_last_sword.item.*;
+import net.the_last_sword.compat.projecte.PrimalSourceArmorSupport;
 import net.the_last_sword.test.UltraTestSwordItem;
 import net.minecraft.world.item.Rarity;
 
@@ -120,6 +124,10 @@ public class ModItems {
 
     public static final RegistryObject<Item> ANCIENT_ENERGY_CORE = ITEMS.register("ancient_energy_core",
         AncientEnergyCore::new
+    );
+
+    public static final RegistryObject<Item> ZERO_POINT_ENGINE = ITEMS.register("zero_point_engine",
+        ZeroPointEngine::new
     );
 
     public static final RegistryObject<Item> DRAGON_CRYSTAL_UPGRADE_TEMPLATE = ITEMS.register("dragon_crystal_upgrade_template",
@@ -273,6 +281,12 @@ public class ModItems {
         DragonCultPriestArmorItem.Boots::new
     );
 
+    public static RegistryObject<Item> CROWN_OF_COUNTLESS_STARS;
+    public static RegistryObject<Item> STAFF_OF_UNIVERSAL_TRANSMUTATION;
+    public static RegistryObject<Item> ROBE_OF_THE_PRIMAL_SOURCE;
+    public static RegistryObject<Item> LEGGINGS_OF_EARTHS_BLESSING;
+    public static RegistryObject<Item> BOOTS_OF_THE_DEEP_ABYSS;
+
     //测试实体刷怪蛋
     public static final RegistryObject<Item> TEST_ENTITY_SPAWN_EGG = ITEMS.register("test_entity_spawn_egg",
         () -> new ForgeSpawnEggItem(ModEntities.TEST_ENTITY, -1, -1, new Item.Properties())
@@ -361,6 +375,20 @@ public class ModItems {
 
     //注册联动物品（直接调用，Java懒加载保证不会在未加载时执行）
     private static void registerConditionalItems() {
+        if (CompatCheck.isTransmutationLoaded()) {
+            STAFF_OF_UNIVERSAL_TRANSMUTATION = ITEMS.register("staff_of_universal_transmutation",
+                () -> CompatCheck.isSpellcastingLoaded()
+                    ? new CastingTransmutationStaffItem()
+                    : new StaffOfUniversalTransmutationItem());
+            CROWN_OF_COUNTLESS_STARS = ITEMS.register("crown_of_countless_stars",
+                () -> PrimalSourceArmorSupport.create(ArmorItem.Type.HELMET));
+            ROBE_OF_THE_PRIMAL_SOURCE = ITEMS.register("robe_of_the_primal_source",
+                () -> PrimalSourceArmorSupport.create(ArmorItem.Type.CHESTPLATE));
+            LEGGINGS_OF_EARTHS_BLESSING = ITEMS.register("leggings_of_earths_blessing",
+                () -> PrimalSourceArmorSupport.create(ArmorItem.Type.LEGGINGS));
+            BOOTS_OF_THE_DEEP_ABYSS = ITEMS.register("boots_of_the_deep_abyss",
+                () -> PrimalSourceArmorSupport.create(ArmorItem.Type.BOOTS));
+        }
         //灾变奖章
         if (CompatCheck.isCataclysmLoaded()) {
             ANCIENT_REMNANT_MEDAL = CataclysmItemsRegistry.registerAncientRemnantMedal(ITEMS);

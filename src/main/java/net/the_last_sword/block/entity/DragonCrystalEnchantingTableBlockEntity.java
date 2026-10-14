@@ -53,10 +53,16 @@ public class DragonCrystalEnchantingTableBlockEntity extends RandomizableContain
     private final InternalEnergyStorage energyStorage;
     private final LazyOptional<IEnergyStorage> energyHandler;
 
-    //内部能量存储: 扩展 Forge EnergyStorage, 新增不受 maxExtract 限制的内部消耗方法
+    // 内部发电和消耗独立于对外能量接口的传输限速。
     private static class InternalEnergyStorage extends EnergyStorage {
         public InternalEnergyStorage(int capacity, int maxReceive, int maxExtract) {
             super(capacity, maxReceive, maxExtract);
+        }
+
+        public int generateInternal(int amount) {
+            int generated = Math.min(Math.max(0, this.capacity - this.energy), Math.max(0, amount));
+            this.energy += generated;
+            return generated;
         }
 
         //内部消耗: 绕过 maxExtract 限制, 用于附魔等一次性能量消耗
@@ -236,7 +242,8 @@ public class DragonCrystalEnchantingTableBlockEntity extends RandomizableContain
 
         // 检测并消耗燃料（满电时不消耗）
         ItemStack fuelSlot = blockEntity.getItem(0);
-        if (!isFull && !fuelSlot.isEmpty() && fuelSlot.is(ModTags.DRAGON_CRYSTAL_ENCHANTING_TABLE_FUEL)) {
+        if (!isFull && blockEntity.totalPowerTime <= 0 && !fuelSlot.isEmpty()
+                && fuelSlot.is(ModTags.DRAGON_CRYSTAL_ENCHANTING_TABLE_FUEL)) {
             fuelSlot.shrink(1);
             blockEntity.totalPowerTime += TheLastSwordConfiguration.getEnchantingTableCrystalPowerTimeSafely();
             changed = true;
@@ -247,7 +254,7 @@ public class DragonCrystalEnchantingTableBlockEntity extends RandomizableContain
             blockEntity.totalPowerTime--;
             changed = true;
 
-            blockEntity.energyStorage.receiveEnergy(TheLastSwordConfiguration.getEnchantingTableEnergyPerTickSafely(), false);
+            blockEntity.energyStorage.generateInternal(TheLastSwordConfiguration.getEnchantingTableEnergyPerTickSafely());
         }
 
         // 给充电槽位物品充能（受 Item Charge Rate 配置限制）
@@ -256,14 +263,16 @@ public class DragonCrystalEnchantingTableBlockEntity extends RandomizableContain
             var energyCap = chargeSlot.getCapability(ForgeCapabilities.ENERGY);
             if (energyCap.isPresent()) {
                 var itemEnergy = energyCap.orElse(null);
-                if (itemEnergy != null) {
+                if (itemEnergy != null && itemEnergy.canReceive()) {
                     int rate = TheLastSwordConfiguration.getEnchantingTableItemChargeRateSafely();
                     int canReceive = itemEnergy.getMaxEnergyStored() - itemEnergy.getEnergyStored();
                     int toCharge = Math.min(Math.min(blockEntity.energyStorage.getEnergyStored(), canReceive), rate);
                     if (toCharge > 0) {
-                        itemEnergy.receiveEnergy(toCharge, false);
-                        blockEntity.energyStorage.extractEnergy(toCharge, false);
-                        changed = true;
+                        int received = itemEnergy.receiveEnergy(toCharge, false);
+                        if (received > 0) {
+                            blockEntity.energyStorage.consumeInternal(received);
+                            changed = true;
+                        }
                     }
                 }
             }

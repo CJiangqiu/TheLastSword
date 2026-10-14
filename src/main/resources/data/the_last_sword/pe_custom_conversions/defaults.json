@@ -1,0 +1,32 @@
+{
+  "values": {
+    "before": {
+      "the_last_sword:dragon_cult_horn": 32992,
+      "the_last_sword:disposable_energy_battery": 102400,
+      "the_last_sword:ancient_energy_core": 4194304,
+      "the_last_sword:zero_point_engine": 16777216,
+      "the_last_sword:knight_greatsword": 4612,
+      "the_last_sword:priest_staff": 32776,
+      "the_last_sword:lightning_spear": 262144,
+      "the_last_sword:dragon_cultist_armor_helmet": 1280,
+      "the_last_sword:dragon_cultist_armor_chestplate": 2048,
+      "the_last_sword:dragon_cultist_armor_leggings": 1792,
+      "the_last_sword:dragon_cultist_armor_boots": 1024,
+      "the_last_sword:dragon_cult_paladin_armor_helmet": 40960,
+      "the_last_sword:dragon_cult_paladin_armor_chestplate": 65536,
+      "the_last_sword:dragon_cult_paladin_armor_leggings": 57344,
+      "the_last_sword:dragon_cult_paladin_armor_boots": 32768,
+      "the_last_sword:dragon_cult_priest_armor_helmet": 105801,
+      "the_last_sword:dragon_cult_priest_armor_chestplate": 130377,
+      "the_last_sword:dragon_cult_priest_armor_leggings": 122185,
+      "the_last_sword:dragon_cult_priest_armor_boots": 97609,
+      "the_last_sword:dragon_crystal_ring": 131072,
+      "the_last_sword:dragon_crystal_necklace": 262144,
+      "the_last_sword:dragon_crystal_crown": 1310720,
+      "the_last_sword:wings_that_cover_the_world": 1310720,
+      "the_last_sword:dimension_explorer": 1310720,
+      "the_last_sword:the_givers_pain": 2621440,
+      "the_last_sword:sword_soul_stone": 135296
+    }
+  }
+}

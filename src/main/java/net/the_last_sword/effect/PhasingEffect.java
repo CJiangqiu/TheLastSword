@@ -22,8 +22,8 @@ public class PhasingEffect extends MobEffect {
     public void addAttributeModifiers(LivingEntity entity, AttributeMap attributeMap, int amplifier) {
         super.addAttributeModifiers(entity, attributeMap, amplifier);
 
-        //虚化效果设置ECA无敌
-        if (!entity.level().isClientSide) {
+        // 续时也会重加属性，重复初始化无敌会用底层旧血量覆盖治疗后的锁定值。
+        if (!entity.level().isClientSide && !EcaAPI.isInvulnerable(entity)) {
             EcaAPI.setInvulnerable(entity, true);
         }
     }

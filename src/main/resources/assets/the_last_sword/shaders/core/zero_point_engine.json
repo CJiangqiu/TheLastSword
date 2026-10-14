@@ -1,0 +1,13 @@
+{
+  "blend": {"func": "add", "srcrgb": "srcalpha", "dstrgb": "1-srcalpha"},
+  "vertex": "the_last_sword:zero_point_engine",
+  "fragment": "the_last_sword:zero_point_engine",
+  "samplers": [{"name": "Sampler0"}],
+  "attributes": ["Position", "Color", "UV0", "UV1", "UV2", "Normal"],
+  "uniforms": [
+    {"name": "ModelViewMat", "type": "matrix4x4", "count": 16, "values": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]},
+    {"name": "ProjMat", "type": "matrix4x4", "count": 16, "values": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]},
+    {"name": "LocalUvMin", "type": "float", "count": 2, "values": [0, 0]},
+    {"name": "LocalUvScale", "type": "float", "count": 2, "values": [1, 1]}
+  ]
+}

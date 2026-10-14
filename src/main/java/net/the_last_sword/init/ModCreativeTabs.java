@@ -9,6 +9,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.compat.CompatCheck;
+import net.the_last_sword.compat.irons_spellbooks.SpellIntegration;
 
 public class ModCreativeTabs {
 
@@ -61,6 +62,7 @@ public class ModCreativeTabs {
                 output.accept(ModItems.THE_GIVERS_PAIN.get());
                 output.accept(ModItems.DISPOSABLE_ENERGY_BATTERY.get().getDefaultInstance());
                 output.accept(ModItems.ANCIENT_ENERGY_CORE.get());
+                output.accept(ModItems.ZERO_POINT_ENGINE.get());
                 output.accept(ModItems.DRAGON_CRYSTAL_ENCHANTING_TABLE.get());
                 output.accept(ModItems.DRAGON_CRYSTAL_SOUL_STONE.get());
                 output.accept(ModItems.SWORD_SOUL_STONE.get());
@@ -79,6 +81,16 @@ public class ModCreativeTabs {
                 //测试物品
                 output.accept(ModItems.ULTRA_TEST_SWORD.get());
                 output.accept(ModItems.TEST_ENTITY_SPAWN_EGG.get());
+
+                //剧情笔记
+                output.accept(ModItems.MAGE_NOTE_1.get());
+                output.accept(ModItems.MAGE_NOTE_2.get());
+                output.accept(ModItems.MAGE_NOTE_3.get());
+                output.accept(ModItems.MAGE_NOTE_4.get());
+                output.accept(ModItems.DRAGON_CULT_SECRET_LETTER.get());
+                output.accept(ModItems.TRAVELER_MESSAGE.get());
+                output.accept(ModItems.WHERE_IS_IT_NOTE.get());
+                output.accept(ModItems.BLACKSMITHS_PAIN_NOTE.get());
 
                 //Cataclysm联动奖章
                 if (CompatCheck.isCataclysmLoaded() && ModItems.ANCIENT_REMNANT_MEDAL != null) {
@@ -105,15 +117,18 @@ public class ModCreativeTabs {
                     output.accept(unluckyVariant);
                 }
 
-                //剧情笔记
-                output.accept(ModItems.MAGE_NOTE_1.get());
-                output.accept(ModItems.MAGE_NOTE_2.get());
-                output.accept(ModItems.MAGE_NOTE_3.get());
-                output.accept(ModItems.MAGE_NOTE_4.get());
-                output.accept(ModItems.DRAGON_CULT_SECRET_LETTER.get());
-                output.accept(ModItems.TRAVELER_MESSAGE.get());
-                output.accept(ModItems.WHERE_IS_IT_NOTE.get());
-                output.accept(ModItems.BLACKSMITHS_PAIN_NOTE.get());
+                if (ModItems.CROWN_OF_COUNTLESS_STARS != null) {
+                    output.accept(ModItems.STAFF_OF_UNIVERSAL_TRANSMUTATION.get());
+                    output.accept(ModItems.CROWN_OF_COUNTLESS_STARS.get());
+                    output.accept(ModItems.ROBE_OF_THE_PRIMAL_SOURCE.get());
+                    output.accept(ModItems.LEGGINGS_OF_EARTHS_BLESSING.get());
+                    output.accept(ModItems.BOOTS_OF_THE_DEEP_ABYSS.get());
+                }
+
+                if (CompatCheck.isSpellcastingLoaded()) {
+                    SpellIntegration.addScrolls(output);
+                }
+
             })
             .build()
     );

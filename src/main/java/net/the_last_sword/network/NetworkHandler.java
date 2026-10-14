@@ -8,12 +8,13 @@ import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 import net.the_last_sword.TheLastSwordMod;
+import net.the_last_sword.compat.projecte.TransmutationStaffTerminationPacket;
 import net.minecraft.server.level.ServerPlayer;
 
 //网络包管理器
 public class NetworkHandler {
 
-    private static final String PROTOCOL_VERSION = "12";
+    private static final String PROTOCOL_VERSION = "15";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "main"),
@@ -30,6 +31,16 @@ public class NetworkHandler {
 
     //注册所有网络包
     public static void register() {
+        CHANNEL.messageBuilder(BlinkRiftPacket.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(BlinkRiftPacket::encode)
+                .decoder(BlinkRiftPacket::decode)
+                .consumerMainThread(BlinkRiftPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(TransmutationStaffTerminationPacket.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(TransmutationStaffTerminationPacket::encode)
+                .decoder(TransmutationStaffTerminationPacket::decode)
+                .consumerMainThread(TransmutationStaffTerminationPacket::handle)
+                .add();
         CHANNEL.messageBuilder(LightningSpearConfigPacket.class, id(), NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(LightningSpearConfigPacket::encode)
                 .decoder(LightningSpearConfigPacket::decode)
