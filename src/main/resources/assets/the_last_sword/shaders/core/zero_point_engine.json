@@ -8,6 +8,7 @@
     {"name": "ModelViewMat", "type": "matrix4x4", "count": 16, "values": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]},
     {"name": "ProjMat", "type": "matrix4x4", "count": 16, "values": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]},
     {"name": "LocalUvMin", "type": "float", "count": 2, "values": [0, 0]},
-    {"name": "LocalUvScale", "type": "float", "count": 2, "values": [1, 1]}
+    {"name": "LocalUvScale", "type": "float", "count": 2, "values": [1, 1]},
+    {"name": "GlowPhase", "type": "float", "count": 1, "values": [0]}
   ]
 }

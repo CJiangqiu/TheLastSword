@@ -14,9 +14,12 @@ import net.the_last_sword.TheLastSwordMod;
 import java.io.IOException;
 
 public final class ZeroPointEngineShader extends EcaShaderInstance {
+    private static final long ANIMATION_START_NANOS = System.nanoTime();
+    private static final long GLOW_CYCLE_NANOS = 6_000_000_000L;
     private static ShaderInstance shader;
     private final Uniform localUvMin;
     private final Uniform localUvScale;
+    private final Uniform glowPhase;
 
     public static final RenderType ITEM = RenderType.create(
             "zero_point_engine_glow", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS,
@@ -35,6 +38,7 @@ public final class ZeroPointEngineShader extends EcaShaderInstance {
                 DefaultVertexFormat.NEW_ENTITY);
         localUvMin = getUniform("LocalUvMin");
         localUvScale = getUniform("LocalUvScale");
+        glowPhase = getUniform("GlowPhase");
     }
 
     public static void setShader(ShaderInstance instance) {
@@ -45,6 +49,11 @@ public final class ZeroPointEngineShader extends EcaShaderInstance {
     public void apply() {
         // 图集中的位置会在资源重载后变化，始终使用当前绘制批次的局部坐标。
         applyLocalUvBoundsUniforms(localUvMin, localUvScale);
+        if (glowPhase != null) {
+            // 单调时间让界面中的光晕持续流动，循环归一化避免长时间运行后精度下降。
+            glowPhase.set((float) ((System.nanoTime() - ANIMATION_START_NANOS) % GLOW_CYCLE_NANOS)
+                    / GLOW_CYCLE_NANOS);
+        }
         super.apply();
     }
 }

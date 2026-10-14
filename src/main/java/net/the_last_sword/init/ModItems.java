@@ -11,8 +11,7 @@ import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.compat.CompatCheck;
 import net.the_last_sword.compat.cataclysm.CataclysmItemsRegistry;
 import net.the_last_sword.compat.curios.CuriosItemsRegistry;
-import net.the_last_sword.compat.irons_spellbooks.CastingTransmutationStaffItem;
-import net.the_last_sword.compat.projecte.StaffOfUniversalTransmutationItem;
+import net.the_last_sword.compat.projecte.TransmutationStaffFactory;
 import net.the_last_sword.compat.lucky_block.TheLastEndLuckyBlockDisplayItem;
 import net.the_last_sword.item.*;
 import net.the_last_sword.compat.projecte.PrimalSourceArmorSupport;
@@ -377,9 +376,7 @@ public class ModItems {
     private static void registerConditionalItems() {
         if (CompatCheck.isTransmutationLoaded()) {
             STAFF_OF_UNIVERSAL_TRANSMUTATION = ITEMS.register("staff_of_universal_transmutation",
-                () -> CompatCheck.isSpellcastingLoaded()
-                    ? new CastingTransmutationStaffItem()
-                    : new StaffOfUniversalTransmutationItem());
+                TransmutationStaffFactory::create);
             CROWN_OF_COUNTLESS_STARS = ITEMS.register("crown_of_countless_stars",
                 () -> PrimalSourceArmorSupport.create(ArmorItem.Type.HELMET));
             ROBE_OF_THE_PRIMAL_SOURCE = ITEMS.register("robe_of_the_primal_source",

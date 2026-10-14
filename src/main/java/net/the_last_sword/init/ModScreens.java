@@ -1,6 +1,7 @@
 package net.the_last_sword.init;
 
 import net.minecraft.client.gui.screens.MenuScreens;
+import net.eca.util.item_extension.ItemExtensionManager;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -9,6 +10,8 @@ import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.client.gui.DragonCrystalEnchantingTableScreen;
 import net.the_last_sword.client.gui.DragonCrystalSmithingTableScreen;
 import net.the_last_sword.client.gui.SummonWraithGuiScreen;
+import net.the_last_sword.compat.CompatCheck;
+import net.the_last_sword.compat.irons_spellbooks.EndSpellScrollItemExtension;
 
 //菜单屏幕注册
 @Mod.EventBusSubscriber(modid = TheLastSwordMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
@@ -21,6 +24,9 @@ public class ModScreens {
             MenuScreens.register(ModMenus.DRAGON_CRYSTAL_SMITHING_TABLE.get(), DragonCrystalSmithingTableScreen::new);
             MenuScreens.register(ModMenus.DRAGON_CRYSTAL_ENCHANTING_TABLE.get(), DragonCrystalEnchantingTableScreen::new);
             MenuScreens.register(ModMenus.SUMMON_WRAITH_GUI.get(), SummonWraithGuiScreen::new);
+            if (CompatCheck.isSpellcastingLoaded()) {
+                ItemExtensionManager.register(new EndSpellScrollItemExtension());
+            }
         });
     }
 }
