@@ -14,7 +14,6 @@ import net.the_last_sword.item.DragonCultPriestArmorItem;
 import net.the_last_sword.item.DragonCrystalArmorItem;
 import net.the_last_sword.item.DragonCrystalSword;
 import net.the_last_sword.item.DragonSword;
-import net.the_last_sword.item.PriestStaffItem;
 import net.the_last_sword.compat.projecte.PrimalSourceArmorItem;
 import net.the_last_sword.init.ModItems;
 import net.the_last_sword.item.TheLastSword;
@@ -95,7 +94,7 @@ public final class IronsSpellsCompat {
             return;
         }
 
-        if (event.getItemStack().getItem() instanceof PriestStaffItem
+        if (event.getItemStack().is(ModItems.PRIEST_STAFF.get())
             && event.getSlotType() == EquipmentSlot.MAINHAND) {
             addStaffModifiers(event);
             return;

@@ -373,14 +373,14 @@ public abstract class DragonArmorItem extends TheLastEndArmorItem implements Geo
 
     //检查实体是否穿戴全套龙之盔甲
     public static boolean isFullSet(LivingEntity entity) {
-        return !entity.getItemBySlot(EquipmentSlot.HEAD).isEmpty() &&
-                entity.getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof DragonArmorItem.Helmet &&
-                !entity.getItemBySlot(EquipmentSlot.CHEST).isEmpty() &&
-                entity.getItemBySlot(EquipmentSlot.CHEST).getItem() instanceof DragonArmorItem.Chestplate &&
-                !entity.getItemBySlot(EquipmentSlot.LEGS).isEmpty() &&
-                entity.getItemBySlot(EquipmentSlot.LEGS).getItem() instanceof DragonArmorItem.Leggings &&
-                !entity.getItemBySlot(EquipmentSlot.FEET).isEmpty() &&
-                entity.getItemBySlot(EquipmentSlot.FEET).getItem() instanceof DragonArmorItem.Boots;
+        ItemStack head = entity.getItemBySlot(EquipmentSlot.HEAD);
+        if (head.isEmpty() || !(head.getItem() instanceof DragonArmorItem.Helmet)) return false;
+        ItemStack chest = entity.getItemBySlot(EquipmentSlot.CHEST);
+        if (chest.isEmpty() || !(chest.getItem() instanceof DragonArmorItem.Chestplate)) return false;
+        ItemStack legs = entity.getItemBySlot(EquipmentSlot.LEGS);
+        if (legs.isEmpty() || !(legs.getItem() instanceof DragonArmorItem.Leggings)) return false;
+        ItemStack feet = entity.getItemBySlot(EquipmentSlot.FEET);
+        return !feet.isEmpty() && feet.getItem() instanceof DragonArmorItem.Boots;
     }
 
     // ==================== 4个子类：头盔、胸甲、护腿、靴子 ====================

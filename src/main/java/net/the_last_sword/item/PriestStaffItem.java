@@ -26,7 +26,7 @@ public class PriestStaffItem extends Item {
     private final Multimap<Attribute, AttributeModifier> defaultModifiers;
 
     public PriestStaffItem() {
-        super(new Item.Properties().durability(200).rarity(Rarity.UNCOMMON));
+        super(createProperties());
 
         ImmutableMultimap.Builder<Attribute, AttributeModifier> modifiers = ImmutableMultimap.builder();
         modifiers.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(
@@ -44,6 +44,15 @@ public class PriestStaffItem extends Item {
         this.defaultModifiers = modifiers.build();
     }
 
+    public static Item.Properties createProperties() {
+        return new Item.Properties().durability(200).rarity(Rarity.UNCOMMON);
+    }
+
+    @Override
+    public int getEnchantmentValue() {
+        return 32;
+    }
+
     @Override
     public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot slot) {
         return slot == EquipmentSlot.MAINHAND
@@ -53,44 +62,58 @@ public class PriestStaffItem extends Item {
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        if (player.isShiftKeyDown()) {
+            return useGuard(level, player, hand);
+        }
         ItemStack stack = player.getItemInHand(hand);
         if (player.getCooldowns().isOnCooldown(this)) {
             return InteractionResultHolder.fail(stack);
         }
 
         if (!level.isClientSide) {
-            if (player.isShiftKeyDown()) {
-                PriestGuardEffect.apply(
-                    player,
-                    TheLastSwordConfiguration.getPriestStaffGuardRadiusSafely(),
-                    TheLastSwordConfiguration.getPriestStaffGuardShieldGainSafely()
-                );
-                consumeDurability(stack, player, hand, 2);
-                player.getCooldowns().addCooldown(
-                    this,
-                    TheLastSwordConfiguration.getPriestStaffGuardCooldownSafely()
-                );
-            } else {
-                float damage = (float) (player.getAttributeValue(Attributes.ATTACK_DAMAGE)
-                    * TheLastSwordConfiguration.getPriestStaffProjectileDamageMultiplierSafely());
-                DragonSwordProjectile.shoot(
-                    level, player, player.getRandom(), player.getUUID(), damage, stack
-                );
-                consumeDurability(stack, player, hand, 1);
-            }
+            float damage = (float) (player.getAttributeValue(Attributes.ATTACK_DAMAGE)
+                * TheLastSwordConfiguration.getPriestStaffProjectileDamageMultiplierSafely());
+            DragonSwordProjectile.shoot(
+                level, player, player.getRandom(), player.getUUID(), damage, stack
+            );
+            consumeDurability(stack, player, hand, 1);
         }
 
+        return InteractionResultHolder.success(stack);
+    }
+
+    public static InteractionResultHolder<ItemStack> useGuard(Level level, Player player, InteractionHand hand) {
+        ItemStack stack = player.getItemInHand(hand);
+        Item item = stack.getItem();
+        if (player.getCooldowns().isOnCooldown(item)) {
+            return InteractionResultHolder.fail(stack);
+        }
+        if (!level.isClientSide) {
+            PriestGuardEffect.apply(player,
+                TheLastSwordConfiguration.getPriestStaffGuardRadiusSafely(),
+                TheLastSwordConfiguration.getPriestStaffGuardShieldGainSafely());
+            consumeDurability(stack, player, hand, 2);
+            player.getCooldowns().addCooldown(item,
+                TheLastSwordConfiguration.getPriestStaffGuardCooldownSafely());
+        }
         return InteractionResultHolder.success(stack);
     }
 
     @Override
     public void appendHoverText(ItemStack stack, Level level, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, level, tooltip, flag);
+        appendStaffTooltip(tooltip, false);
+    }
 
-        tooltip.add(Component.translatable(
-            "item_tooltip.the_last_sword.priest_staff.projectile",
-            formatValue(TheLastSwordConfiguration.getPriestStaffProjectileDamageMultiplierSafely())
-        ));
+    public static void appendStaffTooltip(List<Component> tooltip, boolean casting) {
+        if (casting) {
+            tooltip.add(Component.translatable("item_tooltip.the_last_sword.priest_staff.casting"));
+        } else {
+            tooltip.add(Component.translatable(
+                "item_tooltip.the_last_sword.priest_staff.projectile",
+                formatValue(TheLastSwordConfiguration.getPriestStaffProjectileDamageMultiplierSafely())
+            ));
+        }
         tooltip.add(Component.translatable(
             "item_tooltip.the_last_sword.priest_staff.guard",
             formatValue(TheLastSwordConfiguration.getPriestStaffGuardRadiusSafely()),

@@ -177,7 +177,6 @@ public class TheLastEndSwordWraithEntity extends TheLastEndEntity {
         this.goalSelector.addGoal(4, new SwordWraithEndOfAllThingsGoal(this));
 
         this.goalSelector.addGoal(5, new SwordWraithChaseTargetGoal(this));
-        this.goalSelector.addGoal(6, new SwordWraithFollowOwnerGoal(this));
 
         this.goalSelector.addGoal(7, new FloatGoal(this));
         this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 8.0F));

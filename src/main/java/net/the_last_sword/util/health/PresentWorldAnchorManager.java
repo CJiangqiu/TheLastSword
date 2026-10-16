@@ -265,12 +265,26 @@ public final class PresentWorldAnchorManager {
         return getHealBanTime(entity) > 0;
     }
 
+    public static void refreshHealBanTickState(LivingEntity entity) {
+        if (!(entity instanceof HealBanTickState state)) return;
+        state.the_last_sword$setHealBanTimeKnownZero(false);
+        if (HEAL_BAN_TIME != null) {
+            try {
+                state.the_last_sword$setHealBanTimeKnownZero(
+                        entity.getEntityData().get(HEAL_BAN_TIME) <= 0);
+            } catch (Exception ignored) {
+                // 无同步计时时保留原有持久化数据回退路径。
+            }
+        }
+    }
+
     public static void tickHealBanTime(LivingEntity entity) {
         if (entity == null || entity.level().isClientSide) {
             return;
         }
 
-        int currentTime = getHealBanTime(entity);
+        int currentTime = entity instanceof HealBanTickState state
+                && state.the_last_sword$isHealBanTimeKnownZero() ? 0 : getHealBanTime(entity);
         if (currentTime <= 0) {
             if (entity.hasEffect(ModEffects.WORLD_SEVERANCE.get())) {
                 entity.removeEffect(ModEffects.WORLD_SEVERANCE.get());
@@ -327,9 +341,13 @@ public final class PresentWorldAnchorManager {
         if (HEAL_BAN_TIME != null) {
             try {
                 entity.getEntityData().set(HEAL_BAN_TIME, safeSeconds);
+                refreshHealBanTickState(entity);
                 return;
             } catch (Exception ignored) {
             }
+        }
+        if (entity instanceof HealBanTickState state) {
+            state.the_last_sword$setHealBanTimeKnownZero(false);
         }
         entity.getPersistentData().putInt(NBT_HEAL_BAN_TIME, safeSeconds);
     }

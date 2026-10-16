@@ -340,6 +340,12 @@ public class TheLastSwordConfiguration {
     // Attack Configuration | 攻击系统配置
     // ═══════════════════════════════════════════════════════════════════════════════════
 
+    public static ForgeConfigSpec.ConfigValue<Boolean> ALLOW_ATTACK_PLAYERS;
+    public static ForgeConfigSpec.ConfigValue<Boolean> ALLOW_ATTACK_VILLAGERS;
+    public static ForgeConfigSpec.ConfigValue<Boolean> ALLOW_ATTACK_GOLEMS;
+    public static ForgeConfigSpec.ConfigValue<Boolean> ALLOW_ATTACK_ANIMALS;
+    public static ForgeConfigSpec.ConfigValue<Boolean> ALLOW_ATTACK_NEUTRAL_MOBS;
+
     // Absolute Destruction Damage | 绝对毁灭伤害配置
     public static ForgeConfigSpec.ConfigValue<Double> ABSOLUTE_DESTRUCTION_PRESENT_WORLD_ANCHOR_DAMAGE_MULTIPLIER;
     public static ForgeConfigSpec.ConfigValue<Boolean> ABSOLUTE_DESTRUCTION_DISPLAY_PRESENT_WORLD_ANCHOR_DAMAGE;
@@ -1877,6 +1883,32 @@ public class TheLastSwordConfiguration {
         BUILDER.push("Attack");
 
 
+        BUILDER.comment(
+            "Applies to all attackers using the shared attack filter. First matching category wins: players, villagers, golems, animals, neutral mobs. Existing protection rules still apply.",
+            "适用于调用统一攻击判定的所有攻击者。按玩家、村民、傀儡、动物、中立生物顺序，仅采用首个匹配分类；原有保护规则仍然生效。"
+        ).push("Allow Attack");
+        ALLOW_ATTACK_PLAYERS = BUILDER
+            .comment("Allow attacking players", "允许攻击玩家")
+            .translation("config.the_last_sword.allow_attack.players")
+            .define("Players", true);
+        ALLOW_ATTACK_VILLAGERS = BUILDER
+            .comment("Allow attacking villagers and wandering traders", "允许攻击村民和流浪商人")
+            .translation("config.the_last_sword.allow_attack.villagers")
+            .define("Villagers", false);
+        ALLOW_ATTACK_GOLEMS = BUILDER
+            .comment("Allow attacking golems, including iron and snow golems", "允许攻击傀儡，包括铁傀儡和雪傀儡")
+            .translation("config.the_last_sword.allow_attack.golems")
+            .define("Golems", false);
+        ALLOW_ATTACK_ANIMALS = BUILDER
+            .comment("Allow attacking animals; takes priority over neutral mobs", "允许攻击动物；优先于中立生物分类")
+            .translation("config.the_last_sword.allow_attack.animals")
+            .define("Animals", true);
+        ALLOW_ATTACK_NEUTRAL_MOBS = BUILDER
+            .comment("Allow attacking neutral mobs not matched by an earlier category, regardless of anger", "允许攻击未匹配前述分类的中立生物，不区分是否愤怒")
+            .translation("config.the_last_sword.allow_attack.neutral_mobs")
+            .define("Neutral Mobs", true);
+        BUILDER.pop();
+
         // Absolute Destruction Damage Settings | 绝毁伤害设置
         BUILDER.push("Absolute Destruction Damage");
         ABSOLUTE_DESTRUCTION_PRESENT_WORLD_ANCHOR_DAMAGE_MULTIPLIER = BUILDER
@@ -2207,6 +2239,26 @@ public class TheLastSwordConfiguration {
         } catch (IllegalStateException | NullPointerException e) {
             return defaultValue;
         }
+    }
+
+    public static boolean getAllowAttackPlayersSafely() {
+        return safeGet(ALLOW_ATTACK_PLAYERS, true);
+    }
+
+    public static boolean getAllowAttackVillagersSafely() {
+        return safeGet(ALLOW_ATTACK_VILLAGERS, false);
+    }
+
+    public static boolean getAllowAttackGolemsSafely() {
+        return safeGet(ALLOW_ATTACK_GOLEMS, false);
+    }
+
+    public static boolean getAllowAttackAnimalsSafely() {
+        return safeGet(ALLOW_ATTACK_ANIMALS, true);
+    }
+
+    public static boolean getAllowAttackNeutralMobsSafely() {
+        return safeGet(ALLOW_ATTACK_NEUTRAL_MOBS, true);
     }
 
     //幸运事件权重（未登记的事件按默认权重 100 处理）

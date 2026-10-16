@@ -17,6 +17,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
@@ -74,8 +76,7 @@ public class ClientEventHandler {
     //龙魂灯笼渲染相关
     private static final double LANTERN_RANGE = 8.0;
     private static final double LANTERN_SEARCH_RANGE = 16.0;
-    private static final int LANTERN_SCAN_INTERVAL_TICKS = 5;
-    private static final List<BlockPos> LANTERN_SEARCH_OFFSETS = createLanternSearchOffsets();
+    private static final int LANTERN_SCAN_INTERVAL_TICKS = 20;
     private static List<BlockPos> cachedActiveLanterns = List.of();
     private static Level lanternCacheLevel;
     private static int lanternScanTicksRemaining;
@@ -555,22 +556,6 @@ public class ClientEventHandler {
         lanternScanTicksRemaining = LANTERN_SCAN_INTERVAL_TICKS - 1;
     }
 
-    private static List<BlockPos> createLanternSearchOffsets() {
-        List<BlockPos> offsets = new ArrayList<>();
-        int range = (int) Math.ceil(LANTERN_SEARCH_RANGE);
-        double rangeSquared = LANTERN_SEARCH_RANGE * LANTERN_SEARCH_RANGE;
-        for (int x = -range; x <= range; x++) {
-            for (int y = -range; y <= range; y++) {
-                for (int z = -range; z <= range; z++) {
-                    if (x * x + y * y + z * z <= rangeSquared) {
-                        offsets.add(new BlockPos(x, y, z));
-                    }
-                }
-            }
-        }
-        return List.copyOf(offsets);
-    }
-
     //渲染所有激活的龙魂灯笼范围
     private static void renderDragonSoulLanternRanges(PoseStack poseStack, Camera camera, Level level) {
         if (lanternCacheLevel != level || cachedActiveLanterns.isEmpty()) {
@@ -605,15 +590,46 @@ public class ClientEventHandler {
         List<BlockPos> lanterns = new ArrayList<>();
         Block lanternBlock = ModBlocks.DRAGON_SOUL_LANTERN.get();
         BlockPos.MutableBlockPos checkPos = new BlockPos.MutableBlockPos();
-        for (BlockPos offset : LANTERN_SEARCH_OFFSETS) {
-            checkPos.setWithOffset(playerPos, offset);
-            if (level.isOutsideBuildHeight(checkPos) || !level.hasChunkAt(checkPos)) {
-                continue;
-            }
-            BlockState state = level.getBlockState(checkPos);
-            if (state.is(lanternBlock) && isLanternActivated(level, checkPos)) {
-                // 缓存不能持有下一次循环会被修改的扫描坐标。
-                lanterns.add(checkPos.immutable());
+        int range = (int) Math.ceil(LANTERN_SEARCH_RANGE);
+        double rangeSquared = LANTERN_SEARCH_RANGE * LANTERN_SEARCH_RANGE;
+        int minX = playerPos.getX() - range;
+        int maxX = playerPos.getX() + range;
+        int minY = Math.max(playerPos.getY() - range, level.getMinBuildHeight());
+        int maxY = Math.min(playerPos.getY() + range, level.getMaxBuildHeight() - 1);
+        int minZ = playerPos.getZ() - range;
+        int maxZ = playerPos.getZ() + range;
+        if (minY > maxY) return lanterns;
+
+        for (int chunkX = minX >> 4; chunkX <= (maxX >> 4); chunkX++) {
+            for (int chunkZ = minZ >> 4; chunkZ <= (maxZ >> 4); chunkZ++) {
+                LevelChunk chunk = level.getChunkSource().getChunk(chunkX, chunkZ, false);
+                if (chunk == null) continue;
+                for (int sectionY = minY >> 4; sectionY <= (maxY >> 4); sectionY++) {
+                    LevelChunkSection section = chunk.getSection(level.getSectionIndexFromSectionY(sectionY));
+                    // 调色板只用于排除；可能命中时仍核实实际方块，避免残留条目误报。
+                    if (section.hasOnlyAir() || !section.maybeHas(state -> state.is(lanternBlock))) continue;
+                    int startX = Math.max(minX, chunkX << 4);
+                    int endX = Math.min(maxX, (chunkX << 4) + 15);
+                    int startY = Math.max(minY, sectionY << 4);
+                    int endY = Math.min(maxY, (sectionY << 4) + 15);
+                    int startZ = Math.max(minZ, chunkZ << 4);
+                    int endZ = Math.min(maxZ, (chunkZ << 4) + 15);
+                    for (int x = startX; x <= endX; x++) {
+                        int dx = x - playerPos.getX();
+                        for (int y = startY; y <= endY; y++) {
+                            int dy = y - playerPos.getY();
+                            for (int z = startZ; z <= endZ; z++) {
+                                int dz = z - playerPos.getZ();
+                                if (dx * dx + dy * dy + dz * dz > rangeSquared) continue;
+                                if (!section.getBlockState(x & 15, y & 15, z & 15).is(lanternBlock)) continue;
+                                checkPos.set(x, y, z);
+                                if (isLanternActivated(level, checkPos)) {
+                                    lanterns.add(checkPos.immutable());
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 

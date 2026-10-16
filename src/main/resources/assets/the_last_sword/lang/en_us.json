@@ -1,4 +1,10 @@
 {
+  "item_tooltip.the_last_sword.priest_staff.casting": "Right-click: cast the selected spell",
+  "config.the_last_sword.allow_attack.players": "Players",
+  "config.the_last_sword.allow_attack.villagers": "Villagers",
+  "config.the_last_sword.allow_attack.golems": "Golems",
+  "config.the_last_sword.allow_attack.animals": "Animals",
+  "config.the_last_sword.allow_attack.neutral_mobs": "Neutral Mobs",
   "spell.the_last_sword.the_last_end_crystal": "End Crystal",
   "spell.the_last_sword.the_last_end_crystal.guide": "After a 1-second cast (reduced by 0.1 seconds per level, to 0.1 seconds at level 10), opens a stationary rift above the casting position. After unfolding, it fires crystals once per second at the nearest eligible target within 32 blocks. Crystals retain repeated area Absolute Destruction damage and impact effects. With no target, it waits without spending crystals and closes after 10 seconds of accumulated waiting. Summons 1 crystal at level 1, plus 1 per level, up to 10. Damage remains 20 per hit.",
   "ui.the_last_sword.the_last_end_crystal.damage": "Absolute Destruction Damage per Hit: %s",

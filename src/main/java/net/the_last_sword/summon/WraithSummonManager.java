@@ -56,6 +56,9 @@ public class WraithSummonManager {
     //跟随距离阈值
     private static final double FOLLOW_DISTANCE = 4.5;
 
+    private static final int SUMMON_INPUT_GUARD_TICKS = 4;
+    private static final Map<Player, Long> LAST_SUMMON_INPUT_TICKS = new WeakHashMap<>();
+
     // ============ 玩家数据存取方法 ============
 
     //从玩家持久化数据读取魂石
@@ -250,6 +253,15 @@ public class WraithSummonManager {
      * 召唤API（统一入口）
      */
     public static boolean summonWraith(Player player, ItemStack weaponStack, Level level) {
+        if (!(level instanceof ServerLevel serverLevel) || player == null || weaponStack.isEmpty()) return false;
+        if (player.getCooldowns().isOnCooldown(weaponStack.getItem())) return false;
+
+        // 在切换状态前拦截紧邻请求；双手和不同召唤物品共用窗口，创造模式同样生效。
+        long now = serverLevel.getServer().overworld().getGameTime();
+        Long previous = LAST_SUMMON_INPUT_TICKS.get(player);
+        if (previous != null && now >= previous && now - previous < SUMMON_INPUT_GUARD_TICKS) return false;
+        LAST_SUMMON_INPUT_TICKS.put(player, now);
+
         //从玩家持久化数据读取魂石
         ItemStack soulStone = getSoulStoneFromPlayer(player);
         if (soulStone.isEmpty()) {

@@ -158,7 +158,7 @@ public class ModItems {
     );
 
     public static final RegistryObject<Item> PRIEST_STAFF = ITEMS.register("priest_staff",
-        PriestStaffItem::new
+        PriestStaffFactory::create
     );
 
     public static final RegistryObject<Item> DRAGON_SWORD = ITEMS.register("dragon_sword",

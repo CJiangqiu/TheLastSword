@@ -1,4 +1,10 @@
 {
+  "item_tooltip.the_last_sword.priest_staff.casting": "우클릭: 현재 선택한 주문 시전",
+  "config.the_last_sword.allow_attack.players": "플레이어",
+  "config.the_last_sword.allow_attack.villagers": "주민",
+  "config.the_last_sword.allow_attack.golems": "골렘",
+  "config.the_last_sword.allow_attack.animals": "동물",
+  "config.the_last_sword.allow_attack.neutral_mobs": "중립 몹",
   "spell.the_last_sword.the_last_end_crystal": "종언의 수정",
   "spell.the_last_sword.the_last_end_crystal.guide": "기본 시전 시간은 1초이며 레벨마다 0.1초 감소하여 10레벨에서는 0.1초가 됩니다. 시전 완료 후 시전 위치 위에 고정된 균열을 엽니다. 펼쳐진 뒤 32블록 안의 공격 가능한 가장 가까운 대상에게 매초 수정을 하나씩 발사합니다. 수정은 지속적인 범위 절대 파괴 피해와 명중 효과를 유지합니다. 대상이 없으면 수정을 소모하지 않고 기다리며, 누적 대기 시간이 10초가 되면 닫힙니다. 처음에는 1개를 소환하고 레벨마다 1개씩 증가하여 최대 10개입니다. 명중당 피해는 20으로 고정됩니다.",
   "ui.the_last_sword.the_last_end_crystal.damage": "명중당 절대 파괴 피해: %s",

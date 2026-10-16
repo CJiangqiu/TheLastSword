@@ -33,6 +33,8 @@ As you follow the scroll and uncover the story of The Last Sword, you will visit
 
 These fanatical cultists stand in the way of your search for The Last Sword. When their horns sound around the village, prepare for a desperate battle. Take up your weapon and defend the villagers.
 
+During a Dragon Cult raid, right-click a bell to highlight nearby Dragon Cult members participating in the raid and teleport them to the bell.
+
 [![Facing the Dragon Cult](https://i.postimg.cc/br211W5F/3.png)](https://postimg.cc/QKhB34hp)
 
 ## [![Dragon Crystal Ring](https://i.postimg.cc/kgQbyxgb/the-last-sword-dragon-crystal-ring.png)](https://postimg.cc/fVbyzSXz) Ancient Relics
@@ -313,6 +315,9 @@ Mods with added integrations or compatibility support:
 ## [![the-last-sword-dragon-cult-horn.png](https://i.postimg.cc/rw1r9SwN/the-last-sword-dragon-cult-horn.png)](https://postimg.cc/tsgJqnPs)迎战拜龙教
 
 在你探寻最终之剑的旅程上，这群邪教徒疯子成为了一大障碍。当他们的号角在村庄周围响起时，你需要做好背水一战的准备，拿起武器保卫村庄。
+
+拜龙教袭击期间，右键铃铛即可将周围参与袭击的拜龙教高亮并传送过来。
+
 [![3.png](https://i.postimg.cc/br211W5F/3.png)](https://postimg.cc/QKhB34hp)
 ## [![the-last-sword-dragon-crystal-ring.png](https://i.postimg.cc/kgQbyxgb/the-last-sword-dragon-crystal-ring.png)](https://postimg.cc/fVbyzSXz)古老的遗物
 在探索过程中，你可以获得许多蕴含最终之剑力量碎片的饰品，它们中有一些具有看起来似乎是负面的效果，但是相互搭配可以得到更强的效果。在你想要突破龙水晶装备得到更强的龙之装备时，这些古老的遗物或许可以发挥作用。

@@ -10,7 +10,11 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.animal.AbstractGolem;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -356,12 +360,33 @@ public class EntityUtil {
     }
 
     // ==================== 实体目标与队伍模块====================
-    //综合判断是否可以攻击目标（阵营、原版队伍、宠物主从、无敌保护统一由 ECA 判定）
+    // 分类许可只增加限制，不绕过原有阵营与保护判定。
     public static boolean canAttack(Entity attacker, Entity target) {
         if (target instanceof TheLastEndEntity theLastEnd && theLastEnd.isNpc()) {
             return false;
         }
-        return FactionUtil.canAttack(attacker, target);
+        return isAttackCategoryAllowed(target) && FactionUtil.canAttack(attacker, target);
+    }
+
+    private static boolean isAttackCategoryAllowed(Entity target) {
+        if (target == null) return false;
+        // 首个分类优先，避免动物和傀儡被中立生物开关重复限制。
+        if (target instanceof Player) {
+            return TheLastSwordConfiguration.getAllowAttackPlayersSafely();
+        }
+        if (target instanceof AbstractVillager) {
+            return TheLastSwordConfiguration.getAllowAttackVillagersSafely();
+        }
+        if (target instanceof AbstractGolem) {
+            return TheLastSwordConfiguration.getAllowAttackGolemsSafely();
+        }
+        if (target instanceof Animal) {
+            return TheLastSwordConfiguration.getAllowAttackAnimalsSafely();
+        }
+        if (target instanceof NeutralMob) {
+            return TheLastSwordConfiguration.getAllowAttackNeutralMobsSafely();
+        }
+        return true;
     }
     //查找实体的主人
     public static LivingEntity findOwner(Entity entity) {

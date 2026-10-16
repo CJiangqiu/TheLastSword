@@ -22,6 +22,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
+import net.the_last_sword.entity.ai.TheLastEndFollowOwnerGoal;
 import net.the_last_sword.util.EntityUtil;
 import net.the_last_sword.util.damage.AdvancedEquipmentDamageHandler;
 import net.the_last_sword.util.damage.AdvancedEquipmentDamageHandler.DamageResult;
@@ -87,6 +88,10 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
 
     protected TheLastEndEntity(EntityType<? extends TamableAnimal> entityType, Level level) {
         super(entityType, level);
+        // 子类可能完全覆写目标注册，因此在基类构造完成后统一添加跟随行为。
+        if (!level.isClientSide) {
+            this.goalSelector.addGoal(2, new TheLastEndFollowOwnerGoal(this));
+        }
     }
 
     @Override
@@ -515,6 +520,13 @@ public abstract class TheLastEndEntity extends TamableAnimal implements GeoEntit
         setDeathTick(0);
         setAnimationState(nextState);
         TrueHealthManager.setHealth(this, restoredMaxHealth);
+    }
+
+    // 调用方须先解除保护和锁血；致死写入不能用近似相等跳过残余正血量。
+    public final boolean writeDeathHealth() {
+        if (level().isClientSide) return false;
+        getEntityData().set(DATA_HEALTH_ID, 0.0F);
+        return getEntityData().get(DATA_HEALTH_ID) == 0.0F;
     }
 
     public void triggerDeath(@NotNull DamageSource damageSource) {

@@ -1,4 +1,10 @@
 {
+  "item_tooltip.the_last_sword.priest_staff.casting": "ПКМ: применить выбранное заклинание",
+  "config.the_last_sword.allow_attack.players": "Игроки",
+  "config.the_last_sword.allow_attack.villagers": "Жители",
+  "config.the_last_sword.allow_attack.golems": "Големы",
+  "config.the_last_sword.allow_attack.animals": "Животные",
+  "config.the_last_sword.allow_attack.neutral_mobs": "Нейтральные мобы",
   "spell.the_last_sword.the_last_end_crystal": "Кристалл конца",
   "spell.the_last_sword.the_last_end_crystal.guide": "Базовое время применения — 1 секунда, уменьшается на 0,1 секунды за уровень до 0,1 секунды на уровне 10. После применения открывает неподвижный разлом над местом применения. После раскрытия раз в секунду выпускает кристалл в ближайшую допустимую цель в радиусе 32 блоков. Кристаллы многократно наносят урон абсолютного уничтожения по области и сохраняют эффекты попадания. Без цели разлом ждёт, не расходуя кристаллы, и закрывается после 10 секунд суммарного ожидания. Число кристаллов: 1 на первом уровне, ещё 1 за уровень, до 10. Урон за попадание всегда равен 20.",
   "ui.the_last_sword.the_last_end_crystal.damage": "Урон абсолютного уничтожения за попадание: %s",

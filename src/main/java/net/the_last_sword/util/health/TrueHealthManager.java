@@ -1,6 +1,7 @@
 package net.the_last_sword.util.health;
 
 import net.eca.api.EcaAPI;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -86,6 +87,9 @@ public final class TrueHealthManager {
         // 先撤销死亡拦截，再同步解锁和血量，避免客户端收到零血量时仍被保护。
         EntityUtil.setProtection(entity, false);
         EcaAPI.unlockHealth(entity);
+        if (normalizedHealth == 0.0F && entity instanceof TheLastEndEntity endEntity) {
+            return endEntity.writeDeathHealth();
+        }
         return EcaAPI.setHealth(entity, normalizedHealth);
     }
 
@@ -104,6 +108,10 @@ public final class TrueHealthManager {
 
     public static void register(LivingEntity entity) {
         if (entity == null || entity.level().isClientSide || !shouldProtect(entity)) return;
+        registerEligible(entity);
+    }
+
+    private static void registerEligible(LivingEntity entity) {
         releaseMaxHealthLock(entity);
         float health = getHealth(entity);
         if (entity.dead || health <= 0.0F) {
@@ -120,15 +128,21 @@ public final class TrueHealthManager {
         if (EntityUtil.hasProtection(entity) && (entity.dead || getHealth(entity) <= 0.0F)) {
             clear(entity);
         } else if (shouldProtect(entity)) {
-            register(entity);
+            registerEligible(entity);
             clampHealth(entity);
         } else if (EntityUtil.hasProtection(entity)) {
             clear(entity);
         }
-        entity.getPersistentData().remove("JustifiedDefenceProtection");
-        entity.getPersistentData().remove("JustifiedDefenceClearDelay");
-        entity.getPersistentData().remove("UltraTestSwordTLSDefence");
-        entity.getPersistentData().remove("TheLastSwordYouNeverForgotDefence");
+    }
+
+    // 历史字段只在加载或加入世界时迁移，避免普通生物持续访问持久化数据。
+    public static void migrateLegacyProtection(LivingEntity entity) {
+        if (entity.level().isClientSide) return;
+        CompoundTag data = entity.getPersistentData();
+        data.remove("JustifiedDefenceProtection");
+        data.remove("JustifiedDefenceClearDelay");
+        data.remove("UltraTestSwordTLSDefence");
+        data.remove("TheLastSwordYouNeverForgotDefence");
     }
 
     // 属性更新后只收敛超出上限的血量，增加上限不会获得额外治疗。

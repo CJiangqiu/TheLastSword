@@ -1,4 +1,10 @@
 {
+  "item_tooltip.the_last_sword.priest_staff.casting": "右クリック：選択中の呪文を詠唱",
+  "config.the_last_sword.allow_attack.players": "プレイヤー",
+  "config.the_last_sword.allow_attack.villagers": "村人",
+  "config.the_last_sword.allow_attack.golems": "ゴーレム",
+  "config.the_last_sword.allow_attack.animals": "動物",
+  "config.the_last_sword.allow_attack.neutral_mobs": "中立モブ",
   "spell.the_last_sword.the_last_end_crystal": "終焉の水晶",
   "spell.the_last_sword.the_last_end_crystal.guide": "基本詠唱時間は1秒で、レベルごとに0.1秒短縮され、レベル10では0.1秒になる。詠唱完了後、発動地点の上方に固定された裂け目を開く。展開後、32ブロック以内の攻撃可能な最も近い対象へ毎秒1個の水晶を放つ。水晶は継続的な範囲絶対破壊ダメージと命中エフェクトを持つ。対象がいない間は水晶を消費せず待機し、累計10秒待機すると閉じる。初期数は1個、レベルごとに1個増加し最大10個。命中ごとのダメージは20で固定。",
   "ui.the_last_sword.the_last_end_crystal.damage": "命中ごとの絶対破壊ダメージ：%s",

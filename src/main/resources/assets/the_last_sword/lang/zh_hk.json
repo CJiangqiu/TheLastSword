@@ -1,4 +1,10 @@
 {
+  "item_tooltip.the_last_sword.priest_staff.casting": "右鍵：施放目前選取的法術",
+  "config.the_last_sword.allow_attack.players": "玩家",
+  "config.the_last_sword.allow_attack.villagers": "村民",
+  "config.the_last_sword.allow_attack.golems": "傀儡",
+  "config.the_last_sword.allow_attack.animals": "動物",
+  "config.the_last_sword.allow_attack.neutral_mobs": "中立生物",
   "spell.the_last_sword.the_last_end_crystal": "終焉水晶",
   "spell.the_last_sword.the_last_end_crystal.guide": "基礎施法時間1秒，每級減少0.1秒，10級為0.1秒。施法完成後，在施放位置上方展開固定裂隙，展開後每秒向32格內最近的可攻擊目標發射一枚水晶。水晶保留持續範圍絕毀傷害與命中特效。沒有目標時等待且不消耗水晶數量，累計等待10秒後關閉。初始召喚1枚，每級增加1枚，最多10枚，每次命中傷害固定為20。",
   "ui.the_last_sword.the_last_end_crystal.damage": "每次命中絕毀傷害：%s",

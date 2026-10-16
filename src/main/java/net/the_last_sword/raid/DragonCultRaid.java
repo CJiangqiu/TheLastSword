@@ -6,6 +6,7 @@ import net.eca.util.raid.RaidContext;
 import net.eca.util.raid.RaidDefinition;
 import net.eca.util.raid.RaidMusicExtension;
 import net.eca.util.raid.RaidWave;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.StructureTags;
 import net.minecraft.tags.TagKey;
@@ -89,6 +90,16 @@ public class DragonCultRaid extends RaidDefinition {
     @Override
     public int getCelebrationTicks() {
         return RESULT_DISPLAY_TICKS;
+    }
+
+    @Override
+    public boolean shouldTeleportRaidersOnBell(RaidContext context, ServerPlayer player, BlockPos bellPos) {
+        return true;
+    }
+
+    @Override
+    public boolean shouldGlowRaidersOnBell(RaidContext context, ServerPlayer player, BlockPos bellPos) {
+        return true;
     }
 
     @OnlyIn(Dist.CLIENT)

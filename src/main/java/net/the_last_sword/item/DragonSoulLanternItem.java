@@ -48,12 +48,14 @@ public class DragonSoulLanternItem extends BlockItem implements ICurioItem, ISum
         ItemLevelHelper.ensureInitialized(stack, 1);
 
         //非潜行状态下右键空气时召唤剑灵
-        if (!player.isCrouching() && !world.isClientSide) {
-            WraithSummonManager.summonWraith(player, stack, world);
-            return InteractionResultHolder.success(stack);
+        if (!player.isCrouching()) {
+            if (!world.isClientSide) {
+                WraithSummonManager.summonWraith(player, stack, world);
+            }
+            return InteractionResultHolder.sidedSuccess(stack, world.isClientSide);
         }
 
-        //其他情况（潜行或客户端）使用默认行为
+        // 潜行时保留放置行为。
         return InteractionResultHolder.pass(stack);
     }
 
@@ -61,16 +63,19 @@ public class DragonSoulLanternItem extends BlockItem implements ICurioItem, ISum
     public InteractionResult useOn(UseOnContext context) {
         ItemStack stack = context.getItemInHand();
 
-        //潜行时或右键方块时，使用默认的方块放置逻辑
+        // 潜行时使用默认的方块放置逻辑。
         if (context.getPlayer() != null && context.getPlayer().isCrouching()) {
             return super.useOn(context);
         }
 
         //非潜行状态右键方块时也召唤剑灵（不放置方块）
         Player player = context.getPlayer();
-        if (player != null && !context.getLevel().isClientSide) {
-            WraithSummonManager.summonWraith(player, stack, context.getLevel());
-            return InteractionResult.SUCCESS;
+        if (player != null) {
+            if (!context.getLevel().isClientSide) {
+                WraithSummonManager.summonWraith(player, stack, context.getLevel());
+            }
+            // 客户端也消费方块交互，避免同一次右键继续发送空气使用请求。
+            return InteractionResult.sidedSuccess(context.getLevel().isClientSide);
         }
 
         return InteractionResult.PASS;

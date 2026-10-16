@@ -1,11 +1,14 @@
 package net.the_last_sword.mixin;
 
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.entity.EntityInLevelCallback;
 import net.the_last_sword.client.PerceptionScanData;
 import net.the_last_sword.init.ModEffects;
 import net.the_last_sword.util.EntityUtil;
+import net.the_last_sword.util.health.TrueHealthManager;
+import net.the_last_sword.util.health.PresentWorldAnchorManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -18,6 +21,15 @@ import javax.annotation.Nullable;
 public class EntityMixin {
 
     @Shadow @Nullable private Entity.RemovalReason removalReason;
+
+    // 等派生类读档结束后迁移，覆盖运行中重新加载实体数据的入口。
+    @Inject(method = "load", at = @At("RETURN"))
+    private void theLastSword$afterLoad(CompoundTag tag, CallbackInfo ci) {
+        if ((Object) this instanceof LivingEntity living && !living.level().isClientSide) {
+            TrueHealthManager.migrateLegacyProtection(living);
+            PresentWorldAnchorManager.refreshHealBanTickState(living);
+        }
+    }
 
     @Inject(method = "kill", at = @At("HEAD"), cancellable = true)
     private void theLastSword$preventKill(CallbackInfo ci) {

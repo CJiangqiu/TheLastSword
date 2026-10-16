@@ -55,6 +55,7 @@ import net.the_last_sword.network.SyncDragonCrystalRecipesPacket;
 import net.the_last_sword.recipe.ConfigRecipeManager;
 import net.the_last_sword.util.EntityUtil;
 import net.the_last_sword.util.health.TrueHealthManager;
+import net.the_last_sword.util.health.PresentWorldAnchorManager;
 import net.the_last_sword.util.TheLastSwordLogger;
 
 import java.util.*;
@@ -104,6 +105,10 @@ public class ServerEventHandler {
     //当实体加入世界时检测TheLastEndSwordItems和TheLastEndArmorItem掉落物并添加发光效果和保护
     @SubscribeEvent
     public static void onEntityJoinLevel(EntityJoinLevelEvent event) {
+        if (!event.getLevel().isClientSide && event.getEntity() instanceof LivingEntity living) {
+            TrueHealthManager.migrateLegacyProtection(living);
+            PresentWorldAnchorManager.refreshHealBanTickState(living);
+        }
         if (event.getEntity() instanceof ItemEntity itemEntity) {
             if (itemEntity.getItem().getItem() instanceof TheLastEndSwordItems ||
                 itemEntity.getItem().getItem() instanceof TheLastEndArmorItem) {
