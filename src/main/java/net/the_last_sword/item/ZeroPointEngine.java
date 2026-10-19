@@ -139,19 +139,22 @@ public class ZeroPointEngine extends Item implements ICurioItem {
                 }
             });
 
-            // 多个槽位引用同一物品时只处理一次，成功充能后不再分配余下额度。
+            // 少量补电后继续分配本刻余额，避免持续耗能的前排装备阻塞后续目标。
             Set<ItemStack> visited = Collections.newSetFromMap(new IdentityHashMap<>());
             visited.add(stack);
+            int remaining = rate;
             for (ItemStack target : targets) {
                 if (target.isEmpty() || !visited.add(target)) continue;
-                if (chargeItem(source, target, rate) > 0) break;
+                remaining -= chargeItem(source, target, remaining);
+                if (remaining <= 0 || source.getEnergyStored() <= 0) break;
             }
         });
     }
 
     private int chargeItem(IEnergyStorage source, ItemStack target, int limit) {
         return target.getCapability(ForgeCapabilities.ENERGY).map(receiver -> {
-            if (receiver == source || !receiver.canReceive()) return 0;
+            if (receiver == source || !receiver.canReceive()
+                    || receiver.getEnergyStored() >= receiver.getMaxEnergyStored()) return 0;
             int available = source.extractEnergy(limit, true);
             if (available <= 0) return 0;
             int received = receiver.receiveEnergy(available, false);

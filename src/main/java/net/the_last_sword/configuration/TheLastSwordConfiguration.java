@@ -999,7 +999,7 @@ public class TheLastSwordConfiguration {
             .comment("Energy generated per tick while carried or equipped (FE/tick)", "携带或装备时每 tick 自发电量（FE/tick）")
             .defineInRange("Generation Rate", 1024, 0, Integer.MAX_VALUE);
         ZERO_POINT_ENGINE_CHARGE_RATE = BUILDER
-            .comment("Energy transferred per tick to one item (FE/tick)", "每 tick 仅向一件物品充能的速率上限（FE/tick）")
+            .comment("Maximum total energy transferred per tick across all target items (FE/tick)", "每 tick 向所有目标物品充能的总速率上限（FE/tick）")
             .defineInRange("Charge Rate", 8192, 0, Integer.MAX_VALUE);
         BUILDER.pop();
 
