@@ -26,7 +26,11 @@ import top.theillusivec4.curios.api.type.capability.ICurioItem;
 import top.theillusivec4.curios.api.type.inventory.IDynamicStackHandler;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Set;
 
 public class AncientEnergyCore extends Item implements IDragonSmithingTemplate, ICurioItem {
 
@@ -150,63 +154,54 @@ public class AncientEnergyCore extends Item implements IDragonSmithingTemplate, 
                 return;
             }
 
-            //按顺序充能：盔甲栏 -> 物品栏 -> 背包
-            //盔甲栏（从头到脚）
+            int rate = TheLastSwordConfiguration.getAncientEnergyCoreChargeRateSafely();
+            if (rate <= 0) {
+                return;
+            }
+
+            List<ItemStack> targets = new ArrayList<>();
             for (ItemStack armorStack : player.getArmorSlots()) {
-                if (chargeItem(coreEnergy, armorStack)) {
-                    return;
-                }
+                targets.add(armorStack);
             }
-
-            //物品栏（快捷栏）
-            for (int i = 0; i < 9; i++) {
-                ItemStack hotbarStack = player.getInventory().getItem(i);
-                if (hotbarStack == stack) continue; //跳过自己
-                if (chargeItem(coreEnergy, hotbarStack)) {
-                    return;
-                }
+            for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+                targets.add(player.getInventory().getItem(i));
             }
-
-            //背包其余部分
-            for (int i = 9; i < player.getInventory().getContainerSize(); i++) {
-                ItemStack invStack = player.getInventory().getItem(i);
-                if (invStack == stack) continue; //跳过自己
-                if (chargeItem(coreEnergy, invStack)) {
-                    return;
-                }
-            }
-
-            //饰品栏（所有Curios槽位）
             CuriosApi.getCuriosInventory(player).ifPresent(handler -> {
                 for (var entry : handler.getCurios().entrySet()) {
                     IDynamicStackHandler stacks = entry.getValue().getStacks();
                     for (int i = 0; i < stacks.getSlots(); i++) {
-                        ItemStack curioStack = stacks.getStackInSlot(i);
-                        if (curioStack == stack) continue;
-                        if (chargeItem(coreEnergy, curioStack)) {
-                            return;
-                        }
+                        targets.add(stacks.getStackInSlot(i));
                     }
                 }
             });
+
+            // 少量补电后继续分配本刻余额，重复出现的装备槽只处理一次。
+            Set<ItemStack> visited = Collections.newSetFromMap(new IdentityHashMap<>());
+            visited.add(stack);
+            int remaining = rate;
+            for (ItemStack target : targets) {
+                if (target.isEmpty() || !visited.add(target)) continue;
+                remaining -= chargeItem(coreEnergy, target, remaining);
+                if (remaining <= 0 || coreEnergy.getEnergyStored() <= 0) break;
+            }
         });
     }
 
-    // 一旦成功充能就结束本 tick，即使目标只缺少少量能量。
-    private boolean chargeItem(IEnergyStorage source, ItemStack target) {
+    private int chargeItem(IEnergyStorage source, ItemStack target, int limit) {
         if (target.isEmpty()) {
-            return false;
+            return 0;
         }
 
         return target.getCapability(ForgeCapabilities.ENERGY).map(targetEnergy -> {
-            if (!targetEnergy.canReceive()) {
-                return false;
+            if (targetEnergy == source || !targetEnergy.canReceive()
+                    || targetEnergy.getEnergyStored() >= targetEnergy.getMaxEnergyStored()) {
+                return 0;
             }
 
             //尝试提取能量
-            int extracted = source.extractEnergy(TheLastSwordConfiguration.getAncientEnergyCoreChargeRateSafely(), true);
+            int extracted = source.extractEnergy(limit, true);
             if (extracted <= 0) {
-                return true; //能量核心没能量了
+                return 0;
             }
 
             //尝试充入目标
@@ -214,11 +209,10 @@ public class AncientEnergyCore extends Item implements IDragonSmithingTemplate, 
             if (received > 0) {
                 //从能量核心中实际扣除能量
                 source.extractEnergy(received, false);
-                return true;
             }
 
-            return false;
-        }).orElse(false);
+            return Math.max(0, received);
+        }).orElse(0);
     }
 
     //获取充能启用状态
