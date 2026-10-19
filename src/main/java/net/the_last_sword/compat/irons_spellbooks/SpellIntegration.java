@@ -1,5 +1,6 @@
 package net.the_last_sword.compat.irons_spellbooks;
 
+import io.redspace.ironsspellbooks.api.registry.AttributeRegistry;
 import io.redspace.ironsspellbooks.api.registry.SchoolRegistry;
 import io.redspace.ironsspellbooks.api.registry.SpellRegistry;
 import io.redspace.ironsspellbooks.api.spells.AbstractSpell;
@@ -13,6 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -35,10 +37,21 @@ public final class SpellIntegration {
             TagKey.create(Registries.ITEM,
                 ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "the_last_end_focus")),
             Component.translatable("school.the_last_sword.the_last_end").withStyle(ChatFormatting.DARK_PURPLE),
-            () -> null,
-            () -> null,
+            AttributeRegistry.SPELL_POWER,
+            AttributeRegistry.SPELL_RESIST,
             () -> SoundEvents.ENCHANTMENT_TABLE_USE,
-            DamageTypes.FELL_OUT_OF_WORLD));
+            DamageTypes.FELL_OUT_OF_WORLD) {
+                // 学派不单独叠加强度和抗性，通用倍率由法术结算处理。
+                @Override
+                public double getPowerFor(LivingEntity entity) {
+                    return 1.0;
+                }
+
+                @Override
+                public double getResistanceFor(LivingEntity entity) {
+                    return 1.0;
+                }
+            });
         SPELLS.register("void_enchanting", VoidEnchantingSpell::new);
         SPELLS.register("phasing", PhasingSpell::new);
         SPELLS.register("double_strike", DoubleStrikeSpell::new);
