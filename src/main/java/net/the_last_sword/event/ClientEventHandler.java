@@ -43,6 +43,8 @@ import net.the_last_sword.client.renderer.DangerousSkillPreviewRenderer;
 import net.the_last_sword.client.renderer.LostWraithEndStrikeEffectRenderer;
 import net.the_last_sword.client.shader.TheLastEndEffect;
 import net.the_last_sword.configuration.DefenceConfig;
+import net.the_last_sword.compat.CompatCheck;
+import net.the_last_sword.compat.irons_spellbooks.SpellcastingClientIntegration;
 import net.the_last_sword.network.DefenceConfigPacket;
 import net.the_last_sword.init.ModKeyMappings;
 import net.the_last_sword.init.ModBlocks;
@@ -176,6 +178,9 @@ public class ClientEventHandler {
                 ItemProperties.register(ModItems.DRAGON_CRYSTAL_SOUL_STONE.get(),
                         ResourceLocation.fromNamespaceAndPath(TheLastSwordMod.MOD_ID, "dragon_crystal_soul_stone_full"),
                         (stack, level, entity, seed) -> DragonCrystalSoulStone.hasStoredEntity(stack) ? 1.0F : 0.0F);
+                if (CompatCheck.isSpellcastingLoaded()) {
+                    SpellcastingClientIntegration.registerRenderers();
+                }
             });
         }
     }

@@ -126,6 +126,7 @@ public class ModCreativeTabs {
                 }
 
                 if (CompatCheck.isSpellcastingLoaded()) {
+                    output.accept(ModItems.DRAGON_CRYSTAL_GRIMOIRE.get());
                     SpellIntegration.addScrolls(output);
                 }
 

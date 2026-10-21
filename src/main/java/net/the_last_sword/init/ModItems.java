@@ -11,6 +11,7 @@ import net.the_last_sword.TheLastSwordMod;
 import net.the_last_sword.compat.CompatCheck;
 import net.the_last_sword.compat.cataclysm.CataclysmItemsRegistry;
 import net.the_last_sword.compat.curios.CuriosItemsRegistry;
+import net.the_last_sword.compat.irons_spellbooks.SpellIntegration;
 import net.the_last_sword.compat.projecte.TransmutationStaffFactory;
 import net.the_last_sword.compat.lucky_block.TheLastEndLuckyBlockDisplayItem;
 import net.the_last_sword.item.*;
@@ -364,6 +365,7 @@ public class ModItems {
     public static RegistryObject<Item> THE_HARBINGER_MEDAL;
     public static RegistryObject<Item> THE_LEVIATHAN_MEDAL;
     public static RegistryObject<Item> SCYLLA_MEDAL;
+    public static RegistryObject<Item> DRAGON_CRYSTAL_GRIMOIRE;
 
     public static void register(IEventBus eventBus) {
         //注册条件物品
@@ -374,6 +376,10 @@ public class ModItems {
 
     //注册联动物品（直接调用，Java懒加载保证不会在未加载时执行）
     private static void registerConditionalItems() {
+        if (CompatCheck.isSpellcastingLoaded()) {
+            DRAGON_CRYSTAL_GRIMOIRE = ITEMS.register("dragon_crystal_grimoire",
+                SpellIntegration::createDragonCrystalGrimoire);
+        }
         if (CompatCheck.isTransmutationLoaded()) {
             STAFF_OF_UNIVERSAL_TRANSMUTATION = ITEMS.register("staff_of_universal_transmutation",
                 TransmutationStaffFactory::create);

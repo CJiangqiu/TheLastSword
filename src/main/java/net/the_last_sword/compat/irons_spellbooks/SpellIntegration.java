@@ -6,6 +6,8 @@ import io.redspace.ironsspellbooks.api.registry.SpellRegistry;
 import io.redspace.ironsspellbooks.api.spells.AbstractSpell;
 import io.redspace.ironsspellbooks.api.spells.ISpellContainer;
 import io.redspace.ironsspellbooks.api.spells.SchoolType;
+import io.redspace.ironsspellbooks.item.SpellBook;
+import io.redspace.ironsspellbooks.item.weapons.AttributeContainer;
 import io.redspace.ironsspellbooks.registries.ItemRegistry;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.Registries;
@@ -15,8 +17,11 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.registries.DeferredRegister;
@@ -29,6 +34,15 @@ public final class SpellIntegration {
         DeferredRegister.create(SpellRegistry.SPELL_REGISTRY_KEY, TheLastSwordMod.MOD_ID);
 
     private SpellIntegration() {
+    }
+
+    public static Item createDragonCrystalGrimoire() {
+        return new SpellBook(12, new Item.Properties().stacksTo(1).fireResistant().rarity(Rarity.UNCOMMON))
+            .withSpellbookAttributes(
+                new AttributeContainer(AttributeRegistry.SPELL_POWER, 0.5, AttributeModifier.Operation.MULTIPLY_BASE),
+                new AttributeContainer(AttributeRegistry.CAST_TIME_REDUCTION, 0.5, AttributeModifier.Operation.MULTIPLY_BASE),
+                new AttributeContainer(AttributeRegistry.COOLDOWN_REDUCTION, 0.5, AttributeModifier.Operation.MULTIPLY_BASE)
+            );
     }
 
     public static void register(IEventBus eventBus) {

@@ -1,0 +1,24 @@
+{
+  "type": "the_last_sword:dragon_crystal_smithing",
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "irons_spellbooks"
+    }
+  ],
+  "template": {
+    "item": "the_last_sword:dragon_crystal_upgrade_template",
+    "inputLevel": 0
+  },
+  "input": {
+    "item": "minecraft:book",
+    "inputLevel": 0
+  },
+  "addition": {
+    "item": "the_last_sword:dragon_crystal"
+  },
+  "output": {
+    "item": "the_last_sword:dragon_crystal_grimoire",
+    "outputLevel": 0
+  }
+}

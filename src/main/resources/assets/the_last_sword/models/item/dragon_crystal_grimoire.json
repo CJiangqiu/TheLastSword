@@ -1,0 +1,18 @@
+{
+  "parent": "minecraft:item/handheld",
+  "loader": "forge:separate_transforms",
+  "textures": {
+    "particle": "the_last_sword:item/dragon_crystal_grimoire_3d"
+  },
+  "base": {
+    "parent": "the_last_sword:item/dragon_crystal_grimoire_3d"
+  },
+  "perspectives": {
+    "gui": {
+      "parent": "minecraft:item/generated",
+      "textures": {
+        "layer0": "the_last_sword:item/dragon_crystal_grimoire"
+      }
+    }
+  }
+}
