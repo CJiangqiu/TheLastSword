@@ -20,10 +20,6 @@ import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
-import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
-import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.animal.IronGolem;
-import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -32,9 +28,9 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.entity.ai.DragonCultistMagicGoal;
 import net.the_last_sword.entity.ai.DragonCultistMeleeAttackGoal;
+import net.the_last_sword.entity.ai.DragonCultTargetGoals;
 import net.the_last_sword.faction.DragonCultFaction;
 import net.the_last_sword.init.ModItems;
-import net.the_last_sword.util.DragonCultDisguise;
 import net.the_last_sword.util.EntityUtil;
 import net.the_last_sword.util.health.TrueHealthManager;
 import org.jetbrains.annotations.NotNull;
@@ -63,12 +59,7 @@ public class DragonCultistEntity extends TheLastEndEntity {
         this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class, 8.0F));
         this.goalSelector.addGoal(6, new RandomLookAroundGoal(this));
 
-        this.targetSelector.addGoal(1, new HurtByTargetGoal(this)
-                .setAlertOthers(DragonCultistEntity.class, DragonCultPaladinEntity.class));
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false,
-                DragonCultDisguise.NOT_DISGUISED_PLAYER));
-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, true));
-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
+        DragonCultTargetGoals.register(this, DragonCultistEntity.class, DragonCultPaladinEntity.class);
     }
 
     @Override

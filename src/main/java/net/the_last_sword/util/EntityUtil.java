@@ -10,10 +10,12 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.animal.AbstractGolem;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.player.Player;
@@ -35,6 +37,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.the_last_sword.configuration.TheLastSwordConfiguration;
 import net.the_last_sword.entity.TheLastEndEntity;
+import net.the_last_sword.faction.DragonCultFaction;
 import net.the_last_sword.init.ModAttributes;
 import net.the_last_sword.init.ModEffects;
 import net.the_last_sword.item.DragonArmorItem;
@@ -360,12 +363,38 @@ public class EntityUtil {
     }
 
     // ==================== 实体目标与队伍模块====================
-    // 分类许可只增加限制，不绕过原有阵营与保护判定。
+    // 野生敌意和主人指令只豁免指定分类，阵营与保护始终优先。
     public static boolean canAttack(Entity attacker, Entity target) {
         if (target instanceof TheLastEndEntity theLastEnd && theLastEnd.isNpc()) {
             return false;
         }
-        return isAttackCategoryAllowed(target) && FactionUtil.canAttack(attacker, target);
+        if (!FactionUtil.canAttack(attacker, target)) {
+            return false;
+        }
+        if (isVillagerOrIronGolem(target)) {
+            if (attacker instanceof LivingEntity living && WraithSummonManager.isWraith(living)) {
+                return WraithSummonManager.isCommandedTarget(living, target);
+            }
+            if (attacker != null && !(attacker instanceof TamableAnimal tamable && tamable.isTame())
+                    && DragonCultFaction.ID.equals(EcaAPI.getEntityFaction(attacker))) {
+                return true;
+            }
+        }
+        return isAttackCategoryAllowed(target);
+    }
+
+    public static boolean isVillagerOrIronGolem(Entity target) {
+        return target instanceof AbstractVillager || target instanceof IronGolem;
+    }
+
+    // 仅供接收主人攻击信号时验证；不会扩大玩家武器的分类许可。
+    public static boolean canFollowOwnerAttack(Mob wraith, Player owner, LivingEntity target) {
+        if (target == null || target instanceof TheLastEndEntity theLastEnd && theLastEnd.isNpc()) {
+            return false;
+        }
+        return (isVillagerOrIronGolem(target) || isAttackCategoryAllowed(target))
+                && FactionUtil.canTarget(owner, target)
+                && FactionUtil.canTarget(wraith, target);
     }
 
     private static boolean isAttackCategoryAllowed(Entity target) {

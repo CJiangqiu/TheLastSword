@@ -59,6 +59,20 @@ public class WraithSummonManager {
     private static final int SUMMON_INPUT_GUARD_TICKS = 4;
     private static final Map<Player, Long> LAST_SUMMON_INPUT_TICKS = new WeakHashMap<>();
 
+    // 指令只属于当前召唤实例，不写入魂石或存档，避免重新召唤后恢复旧敌意。
+    private static final Map<Mob, AttackCommand> ATTACK_COMMANDS = new WeakHashMap<>();
+
+    private static final class AttackCommand {
+        private final UUID ownerUuid;
+        private int timestamp;
+        private UUID targetUuid;
+
+        private AttackCommand(Player owner) {
+            ownerUuid = owner.getUUID();
+            timestamp = owner.getLastHurtMobTimestamp();
+        }
+    }
+
     // ============ 玩家数据存取方法 ============
 
     //从玩家持久化数据读取魂石
@@ -121,6 +135,11 @@ public class WraithSummonManager {
             nbt.putBoolean("is_summoned", false);
             saveSoulStoneToPlayer(player, soulStone);
             return false;
+        }
+
+        if (wraith instanceof Mob mob) {
+            ATTACK_COMMANDS.remove(mob);
+            mob.setTarget(null);
         }
 
         //3. 禁用强加载并清除管理器记录（防御数据）
@@ -229,6 +248,10 @@ public class WraithSummonManager {
                 }
             } else {
                 //非魂石剑灵：直接删除（不保存NBT）
+                if (wraith instanceof Mob mob) {
+                    ATTACK_COMMANDS.remove(mob);
+                    mob.setTarget(null);
+                }
                 if (wraith.level() instanceof ServerLevel sl) {
                     EcaAPI.setForceLoading(wraith, sl, false);
                 }
@@ -758,6 +781,10 @@ public class WraithSummonManager {
 
     //设置主人
     private static void setupOwnership(LivingEntity wraith, Player owner) {
+        if (wraith instanceof Mob mob) {
+            ATTACK_COMMANDS.put(mob, new AttackCommand(owner));
+            mob.setTarget(null);
+        }
         if (wraith instanceof TamableAnimal tamable) {
             tamable.setOwnerUUID(owner.getUUID());
             tamable.setTame(true);
@@ -873,6 +900,9 @@ public class WraithSummonManager {
         //获取主人
         Player owner = entity.level().getServer().getPlayerList().getPlayer(ownerUUID);
         if (owner == null) {
+            if (entity instanceof Mob mob) {
+                ATTACK_COMMANDS.remove(mob);
+            }
             return;
         }
 
@@ -992,10 +1022,9 @@ public class WraithSummonManager {
 
     //目标过滤（所有剑灵类型都需要）
     private static void filterInvalidTargets(Mob wraith, Player owner) {
-        //需求1：主人主动攻击的实体，立即接管
-        LivingEntity ownerHurt = owner.getLastHurtMob();
-        if (isAttackable(ownerHurt, wraith, owner)) {
-            wraith.setTarget(ownerHurt);
+        LivingEntity commandedTarget = updateAttackCommand(wraith, owner);
+        if (commandedTarget != null) {
+            wraith.setTarget(commandedTarget);
             return;
         }
 
@@ -1019,6 +1048,56 @@ public class WraithSummonManager {
         }
     }
 
+    private static LivingEntity updateAttackCommand(Mob wraith, Player owner) {
+        AttackCommand command = ATTACK_COMMANDS.get(wraith);
+        if (command == null || !command.ownerUuid.equals(owner.getUUID())) {
+            command = new AttackCommand(owner);
+            ATTACK_COMMANDS.put(wraith, command);
+        }
+
+        int timestamp = owner.getLastHurtMobTimestamp();
+        if (timestamp != command.timestamp) {
+            command.timestamp = timestamp;
+            LivingEntity target = owner.getLastHurtMob();
+            command.targetUuid = isValidCommandTarget(wraith, owner, target) ? target.getUUID() : null;
+        }
+
+        if (command.targetUuid != null && wraith.level() instanceof ServerLevel serverLevel
+                && serverLevel.getEntity(command.targetUuid) instanceof LivingEntity target
+                && isValidCommandTarget(wraith, owner, target)) {
+            return target;
+        }
+        // 保留已消费的时间戳，目标离开后不能凭同一旧信号再次获得许可。
+        command.targetUuid = null;
+        return null;
+    }
+
+    private static boolean isValidCommandTarget(Mob wraith, Player owner, LivingEntity target) {
+        double range = Math.max(wraith.getAttributeValue(Attributes.FOLLOW_RANGE), 8.0);
+        return owner != null && owner.isAlive() && !owner.isRemoved() && wraith.isAlive() && !wraith.isRemoved()
+                && target != null && target.isAlive() && !target.isRemoved()
+                && owner.level() == wraith.level() && target.level() == wraith.level()
+                && wraith.distanceToSqr(target) <= range * range
+                && EntityUtil.canFollowOwnerAttack(wraith, owner, target);
+    }
+
+    public static boolean isCommandedTarget(LivingEntity wraith, Entity target) {
+        if (!(wraith instanceof Mob mob) || !(target instanceof LivingEntity livingTarget)) {
+            return false;
+        }
+        AttackCommand command = ATTACK_COMMANDS.get(mob);
+        if (command == null || !livingTarget.getUUID().equals(command.targetUuid)
+                || !command.ownerUuid.equals(getOwnerByWraith(mob.getUUID()))) {
+            return false;
+        }
+        Player owner = getOwner(mob, mob.level());
+        if (!isValidCommandTarget(mob, owner, livingTarget)) {
+            command.targetUuid = null;
+            return false;
+        }
+        return true;
+    }
+
     //非可驯服实体AI
     private static void handleNonTamableWraithAI(Mob wraith, Player owner) {
         //跟随和传送（仅在无目标时）
@@ -1040,7 +1119,7 @@ public class WraithSummonManager {
     //统一可攻击判定：主人与剑灵两侧都判定可攻击（阵营已覆盖同营剑灵、主人及其盟友）
     private static boolean isAttackable(LivingEntity target, Mob wraith, Player owner) {
         return target != null && target.isAlive()
-            && EntityUtil.canAttack(owner, target)
+            && (isCommandedTarget(wraith, target) || EntityUtil.canAttack(owner, target))
             && EntityUtil.canAttack(wraith, target);
     }
 

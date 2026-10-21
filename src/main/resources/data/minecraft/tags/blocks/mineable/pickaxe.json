@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "the_last_sword:dragon_crystal_enchanting_table"
+    "the_last_sword:dragon_crystal_enchanting_table",
+    "the_last_sword:dragon_crystal_smithing_table"
   ]
 }

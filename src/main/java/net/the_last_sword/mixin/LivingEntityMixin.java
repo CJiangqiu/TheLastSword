@@ -396,6 +396,15 @@ public class LivingEntityMixin implements HealBanTickState {
             return;
         }
 
+        // 普通近战和火球也必须遵守主人的逐目标授权，不能误伤附近村民与铁傀儡。
+        if (EntityUtil.isVillagerOrIronGolem(entity)
+                && damageSource.getEntity() instanceof LivingEntity wraith
+                && WraithSummonManager.isWraith(wraith)
+                && !EntityUtil.canAttack(wraith, entity)) {
+            cir.setReturnValue(false);
+            return;
+        }
+
         if (the_last_sword$isAbsoluteDestructionDamage(damageSource)) {
             Entity attacker = damageSource.getEntity();
             if (attacker != null && !EntityUtil.canAttack(attacker, entity)) {

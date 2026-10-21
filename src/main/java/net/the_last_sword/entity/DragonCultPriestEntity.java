@@ -35,11 +35,8 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
-import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
-import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
@@ -54,11 +51,11 @@ import net.the_last_sword.entity.ai.DragonCultPriestBreathGoal;
 import net.the_last_sword.entity.ai.DragonCultPriestGuardGoal;
 import net.the_last_sword.entity.ai.DragonCultPriestKeepDistanceGoal;
 import net.the_last_sword.entity.ai.DragonCultPriestLightningGoal;
+import net.the_last_sword.entity.ai.DragonCultTargetGoals;
 import net.the_last_sword.entity.variant.NamedPriestVariant;
 import net.the_last_sword.faction.DragonCultFaction;
 import net.the_last_sword.init.ModItems;
 import net.the_last_sword.init.ModEntities;
-import net.the_last_sword.util.DragonCultDisguise;
 import net.the_last_sword.util.EntityUtil;
 import net.the_last_sword.util.health.TrueHealthManager;
 import org.jetbrains.annotations.NotNull;
@@ -143,12 +140,8 @@ public class DragonCultPriestEntity extends TheLastEndEntity {
         this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class, 8.0F));
         this.goalSelector.addGoal(6, new RandomLookAroundGoal(this));
 
-        this.targetSelector.addGoal(1, new HurtByTargetGoal(this)
-                .setAlertOthers(DragonCultistEntity.class, DragonCultPaladinEntity.class, DragonCultPriestEntity.class));
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false,
-                DragonCultDisguise.NOT_DISGUISED_PLAYER));
-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, true));
-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
+        DragonCultTargetGoals.register(this,
+                DragonCultistEntity.class, DragonCultPaladinEntity.class, DragonCultPriestEntity.class);
     }
 
     @Override
