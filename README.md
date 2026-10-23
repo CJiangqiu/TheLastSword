@@ -13,6 +13,7 @@ Visit the mod's [official wiki](https://github.com/CJiangqiu/TheLastSword/wiki) 
 
 Parts of this mod draw inspiration from *The Elder Scrolls V: Skyrim*, *Elden Ring*, *Fate/Grand Order*, and other works.
 
+Community Edition (If you want to play on newer Minecraft versions):https://www.curseforge.com/minecraft/mc-mods/the-last-sword-you-never-forgot-community-port-neoforge
 ***
 
 # Embark on a Journey to Reforge The Last Sword
